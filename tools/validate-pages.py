@@ -5,7 +5,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from jsonschema import Draft202012Validator, FormatChecker, RefResolver
+from jsonschema import Draft202012Validator, FormatChecker
+from referencing import Registry, Resource
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMAS = ROOT / "schemas"
@@ -23,14 +24,13 @@ def validator(schema_name: str) -> Draft202012Validator:
     schema = load_json(SCHEMAS / schema_name)
     package_schema = load_json(SCHEMAS / "package.schema.json")
     publisher_schema = load_json(SCHEMAS / "publisher.schema.json")
-    resolver = RefResolver.from_schema(
-        schema,
-        store={
-            "package.schema.json": package_schema,
-            "publisher.schema.json": publisher_schema,
-        },
+    registry = Registry().with_resources(
+        [
+            ("package.schema.json", Resource.from_contents(package_schema)),
+            ("publisher.schema.json", Resource.from_contents(publisher_schema)),
+        ]
     )
-    return Draft202012Validator(schema, resolver=resolver, format_checker=FORMAT_CHECKER)
+    return Draft202012Validator(schema, registry=registry, format_checker=FORMAT_CHECKER)
 
 
 def validate(schema_name: str, payload: Any, label: str) -> None:
