@@ -1,0 +1,6 @@
+{
+  "$schema": "./schemas/registry.schema.json",
+  "schemaVersion": "1.0.0",
+  "packages": {},
+  "publishers": {}
+}
