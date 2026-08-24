@@ -64,11 +64,22 @@ The signature algorithm is Ed25519 and the signature encoding is base64 raw 64-b
 
 ## 4. Root trust and distribution keys
 
-The Registry Root private key is an **offline authority**. It must never be committed to Git, uploaded to GitHub Actions, embedded in Simple Connection, or used for routine snapshot publication.
+The Registry Root private key is stored as the GitHub Actions Secret:
 
-Simple Connection pins the corresponding root public key.
+```text
+SCTOOL_REGISTRY_ROOT_PRIVATE_KEY_B64
+```
 
-The root key signs `trust.json`. `trust.json` authorizes one or more distribution public keys with lifecycle states:
+It must never be committed to Git, embedded in Simple Connection, printed by workflow steps, or supplied to the routine Pages publication workflow.
+It is consumed only by the manually dispatched Root trust-signing workflow.
+
+Simple Connection pins the corresponding Registry Root public key. GitHub Actions stores the same public value as the non-secret variable:
+
+```text
+SCTOOL_REGISTRY_ROOT_PUBLIC_KEY_B64
+```
+
+The Root key signs `trust.json`. `trust.json` authorizes one or more Distribution public keys with lifecycle states:
 
 ```text
 active   = may sign a new registry head
@@ -76,18 +87,44 @@ retired  = retained for historical verification; may not sign a new head
 revoked  = must not be accepted
 ```
 
-The routine distribution private key may be stored as a GitHub Actions secret because compromise of that key can be recovered by an offline-root-signed trust rotation.
+The routine Distribution private key is stored separately as:
+
+```text
+SCTOOL_REGISTRY_DISTRIBUTION_PRIVATE_KEY_B64
+```
+
+The routine Pages workflow may consume the Distribution private key, but must not consume the Root private key.
+
+This is a GitHub-hosted root trust model, not an offline root model. Separating Root and Distribution credentials prevents routine publication from requiring the Root credential and reduces accidental exposure, but a GitHub administrator or workflow mutation with sufficient access to repository Actions Secrets remains inside the Registry Root trust domain.
+
+### Root trust publication
+
+Root trust publication is manual:
+
+```text
+workflow_dispatch
+-> validate current repository contracts
+-> decode operator-supplied unsigned trust descriptor
+-> confirm expected trust sequence
+-> sign with SCTOOL_REGISTRY_ROOT_PRIVATE_KEY_B64
+-> verify derived Root public key against SCTOOL_REGISTRY_ROOT_PUBLIC_KEY_B64
+-> validate trust schema
+-> independently verify Root signature
+-> commit trust/trust.json to main
+```
+
+The Root-signing workflow must not be triggered by `push`, `pull_request`, a publisher submission, or routine Pages publication.
 
 ### Distribution key rotation
 
 Normal rotation is:
 
 ```text
-1. offline root signs trust sequence N+1 with old key + new active key
-2. publish the new trust descriptor
-3. configure Actions with the new distribution private key
-4. publish a head signed by the new key
-5. after the migration window, offline root signs a later trust sequence retiring the old key
+1. prepare trust sequence N+1 containing the old and new Distribution public keys
+2. manually run the Root trust-signing workflow
+3. update SCTOOL_REGISTRY_DISTRIBUTION_PRIVATE_KEY_B64 to the new private key
+4. publish a head signed by the new active key
+5. after the migration window, manually sign a later trust sequence retiring the old key
 ```
 
 A revoked key is never valid for a new head.
@@ -228,5 +265,14 @@ PTSIP validate/conform
 -> independently verify generated Pages cryptographic output
 -> deploy Pages artifact
 ```
+
+The Pages workflow receives only:
+
+```text
+SCTOOL_REGISTRY_ROOT_PUBLIC_KEY_B64
+SCTOOL_REGISTRY_DISTRIBUTION_PRIVATE_KEY_B64
+```
+
+It must never reference `SCTOOL_REGISTRY_ROOT_PRIVATE_KEY_B64`.
 
 Before `trust/trust.json` exists, Pages publication remains intentionally inactive while repository governance and Registry JSON contract checks still run.
