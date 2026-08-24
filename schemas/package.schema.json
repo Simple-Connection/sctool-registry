@@ -7,6 +7,8 @@
     "schemaVersion",
     "id",
     "publisher",
+    "defaultChannel",
+    "channels",
     "versions"
   ],
   "properties": {
@@ -42,6 +44,21 @@
           "type": "string",
           "format": "uri"
         }
+      }
+    },
+    "defaultChannel": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,31}$"
+    },
+    "channels": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9-]{0,31}$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
       }
     },
     "versions": {
