@@ -26,16 +26,43 @@ components:
     roles:
       - CONFIGURATION
       - GOVERNANCE
+      - DOCUMENTATION
     include:
       - "schemas/*.schema.json"
       - "policy/registry-policy.json"
       - "docs/REGISTRY_CONTRACT_V1.md"
-    purpose: canonical_registry_submission_trust_integrity_and_admission_contracts
+      - "docs/PAGES_DISTRIBUTION_V1.md"
+      - "trust/README.md"
+    purpose: canonical_registry_submission_distribution_trust_integrity_and_admission_contracts
     shipped: true
     runtime_required: false
     executable: false
     release_owner: registry-contract
     compatibility_owner: registry-contract
+
+  - id: registry-pages-delivery
+    classification: DELIVERY
+    roles:
+      - AUTOMATION
+      - VERIFICATION
+      - CONFIGURATION
+    include:
+      - ".github/workflows/pages.yml"
+      - "tools/**"
+    purpose: signed_registry_snapshot_assembly_verification_key_bootstrap_and_github_pages_publication
+    shipped: false
+    runtime_required: false
+    executable: true
+    release_owner: delivery
+    compatibility_owner: registry-contract
+    analysis_inputs:
+      - "registry.json"
+      - "packages/**"
+      - "publishers/**"
+      - "schemas/**"
+      - "policy/**"
+      - "trust/**"
+      - "ptsip.yaml"
 
   - id: product-documentation
     classification: PRODUCT
@@ -61,6 +88,7 @@ components:
     include:
       - "ptsip.yaml"
       - "AGENTS.md"
+      - ".gitignore"
     purpose: repository_architecture_declaration_and_coding_agent_operating_governance
     shipped: false
     runtime_required: false
@@ -73,6 +101,21 @@ relationships:
     from: registry-contracts
     to: registry-catalog
     type: SPECIFIES
+
+  - id: registry-contracts-specify-pages-delivery
+    from: registry-contracts
+    to: registry-pages-delivery
+    type: SPECIFIES
+
+  - id: registry-pages-delivery-reads-catalog
+    from: registry-pages-delivery
+    to: registry-catalog
+    type: READS
+
+  - id: registry-pages-delivery-publishes-catalog
+    from: registry-pages-delivery
+    to: registry-catalog
+    type: PUBLISHES
 
   - id: product-documentation-documents-catalog
     from: product-documentation
@@ -92,6 +135,11 @@ relationships:
   - id: repository-governance-governs-contracts
     from: repository-governance
     to: registry-contracts
+    type: GOVERNS
+
+  - id: repository-governance-governs-pages-delivery
+    from: repository-governance
+    to: registry-pages-delivery
     type: GOVERNS
 
 component_dependency_policy:
