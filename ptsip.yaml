@@ -1,0 +1,105 @@
+ptsip:
+  version: "0.3.6-draft"
+  specification:
+    source: "https://github.com/Kinirin/PTSIP"
+    revision: "d6995ed232e845b88d8235b851e80ab54b7804ea"
+
+responsibility_map:
+  mode: explicit
+
+components:
+  - id: registry-catalog
+    classification: PRODUCT
+    roles:
+      - CONFIGURATION
+    include:
+      - "registry.json"
+    purpose: public_sctool_package_discovery_and_runtime_registry_index
+    shipped: true
+    runtime_required: true
+    executable: false
+    release_owner: registry
+    compatibility_owner: registry
+
+  - id: registry-contracts
+    classification: NEUTRAL_CONTRACT
+    roles:
+      - CONFIGURATION
+      - GOVERNANCE
+    include:
+      - "schemas/*.schema.json"
+      - "policy/registry-policy.json"
+      - "docs/REGISTRY_CONTRACT_V1.md"
+    purpose: canonical_registry_submission_trust_integrity_and_admission_contracts
+    shipped: true
+    runtime_required: false
+    executable: false
+    release_owner: registry-contract
+    compatibility_owner: registry-contract
+
+  - id: product-documentation
+    classification: PRODUCT
+    roles:
+      - DOCUMENTATION
+    include:
+      - "README.md"
+      - "packages/README.md"
+      - "publishers/README.md"
+    purpose: public_registry_usage_package_and_publisher_documentation
+    shipped: true
+    runtime_required: false
+    executable: false
+    release_owner: registry
+    compatibility_owner: registry
+
+  - id: repository-governance
+    classification: DEVELOPMENT_TOOLING
+    roles:
+      - CONFIGURATION
+      - GOVERNANCE
+      - DOCUMENTATION
+    include:
+      - "ptsip.yaml"
+      - "AGENTS.md"
+    purpose: repository_architecture_declaration_and_coding_agent_operating_governance
+    shipped: false
+    runtime_required: false
+    executable: false
+    release_owner: development-tooling
+    compatibility_owner: development-tooling
+
+relationships:
+  - id: registry-contracts-specify-catalog
+    from: registry-contracts
+    to: registry-catalog
+    type: SPECIFIES
+
+  - id: product-documentation-documents-catalog
+    from: product-documentation
+    to: registry-catalog
+    type: DOCUMENTS
+
+  - id: product-documentation-documents-contracts
+    from: product-documentation
+    to: registry-contracts
+    type: DOCUMENTS
+
+  - id: repository-governance-governs-catalog
+    from: repository-governance
+    to: registry-catalog
+    type: GOVERNS
+
+  - id: repository-governance-governs-contracts
+    from: repository-governance
+    to: registry-contracts
+    type: GOVERNS
+
+component_dependency_policy:
+  default: deny
+
+policies:
+  product_to_nonproduct_runtime_dependency: deny
+  nonproduct_in_product_package: deny
+  independent_build_resolution: required
+  shared_executable_cross_lifecycle: deny
+  neutral_contract_sharing: allow
