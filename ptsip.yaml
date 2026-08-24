@@ -47,9 +47,9 @@ components:
       - VERIFICATION
       - CONFIGURATION
     include:
-      - ".github/workflows/pages.yml"
+      - ".github/workflows/*.yml"
       - "tools/**"
-    purpose: signed_registry_snapshot_assembly_verification_key_bootstrap_and_github_pages_publication
+    purpose: signed_registry_snapshot_assembly_root_trust_signing_verification_key_bootstrap_and_github_pages_publication
     shipped: false
     runtime_required: false
     executable: true
