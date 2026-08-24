@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SCTool Registry Index v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "packages",
+    "publishers"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "packages": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^packages/[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?\\.json$"
+      }
+    },
+    "publishers": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._-]{0,62}[A-Za-z0-9])?$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^publishers/[A-Za-z0-9](?:[A-Za-z0-9._-]{0,62}[A-Za-z0-9])?\\.json$"
+      }
+    }
+  }
+}
