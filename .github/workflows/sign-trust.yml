@@ -1,0 +1,85 @@
+name: Sign SCTool Registry trust
+
+on:
+  workflow_dispatch:
+    inputs:
+      unsigned_trust_b64:
+        description: Base64-encoded unsigned trust JSON containing schemaVersion and signed, without proof
+        required: true
+        type: string
+      expected_sequence:
+        description: Expected positive trust sequence for operator confirmation
+        required: true
+        type: number
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sctool-registry-root-signing
+  cancel-in-progress: false
+
+jobs:
+  sign-trust:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout canonical main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Install PTSIP tool
+        run: python -m pip install "PTSIP==0.3.6"
+
+      - name: Validate repository before trust mutation
+        run: |
+          ptsip validate .
+          ptsip conform .
+          python tools/validate-registry.py
+
+      - name: Decode unsigned trust input
+        env:
+          UNSIGNED_TRUST_B64: ${{ inputs.unsigned_trust_b64 }}
+          EXPECTED_SEQUENCE: ${{ inputs.expected_sequence }}
+        shell: bash
+        run: |
+          unsigned="$RUNNER_TEMP/trust-unsigned.json"
+          printf '%s' "$UNSIGNED_TRUST_B64" | base64 --decode > "$unsigned"
+          actual_sequence="$(node -e 'const fs=require("node:fs"); const value=JSON.parse(fs.readFileSync(process.argv[1], "utf8")); process.stdout.write(String(value?.signed?.sequence ?? ""));' "$unsigned")"
+          if [[ "$actual_sequence" != "$EXPECTED_SEQUENCE" ]]; then
+            echo "Unsigned trust sequence mismatch: expected=$EXPECTED_SEQUENCE actual=$actual_sequence" >&2
+            exit 1
+          fi
+
+      - name: Sign trust descriptor with Registry Root Actions Secret
+        env:
+          SCTOOL_REGISTRY_ROOT_PRIVATE_KEY_B64: ${{ secrets.SCTOOL_REGISTRY_ROOT_PRIVATE_KEY_B64 }}
+          SCTOOL_REGISTRY_ROOT_PUBLIC_KEY_B64: ${{ vars.SCTOOL_REGISTRY_ROOT_PUBLIC_KEY_B64 }}
+        run: >-
+          node tools/sign-trust.mjs
+          --input "$RUNNER_TEMP/trust-unsigned.json"
+          --out trust/trust.json
+
+      - name: Validate signed trust contract
+        env:
+          SCTOOL_REGISTRY_ROOT_PUBLIC_KEY_B64: ${{ vars.SCTOOL_REGISTRY_ROOT_PUBLIC_KEY_B64 }}
+        run: |
+          python tools/validate-registry.py
+          node tools/verify-trust.mjs --trust trust/trust.json
+
+      - name: Commit root-signed trust descriptor
+        env:
+          EXPECTED_SEQUENCE: ${{ inputs.expected_sequence }}
+        shell: bash
+        run: |
+          git add trust/trust.json
+          if git diff --cached --quiet; then
+            echo "trust/trust.json is already identical; no commit required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "trust: publish root-signed sequence ${EXPECTED_SEQUENCE}"
+          git push origin HEAD:main
