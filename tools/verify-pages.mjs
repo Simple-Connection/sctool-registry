@@ -18,11 +18,18 @@ if (!rootPublicRaw) throw new Error("Missing SCTOOL_REGISTRY_ROOT_PUBLIC_KEY_B64
 const trust = JSON.parse(await readFile(resolve(site, "trust.json"), "utf8"));
 const head = JSON.parse(await readFile(resolve(site, "registry-head.json"), "utf8"));
 const rootPublic = publicKeyFromRawBase64(rootPublicRaw);
+if (trust.proof?.algorithm !== "ed25519" || trust.proof?.scope !== trust.signed?.scope || trust.proof?.keyId !== trust.signed?.rootKeyId) {
+  throw new Error("Trust proof metadata mismatch.");
+}
 if (!verifyCanonical(rootPublic, signedEnvelopePayload(trust), trust.proof.signature)) throw new Error("Trust root signature verification failed.");
 if (head.proof.keyId !== head.signed.signingKeyId || head.proof.scope !== head.signed.scope) throw new Error("Head proof metadata mismatch.");
 if (head.signed.trustSequence !== trust.signed.sequence) throw new Error("Head trustSequence does not match trust descriptor.");
 const key = trust.signed.distributionKeys.find((candidate) => candidate.keyId === head.signed.signingKeyId);
 if (!key || key.status !== "active") throw new Error("Head signing key is not active in trust descriptor.");
+const issuedMillis = Date.parse(head.signed.issuedAt);
+if (Number.isNaN(issuedMillis)) throw new Error("Head issuedAt is invalid.");
+if (issuedMillis < Date.parse(key.validFrom)) throw new Error("Head was signed before the distribution key became valid.");
+if (key.validUntil && issuedMillis > Date.parse(key.validUntil)) throw new Error("Head was signed after the distribution key expired.");
 if (!verifyCanonical(publicKeyFromRawBase64(key.publicKey), signedEnvelopePayload(head), head.proof.signature)) {
   throw new Error("Registry head signature verification failed.");
 }
