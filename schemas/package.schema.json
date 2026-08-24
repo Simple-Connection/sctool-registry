@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SCTool Registry Package Descriptor v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "publisher",
+    "versions"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$"
+    },
+    "publisher": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._-]{0,62}[A-Za-z0-9])?$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "visibility"
+      ],
+      "properties": {
+        "visibility": {
+          "enum": [
+            "public",
+            "private",
+            "undisclosed"
+          ]
+        },
+        "repository": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "versions": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "artifacts"
+        ],
+        "properties": {
+          "artifacts": {
+            "type": "object",
+            "minProperties": 1,
+            "propertyNames": {
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)+$"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "target",
+                "assetName",
+                "url",
+                "sha256",
+                "size",
+                "publishedAt",
+                "contract",
+                "signature"
+              ],
+              "properties": {
+                "target": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "platform",
+                    "arch"
+                  ],
+                  "properties": {
+                    "platform": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]+$"
+                    },
+                    "arch": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]+$"
+                    }
+                  }
+                },
+                "assetName": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 255
+                },
+                "url": {
+                  "type": "string",
+                  "pattern": "^https://"
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "size": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "publishedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "contract": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "sctoolSpecVersion"
+                  ],
+                  "properties": {
+                    "sctoolSpecVersion": {
+                      "type": "string",
+                      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+                    }
+                  }
+                },
+                "signature": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "algorithm",
+                    "keyId",
+                    "scope",
+                    "submissionId",
+                    "submittedAt",
+                    "sdkVersion",
+                    "value"
+                  ],
+                  "properties": {
+                    "algorithm": {
+                      "const": "ed25519"
+                    },
+                    "keyId": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._:-]{0,126}[A-Za-z0-9])?$"
+                    },
+                    "scope": {
+                      "const": "sctool-submission-v1"
+                    },
+                    "submissionId": {
+                      "type": "string",
+                      "minLength": 16,
+                      "maxLength": 128
+                    },
+                    "submittedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "sdkVersion": {
+                      "type": "string",
+                      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+                    },
+                    "value": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
