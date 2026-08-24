@@ -32,12 +32,15 @@ and submission contracts before publication.
 ## Repository responsibilities
 
 ```text
-registry.json                  package/publisher index
-packages/*.json                accepted package/version/artifact descriptors
-publishers/*.json              registered publisher verification keys
-schemas/*.schema.json          canonical registry contracts
-policy/registry-policy.json    machine-readable admission policy
-docs/REGISTRY_CONTRACT_V1.md   submission/signature/immutability contract
+registry.json                    package/publisher index
+packages/*.json                  accepted package/version/artifact descriptors
+publishers/*.json                registered publisher verification keys
+schemas/*.schema.json            canonical registry contracts
+policy/registry-policy.json      machine-readable admission policy
+docs/REGISTRY_CONTRACT_V1.md     submission/signature/immutability contract
+docs/PAGES_DISTRIBUTION_V1.md    GitHub Pages signed metadata distribution contract
+trust/README.md                   offline-root/distribution-key bootstrap guidance
+.github/workflows/pages.yml       signed Pages delivery workflow
 ```
 
 `.sctool` binaries are not committed to Git history. Accepted payloads are published as public
@@ -68,12 +71,23 @@ Example:
 sctool/openai-local-bridge/v0.3.1
 ```
 
-## Current scope
+## Distribution architecture
 
-This scaffold defines registry data contracts and policy only.
-Registry intake transport, publisher enrollment workflow, artifact upload service,
-SDK `publish` command, and automatic release publication are follow-up implementation work.
+Registry source metadata remains canonical in this repository. Simple Connection does not use the GitHub REST API for package discovery. Public metadata distribution is designed as:
 
+```text
+Git repository
+  -> signed GitHub Pages trust/head/snapshot metadata
+  -> Simple Connection verifies the pinned Registry Root key
+  -> package artifact selected through a registry channel
+  -> anonymous GitHub Release .sctool download
+```
+
+The client bootstrap contract pins the Pages head URL and Registry Root public key, not individual SCTool versions. Package descriptors resolve `defaultChannel` / `channels` to concrete versions at runtime.
+
+Pages publication remains intentionally inactive until an offline-root-signed `trust/trust.json` is committed and the corresponding public root / distribution private key are configured for Actions. See `docs/PAGES_DISTRIBUTION_V1.md` and `trust/README.md`.
+
+Registry Intake transport, publisher enrollment workflow, artifact upload service, and SDK `publish` are follow-up implementation work.
 
 ## Development governance — PTSIP 0.3.6
 
