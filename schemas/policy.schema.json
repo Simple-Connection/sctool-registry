@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SCTool Registry Admission Policy v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "source",
+    "publisher",
+    "verification",
+    "artifact",
+    "ownership",
+    "immutability"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "visibilityRequired",
+        "repositoryRequired"
+      ],
+      "properties": {
+        "visibilityRequired": {
+          "const": false
+        },
+        "repositoryRequired": {
+          "const": false
+        }
+      }
+    },
+    "publisher": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registeredKeyRequired",
+        "signatureAlgorithm",
+        "directRepositoryWriteAllowed"
+      ],
+      "properties": {
+        "registeredKeyRequired": {
+          "const": true
+        },
+        "signatureAlgorithm": {
+          "const": "ed25519"
+        },
+        "directRepositoryWriteAllowed": {
+          "const": false
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "serverSideRevalidationRequired",
+        "trustPublisherPassResult",
+        "checks"
+      ],
+      "properties": {
+        "serverSideRevalidationRequired": {
+          "const": true
+        },
+        "trustPublisherPassResult": {
+          "const": false
+        },
+        "checks": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "manifest-schema",
+              "package-id",
+              "version",
+              "target",
+              "contract-compatibility",
+              "archive-path-safety",
+              "internal-checksums",
+              "artifact-sha256",
+              "publisher-signature",
+              "package-ownership",
+              "version-immutability"
+            ]
+          }
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "anonymousHttpsRequired",
+        "gitHistoryStorageAllowed",
+        "defaultReleaseTagPattern"
+      ],
+      "properties": {
+        "anonymousHttpsRequired": {
+          "const": true
+        },
+        "gitHistoryStorageAllowed": {
+          "const": false
+        },
+        "defaultReleaseTagPattern": {
+          "const": "sctool/{packageId}/v{version}"
+        }
+      }
+    },
+    "ownership": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enforced"
+      ],
+      "properties": {
+        "enforced": {
+          "const": true
+        }
+      }
+    },
+    "immutability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity",
+        "sameDigestRetry",
+        "differentDigestRetry"
+      ],
+      "properties": {
+        "identity": {
+          "const": [
+            "packageId",
+            "version",
+            "target"
+          ]
+        },
+        "sameDigestRetry": {
+          "const": "idempotent-success"
+        },
+        "differentDigestRetry": {
+          "const": "reject"
+        }
+      }
+    }
+  }
+}
