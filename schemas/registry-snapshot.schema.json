@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SCTool Registry Pages Snapshot v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sequence",
+    "revision",
+    "generatedAt",
+    "source",
+    "registrySha256",
+    "packages",
+    "publishers"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "revision": {
+      "$ref": "#/$defs/revision"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "commit"
+      ],
+      "properties": {
+        "repository": {
+          "const": "Simple-Connection/sctool-registry"
+        },
+        "commit": {
+          "$ref": "#/$defs/revision"
+        }
+      }
+    },
+    "registrySha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "packages": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$"
+      },
+      "additionalProperties": {
+        "$ref": "package.schema.json"
+      }
+    },
+    "publishers": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._-]{0,62}[A-Za-z0-9])?$"
+      },
+      "additionalProperties": {
+        "$ref": "publisher.schema.json"
+      }
+    }
+  },
+  "$defs": {
+    "revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40,64}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}
