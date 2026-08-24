@@ -44,6 +44,9 @@ jobs:
           ptsip validate .
           ptsip conform .
 
+      - name: Validate registry JSON contracts
+        run: python tools/validate-registry.py
+
       - name: Detect trust activation
         id: activation
         shell: bash
