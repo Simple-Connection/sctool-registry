@@ -1,0 +1,47 @@
+{
+  "$schema": "../schemas/policy.schema.json",
+  "schemaVersion": "1.0.0",
+  "source": {
+    "visibilityRequired": false,
+    "repositoryRequired": false
+  },
+  "publisher": {
+    "registeredKeyRequired": true,
+    "signatureAlgorithm": "ed25519",
+    "directRepositoryWriteAllowed": false
+  },
+  "verification": {
+    "serverSideRevalidationRequired": true,
+    "trustPublisherPassResult": false,
+    "checks": [
+      "manifest-schema",
+      "package-id",
+      "version",
+      "target",
+      "contract-compatibility",
+      "archive-path-safety",
+      "internal-checksums",
+      "artifact-sha256",
+      "publisher-signature",
+      "package-ownership",
+      "version-immutability"
+    ]
+  },
+  "artifact": {
+    "anonymousHttpsRequired": true,
+    "gitHistoryStorageAllowed": false,
+    "defaultReleaseTagPattern": "sctool/{packageId}/v{version}"
+  },
+  "ownership": {
+    "enforced": true
+  },
+  "immutability": {
+    "identity": [
+      "packageId",
+      "version",
+      "target"
+    ],
+    "sameDigestRetry": "idempotent-success",
+    "differentDigestRetry": "reject"
+  }
+}
