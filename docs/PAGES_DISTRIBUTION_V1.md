@@ -92,7 +92,7 @@ Normal rotation is:
 
 A revoked key is never valid for a new head.
 
-## 5. Registry revision
+## 5. Registry revision and anti-rollback state
 
 A Pages revision is the exact source Git commit identity used to assemble the snapshot.
 Contract v1 accepts lowercase hexadecimal Git object identifiers of 40 to 64 characters.
@@ -103,23 +103,38 @@ Contract v1 accepts lowercase hexadecimal Git object identifiers of 40 to 64 cha
 git rev-list --count <source-revision>
 ```
 
-Simple Connection stores the last verified `(sequence, revision)` pair.
-
-Client anti-rollback rules:
+Simple Connection stores the last verified state:
 
 ```text
-incoming sequence < stored sequence
-    -> reject
+(trustSequence, sequence, revision)
+```
 
-incoming sequence == stored sequence
+Client anti-rollback rules are evaluated only after the root signature on `trust.json` and the authorized distribution signature on `registry-head.json` verify:
+
+```text
+incoming trustSequence < stored trustSequence
+    -> reject stale trust metadata
+
+incoming trustSequence > stored trustSequence
+    -> eligible after root-signature verification
+
+incoming trustSequence == stored trustSequence
+and incoming sequence < stored sequence
+    -> reject stale registry metadata
+
+incoming trustSequence == stored trustSequence
+and incoming sequence == stored sequence
 and incoming revision != stored revision
     -> reject as conflicting history
 
-incoming sequence > stored sequence
+incoming trustSequence == stored trustSequence
+and incoming sequence > stored sequence
     -> eligible after signature verification
 ```
 
-A first-install client cannot cryptographically prove global freshness without an external transparency/time authority; it therefore accepts a currently valid root-trusted head obtained over HTTPS.
+When a higher `trustSequence` is accepted, the head must reference that exact trust sequence and must be signed by an active key in that trust descriptor.
+
+A first-install client cannot cryptographically prove global freshness without an external transparency/time authority; it therefore accepts a currently valid root-trusted trust/head pair obtained over HTTPS. After that first accepted state, the stored trust and registry sequences provide rollback resistance.
 
 ## 6. Immutable snapshot
 
@@ -209,7 +224,8 @@ PTSIP validate/conform
 -> enforce channel -> version references
 -> assemble immutable snapshot
 -> sign registry-head.json
--> independently verify generated Pages output
+-> validate generated Pages JSON contracts
+-> independently verify generated Pages cryptographic output
 -> deploy Pages artifact
 ```
 
