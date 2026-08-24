@@ -32,7 +32,7 @@ components:
       - "policy/registry-policy.json"
       - "docs/REGISTRY_CONTRACT_V1.md"
       - "docs/PAGES_DISTRIBUTION_V1.md"
-      - "trust/README.md"
+      - "trust/**"
     purpose: canonical_registry_submission_distribution_trust_integrity_and_admission_contracts
     shipped: true
     runtime_required: false
@@ -55,6 +55,9 @@ components:
     executable: true
     release_owner: delivery
     compatibility_owner: registry-contract
+    manifests:
+      - "tools/package.json"
+      - "tools/requirements.txt"
     analysis_inputs:
       - "registry.json"
       - "packages/**"
