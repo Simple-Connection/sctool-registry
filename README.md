@@ -39,7 +39,8 @@ schemas/*.schema.json            canonical registry contracts
 policy/registry-policy.json      machine-readable admission policy
 docs/REGISTRY_CONTRACT_V1.md     submission/signature/immutability contract
 docs/PAGES_DISTRIBUTION_V1.md    GitHub Pages signed metadata distribution contract
-trust/README.md                   offline-root/distribution-key bootstrap guidance
+trust/README.md                   Root/Distribution Actions Secret bootstrap guidance
+.github/workflows/sign-trust.yml  manual Root trust-signing workflow
 .github/workflows/pages.yml       signed Pages delivery workflow
 ```
 
@@ -85,7 +86,7 @@ Git repository
 
 The client bootstrap contract pins the Pages head URL and Registry Root public key, not individual SCTool versions. Package descriptors resolve `defaultChannel` / `channels` to concrete versions at runtime.
 
-Pages publication remains intentionally inactive until an offline-root-signed `trust/trust.json` is committed and the corresponding public root / distribution private key are configured for Actions. See `docs/PAGES_DISTRIBUTION_V1.md` and `trust/README.md`.
+Registry Root and Distribution private keys are stored as separate GitHub Actions Secrets. The Root private secret is used only by the manually dispatched trust-signing workflow; routine Pages publication receives only the Root public key and Distribution private key. Pages publication remains intentionally inactive until a valid Root-signed `trust/trust.json` exists. See `docs/PAGES_DISTRIBUTION_V1.md` and `trust/README.md`.
 
 Registry Intake transport, publisher enrollment workflow, artifact upload service, and SDK `publish` are follow-up implementation work.
 
