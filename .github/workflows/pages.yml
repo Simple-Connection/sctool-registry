@@ -78,6 +78,10 @@ jobs:
           --issued-at "${{ steps.identity.outputs.issued_at }}"
           --out _site
 
+      - name: Validate generated Pages JSON contracts
+        if: steps.activation.outputs.activated == 'true'
+        run: python tools/validate-pages.py --site _site
+
       - name: Verify generated Pages distribution
         if: steps.activation.outputs.activated == 'true'
         env:
