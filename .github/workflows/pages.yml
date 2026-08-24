@@ -12,7 +12,7 @@ on:
       - "trust/**"
       - "tools/**"
       - "ptsip.yaml"
-      - ".github/workflows/pages.yml"
+      - ".github/workflows/*.yml"
   push:
     branches:
       - main
@@ -25,7 +25,7 @@ on:
       - "trust/**"
       - "tools/**"
       - "ptsip.yaml"
-      - ".github/workflows/pages.yml"
+      - ".github/workflows/*.yml"
 
 permissions:
   contents: read
@@ -47,13 +47,31 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install PTSIP tool
-        run: python -m pip install "PTSIP==0.3.6"
-
-      - name: Validate PTSIP architecture
+      - name: Install PTSIP and delivery validation dependencies
         run: |
-          ptsip validate .
-          ptsip conform .
+          python -m pip install "PTSIP==0.3.6"
+          python -m pip install -r tools/requirements.txt
+
+      - name: Validate PTSIP architecture with exact Product Artifact evidence
+        shell: bash
+        run: |
+          validation="$RUNNER_TEMP/ptsip-validation.json"
+          evidence="$RUNNER_TEMP/sctool-registry-product-artifact.json"
+          revision="$(git rev-parse HEAD)"
+          tracked="$(python -c "from ptsip.repository.snapshot import capture_snapshot; print(capture_snapshot('.').tracked_content_fingerprint)")"
+
+          ptsip validate . --json > "$validation"
+          python tools/generate-ptsip-artifact-evidence.py \
+            --validation "$validation" \
+            --out "$evidence" \
+            --repository "$GITHUB_REPOSITORY" \
+            --revision "$revision" \
+            --tracked-content-sha256 "$tracked" \
+            --component registry-catalog \
+            --component registry-contracts \
+            --component product-documentation
+
+          ptsip conform . --artifact-evidence "$evidence"
 
       - name: Validate registry JSON contracts
         run: python tools/validate-registry.py
