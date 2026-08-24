@@ -45,7 +45,7 @@ Trust and head signatures use **SCTool canonical JSON v1**.
 For the object being signed:
 
 1. only JSON null, booleans, strings, safe integers, arrays, and objects are permitted;
-2. object member names are sorted lexicographically;
+2. schema-defined object member names are ASCII and are sorted in ascending UTF-16 code-unit order, equivalent to the default JavaScript `Array.prototype.sort()` order for those member names;
 3. array order is preserved;
 4. no insignificant whitespace is emitted;
 5. UTF-8 encodes the resulting JSON text;
@@ -202,6 +202,7 @@ The custom GitHub Actions workflow must:
 
 ```text
 PTSIP validate/conform
+-> validate Registry JSON and JSON Schema contracts
 -> verify root signature on trust.json
 -> verify distribution private key matches exactly one active authorized key
 -> resolve registry/package/publisher identities
@@ -212,4 +213,4 @@ PTSIP validate/conform
 -> deploy Pages artifact
 ```
 
-Before `trust/trust.json` exists, Pages publication remains intentionally inactive while repository governance checks may still run.
+Before `trust/trust.json` exists, Pages publication remains intentionally inactive while repository governance and Registry JSON contract checks still run.
