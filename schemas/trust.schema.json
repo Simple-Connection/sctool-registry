@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SCTool Registry Trust Descriptor v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "signed",
+    "proof"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "signed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "sequence",
+        "issuedAt",
+        "rootKeyId",
+        "distributionKeys"
+      ],
+      "properties": {
+        "scope": {
+          "const": "sctool-registry-trust-v1"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "issuedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rootKeyId": {
+          "$ref": "#/$defs/keyId"
+        },
+        "distributionKeys": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/distributionKey"
+          }
+        }
+      }
+    },
+    "proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "scope",
+        "keyId",
+        "signature"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "ed25519"
+        },
+        "scope": {
+          "const": "sctool-registry-trust-v1"
+        },
+        "keyId": {
+          "$ref": "#/$defs/keyId"
+        },
+        "signature": {
+          "$ref": "#/$defs/signature"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "keyId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._:-]{0,126}[A-Za-z0-9])?$"
+    },
+    "rawPublicKey": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]{43}=$"
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]{86}==$"
+    },
+    "distributionKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "keyId",
+        "algorithm",
+        "encoding",
+        "publicKey",
+        "status",
+        "validFrom"
+      ],
+      "properties": {
+        "keyId": {
+          "$ref": "#/$defs/keyId"
+        },
+        "algorithm": {
+          "const": "ed25519"
+        },
+        "encoding": {
+          "const": "base64-raw-32"
+        },
+        "publicKey": {
+          "$ref": "#/$defs/rawPublicKey"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "retired",
+            "revoked"
+          ]
+        },
+        "validFrom": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validUntil": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "retiredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "revokedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "retired"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "retiredAt"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "revoked"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "revokedAt"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

@@ -9,6 +9,7 @@ artifact immutability, or distribution behavior, read:
 
 ```text
 docs/REGISTRY_CONTRACT_V1.md
+docs/PAGES_DISTRIBUTION_V1.md
 policy/registry-policy.json
 ptsip.yaml
 ```
@@ -84,8 +85,12 @@ registry-catalog
 = PRODUCT
 
 registry-contracts
-= schemas, admission policy, canonical registry contract
+= schemas, admission/distribution/trust policy and canonical contracts
 = NEUTRAL_CONTRACT
+
+registry-pages-delivery
+= Root trust signing, snapshot assembly/verification and GitHub Pages publication
+= DELIVERY
 
 product-documentation
 = public registry documentation
@@ -96,9 +101,32 @@ repository-governance
 = DEVELOPMENT_TOOLING
 ```
 
-Do not classify future Registry Intake implementation, CI, release publication,
-or operational monitoring by analogy. Determine its actual lifecycle ownership
-when that responsibility is introduced and update `ptsip.yaml` explicitly.
+Do not classify future Registry Intake implementation, release publication outside
+this Pages boundary, or operational monitoring by analogy. Determine its actual
+lifecycle ownership when that responsibility is introduced and update `ptsip.yaml`
+explicitly.
+
+## Registry trust secret boundary
+
+Private key values are never repository content.
+
+Canonical GitHub Actions secret names are:
+
+```text
+SCTOOL_REGISTRY_ROOT_PRIVATE_KEY_B64
+SCTOOL_REGISTRY_DISTRIBUTION_PRIVATE_KEY_B64
+```
+
+The Root private secret may be referenced only by the manually dispatched
+`.github/workflows/sign-trust.yml` trust-signing path. Routine Pages publication
+must never request, echo, copy, persist, or otherwise consume the Root private secret.
+
+The Distribution private secret may be used by `.github/workflows/pages.yml` for
+routine `registry-head.json` signing. The corresponding Registry Root public key is
+non-secret configuration and is pinned independently by Simple Connection.
+
+Never place private key material in generated Pages artifacts, logs, workflow
+artifacts, test fixtures, committed configuration, or documentation examples.
 
 ## Registry invariants
 
@@ -110,3 +138,5 @@ when that responsibility is introduced and update `ptsip.yaml` explicitly.
 6. Exact-digest retry is idempotent; different-digest overwrite is rejected.
 7. Published artifacts are anonymously downloadable over HTTPS.
 8. `.sctool` binaries are not stored in Git history.
+9. Simple Connection does not hardcode individual SCTool versions; signed Registry channels resolve versions.
+10. Root trust signing and routine Distribution signing use separate Actions Secrets.

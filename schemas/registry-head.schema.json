@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SCTool Registry Pages Head v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "signed",
+    "proof"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "signed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "sequence",
+        "revision",
+        "issuedAt",
+        "trustSequence",
+        "signingKeyId",
+        "snapshot"
+      ],
+      "properties": {
+        "scope": {
+          "const": "sctool-registry-head-v1"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "issuedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "trustSequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "signingKeyId": {
+          "$ref": "#/$defs/keyId"
+        },
+        "snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256",
+            "size"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "pattern": "^snapshots/[0-9a-f]{40,64}\\.json$"
+            },
+            "sha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "size": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    "proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "scope",
+        "keyId",
+        "signature"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "ed25519"
+        },
+        "scope": {
+          "const": "sctool-registry-head-v1"
+        },
+        "keyId": {
+          "$ref": "#/$defs/keyId"
+        },
+        "signature": {
+          "$ref": "#/$defs/signature"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "keyId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._:-]{0,126}[A-Za-z0-9])?$"
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40,64}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]{86}==$"
+    }
+  }
+}
