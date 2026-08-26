@@ -16,6 +16,56 @@ ptsip.yaml
 
 `docs/REGISTRY_CONTRACT_V1.md` and `schemas/policy-v1.schema.json` are retained as historical v1 references. Do not silently restore v1 anonymous artifact delivery into the current v2 policy.
 
+## Version-scoped development branches
+
+Development work is organized by `distribution_contract_version`. One distribution contract version may contain multiple implementation sessions or work units.
+
+For each version, create one persistent development branch using exactly:
+
+```text
+dev/{major}.{minor}.{micro}
+```
+
+Examples:
+
+```text
+dev/1.0.0
+dev/1.1.0
+dev/2.0.0
+```
+
+The version in the branch name is the version being developed for that distribution contract. Do not infer a different branch version from an unrelated package, schema, policy, SDK, or tool version.
+
+Multiple sessions belonging to the same version must remain on the same `dev/{major}.{minor}.{micro}` branch. At the end of an individual session:
+
+```text
+commit the completed session to the version branch
+run the session's required validation
+continue later sessions from the same version branch
+```
+
+Do **not** create a new branch for every session and do **not** merge the version branch to `main` merely because one session is complete.
+
+The version branch is merged to `main` only when all planned sessions for that version are complete and the version-level acceptance, Registry validation, and applicable PTSIP gates have passed.
+
+Each version has one canonical improvement-plan document named exactly:
+
+```text
+{major}.{minor}.{micro}_Improvement_plan.md
+```
+
+Examples:
+
+```text
+1.0.0_Improvement_plan.md
+1.1.0_Improvement_plan.md
+2.0.0_Improvement_plan.md
+```
+
+The improvement plan is the version-level index for its sessions. It should record the version objective, session/work-unit breakdown, completion state, acceptance criteria, and final merge gate so that session completion does not get confused with version completion.
+
+Before creating a new development branch, determine the target `distribution_contract_version` and use this naming/document policy. Reuse an existing matching `dev/{major}.{minor}.{micro}` branch when that version is already in progress.
+
 ## PTSIP is mandatory from the first commit
 
 Architecture and responsibility ownership are governed by:
