@@ -93,8 +93,9 @@ components:
     include:
       - "ptsip.yaml"
       - "AGENTS.md"
+      - "docs/ver*/**"
       - ".gitignore"
-    purpose: repository_architecture_declaration_and_coding_agent_operating_governance
+    purpose: repository_architecture_declaration_version_session_planning_and_coding_agent_operating_governance
     shipped: false
     runtime_required: false
     executable: false
