@@ -66,6 +66,27 @@ The improvement plan is the version-level index for its sessions. It should reco
 
 Before creating a new development branch, determine the target `distribution_contract_version` and use this naming/document policy. Reuse an existing matching `dev/{major}.{minor}.{micro}` branch when that version is already in progress.
 
+## Version documentation layout
+
+Version planning documents use a shallow version directory modeled after the version/session separation used by `Kinirin/ERP_suver`:
+
+```text
+docs/ver{major}.{minor}.{micro}/
+├─ {major}.{minor}.{micro}_Improvement_plan.md
+└─ session_document/
+   └─ ver.{major}.{minor}.{micro}_P{N}_{topic}.yaml
+```
+
+The improvement plan is the version-level index. Detailed session scope must not be duplicated into multiple Markdown planning files.
+
+For each approved session, create one YAML document under `session_document/`. The session YAML owns the detailed goal, allowed/excluded scope, work units, validation evidence, completion criteria, state, and next action.
+
+Primary sessions use `P1`, `P2`, `P3`, ... . Use `P1.1`, `P1.2`, ... only when an already approved primary session must be split into a subordinate session.
+
+Do not pre-generate empty session documents for speculative future work. Add a session YAML when that session is approved to begin, and add its path/status to the version improvement plan.
+
+Version/session planning documents are repository development governance and must be assigned to `repository-governance` in `ptsip.yaml`, not to runtime Registry contracts or product documentation.
+
 ## PTSIP is mandatory from the first commit
 
 Architecture and responsibility ownership are governed by:
