@@ -1,6 +1,6 @@
 {
   "$schema": "../schemas/policy.schema.json",
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "2.0.0",
   "source": {
     "visibilityRequired": false,
     "repositoryRequired": false
@@ -28,7 +28,17 @@
     ]
   },
   "artifact": {
-    "anonymousHttpsRequired": true,
+    "access": {
+      "mode": "github-authenticated",
+      "provider": "github.com",
+      "credentialSource": "gh-cli-credential-store",
+      "backend": "github-release-asset",
+      "repository": "Simple-Connection/sctool-artifacts",
+      "repositoryVisibility": "private",
+      "requiredRepositoryPermission": "contents-read",
+      "contract": "registry-access-v1"
+    },
+    "anonymousDownloadAllowed": false,
     "gitHistoryStorageAllowed": false,
     "defaultReleaseTagPattern": "sctool/{packageId}/v{version}"
   },

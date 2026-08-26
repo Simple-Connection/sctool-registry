@@ -31,6 +31,8 @@ components:
       - "schemas/*.schema.json"
       - "policy/registry-policy.json"
       - "docs/REGISTRY_CONTRACT_V1.md"
+      - "docs/REGISTRY_CONTRACT_V2.md"
+      - "docs/REGISTRY_ACCESS_V1.md"
       - "docs/PAGES_DISTRIBUTION_V1.md"
       - "trust/**"
     purpose: canonical_registry_submission_distribution_trust_integrity_and_admission_contracts
