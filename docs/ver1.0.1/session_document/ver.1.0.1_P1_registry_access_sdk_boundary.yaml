@@ -5,7 +5,7 @@ session:
   id: "P1"
   number: 1
   title: "registry_access_sdk_boundary"
-  status: "PLANNED"
+  status: "PAUSED"
   improvement_plan: "docs/ver1.0.1/1.0.1_Improvement_plan.md"
   branch: "dev/1.0.1"
   branch_isolation: false
@@ -86,6 +86,50 @@ access_states:
   - "network-unavailable"
   - "configuration-error"
 
+execution_preflight:
+  audited_at: "2026-08-26"
+  implementation_main_sha: "a0c8173941c4d3fd4376c0834e6ea13951cafc96"
+  repository_entry_chain:
+    agents: "PASS"
+    memory: "PASS"
+    document_hub: "PASS"
+    general_ledger: "PASS"
+    approval_policy: "PASS"
+    version_ledger: "PASS"
+    development_goal: "PASS"
+    improvement_plan: "PASS"
+    development_session: "BLOCKED"
+  current_simple_connection_routing:
+    release_line: "v2.2"
+    current_target: "2.2.3"
+    current_target_state: "verification"
+    development_session_state: "completed"
+    current_session: null
+  sdk_governance:
+    policy: "docs/sdk/SDK_GOVERNANCE.md"
+    target_path_allowed: true
+    canonical_program_sdk: "program-sdk/sctool-sdk"
+  ptsip:
+    profile: "docs/sdk/simple-connection.ptsip.yaml"
+    component: "sctool-program-sdk"
+    classification: "PRODUCT"
+    path_assignment: "program-sdk/sctool-sdk/**"
+  implementation_shape:
+    proposed_source: "program-sdk/sctool-sdk/src/registry-access.ts"
+    proposed_tests: "program-sdk/sctool-sdk/tests/run-registry-access-suite.mjs"
+    desktop_dependency_required: false
+  blocker:
+    id: "SC-ROUTING-NO-CURRENT-SESSION"
+    state: "OPEN"
+    description: >-
+      Kinirin/Simple-Connection repository routing currently resolves to a completed
+      2.2.3 development-session registry with current_session=null. Repository
+      instructions require source work to stop rather than invent a downstream
+      P-session when the selector is absent.
+    source_write_allowed: false
+    source_branch_created: false
+    source_files_modified: false
+
 validation:
   required_commands:
     - "npm ci --prefix program-sdk/sctool-sdk"
@@ -118,13 +162,16 @@ completion_criteria:
   production_trust_activated: false
 
 state:
-  audit: "PENDING"
+  audit: "COMPLETE"
   plan: "APPROVED"
-  apply: "PENDING"
+  apply: "PAUSED"
   test: "PENDING"
   closeout: "PENDING"
 
 next:
   action: >-
-    Begin W5 in Kinirin/Simple-Connection under program-sdk/sctool-sdk only;
-    keep this session document as the detailed 1.0.1 P1 execution record.
+    Resume W5 only after Kinirin/Simple-Connection exposes a routable approved
+    implementation session for this SDK work, or the user explicitly approves a
+    repository-wide SDK maintenance exception that supersedes the missing-session
+    routing gate. Keep all Registry-side work on dev/1.0.1 and do not merge it
+    merely to resolve this blocker.
