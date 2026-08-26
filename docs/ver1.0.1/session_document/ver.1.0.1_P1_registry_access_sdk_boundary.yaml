@@ -1,0 +1,130 @@
+schema_version: "1.0.1"
+document_type: build_session
+
+session:
+  id: "P1"
+  number: 1
+  title: "registry_access_sdk_boundary"
+  status: "PLANNED"
+  improvement_plan: "docs/ver1.0.1/1.0.1_Improvement_plan.md"
+  branch: "dev/1.0.1"
+  branch_isolation: false
+
+authority:
+  registry_repository: "Simple-Connection/sctool-registry"
+  registry_access_contract: "docs/REGISTRY_ACCESS_V1.md"
+  registry_contract: "docs/REGISTRY_CONTRACT_V2.md"
+  registry_policy: "policy/registry-policy.json"
+  implementation_repository: "Kinirin/Simple-Connection"
+  implementation_component: "program-sdk/sctool-sdk"
+
+goal: >-
+  Implement the SDK-side GitHub identity and private artifact-repository access
+  boundary defined by REGISTRY_ACCESS_V1, without depending on Simple Connection
+  desktop internals and without exposing or extracting GitHub credential material.
+
+scope:
+  allowed_implementation_paths:
+    - "program-sdk/sctool-sdk/**"
+  allowed_contract_consumption:
+    - "REGISTRY_ACCESS_V1 identity and access states"
+    - "REGISTRY_CONTRACT_V2 authenticated artifact-access boundary"
+  excluded:
+    - "desktop/src/**"
+    - "renderer/UI changes"
+    - "Simple Connection installer UX"
+    - "production Root trust activation"
+    - "trust/trust.json issuance"
+    - "artifact binary download implementation"
+    - "package/channel update resolution"
+    - "per-device credentials or application attestation"
+    - "commercial entitlement or licensing"
+
+work_units:
+  - id: "W5"
+    title: "registry_access_types"
+    objective: >-
+      Define stable SDK result/types for authorized, gh-unavailable,
+      unauthenticated, identity-unresolved, access-denied,
+      network-unavailable, and configuration-error.
+  - id: "W6"
+    title: "github_identity_adapter"
+    objective: >-
+      Resolve the canonical current GitHub login through the GitHub CLI
+      credential-store session while removing inherited GH_TOKEN and
+      GITHUB_TOKEN overrides from Registry subprocesses.
+  - id: "W7"
+    title: "artifact_repository_authorization_probe"
+    objective: >-
+      Probe authenticated read access to Simple-Connection/sctool-artifacts
+      and normalize authenticated 403/404 responses to access-denied.
+  - id: "W8"
+    title: "negative_security_tests"
+    objective: >-
+      Prove fail-closed behavior, token-override isolation, non-invocation of
+      gh auth token, and absence of credential material from structured results.
+
+behavior_contract:
+  identity_provider: "github.com"
+  credential_source: "gh-cli-credential-store"
+  canonical_identity_command: "gh api user --jq .login"
+  authentication_gate: "gh auth status --hostname github.com"
+  artifact_repository: "Simple-Connection/sctool-artifacts"
+  repository_visibility: "private"
+  token_extraction_allowed: false
+  client_private_key_required: false
+  inherited_token_overrides_allowed: false
+  authorization_fail_closed: true
+  desktop_runtime_dependency_allowed: false
+
+access_states:
+  - "authorized"
+  - "gh-unavailable"
+  - "unauthenticated"
+  - "identity-unresolved"
+  - "access-denied"
+  - "network-unavailable"
+  - "configuration-error"
+
+validation:
+  required_commands:
+    - "npm ci --prefix program-sdk/sctool-sdk"
+    - "npm run typecheck --prefix program-sdk/sctool-sdk"
+    - "npm run build --prefix program-sdk/sctool-sdk"
+    - "node --check program-sdk/sctool-sdk/cli/sctool.mjs"
+  required_tests:
+    - "authenticated identity + repository read -> authorized"
+    - "missing/unexecutable gh -> gh-unavailable"
+    - "failed gh auth status -> unauthenticated"
+    - "failed/empty gh api user -> identity-unresolved"
+    - "repository probe 403 -> access-denied"
+    - "repository probe 404 -> access-denied"
+    - "transport failure/timeout -> network-unavailable"
+    - "inherited GH_TOKEN removed"
+    - "inherited GITHUB_TOKEN removed"
+    - "gh auth token never invoked"
+    - "structured results contain no credential material"
+
+completion_criteria:
+  registry_access_types_implemented: false
+  github_identity_adapter_implemented: false
+  token_override_isolation_implemented: false
+  private_repository_probe_implemented: false
+  negative_security_tests_passed: false
+  sdk_typecheck_passed: false
+  sdk_build_passed: false
+  cli_syntax_check_passed: false
+  desktop_ui_changed: false
+  production_trust_activated: false
+
+state:
+  audit: "PENDING"
+  plan: "APPROVED"
+  apply: "PENDING"
+  test: "PENDING"
+  closeout: "PENDING"
+
+next:
+  action: >-
+    Begin W5 in Kinirin/Simple-Connection under program-sdk/sctool-sdk only;
+    keep this session document as the detailed 1.0.1 P1 execution record.
