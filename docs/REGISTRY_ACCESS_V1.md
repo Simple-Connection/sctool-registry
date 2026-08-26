@@ -2,15 +2,20 @@
 
 `registry_access_contract_version: 1.0.0`
 
-This document defines the GitHub identity and authenticated artifact-access boundary that SCTool Registry clients and the SCTool SDK will consume.
+This document defines the GitHub identity and authenticated artifact-access boundary that SCTool Registry clients and the SCTool SDK consume.
 
 ## 0. Activation status
 
-This contract is **prepared but not yet active** while `docs/REGISTRY_CONTRACT_V1.md` and `policy/registry-policy.json` still require anonymous HTTPS artifact delivery.
+This contract is **active** under:
 
-It becomes effective only when a later Registry contract/policy revision explicitly adopts authenticated artifact access. Until then, Registry Contract v1 remains authoritative for production distribution behavior.
+```text
+docs/REGISTRY_CONTRACT_V2.md
+policy/registry-policy.json schemaVersion 2.0.0
+```
 
-This staged activation prevents the meaning of the existing `1.0.0` Registry contract from being changed in place.
+`docs/REGISTRY_CONTRACT_V1.md` and `schemas/policy-v1.schema.json` are retained as historical v1 references for the earlier anonymous-download model.
+
+The v2 activation is an intentional breaking policy change; the meaning of Registry Contract v1 is not changed in place.
 
 ## 1. Scope
 
@@ -185,7 +190,7 @@ The identity object is present only when canonical identity resolution succeeds.
 
 ## 9. Artifact access invariant
 
-When this contract is activated by the Registry v2 distribution/admission policy, SCTool release payload access requires:
+SCTool release payload access requires:
 
 ```text
 GitHub authentication
