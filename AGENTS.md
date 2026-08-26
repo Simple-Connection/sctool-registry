@@ -2,17 +2,19 @@
 
 ## Repository authority
 
-This repository is the public SCTool distribution registry for Simple Connection.
+This repository is the public SCTool metadata registry and authenticated artifact-distribution authority for Simple Connection.
 
-Before changing registry identity, schema, publisher trust, package ownership,
-artifact immutability, or distribution behavior, read:
+Before changing registry identity, schema, publisher trust, package ownership, artifact access/immutability, or distribution behavior, read:
 
 ```text
-docs/REGISTRY_CONTRACT_V1.md
+docs/REGISTRY_CONTRACT_V2.md
+docs/REGISTRY_ACCESS_V1.md
 docs/PAGES_DISTRIBUTION_V1.md
 policy/registry-policy.json
 ptsip.yaml
 ```
+
+`docs/REGISTRY_CONTRACT_V1.md` and `schemas/policy-v1.schema.json` are retained as historical v1 references. Do not silently restore v1 anonymous artifact delivery into the current v2 policy.
 
 ## PTSIP is mandatory from the first commit
 
@@ -25,8 +27,7 @@ Specification rev:   d6995ed232e845b88d8235b851e80ab54b7804ea
 Profile:             ptsip.yaml
 ```
 
-PTSIP is a coding-agent/development tool. Do **not** add PTSIP to registry runtime
-dependencies or package metadata merely to make it available locally.
+PTSIP is a coding-agent/development tool. Do **not** add PTSIP to registry runtime dependencies or package metadata merely to make it available locally.
 
 The coding-agent execution environment should install the exact tool version:
 
@@ -35,10 +36,7 @@ python -m pip install "PTSIP==0.3.6"
 ptsip --version
 ```
 
-If the execution environment cannot reach the package index, do not silently add
-PTSIP as a repository dependency or vendor it into this repository. Report that
-the tool gate could not run and keep the canonical profile/specification revision
-unchanged.
+If the execution environment cannot reach the package index, do not silently add PTSIP as a repository dependency or vendor it into this repository. Report that the tool gate could not run and keep the canonical profile/specification revision unchanged.
 
 ## Required structural workflow
 
@@ -62,12 +60,9 @@ For release/merge gating when applicable:
 ptsip gate .
 ```
 
-A new tracked path must be assigned in `ptsip.yaml` in the same change that
-introduces it. PTSIP classifications are determined by primary lifecycle ownership,
-not by directory name, language, framework, or whether a file is executable.
+A new tracked path must be assigned in `ptsip.yaml` in the same change that introduces it. PTSIP classifications are determined by primary lifecycle ownership, not by directory name, language, framework, or whether a file is executable.
 
-Do not use legacy `TOOLCHAIN` in new declarations. Tool 0.3.6 canonical
-classifications are:
+Do not use legacy `TOOLCHAIN` in new declarations. Tool 0.3.6 canonical classifications are:
 
 ```text
 PRODUCT
@@ -85,11 +80,11 @@ registry-catalog
 = PRODUCT
 
 registry-contracts
-= schemas, admission/distribution/trust policy and canonical contracts
+= schemas, admission/access/distribution/trust policy and canonical contracts
 = NEUTRAL_CONTRACT
 
 registry-pages-delivery
-= Root trust signing, snapshot assembly/verification and GitHub Pages publication
+= Root trust signing, snapshot assembly/verification and GitHub Pages metadata publication
 = DELIVERY
 
 product-documentation
@@ -101,10 +96,7 @@ repository-governance
 = DEVELOPMENT_TOOLING
 ```
 
-Do not classify future Registry Intake implementation, release publication outside
-this Pages boundary, or operational monitoring by analogy. Determine its actual
-lifecycle ownership when that responsibility is introduced and update `ptsip.yaml`
-explicitly.
+Do not classify future Registry Intake implementation, artifact release publication outside this Pages metadata boundary, authenticated download implementation, or operational monitoring by analogy. Determine its actual lifecycle ownership when that responsibility is introduced and update `ptsip.yaml` explicitly.
 
 ## Registry trust secret boundary
 
@@ -117,16 +109,13 @@ SCTOOL_REGISTRY_ROOT_PRIVATE_KEY_B64
 SCTOOL_REGISTRY_DISTRIBUTION_PRIVATE_KEY_B64
 ```
 
-The Root private secret may be referenced only by the manually dispatched
-`.github/workflows/sign-trust.yml` trust-signing path. Routine Pages publication
-must never request, echo, copy, persist, or otherwise consume the Root private secret.
+The Root private secret may be referenced only by the manually dispatched `.github/workflows/sign-trust.yml` trust-signing path. Routine Pages publication must never request, echo, copy, persist, or otherwise consume the Root private secret.
 
-The Distribution private secret may be used by `.github/workflows/pages.yml` for
-routine `registry-head.json` signing. The corresponding Registry Root public key is
-non-secret configuration and is pinned independently by Simple Connection.
+The Distribution private secret may be used by `.github/workflows/pages.yml` for routine `registry-head.json` signing. The corresponding Registry Root public key is non-secret configuration and is pinned independently by Simple Connection.
 
-Never place private key material in generated Pages artifacts, logs, workflow
-artifacts, test fixtures, committed configuration, or documentation examples.
+Never place private key material in generated Pages artifacts, logs, workflow artifacts, test fixtures, committed configuration, or documentation examples.
+
+GitHub end-user credentials are also never Registry repository content. Registry access consumers use the GitHub CLI credential store and must not add GitHub access tokens, OAuth tokens, client private keys, or credential-store material to Registry metadata.
 
 ## Registry invariants
 
@@ -136,7 +125,9 @@ artifacts, test fixtures, committed configuration, or documentation examples.
 4. Registry Intake independently revalidates submitted artifacts.
 5. `(packageId, version, target)` is immutable after publication.
 6. Exact-digest retry is idempotent; different-digest overwrite is rejected.
-7. Published artifacts are anonymously downloadable over HTTPS.
-8. `.sctool` binaries are not stored in Git history.
-9. Simple Connection does not hardcode individual SCTool versions; signed Registry channels resolve versions.
-10. Root trust signing and routine Distribution signing use separate Actions Secrets.
+7. Published `.sctool` artifacts require authenticated GitHub access to `Simple-Connection/sctool-artifacts`.
+8. GitHub authentication identity is resolved through the GitHub CLI credential-store session; Registry access code must not extract credential material merely to establish identity.
+9. `.sctool` binaries are not stored in Registry Git history.
+10. Simple Connection does not hardcode individual SCTool versions; signed Registry channels resolve versions.
+11. Root trust signing and routine Distribution signing use separate Actions Secrets.
+12. Simple Connection UI/install/runtime policy remains outside the Registry access contract.

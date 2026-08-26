@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "SCTool Registry Admission Policy v2",
+  "title": "SCTool Registry Admission Policy v1",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -17,7 +17,7 @@
       "type": "string"
     },
     "schemaVersion": {
-      "const": "2.0.0"
+      "const": "1.0.0"
     },
     "source": {
       "type": "object",
@@ -96,54 +96,13 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "access",
-        "anonymousDownloadAllowed",
+        "anonymousHttpsRequired",
         "gitHistoryStorageAllowed",
         "defaultReleaseTagPattern"
       ],
       "properties": {
-        "access": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "mode",
-            "provider",
-            "credentialSource",
-            "backend",
-            "repository",
-            "repositoryVisibility",
-            "requiredRepositoryPermission",
-            "contract"
-          ],
-          "properties": {
-            "mode": {
-              "const": "github-authenticated"
-            },
-            "provider": {
-              "const": "github.com"
-            },
-            "credentialSource": {
-              "const": "gh-cli-credential-store"
-            },
-            "backend": {
-              "const": "github-release-asset"
-            },
-            "repository": {
-              "const": "Simple-Connection/sctool-artifacts"
-            },
-            "repositoryVisibility": {
-              "const": "private"
-            },
-            "requiredRepositoryPermission": {
-              "const": "contents-read"
-            },
-            "contract": {
-              "const": "registry-access-v1"
-            }
-          }
-        },
-        "anonymousDownloadAllowed": {
-          "const": false
+        "anonymousHttpsRequired": {
+          "const": true
         },
         "gitHistoryStorageAllowed": {
           "const": false
