@@ -5,10 +5,11 @@ session:
   id: "P1"
   number: 1
   title: "registry_access_sdk_boundary"
-  status: "PAUSED"
+  status: "IN_PROGRESS"
   improvement_plan: "docs/ver1.0.1/1.0.1_Improvement_plan.md"
   branch: "dev/1.0.1"
   branch_isolation: false
+  authority_repository: "Simple-Connection/sctool-registry"
 
 authority:
   registry_repository: "Simple-Connection/sctool-registry"
@@ -17,6 +18,13 @@ authority:
   registry_policy: "policy/registry-policy.json"
   implementation_repository: "Kinirin/Simple-Connection"
   implementation_component: "program-sdk/sctool-sdk"
+  implementation_branch: "dev/1.0.1"
+  product_release_session_owner: false
+  authority_rule: >-
+    Registry Distribution 1.0.1 P1 owns planning and completion state. The
+    Simple Connection repository is only the physical owner of the Program SDK
+    implementation and does not receive a new product-version P-session for this
+    Registry contract work.
 
 goal: >-
   Implement the SDK-side GitHub identity and private artifact-repository access
@@ -33,6 +41,7 @@ scope:
     - "desktop/src/**"
     - "renderer/UI changes"
     - "Simple Connection installer UX"
+    - "Simple Connection product-version session creation for Registry work"
     - "production Root trust activation"
     - "trust/trust.json issuance"
     - "artifact binary download implementation"
@@ -43,23 +52,27 @@ scope:
 work_units:
   - id: "W5"
     title: "registry_access_types"
+    status: "IMPLEMENTED"
     objective: >-
       Define stable SDK result/types for authorized, gh-unavailable,
       unauthenticated, identity-unresolved, access-denied,
       network-unavailable, and configuration-error.
   - id: "W6"
     title: "github_identity_adapter"
+    status: "IMPLEMENTED"
     objective: >-
       Resolve the canonical current GitHub login through the GitHub CLI
       credential-store session while removing inherited GH_TOKEN and
       GITHUB_TOKEN overrides from Registry subprocesses.
   - id: "W7"
     title: "artifact_repository_authorization_probe"
+    status: "IMPLEMENTED"
     objective: >-
       Probe authenticated read access to Simple-Connection/sctool-artifacts
       and normalize authenticated 403/404 responses to access-denied.
   - id: "W8"
     title: "negative_security_tests"
+    status: "IMPLEMENTED_LOCAL_PASS"
     objective: >-
       Prove fail-closed behavior, token-override isolation, non-invocation of
       gh auth token, and absence of credential material from structured results.
@@ -98,7 +111,7 @@ execution_preflight:
     version_ledger: "PASS"
     development_goal: "PASS"
     improvement_plan: "PASS"
-    development_session: "BLOCKED"
+    development_session: "NO_PRODUCT_SESSION"
   current_simple_connection_routing:
     release_line: "v2.2"
     current_target: "2.2.3"
@@ -114,27 +127,35 @@ execution_preflight:
     component: "sctool-program-sdk"
     classification: "PRODUCT"
     path_assignment: "program-sdk/sctool-sdk/**"
-  implementation_shape:
-    proposed_source: "program-sdk/sctool-sdk/src/registry-access.ts"
-    proposed_tests: "program-sdk/sctool-sdk/tests/run-registry-access-suite.mjs"
-    desktop_dependency_required: false
-  blocker:
-    id: "SC-ROUTING-NO-CURRENT-SESSION"
-    state: "OPEN"
-    description: >-
-      Kinirin/Simple-Connection repository routing currently resolves to a completed
-      2.2.3 development-session registry with current_session=null. Repository
-      instructions require source work to stop rather than invent a downstream
-      P-session when the selector is absent.
-    source_write_allowed: false
-    source_branch_created: false
-    source_files_modified: false
+  routing_resolution:
+    previous_blocker: "SC-ROUTING-NO-CURRENT-SESSION"
+    state: "RESOLVED_BY_USER_RESPONSIBILITY_DECISION"
+    decision_date: "2026-08-27"
+    rule: >-
+      Do not reopen completed Simple Connection 2.2.3 sessions and do not create
+      a new Simple Connection product version merely to carry Registry SDK work.
+      Registry Distribution 1.0.1 P1 is the formal current session authority.
+
+implementation:
+  repository: "Kinirin/Simple-Connection"
+  branch: "dev/1.0.1"
+  base_sha: "a0c8173941c4d3fd4376c0834e6ea13951cafc96"
+  commit: "f66894b8656c52e789826de9b69876b31a928ca4"
+  changed_paths:
+    - "program-sdk/sctool-sdk/src/registry-access.ts"
+    - "program-sdk/sctool-sdk/cli/lib/github-registry-access.mjs"
+    - "program-sdk/sctool-sdk/tests/registry-access.test.mjs"
+    - "program-sdk/sctool-sdk/tests/run-registry-access-suite.mjs"
+    - "program-sdk/sctool-sdk/package.json"
+  desktop_files_changed: false
+  simple_connection_product_docs_changed: false
 
 validation:
   required_commands:
     - "npm ci --prefix program-sdk/sctool-sdk"
     - "npm run typecheck --prefix program-sdk/sctool-sdk"
     - "npm run build --prefix program-sdk/sctool-sdk"
+    - "npm run test:registry-access --prefix program-sdk/sctool-sdk"
     - "node --check program-sdk/sctool-sdk/cli/sctool.mjs"
   required_tests:
     - "authenticated identity + repository read -> authorized"
@@ -148,30 +169,46 @@ validation:
     - "inherited GITHUB_TOKEN removed"
     - "gh auth token never invoked"
     - "structured results contain no credential material"
+  local_reconstruction:
+    environment: "isolated local reconstruction"
+    node: "22.16.0"
+    npm: "10.9.2"
+    typescript: "5.8.3"
+    compile: "PASS"
+    tests_total: 9
+    tests_passed: 9
+    tests_failed: 0
+  canonical_package_toolchain:
+    declared_typescript: "7.0.1-rc"
+    exact_repository_run: "PENDING"
+  remote_ci:
+    status: "UNOBSERVED"
+    reason: >-
+      Existing SDK plane workflow runs on pull_request or push to main, not an
+      ordinary push to dev/1.0.1. No PR is opened merely for a session-level gate.
 
 completion_criteria:
-  registry_access_types_implemented: false
-  github_identity_adapter_implemented: false
-  token_override_isolation_implemented: false
-  private_repository_probe_implemented: false
-  negative_security_tests_passed: false
-  sdk_typecheck_passed: false
-  sdk_build_passed: false
-  cli_syntax_check_passed: false
+  registry_access_types_implemented: true
+  github_identity_adapter_implemented: true
+  token_override_isolation_implemented: true
+  private_repository_probe_implemented: true
+  negative_security_tests_local_passed: true
+  sdk_typecheck_exact_passed: false
+  sdk_build_exact_passed: false
+  registry_access_exact_suite_passed: false
+  remote_ptsip_gate_passed: false
   desktop_ui_changed: false
   production_trust_activated: false
 
 state:
   audit: "COMPLETE"
   plan: "APPROVED"
-  apply: "PAUSED"
-  test: "PENDING"
+  apply: "COMPLETE"
+  test: "LOCAL_PASS_EXACT_PENDING"
   closeout: "PENDING"
 
 next:
   action: >-
-    Resume W5 only after Kinirin/Simple-Connection exposes a routable approved
-    implementation session for this SDK work, or the user explicitly approves a
-    repository-wide SDK maintenance exception that supersedes the missing-session
-    routing gate. Keep all Registry-side work on dev/1.0.1 and do not merge it
-    merely to resolve this blocker.
+    Run the exact program-sdk/sctool-sdk package validation with its declared
+    toolchain and then record PTSIP/SDK-plane evidence. Do not merge either
+    dev/1.0.1 branch until P1 closeout and the remaining 1.0.1 sessions are complete.
