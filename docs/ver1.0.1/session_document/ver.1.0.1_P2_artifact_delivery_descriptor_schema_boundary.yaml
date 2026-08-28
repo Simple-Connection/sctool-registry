@@ -156,7 +156,7 @@ work_unit_numbering:
 work_units:
   - id: "W1"
     title: "artifact_content_delivery_separation"
-    status: "PLANNED"
+    status: "COMPLETE"
     objective: >-
       Define the stable artifact entry envelope and move filename/sha256/size
       into a backend-independent content object without altering immutable
@@ -187,6 +187,44 @@ work_units:
       Replace the REGISTRY_CONTRACT_V2 transitional URL note with the adopted
       structured delivery contract and document exact Registry-side resolution
       and consistency checks.
+
+w1_audit:
+  completed_at: "2026-08-28"
+  package_schema_current_state: >-
+    schemas/package.schema.json remains schemaVersion 1.0.0 and still carries
+    flat assetName/url/sha256/size fields. W1 intentionally does not mutate it;
+    the breaking schema revision belongs to W4.
+  pages_builder: >-
+    tools/build-pages.mjs validates package identity/channel references and then
+    embeds each complete descriptor into the signed snapshot. It does not
+    interpret flat artifact transport fields, so defining the content/delivery
+    boundary does not require a Pages builder code change in W1.
+  registry_validator: >-
+    tools/validate-registry.py delegates descriptor structure to
+    schemas/package.schema.json and does not independently encode flat artifact
+    transport-field assumptions.
+  publication_state: "registry.json packages=0 publishers=0"
+  conclusion: >-
+    The common artifact boundary can be made canonical as a contract document
+    before W2-W4 implement delivery discrimination, concrete locator validation,
+    and package schema 2.0.0.
+
+w1_implementation:
+  contract: "docs/ARTIFACT_DELIVERY_V1.md"
+  commit: "f75e4e240581e7a0f072268cf7111e2c8cecac46"
+  implemented_boundary:
+    - "target remains package/version selection identity"
+    - "content.filename is the canonical artifact filename authority"
+    - "content.sha256 is the canonical exact-byte digest authority"
+    - "content.size is the canonical exact-byte-length authority"
+    - "delivery owns retrieval adapter/access/locator concerns only"
+    - "delivery cannot override target/content integrity authorities"
+    - "credentials and authenticated user identity are forbidden from package metadata"
+  explicitly_deferred:
+    - "allowed delivery.type values -> W2"
+    - "GitHub repository/assetId locator schema -> W3"
+    - "schemas/package.schema.json 2.0.0 implementation -> W4"
+    - "REGISTRY_CONTRACT_V2 transition closeout -> W5"
 
 scope:
   allowed_paths:
@@ -232,7 +270,7 @@ acceptance_tests:
     - "Registry PTSIP applicable gates remain PASS"
 
 completion_criteria:
-  descriptor_common_envelope_approved: false
+  descriptor_common_envelope_approved: true
   package_schema_v2_implemented: false
   github_locator_implemented: false
   unknown_backend_fail_closed: false
@@ -245,13 +283,12 @@ completion_criteria:
 state:
   audit: "COMPLETE"
   plan: "APPROVED"
-  apply: "PENDING"
+  apply: "IN_PROGRESS"
   test: "PENDING"
   closeout: "PENDING"
 
 next:
   action: >-
-    Audit Pages metadata consumers and package-schema validation assumptions,
-    then implement P2 W1-W5 only inside the Registry dev/1.0.1 branch. Do not
-    modify Kinirin/Simple-Connection to make P2 pass and do not activate a
-    delivery backend other than github-release-asset in 1.0.1.
+    Begin P2-W2 only: define the delivery discriminator and access/locator
+    boundary without implementing the GitHub-specific locator or package schema
+    2.0.0 yet. Keep Kinirin/Simple-Connection outside P2 ownership.
