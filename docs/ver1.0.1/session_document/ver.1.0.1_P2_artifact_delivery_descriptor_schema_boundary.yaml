@@ -149,43 +149,44 @@ schema_strategy:
     - "keep common artifact fields outside backend-specific schema branches"
     - "reject unknown delivery.type values in 1.0.1"
 
-work_units:
-  numbering_scope: "session-local"
+work_unit_numbering:
+  scope: "session-local"
   reset_rule: "Each primary P-session starts its own work-unit sequence at W1."
-  items:
-    - id: "W1"
-      title: "artifact_content_delivery_separation"
-      status: "PLANNED"
-      objective: >-
-        Define the stable artifact entry envelope and move filename/sha256/size
-        into a backend-independent content object without altering immutable
-        package/version/target semantics.
-    - id: "W2"
-      title: "delivery_discriminator_contract"
-      status: "PLANNED"
-      objective: >-
-        Define delivery.type, access contract reference, and type-specific locator
-        validation without pre-authorizing unsupported delivery backends.
-    - id: "W3"
-      title: "github_release_asset_locator"
-      status: "PLANNED"
-      objective: >-
-        Define the minimal GitHub Release asset locator as repository + assetId,
-        with filename and release-tag consistency verified from canonical fields
-        rather than duplicated metadata.
-    - id: "W4"
-      title: "package_schema_v2_and_validation"
-      status: "PLANNED"
-      objective: >-
-        Upgrade package.schema.json to descriptor schema 2.0.0 and add positive
-        and negative validation coverage for the new delivery boundary.
-    - id: "W5"
-      title: "contract_transition_closeout"
-      status: "PLANNED"
-      objective: >-
-        Replace the REGISTRY_CONTRACT_V2 transitional URL note with the adopted
-        structured delivery contract and document exact Registry-side resolution
-        and consistency checks.
+
+work_units:
+  - id: "W1"
+    title: "artifact_content_delivery_separation"
+    status: "PLANNED"
+    objective: >-
+      Define the stable artifact entry envelope and move filename/sha256/size
+      into a backend-independent content object without altering immutable
+      package/version/target semantics.
+  - id: "W2"
+    title: "delivery_discriminator_contract"
+    status: "PLANNED"
+    objective: >-
+      Define delivery.type, access contract reference, and type-specific locator
+      validation without pre-authorizing unsupported delivery backends.
+  - id: "W3"
+    title: "github_release_asset_locator"
+    status: "PLANNED"
+    objective: >-
+      Define the minimal GitHub Release asset locator as repository + assetId,
+      with filename and release-tag consistency verified from canonical fields
+      rather than duplicated metadata.
+  - id: "W4"
+    title: "package_schema_v2_and_validation"
+    status: "PLANNED"
+    objective: >-
+      Upgrade package.schema.json to descriptor schema 2.0.0 and add positive
+      and negative validation coverage for the new delivery boundary.
+  - id: "W5"
+    title: "contract_transition_closeout"
+    status: "PLANNED"
+    objective: >-
+      Replace the REGISTRY_CONTRACT_V2 transitional URL note with the adopted
+      structured delivery contract and document exact Registry-side resolution
+      and consistency checks.
 
 scope:
   allowed_paths:
