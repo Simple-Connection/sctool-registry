@@ -21,7 +21,10 @@ def load_json(path: Path) -> Any:
 def schema_errors(schema_name: str, payload: Any, label: str) -> list[str]:
     schema = load_json(SCHEMAS / schema_name)
     validator = Draft202012Validator(schema, format_checker=FORMAT_CHECKER)
-    errors = sorted(validator.iter_errors(payload), key=lambda err: list(err.absolute_path))
+    errors = sorted(
+        validator.iter_errors(payload),
+        key=lambda err: tuple(str(part) for part in err.absolute_path),
+    )
     rendered: list[str] = []
     for err in errors:
         location = ".".join(str(part) for part in err.absolute_path) or "<root>"
