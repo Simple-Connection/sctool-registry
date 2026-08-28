@@ -1,0 +1,253 @@
+schema_version: "1.0.1"
+document_type: build_session
+
+session:
+  id: "P2"
+  number: 2
+  title: "artifact_delivery_descriptor_schema_boundary"
+  status: "IN_PROGRESS"
+  improvement_plan: "docs/ver1.0.1/1.0.1_Improvement_plan.md"
+  branch: "dev/1.0.1"
+  branch_isolation: false
+  authority_repository: "Simple-Connection/sctool-registry"
+
+authority:
+  registry_repository: "Simple-Connection/sctool-registry"
+  registry_contract: "docs/REGISTRY_CONTRACT_V2.md"
+  registry_access_contract: "docs/REGISTRY_ACCESS_V1.md"
+  registry_policy: "policy/registry-policy.json"
+  package_schema: "schemas/package.schema.json"
+  implementation_repository: "Simple-Connection/sctool-registry"
+  authority_rule: >-
+    P2 is Registry-owned metadata/schema work. It must not assign, migrate, or
+    reinterpret lifecycle responsibility inside Kinirin/Simple-Connection. The
+    Simple Connection PTSIP 0.3.6 reclassification currently blocking P1
+    closeout is an external validation dependency and does not block this P2.
+
+goal: >-
+  Replace the transitional flat artifact URL shape with a stable artifact
+  descriptor boundary that separates immutable artifact content and integrity
+  from provider-specific delivery location. The common envelope must remain
+  usable when future delivery backends are introduced, while 1.0.1 authorizes
+  only the existing authenticated GitHub Release asset backend.
+
+design_principles:
+  - id: "DP1"
+    rule: "artifact_identity_is_transport_independent"
+    detail: >-
+      Package/version/target identity and byte integrity must not change merely
+      because the storage or retrieval backend changes.
+  - id: "DP2"
+    rule: "common_envelope_backend_neutral"
+    detail: >-
+      Common artifact fields must not contain GitHub-specific names such as
+      release, repository visibility, token, API route, or download URL.
+  - id: "DP3"
+    rule: "delivery_is_discriminated"
+    detail: >-
+      delivery.type is the sole backend discriminator. Backend-specific fields
+      live only under delivery.locator and are validated by a type-specific
+      schema branch.
+  - id: "DP4"
+    rule: "no_derived_locator_duplication"
+    detail: >-
+      Values derivable from canonical Registry identity must not be duplicated
+      in the descriptor when doing so can create inconsistent metadata.
+  - id: "DP5"
+    rule: "credentials_never_metadata"
+    detail: >-
+      Delivery metadata may name an access contract but must never contain
+      tokens, credential material, client private keys, or user identity data.
+  - id: "DP6"
+    rule: "capability_not_speculation"
+    detail: >-
+      The schema may expose an extensible delivery envelope, but 1.0.1 must not
+      accept an unimplemented backend merely for theoretical generality.
+
+canonical_descriptor_shape:
+  package_schema_target_version: "2.0.0"
+  artifact_entry:
+    target:
+      purpose: "immutable platform/architecture identity"
+      fields:
+        - "platform"
+        - "arch"
+    content:
+      purpose: "backend-independent exact byte identity"
+      fields:
+        - "filename"
+        - "sha256"
+        - "size"
+    delivery:
+      purpose: "retrieval adapter and provider-specific immutable locator"
+      fields:
+        - "type"
+        - "access"
+        - "locator"
+    publishedAt:
+      purpose: "Registry publication timestamp"
+    contract:
+      purpose: "SCTool compatibility contract"
+    signature:
+      purpose: "publisher submission signature evidence"
+
+  delivery_common:
+    type:
+      kind: "discriminator"
+      current_values:
+        - "github-release-asset"
+    access:
+      shape:
+        contract: "registry-access-v1"
+      rule: >-
+        Access describes the client authorization contract only. It carries no
+        account, token, secret, session, or entitlement material.
+
+  github_release_asset_locator:
+    type: "github-release-asset"
+    required:
+      - "repository"
+      - "assetId"
+    fields:
+      repository:
+        format: "owner/name"
+        canonical_1_0_1_value: "Simple-Connection/sctool-artifacts"
+      assetId:
+        type: "positive integer"
+        purpose: "immutable GitHub Release asset retrieval identity"
+    deliberately_not_stored:
+      assetName: "must equal content.filename and therefore is not duplicated"
+      releaseTag: "derived from sctool/{packageId}/v{version} and verified server-side"
+      url: "mutable/authorization-insufficient transport representation"
+      repositoryVisibility: "Registry policy owns backend visibility"
+      provider: "delivery.type already selects the GitHub adapter"
+
+security_invariants:
+  - "sha256 and size remain common content fields and are verified after retrieval"
+  - "knowing repository or assetId is not authorization"
+  - "delivery access is fail-closed through REGISTRY_ACCESS_V1"
+  - "publisher signature scope remains sctool-submission-v1 unless a separate contract explicitly changes it"
+  - "same packageId + version + target with different sha256 remains a hard reject"
+  - "descriptor contains no credential material"
+  - "a resolved GitHub asset must belong to the canonical repository"
+  - "Registry-side validation must verify the asset release tag derived from packageId/version"
+  - "Registry-side validation must verify the resolved asset name equals content.filename"
+
+schema_strategy:
+  breaking_revision_required: true
+  reason: >-
+    package.schema.json 1.0.0 requires a flat HTTPS url. Replacing that required
+    field with structured delivery is a breaking descriptor change.
+  target_schema_version: "2.0.0"
+  compatibility_bridge_required: false
+  compatibility_reason: >-
+    REGISTRY_CONTRACT_V2 currently records packages=0 and production trust
+    inactive, so no published package depends on the transitional v1 locator.
+  implementation_pattern:
+    - "use JSON Schema draft 2020-12 $defs for common reusable shapes"
+    - "use delivery.type plus oneOf/const for backend-specific locators"
+    - "keep common artifact fields outside backend-specific schema branches"
+    - "reject unknown delivery.type values in 1.0.1"
+
+work_units:
+  - id: "W9"
+    title: "artifact_content_delivery_separation"
+    status: "PLANNED"
+    objective: >-
+      Define the stable artifact entry envelope and move filename/sha256/size
+      into a backend-independent content object without altering immutable
+      package/version/target semantics.
+  - id: "W10"
+    title: "delivery_discriminator_contract"
+    status: "PLANNED"
+    objective: >-
+      Define delivery.type, access contract reference, and type-specific locator
+      validation without pre-authorizing unsupported delivery backends.
+  - id: "W11"
+    title: "github_release_asset_locator"
+    status: "PLANNED"
+    objective: >-
+      Define the minimal GitHub Release asset locator as repository + assetId,
+      with filename and release-tag consistency verified from canonical fields
+      rather than duplicated metadata.
+  - id: "W12"
+    title: "package_schema_v2_and_validation"
+    status: "PLANNED"
+    objective: >-
+      Upgrade package.schema.json to descriptor schema 2.0.0 and add positive
+      and negative validation coverage for the new delivery boundary.
+  - id: "W13"
+    title: "contract_transition_closeout"
+    status: "PLANNED"
+    objective: >-
+      Replace the REGISTRY_CONTRACT_V2 transitional URL note with the adopted
+      structured delivery contract and document exact Registry-side resolution
+      and consistency checks.
+
+scope:
+  allowed_paths:
+    - "schemas/package.schema.json"
+    - "docs/REGISTRY_CONTRACT_V2.md"
+    - "docs/ARTIFACT_DELIVERY_V1.md"
+    - "tools/validate-registry.py"
+    - "tools/**delivery**"
+    - "docs/ver1.0.1/**"
+  may_add_validation_fixtures: true
+  excluded:
+    - "Kinirin/Simple-Connection source or PTSIP profile changes"
+    - "artifact binary download implementation"
+    - "SCTool SDK/CLI download command implementation"
+    - "package/channel resolution behavior changes"
+    - "production Root trust activation"
+    - "trust/trust.json issuance"
+    - "publisher submission signature scope changes"
+    - "commercial entitlement or per-device authorization"
+    - "additional delivery backend activation"
+
+acceptance_tests:
+  schema:
+    - "package descriptor schema itself passes Draft 2020-12 schema validation"
+    - "valid github-release-asset descriptor passes"
+    - "legacy flat url-only artifact fails schema 2.0.0"
+    - "unknown delivery.type fails"
+    - "github locator without repository fails"
+    - "github locator without assetId fails"
+    - "github locator with non-positive assetId fails"
+    - "credential/token/private-key fields are rejected by additionalProperties=false"
+    - "common content fields cannot be replaced by backend-specific aliases"
+  consistency:
+    - "defaultChannel resolves to an existing version"
+    - "channel versions exist in versions"
+    - "artifact map target key matches target object"
+    - "GitHub repository matches Registry artifact backend policy"
+    - "resolved asset name must match content.filename"
+    - "resolved release tag must equal sctool/{packageId}/v{version}"
+  regression:
+    - "Registry JSON validation PASS"
+    - "Pages metadata builder/validator remains compatible with descriptor schema 2.0.0 or is updated within P2"
+    - "Registry PTSIP applicable gates remain PASS"
+
+completion_criteria:
+  descriptor_common_envelope_approved: false
+  package_schema_v2_implemented: false
+  github_locator_implemented: false
+  unknown_backend_fail_closed: false
+  credential_material_rejected: false
+  registry_validation_passed: false
+  pages_metadata_regression_passed: false
+  ptsip_applicable_gates_passed: false
+  production_trust_activated: false
+
+state:
+  audit: "COMPLETE"
+  plan: "APPROVED"
+  apply: "PENDING"
+  test: "PENDING"
+  closeout: "PENDING"
+
+next:
+  action: >-
+    Audit Pages metadata consumers and package-schema validation assumptions,
+    then implement W9-W13 only inside the Registry dev/1.0.1 branch. Do not
+    modify Kinirin/Simple-Connection to make P2 pass and do not activate a
+    delivery backend other than github-release-asset in 1.0.1.
