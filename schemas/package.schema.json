@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "SCTool Registry Package Descriptor v1",
+  "title": "SCTool Registry Package Descriptor v2",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -11,12 +11,184 @@
     "channels",
     "versions"
   ],
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "arch"],
+      "properties": {
+        "platform": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+$"
+        },
+        "arch": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+$"
+        }
+      }
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["filename", "sha256", "size"],
+      "properties": {
+        "filename": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "deliveryAccess": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract"],
+      "properties": {
+        "contract": {
+          "const": "registry-access-v1"
+        }
+      }
+    },
+    "githubReleaseAssetLocator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "assetId"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})/[A-Za-z0-9._-]{1,100}$"
+        },
+        "assetId": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "delivery": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "access", "locator"],
+          "properties": {
+            "type": {
+              "const": "github-release-asset"
+            },
+            "access": {
+              "$ref": "#/$defs/deliveryAccess"
+            },
+            "locator": {
+              "$ref": "#/$defs/githubReleaseAssetLocator"
+            }
+          }
+        }
+      ]
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sctoolSpecVersion"],
+      "properties": {
+        "sctoolSpecVersion": {
+          "$ref": "#/$defs/semver"
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "keyId",
+        "scope",
+        "submissionId",
+        "submittedAt",
+        "sdkVersion",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "ed25519"
+        },
+        "keyId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._:-]{0,126}[A-Za-z0-9])?$"
+        },
+        "scope": {
+          "const": "sctool-submission-v1"
+        },
+        "submissionId": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 128
+        },
+        "submittedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sdkVersion": {
+          "$ref": "#/$defs/semver"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target",
+        "content",
+        "delivery",
+        "publishedAt",
+        "contract",
+        "signature"
+      ],
+      "properties": {
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "content": {
+          "$ref": "#/$defs/content"
+        },
+        "delivery": {
+          "$ref": "#/$defs/delivery"
+        },
+        "publishedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "contract": {
+          "$ref": "#/$defs/contract"
+        },
+        "signature": {
+          "$ref": "#/$defs/signature"
+        }
+      }
+    }
+  },
   "properties": {
     "$schema": {
       "type": "string"
     },
     "schemaVersion": {
-      "const": "1.0.0"
+      "const": "2.0.0"
     },
     "id": {
       "type": "string",
@@ -29,16 +201,10 @@
     "source": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "visibility"
-      ],
+      "required": ["visibility"],
       "properties": {
         "visibility": {
-          "enum": [
-            "public",
-            "private",
-            "undisclosed"
-          ]
+          "enum": ["public", "private", "undisclosed"]
         },
         "repository": {
           "type": "string",
@@ -57,8 +223,7 @@
         "pattern": "^[a-z][a-z0-9-]{0,31}$"
       },
       "additionalProperties": {
-        "type": "string",
-        "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+        "$ref": "#/$defs/semver"
       }
     },
     "versions": {
@@ -70,9 +235,7 @@
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "artifacts"
-        ],
+        "required": ["artifacts"],
         "properties": {
           "artifacts": {
             "type": "object",
@@ -81,114 +244,7 @@
               "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)+$"
             },
             "additionalProperties": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "target",
-                "assetName",
-                "url",
-                "sha256",
-                "size",
-                "publishedAt",
-                "contract",
-                "signature"
-              ],
-              "properties": {
-                "target": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "required": [
-                    "platform",
-                    "arch"
-                  ],
-                  "properties": {
-                    "platform": {
-                      "type": "string",
-                      "pattern": "^[a-z0-9]+$"
-                    },
-                    "arch": {
-                      "type": "string",
-                      "pattern": "^[a-z0-9]+$"
-                    }
-                  }
-                },
-                "assetName": {
-                  "type": "string",
-                  "minLength": 1,
-                  "maxLength": 255
-                },
-                "url": {
-                  "type": "string",
-                  "pattern": "^https://"
-                },
-                "sha256": {
-                  "type": "string",
-                  "pattern": "^[a-f0-9]{64}$"
-                },
-                "size": {
-                  "type": "integer",
-                  "minimum": 1
-                },
-                "publishedAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "contract": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "required": [
-                    "sctoolSpecVersion"
-                  ],
-                  "properties": {
-                    "sctoolSpecVersion": {
-                      "type": "string",
-                      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
-                    }
-                  }
-                },
-                "signature": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "required": [
-                    "algorithm",
-                    "keyId",
-                    "scope",
-                    "submissionId",
-                    "submittedAt",
-                    "sdkVersion",
-                    "value"
-                  ],
-                  "properties": {
-                    "algorithm": {
-                      "const": "ed25519"
-                    },
-                    "keyId": {
-                      "type": "string",
-                      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._:-]{0,126}[A-Za-z0-9])?$"
-                    },
-                    "scope": {
-                      "const": "sctool-submission-v1"
-                    },
-                    "submissionId": {
-                      "type": "string",
-                      "minLength": 16,
-                      "maxLength": 128
-                    },
-                    "submittedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "sdkVersion": {
-                      "type": "string",
-                      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
-                    },
-                    "value": {
-                      "type": "string",
-                      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
-                    }
-                  }
-                }
-              }
+              "$ref": "#/$defs/artifact"
             }
           }
         }
