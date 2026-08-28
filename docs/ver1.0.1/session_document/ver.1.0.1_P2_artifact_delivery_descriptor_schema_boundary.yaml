@@ -112,7 +112,9 @@ canonical_descriptor_shape:
       discriminator_source: "delivery.type"
       may_redefine_content_or_target: false
       credential_material_allowed: false
-      concrete_github_fields: "DEFERRED_TO_W3"
+      concrete_github_fields:
+        - "repository"
+        - "assetId"
     dispatch:
       order:
         - "require type/access/locator"
@@ -121,39 +123,64 @@ canonical_descriptor_shape:
         - "select the type-specific locator validator"
         - "validate locator"
         - "evaluate access contract"
-        - "retrieve only after access succeeds"
+        - "resolve backend artifact only after access succeeds"
+        - "compare backend observations with canonical package/content authority"
         - "verify retrieved bytes against content.size/content.sha256"
       missing_type_validator_behavior: "fail-closed"
       mismatched_access_contract_behavior: "fail-closed"
       locator_schema_failure_behavior: "fail-closed"
 
-  planned_github_release_asset_locator:
+  github_release_asset_locator:
     work_unit: "W3"
     type: "github-release-asset"
-    proposed_required:
+    status: "ADOPTED"
+    required:
       - "repository"
       - "assetId"
-    proposed_fields:
+    fields:
       repository:
         format: "owner/name"
         canonical_1_0_1_value: "Simple-Connection/sctool-artifacts"
+        authority_constraint: "must equal policy/registry-policy.json artifact.access.repository"
       assetId:
-        type: "positive integer"
-        purpose: "immutable GitHub Release asset retrieval identity"
+        type: "positive safe integer"
+        minimum: 1
+        maximum: 9007199254740991
+        semantics: "opaque GitHub Release asset locator identity"
+    expected_release_tag:
+      stored_in_locator: false
+      derivation: "sctool/{packageId}/v{version}"
+    resolution_rules:
+      - "resolve the expected non-draft release by derived tag in locator.repository"
+      - "locator.assetId must identify exactly one asset in that expected release"
+      - "resolved asset.name must equal content.filename"
+      - "resolved asset reported size must equal content.size when available"
+      - "downloaded byte length must equal content.size"
+      - "downloaded SHA-256 must equal content.sha256"
+      - "cross-release, same-name, arbitrary-URL, and anonymous fallback are forbidden"
     deliberately_not_stored:
-      assetName: "must equal content.filename and therefore is not duplicated"
-      releaseTag: "derived from sctool/{packageId}/v{version} and verified server-side"
-      url: "mutable/authorization-insufficient transport representation"
+      assetName: "content.filename is canonical and backend name is observed/compared"
+      releaseTag: "derived from sctool/{packageId}/v{version}"
+      browserDownloadUrl: "transport representation is not Registry artifact identity"
+      apiUrl: "transport representation is not Registry artifact identity"
+      releaseId: "unnecessary because expected release is derived by tag"
+      nodeId: "unnecessary backend metadata"
+      contentType: "not an artifact identity/integrity authority"
+      uploader: "not package identity or client authorization"
       repositoryVisibility: "Registry policy owns backend visibility"
-      provider: "delivery.type already selects the GitHub adapter"
+      provider: "delivery.type selects the GitHub adapter"
+      credentialSource: "REGISTRY_ACCESS_V1/Registry policy own credential behavior"
 
 security_invariants:
   - "sha256 and size remain common content fields and are verified after retrieval"
-  - "knowing a locator is not authorization"
+  - "knowing repository + assetId is not authorization"
   - "delivery access is fail-closed through its registered access contract"
   - "unknown delivery types have no fallback transport"
   - "unregistered type/access combinations fail closed"
   - "missing type-specific locator validation fails closed"
+  - "repository self-redirection outside Registry policy is forbidden"
+  - "assetId must resolve inside the release derived from packageId/version"
+  - "same-name or cross-release fallback is forbidden"
   - "publisher signature scope remains sctool-submission-v1 unless a separate contract explicitly changes it"
   - "same packageId + version + target with different sha256 remains a hard reject"
   - "descriptor contains no credential material"
@@ -174,6 +201,7 @@ schema_strategy:
     - "use delivery.type plus oneOf/const for backend-specific locators"
     - "keep common artifact fields outside backend-specific schema branches"
     - "reject unknown delivery.type values in 1.0.1"
+    - "constrain github-release-asset assetId to positive safe integers"
 
 work_unit_numbering:
   scope: "session-local"
@@ -195,7 +223,7 @@ work_units:
       validation without pre-authorizing unsupported delivery backends.
   - id: "W3"
     title: "github_release_asset_locator"
-    status: "PLANNED"
+    status: "COMPLETE"
     objective: >-
       Define the minimal GitHub Release asset locator as repository + assetId,
       with filename and release-tag consistency verified from canonical fields
@@ -271,6 +299,37 @@ w2_implementation:
   pages_code_change_required: false
   simple_connection_change_required: false
 
+w3_implementation:
+  completed_at: "2026-08-28"
+  contract: "docs/ARTIFACT_DELIVERY_V1.md"
+  contract_commit: "0957ca3c883294d482a408fba26ddf499bf1a104"
+  registry_policy_evidence:
+    backend: "github-release-asset"
+    repository: "Simple-Connection/sctool-artifacts"
+    access_contract: "registry-access-v1"
+    release_tag_pattern: "sctool/{packageId}/v{version}"
+  implemented_boundary:
+    - "github-release-asset locator contains repository + assetId only"
+    - "repository must equal the Registry policy canonical artifact repository"
+    - "assetId is an opaque positive JavaScript-safe integer from 1 through 9007199254740991"
+    - "expected release tag is derived from packageId/version and is not duplicated in locator metadata"
+    - "the expected release must be non-draft"
+    - "assetId must resolve inside that expected release"
+    - "resolved asset name must equal content.filename"
+    - "backend-reported size must agree with content.size when available"
+    - "downloaded bytes remain subject to content.size/content.sha256 verification"
+    - "cross-release, same-name, arbitrary-URL, and anonymous fallback are forbidden"
+    - "assetId remains delivery locator metadata and does not become part of immutable Registry artifact identity"
+  intentionally_deferred:
+    - "machine enforcement in schemas/package.schema.json 2.0.0 -> W4"
+    - "positive/negative schema fixtures -> W4"
+    - "REGISTRY_CONTRACT_V2 transition closeout -> W5"
+    - "actual GitHub API download implementation -> outside P2"
+  validation_kind: "contract/static review against Registry policy and existing Pages canonical JSON constraints"
+  machine_schema_validation: "DEFERRED_TO_W4"
+  pages_code_change_required: false
+  simple_connection_change_required: false
+
 scope:
   allowed_paths:
     - "schemas/package.schema.json"
@@ -300,6 +359,7 @@ acceptance_tests:
     - "github locator without repository fails"
     - "github locator without assetId fails"
     - "github locator with non-positive assetId fails"
+    - "github locator with assetId above JavaScript safe integer fails"
     - "credential/token/private-key fields are rejected by additionalProperties=false"
     - "common content fields cannot be replaced by backend-specific aliases"
   consistency:
@@ -309,6 +369,7 @@ acceptance_tests:
     - "GitHub repository matches Registry artifact backend policy"
     - "resolved asset name must match content.filename"
     - "resolved release tag must equal sctool/{packageId}/v{version}"
+    - "resolved release must not be draft"
   regression:
     - "Registry JSON validation PASS"
     - "Pages metadata builder/validator remains compatible with descriptor schema 2.0.0 or is updated within P2"
@@ -319,8 +380,11 @@ completion_criteria:
   delivery_discriminator_contract_approved: true
   delivery_access_contract_reference_approved: true
   delivery_locator_dispatch_boundary_approved: true
+  github_locator_implemented: true
+  github_repository_policy_constraint_approved: true
+  github_asset_id_safe_integer_constraint_approved: true
+  github_release_consistency_contract_approved: true
   package_schema_v2_implemented: false
-  github_locator_implemented: false
   unknown_backend_machine_enforced: false
   credential_material_machine_rejected: false
   registry_validation_passed: false
@@ -337,7 +401,7 @@ state:
 
 next:
   action: >-
-    Await approval for P2-W3. W3 may define only the concrete
-    github-release-asset locator contract and consistency rules. Do not change
-    schemas/package.schema.json until W4, and keep Kinirin/Simple-Connection
-    outside P2 ownership.
+    Await approval for P2-W4. W4 may implement package descriptor schema 2.0.0,
+    machine-enforce the W1-W3 contracts, add positive/negative validation
+    fixtures, and update Registry validators/Pages handling only where required.
+    Do not modify Kinirin/Simple-Connection for P2.
