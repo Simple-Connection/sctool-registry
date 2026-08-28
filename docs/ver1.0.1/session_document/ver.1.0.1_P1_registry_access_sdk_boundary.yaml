@@ -5,7 +5,7 @@ session:
   id: "P1"
   number: 1
   title: "registry_access_sdk_boundary"
-  status: "IN_PROGRESS"
+  status: "BLOCKED_EXTERNAL_VALIDATION"
   improvement_plan: "docs/ver1.0.1/1.0.1_Improvement_plan.md"
   branch: "dev/1.0.1"
   branch_isolation: false
@@ -21,10 +21,10 @@ authority:
   implementation_branch: "dev/1.0.1"
   product_release_session_owner: false
   authority_rule: >-
-    Registry Distribution 1.0.1 P1 owns planning and completion state. The
-    Simple Connection repository is only the physical owner of the Program SDK
-    implementation and does not receive a new product-version P-session for this
-    Registry contract work.
+    Registry Distribution 1.0.1 P1 owns the Registry access contract session.
+    Kinirin/Simple-Connection owns its own repository lifecycle classification,
+    PTSIP project profile, and conformance migration. Registry must not modify
+    those repository-governance artifacts merely to close P1.
 
 goal: >-
   Implement the SDK-side GitHub identity and private artifact-repository access
@@ -42,6 +42,7 @@ scope:
     - "renderer/UI changes"
     - "Simple Connection installer UX"
     - "Simple Connection product-version session creation for Registry work"
+    - "Simple Connection PTSIP lifecycle/profile migration"
     - "production Root trust activation"
     - "trust/trust.json issuance"
     - "artifact binary download implementation"
@@ -52,30 +53,16 @@ scope:
 work_units:
   - id: "W5"
     title: "registry_access_types"
-    status: "IMPLEMENTED"
-    objective: >-
-      Define stable SDK result/types for authorized, gh-unavailable,
-      unauthenticated, identity-unresolved, access-denied,
-      network-unavailable, and configuration-error.
+    status: "COMPLETE"
   - id: "W6"
     title: "github_identity_adapter"
-    status: "IMPLEMENTED"
-    objective: >-
-      Resolve the canonical current GitHub login through the GitHub CLI
-      credential-store session while removing inherited GH_TOKEN and
-      GITHUB_TOKEN overrides from Registry subprocesses.
+    status: "COMPLETE"
   - id: "W7"
     title: "artifact_repository_authorization_probe"
-    status: "IMPLEMENTED"
-    objective: >-
-      Probe authenticated read access to Simple-Connection/sctool-artifacts
-      and normalize authenticated 403/404 responses to access-denied.
+    status: "COMPLETE"
   - id: "W8"
     title: "negative_security_tests"
-    status: "IMPLEMENTED_LOCAL_PASS"
-    objective: >-
-      Prove fail-closed behavior, token-override isolation, non-invocation of
-      gh auth token, and absence of credential material from structured results.
+    status: "COMPLETE"
 
 behavior_contract:
   identity_provider: "github.com"
@@ -99,43 +86,6 @@ access_states:
   - "network-unavailable"
   - "configuration-error"
 
-execution_preflight:
-  audited_at: "2026-08-26"
-  implementation_main_sha: "a0c8173941c4d3fd4376c0834e6ea13951cafc96"
-  repository_entry_chain:
-    agents: "PASS"
-    memory: "PASS"
-    document_hub: "PASS"
-    general_ledger: "PASS"
-    approval_policy: "PASS"
-    version_ledger: "PASS"
-    development_goal: "PASS"
-    improvement_plan: "PASS"
-    development_session: "NO_PRODUCT_SESSION"
-  current_simple_connection_routing:
-    release_line: "v2.2"
-    current_target: "2.2.3"
-    current_target_state: "verification"
-    development_session_state: "completed"
-    current_session: null
-  sdk_governance:
-    policy: "docs/sdk/SDK_GOVERNANCE.md"
-    target_path_allowed: true
-    canonical_program_sdk: "program-sdk/sctool-sdk"
-  ptsip:
-    profile: "docs/sdk/simple-connection.ptsip.yaml"
-    component: "sctool-program-sdk"
-    classification: "PRODUCT"
-    path_assignment: "program-sdk/sctool-sdk/**"
-  routing_resolution:
-    previous_blocker: "SC-ROUTING-NO-CURRENT-SESSION"
-    state: "RESOLVED_BY_USER_RESPONSIBILITY_DECISION"
-    decision_date: "2026-08-27"
-    rule: >-
-      Do not reopen completed Simple Connection 2.2.3 sessions and do not create
-      a new Simple Connection product version merely to carry Registry SDK work.
-      Registry Distribution 1.0.1 P1 is the formal current session authority.
-
 implementation:
   repository: "Kinirin/Simple-Connection"
   branch: "dev/1.0.1"
@@ -151,13 +101,33 @@ implementation:
   simple_connection_product_docs_changed: false
 
 validation:
-  required_commands:
-    - "npm ci --prefix program-sdk/sctool-sdk"
-    - "npm run typecheck --prefix program-sdk/sctool-sdk"
-    - "npm run build --prefix program-sdk/sctool-sdk"
-    - "npm run test:registry-access --prefix program-sdk/sctool-sdk"
-    - "node --check program-sdk/sctool-sdk/cli/sctool.mjs"
-  required_tests:
+  exact_package_run:
+    received_at: "2026-08-27"
+    npm_ci: "PASS"
+    typecheck: "PASS"
+    build: "PASS"
+    registry_access_tests:
+      status: "PASS"
+      total: 9
+      passed: 9
+      failed: 0
+    sdk_governance_validation: "PASS"
+    ptsip_doctor:
+      status: "PASS"
+      exit_code: 0
+    ptsip_validate:
+      status: "BLOCKED_EXTERNAL_PROFILE"
+      exit_code: 3
+      cause: >-
+        Kinirin/Simple-Connection's then-current PTSIP project profile used the
+        older lifecycle/schema model and was not valid under installed PTSIP
+        Tool 0.3.6. Registry does not own that profile migration.
+    ptsip_conform:
+      status: "BLOCKED_EXTERNAL_PROFILE"
+      exit_code: 6
+      outcome: "INCOMPLETE"
+      cause: "profile.valid=false before conformance evaluation could close"
+  security_tests_covered:
     - "authenticated identity + repository read -> authorized"
     - "missing/unexecutable gh -> gh-unavailable"
     - "failed gh auth status -> unauthenticated"
@@ -169,34 +139,33 @@ validation:
     - "inherited GITHUB_TOKEN removed"
     - "gh auth token never invoked"
     - "structured results contain no credential material"
-  local_reconstruction:
-    environment: "isolated local reconstruction"
-    node: "22.16.0"
-    npm: "10.9.2"
-    typescript: "5.8.3"
-    compile: "PASS"
-    tests_total: 9
-    tests_passed: 9
-    tests_failed: 0
-  canonical_package_toolchain:
-    declared_typescript: "7.0.1-rc"
-    exact_repository_run: "PENDING"
-  remote_ci:
-    status: "UNOBSERVED"
-    reason: >-
-      Existing SDK plane workflow runs on pull_request or push to main, not an
-      ordinary push to dev/1.0.1. No PR is opened merely for a session-level gate.
+
+external_blocker:
+  id: "SC-PTSIP-0.3.6-LIFECYCLE-CLASSIFICATION"
+  owner_repository: "Kinirin/Simple-Connection"
+  state: "OPEN"
+  registry_action_required: false
+  description: >-
+    Simple Connection is independently reviewing which PTSIP 0.3.6 lifecycle
+    actually owns the repository's SDK/tooling responsibilities before it
+    finalizes its 0.3.6 project profile. This may take time and is outside the
+    Registry responsibility boundary.
+  closeout_requirement: >-
+    Accept a later Simple Connection-owned PTSIP validation/conformance result
+    showing the relevant SDK plane is valid/conformant. Do not prescribe the
+    lifecycle classification from this Registry session.
 
 completion_criteria:
   registry_access_types_implemented: true
   github_identity_adapter_implemented: true
   token_override_isolation_implemented: true
   private_repository_probe_implemented: true
-  negative_security_tests_local_passed: true
-  sdk_typecheck_exact_passed: false
-  sdk_build_exact_passed: false
-  registry_access_exact_suite_passed: false
-  remote_ptsip_gate_passed: false
+  sdk_typecheck_exact_passed: true
+  sdk_build_exact_passed: true
+  registry_access_exact_suite_passed: true
+  sdk_governance_exact_passed: true
+  ptsip_doctor_passed: true
+  simple_connection_owned_ptsip_closeout_passed: false
   desktop_ui_changed: false
   production_trust_activated: false
 
@@ -204,11 +173,12 @@ state:
   audit: "COMPLETE"
   plan: "APPROVED"
   apply: "COMPLETE"
-  test: "LOCAL_PASS_EXACT_PENDING"
-  closeout: "PENDING"
+  test: "PASS"
+  closeout: "BLOCKED_EXTERNAL"
 
 next:
   action: >-
-    Run the exact program-sdk/sctool-sdk package validation with its declared
-    toolchain and then record PTSIP/SDK-plane evidence. Do not merge either
-    dev/1.0.1 branch until P1 closeout and the remaining 1.0.1 sessions are complete.
+    Keep P1 frozen with no Registry-side code changes. Continue independent
+    Registry 1.0.1 sessions. When Kinirin/Simple-Connection finishes its own
+    PTSIP 0.3.6 lifecycle/profile work, record only the resulting closeout
+    evidence here and do not reinterpret that repository's lifecycle ownership.
