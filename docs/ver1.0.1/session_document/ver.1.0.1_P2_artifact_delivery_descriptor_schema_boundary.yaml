@@ -80,7 +80,7 @@ canonical_descriptor_shape:
         - "size"
     delivery:
       purpose: "retrieval adapter and provider-specific immutable locator"
-      fields:
+      required_fields:
         - "type"
         - "access"
         - "locator"
@@ -93,22 +93,47 @@ canonical_descriptor_shape:
 
   delivery_common:
     type:
-      kind: "discriminator"
+      kind: "sole explicit discriminator"
       current_values:
         - "github-release-asset"
+      inference_allowed: false
+      unknown_type_behavior: "fail-closed"
+      generic_fallback_allowed: false
     access:
-      shape:
-        contract: "registry-access-v1"
-      rule: >-
-        Access describes the client authorization contract only. It carries no
-        account, token, secret, session, or entitlement material.
+      required_fields:
+        - "contract"
+      current_mapping:
+        github-release-asset: "registry-access-v1"
+      credential_configuration_allowed: false
+      identity_material_allowed: false
+      policy_duplication_allowed: false
+    locator:
+      kind: "required provider-specific object"
+      discriminator_source: "delivery.type"
+      may_redefine_content_or_target: false
+      credential_material_allowed: false
+      concrete_github_fields: "DEFERRED_TO_W3"
+    dispatch:
+      order:
+        - "require type/access/locator"
+        - "resolve type against registered table"
+        - "require the access contract registered for that type"
+        - "select the type-specific locator validator"
+        - "validate locator"
+        - "evaluate access contract"
+        - "retrieve only after access succeeds"
+        - "verify retrieved bytes against content.size/content.sha256"
+      missing_type_validator_behavior: "fail-closed"
+      mismatched_access_contract_behavior: "fail-closed"
+      locator_schema_failure_behavior: "fail-closed"
 
-  github_release_asset_locator:
+  planned_github_release_asset_locator:
+    work_unit: "W3"
     type: "github-release-asset"
-    required:
+    proposed_required:
       - "repository"
       - "assetId"
-    fields:
+    proposed_fields:
       repository:
         format: "owner/name"
         canonical_1_0_1_value: "Simple-Connection/sctool-artifacts"
@@ -124,14 +149,15 @@ canonical_descriptor_shape:
 
 security_invariants:
   - "sha256 and size remain common content fields and are verified after retrieval"
-  - "knowing repository or assetId is not authorization"
-  - "delivery access is fail-closed through REGISTRY_ACCESS_V1"
+  - "knowing a locator is not authorization"
+  - "delivery access is fail-closed through its registered access contract"
+  - "unknown delivery types have no fallback transport"
+  - "unregistered type/access combinations fail closed"
+  - "missing type-specific locator validation fails closed"
   - "publisher signature scope remains sctool-submission-v1 unless a separate contract explicitly changes it"
   - "same packageId + version + target with different sha256 remains a hard reject"
   - "descriptor contains no credential material"
-  - "a resolved GitHub asset must belong to the canonical repository"
-  - "Registry-side validation must verify the asset release tag derived from packageId/version"
-  - "Registry-side validation must verify the resolved asset name equals content.filename"
+  - "Registry-side validation must compare backend observations with canonical content authorities"
 
 schema_strategy:
   breaking_revision_required: true
@@ -163,7 +189,7 @@ work_units:
       package/version/target semantics.
   - id: "W2"
     title: "delivery_discriminator_contract"
-    status: "PLANNED"
+    status: "COMPLETE"
     objective: >-
       Define delivery.type, access contract reference, and type-specific locator
       validation without pre-authorizing unsupported delivery backends.
@@ -220,11 +246,30 @@ w1_implementation:
     - "delivery owns retrieval adapter/access/locator concerns only"
     - "delivery cannot override target/content integrity authorities"
     - "credentials and authenticated user identity are forbidden from package metadata"
-  explicitly_deferred:
-    - "allowed delivery.type values -> W2"
-    - "GitHub repository/assetId locator schema -> W3"
-    - "schemas/package.schema.json 2.0.0 implementation -> W4"
+
+w2_implementation:
+  completed_at: "2026-08-28"
+  contract: "docs/ARTIFACT_DELIVERY_V1.md"
+  contract_commit: "5475ff181716468362371a7f49e701950006cc87"
+  implemented_boundary:
+    - "delivery.type is the sole explicit backend discriminator"
+    - "delivery.type cannot be inferred from locator, URL, repository, access, or content fields"
+    - "github-release-asset is the only registered delivery type for Registry Distribution 1.0.1"
+    - "unknown delivery types have no generic fallback and must fail closed"
+    - "delivery.access contains only a contract reference in the common envelope"
+    - "github-release-asset maps to registry-access-v1 in 1.0.1"
+    - "credential source/provider/permission/user/token/session data are not duplicated into delivery.access"
+    - "delivery.locator is isolated and interpreted only by the validator selected by delivery.type"
+    - "a missing locator validator, mismatched access contract, or invalid locator fails closed"
+    - "metadata dispatch grants no authorization and retrieval begins only after the referenced access contract succeeds"
+  intentionally_deferred:
+    - "concrete github-release-asset repository/assetId locator contract -> W3"
+    - "machine enforcement in schemas/package.schema.json 2.0.0 -> W4"
     - "REGISTRY_CONTRACT_V2 transition closeout -> W5"
+  validation_kind: "contract/static review"
+  machine_schema_validation: "DEFERRED_TO_W4"
+  pages_code_change_required: false
+  simple_connection_change_required: false
 
 scope:
   allowed_paths:
@@ -271,10 +316,13 @@ acceptance_tests:
 
 completion_criteria:
   descriptor_common_envelope_approved: true
+  delivery_discriminator_contract_approved: true
+  delivery_access_contract_reference_approved: true
+  delivery_locator_dispatch_boundary_approved: true
   package_schema_v2_implemented: false
   github_locator_implemented: false
-  unknown_backend_fail_closed: false
-  credential_material_rejected: false
+  unknown_backend_machine_enforced: false
+  credential_material_machine_rejected: false
   registry_validation_passed: false
   pages_metadata_regression_passed: false
   ptsip_applicable_gates_passed: false
@@ -289,6 +337,7 @@ state:
 
 next:
   action: >-
-    Begin P2-W2 only: define the delivery discriminator and access/locator
-    boundary without implementing the GitHub-specific locator or package schema
-    2.0.0 yet. Keep Kinirin/Simple-Connection outside P2 ownership.
+    Await approval for P2-W3. W3 may define only the concrete
+    github-release-asset locator contract and consistency rules. Do not change
+    schemas/package.schema.json until W4, and keep Kinirin/Simple-Connection
+    outside P2 ownership.
