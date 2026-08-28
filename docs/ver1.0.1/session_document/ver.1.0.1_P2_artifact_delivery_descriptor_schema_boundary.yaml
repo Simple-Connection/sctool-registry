@@ -189,19 +189,22 @@ security_invariants:
 schema_strategy:
   breaking_revision_required: true
   reason: >-
-    package.schema.json 1.0.0 requires a flat HTTPS url. Replacing that required
+    package.schema.json 1.0.0 required a flat HTTPS url. Replacing that required
     field with structured delivery is a breaking descriptor change.
   target_schema_version: "2.0.0"
+  implementation_state: "IMPLEMENTED_W4"
   compatibility_bridge_required: false
   compatibility_reason: >-
-    REGISTRY_CONTRACT_V2 currently records packages=0 and production trust
-    inactive, so no published package depends on the transitional v1 locator.
+    REGISTRY_CONTRACT_V2 records packages=0 and production trust inactive, so no
+    published package depends on the transitional v1 locator.
   implementation_pattern:
-    - "use JSON Schema draft 2020-12 $defs for common reusable shapes"
-    - "use delivery.type plus oneOf/const for backend-specific locators"
-    - "keep common artifact fields outside backend-specific schema branches"
-    - "reject unknown delivery.type values in 1.0.1"
-    - "constrain github-release-asset assetId to positive safe integers"
+    - "JSON Schema draft 2020-12 $defs define reusable target/content/delivery/contract/signature shapes"
+    - "delivery.type uses oneOf/const and currently accepts github-release-asset only"
+    - "delivery.access.contract is const registry-access-v1"
+    - "github-release-asset locator requires repository + assetId only"
+    - "content and locator objects reject unknown fields with additionalProperties=false"
+    - "assetId and content.size are constrained to positive JavaScript-safe integers"
+    - "unknown delivery.type values fail schema validation"
 
 work_unit_numbering:
   scope: "session-local"
@@ -230,7 +233,7 @@ work_units:
       rather than duplicated metadata.
   - id: "W4"
     title: "package_schema_v2_and_validation"
-    status: "PLANNED"
+    status: "COMPLETE"
     objective: >-
       Upgrade package.schema.json to descriptor schema 2.0.0 and add positive
       and negative validation coverage for the new delivery boundary.
@@ -245,23 +248,22 @@ work_units:
 w1_audit:
   completed_at: "2026-08-28"
   package_schema_current_state: >-
-    schemas/package.schema.json remains schemaVersion 1.0.0 and still carries
-    flat assetName/url/sha256/size fields. W1 intentionally does not mutate it;
-    the breaking schema revision belongs to W4.
+    At W1, schemas/package.schema.json remained schemaVersion 1.0.0 and still
+    carried flat assetName/url/sha256/size fields. W1 intentionally did not
+    mutate it because the breaking schema revision belonged to W4.
   pages_builder: >-
     tools/build-pages.mjs validates package identity/channel references and then
     embeds each complete descriptor into the signed snapshot. It does not
     interpret flat artifact transport fields, so defining the content/delivery
-    boundary does not require a Pages builder code change in W1.
+    boundary did not require a Pages builder code change in W1.
   registry_validator: >-
-    tools/validate-registry.py delegates descriptor structure to
-    schemas/package.schema.json and does not independently encode flat artifact
+    At W1, tools/validate-registry.py delegated descriptor structure to
+    schemas/package.schema.json and did not independently encode flat artifact
     transport-field assumptions.
   publication_state: "registry.json packages=0 publishers=0"
   conclusion: >-
-    The common artifact boundary can be made canonical as a contract document
-    before W2-W4 implement delivery discrimination, concrete locator validation,
-    and package schema 2.0.0.
+    The common artifact boundary could be made canonical before W2-W4 implemented
+    delivery discrimination, concrete locator validation, and package schema 2.0.0.
 
 w1_implementation:
   contract: "docs/ARTIFACT_DELIVERY_V1.md"
@@ -290,14 +292,6 @@ w2_implementation:
     - "delivery.locator is isolated and interpreted only by the validator selected by delivery.type"
     - "a missing locator validator, mismatched access contract, or invalid locator fails closed"
     - "metadata dispatch grants no authorization and retrieval begins only after the referenced access contract succeeds"
-  intentionally_deferred:
-    - "concrete github-release-asset repository/assetId locator contract -> W3"
-    - "machine enforcement in schemas/package.schema.json 2.0.0 -> W4"
-    - "REGISTRY_CONTRACT_V2 transition closeout -> W5"
-  validation_kind: "contract/static review"
-  machine_schema_validation: "DEFERRED_TO_W4"
-  pages_code_change_required: false
-  simple_connection_change_required: false
 
 w3_implementation:
   completed_at: "2026-08-28"
@@ -320,15 +314,78 @@ w3_implementation:
     - "downloaded bytes remain subject to content.size/content.sha256 verification"
     - "cross-release, same-name, arbitrary-URL, and anonymous fallback are forbidden"
     - "assetId remains delivery locator metadata and does not become part of immutable Registry artifact identity"
-  intentionally_deferred:
-    - "machine enforcement in schemas/package.schema.json 2.0.0 -> W4"
-    - "positive/negative schema fixtures -> W4"
-    - "REGISTRY_CONTRACT_V2 transition closeout -> W5"
-    - "actual GitHub API download implementation -> outside P2"
-  validation_kind: "contract/static review against Registry policy and existing Pages canonical JSON constraints"
-  machine_schema_validation: "DEFERRED_TO_W4"
+
+w4_implementation:
+  completed_at: "2026-08-28"
+  schema:
+    path: "schemas/package.schema.json"
+    version: "2.0.0"
+    commit: "f6921b8b0176cf6476e5d66eae80acc413e359c3"
+    machine_enforced:
+      - "artifact requires target/content/delivery/publishedAt/contract/signature"
+      - "content requires filename/sha256/size and rejects unknown fields"
+      - "legacy flat assetName/url/sha256/size artifact shape is rejected"
+      - "delivery.type is const github-release-asset"
+      - "delivery.access.contract is const registry-access-v1"
+      - "locator requires repository + assetId and rejects unknown fields"
+      - "assetId must be 1..9007199254740991"
+      - "content.size must be 1..9007199254740991"
+      - "credential/token/private-key field injection is rejected by additionalProperties=false"
+  registry_validator:
+    path: "tools/validate-registry.py"
+    commits:
+      - "20e10b43d5737368c3ec90226730cad8f8aaaef9"
+      - "cbd7b499822588dc5a976fa2411f4cb19851c6a7"
+    machine_enforced:
+      - "package descriptor id matches registry key"
+      - "defaultChannel exists in channels"
+      - "every channel version exists in versions"
+      - "artifact map key equals target.platform-target.arch"
+      - "delivery.type matches Registry policy artifact backend"
+      - "delivery.access.contract matches Registry policy access contract"
+      - "locator.repository matches Registry policy canonical artifact repository"
+      - "schema error ordering is deterministic across mixed path components"
+  regression_fixture:
+    path: "tools/test-delivery-package-schema-v2.py"
+    commit: "83994b1459a04f60163b662cbdc2d8b01621ce0a"
+    cases_total: 14
+    positive_cases: 1
+    negative_cases: 13
+    covered:
+      - "valid github-release-asset descriptor passes"
+      - "legacy flat url-only artifact fails"
+      - "unknown delivery.type fails"
+      - "missing repository fails"
+      - "missing assetId fails"
+      - "assetId zero fails"
+      - "assetId above safe integer fails"
+      - "credential field injection fails"
+      - "private key field injection fails"
+      - "mismatched access contract fails"
+      - "artifact map target mismatch fails consistency validation"
+      - "repository policy mismatch fails consistency validation"
+      - "defaultChannel missing from channels fails consistency validation"
+      - "channel pointing to a missing version fails consistency validation"
+  local_reconstruction_validation:
+    environment: "assistant container reconstruction of adopted W4 schema/consistency rules"
+    jsonschema: "4.26.0"
+    result: "PASS"
+    cases_total: 14
+    cases_passed: 14
+    cases_failed: 0
+    limitation: >-
+      The assistant container could not resolve raw.githubusercontent.com, so it
+      could not execute an exact network checkout of dev/1.0.1. The reconstructed
+      validation used the same adopted schema constraints and consistency cases.
+  exact_repository_validation:
+    status: "PENDING"
+    required_commands:
+      - "python tools/test-delivery-package-schema-v2.py"
+      - "python tools/validate-registry.py"
+    closeout_owner: "P2-W5"
   pages_code_change_required: false
   simple_connection_change_required: false
+  registry_contract_v2_closeout: "DEFERRED_TO_W5"
 
 scope:
   allowed_paths:
@@ -367,12 +424,13 @@ acceptance_tests:
     - "channel versions exist in versions"
     - "artifact map target key matches target object"
     - "GitHub repository matches Registry artifact backend policy"
+    - "delivery access contract matches Registry policy"
     - "resolved asset name must match content.filename"
     - "resolved release tag must equal sctool/{packageId}/v{version}"
     - "resolved release must not be draft"
   regression:
     - "Registry JSON validation PASS"
-    - "Pages metadata builder/validator remains compatible with descriptor schema 2.0.0 or is updated within P2"
+    - "Pages metadata builder/validator remains compatible with descriptor schema 2.0.0"
     - "Registry PTSIP applicable gates remain PASS"
 
 completion_criteria:
@@ -384,10 +442,12 @@ completion_criteria:
   github_repository_policy_constraint_approved: true
   github_asset_id_safe_integer_constraint_approved: true
   github_release_consistency_contract_approved: true
-  package_schema_v2_implemented: false
-  unknown_backend_machine_enforced: false
-  credential_material_machine_rejected: false
-  registry_validation_passed: false
+  package_schema_v2_implemented: true
+  unknown_backend_machine_enforced: true
+  credential_material_machine_rejected: true
+  package_consistency_validation_implemented: true
+  w4_local_reconstruction_passed: true
+  exact_registry_validation_passed: false
   pages_metadata_regression_passed: false
   ptsip_applicable_gates_passed: false
   production_trust_activated: false
@@ -396,12 +456,13 @@ state:
   audit: "COMPLETE"
   plan: "APPROVED"
   apply: "IN_PROGRESS"
-  test: "PENDING"
+  test: "LOCAL_RECONSTRUCTION_PASS_EXACT_PENDING"
   closeout: "PENDING"
 
 next:
   action: >-
-    Await approval for P2-W4. W4 may implement package descriptor schema 2.0.0,
-    machine-enforce the W1-W3 contracts, add positive/negative validation
-    fixtures, and update Registry validators/Pages handling only where required.
-    Do not modify Kinirin/Simple-Connection for P2.
+    Await approval for P2-W5. W5 must run the exact Registry validation commands,
+    reconcile ARTIFACT_DELIVERY_V1 and REGISTRY_CONTRACT_V2 with the implemented
+    package descriptor schema 2.0.0, confirm Pages/PTSIP applicable gates, and
+    close P2 only if all Registry-owned acceptance evidence passes. Do not modify
+    Kinirin/Simple-Connection for P2.
