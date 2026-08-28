@@ -5,7 +5,7 @@ session:
   id: "P2"
   number: 2
   title: "artifact_delivery_descriptor_schema_boundary"
-  status: "IN_PROGRESS"
+  status: "BLOCKED_EXTERNAL_VALIDATION"
   improvement_plan: "docs/ver1.0.1/1.0.1_Improvement_plan.md"
   branch: "dev/1.0.1"
   branch_isolation: false
@@ -15,387 +15,191 @@ authority:
   registry_repository: "Simple-Connection/sctool-registry"
   registry_contract: "docs/REGISTRY_CONTRACT_V2.md"
   registry_access_contract: "docs/REGISTRY_ACCESS_V1.md"
+  artifact_delivery_contract: "docs/ARTIFACT_DELIVERY_V1.md"
   registry_policy: "policy/registry-policy.json"
   package_schema: "schemas/package.schema.json"
   implementation_repository: "Simple-Connection/sctool-registry"
   authority_rule: >-
-    P2 is Registry-owned metadata/schema work. It must not assign, migrate, or
-    reinterpret lifecycle responsibility inside Kinirin/Simple-Connection. The
-    Simple Connection PTSIP 0.3.6 reclassification currently blocking P1
-    closeout is an external validation dependency and does not block this P2.
+    P2 owns Registry metadata/schema/delivery-contract work only. It does not
+    assign or migrate lifecycle responsibility inside Kinirin/Simple-Connection.
 
 goal: >-
-  Replace the transitional flat artifact URL shape with a stable artifact
-  descriptor boundary that separates immutable artifact content and integrity
-  from provider-specific delivery location. The common envelope must remain
-  usable when future delivery backends are introduced, while 1.0.1 authorizes
-  only the existing authenticated GitHub Release asset backend.
+  Replace the transitional flat artifact URL shape with a stable structured
+  descriptor that separates backend-independent artifact content/integrity from
+  authenticated backend-specific delivery location.
 
-design_principles:
-  - id: "DP1"
-    rule: "artifact_identity_is_transport_independent"
-    detail: >-
-      Package/version/target identity and byte integrity must not change merely
-      because the storage or retrieval backend changes.
-  - id: "DP2"
-    rule: "common_envelope_backend_neutral"
-    detail: >-
-      Common artifact fields must not contain GitHub-specific names such as
-      release, repository visibility, token, API route, or download URL.
-  - id: "DP3"
-    rule: "delivery_is_discriminated"
-    detail: >-
-      delivery.type is the sole backend discriminator. Backend-specific fields
-      live only under delivery.locator and are validated by a type-specific
-      schema branch.
-  - id: "DP4"
-    rule: "no_derived_locator_duplication"
-    detail: >-
-      Values derivable from canonical Registry identity must not be duplicated
-      in the descriptor when doing so can create inconsistent metadata.
-  - id: "DP5"
-    rule: "credentials_never_metadata"
-    detail: >-
-      Delivery metadata may name an access contract but must never contain
-      tokens, credential material, client private keys, or user identity data.
-  - id: "DP6"
-    rule: "capability_not_speculation"
-    detail: >-
-      The schema may expose an extensible delivery envelope, but 1.0.1 must not
-      accept an unimplemented backend merely for theoretical generality.
-
-canonical_descriptor_shape:
-  package_schema_target_version: "2.0.0"
-  artifact_entry:
-    target:
-      purpose: "immutable platform/architecture identity"
-      fields:
-        - "platform"
-        - "arch"
-    content:
-      purpose: "backend-independent exact byte identity"
-      fields:
-        - "filename"
-        - "sha256"
-        - "size"
-    delivery:
-      purpose: "retrieval adapter and provider-specific immutable locator"
-      required_fields:
-        - "type"
-        - "access"
-        - "locator"
-    publishedAt:
-      purpose: "Registry publication timestamp"
-    contract:
-      purpose: "SCTool compatibility contract"
-    signature:
-      purpose: "publisher submission signature evidence"
-
-  delivery_common:
-    type:
-      kind: "sole explicit discriminator"
-      current_values:
-        - "github-release-asset"
-      inference_allowed: false
-      unknown_type_behavior: "fail-closed"
-      generic_fallback_allowed: false
-    access:
-      required_fields:
-        - "contract"
-      current_mapping:
-        github-release-asset: "registry-access-v1"
-      credential_configuration_allowed: false
-      identity_material_allowed: false
-      policy_duplication_allowed: false
-    locator:
-      kind: "required provider-specific object"
-      discriminator_source: "delivery.type"
-      may_redefine_content_or_target: false
-      credential_material_allowed: false
-      concrete_github_fields:
-        - "repository"
-        - "assetId"
-    dispatch:
-      order:
-        - "require type/access/locator"
-        - "resolve type against registered table"
-        - "require the access contract registered for that type"
-        - "select the type-specific locator validator"
-        - "validate locator"
-        - "evaluate access contract"
-        - "resolve backend artifact only after access succeeds"
-        - "compare backend observations with canonical package/content authority"
-        - "verify retrieved bytes against content.size/content.sha256"
-      missing_type_validator_behavior: "fail-closed"
-      mismatched_access_contract_behavior: "fail-closed"
-      locator_schema_failure_behavior: "fail-closed"
-
-  github_release_asset_locator:
-    work_unit: "W3"
+design:
+  artifact_identity: "(packageId, version, target)"
+  package_schema_version: "2.0.0"
+  content_authority:
+    - "content.filename"
+    - "content.sha256"
+    - "content.size"
+  delivery:
     type: "github-release-asset"
-    status: "ADOPTED"
-    required:
+    access_contract: "registry-access-v1"
+    locator_fields:
       - "repository"
       - "assetId"
-    fields:
-      repository:
-        format: "owner/name"
-        canonical_1_0_1_value: "Simple-Connection/sctool-artifacts"
-        authority_constraint: "must equal policy/registry-policy.json artifact.access.repository"
-      assetId:
-        type: "positive safe integer"
-        minimum: 1
-        maximum: 9007199254740991
-        semantics: "opaque GitHub Release asset locator identity"
-    expected_release_tag:
-      stored_in_locator: false
-      derivation: "sctool/{packageId}/v{version}"
-    resolution_rules:
-      - "resolve the expected non-draft release by derived tag in locator.repository"
-      - "locator.assetId must identify exactly one asset in that expected release"
-      - "resolved asset.name must equal content.filename"
-      - "resolved asset reported size must equal content.size when available"
-      - "downloaded byte length must equal content.size"
-      - "downloaded SHA-256 must equal content.sha256"
-      - "cross-release, same-name, arbitrary-URL, and anonymous fallback are forbidden"
-    deliberately_not_stored:
-      assetName: "content.filename is canonical and backend name is observed/compared"
-      releaseTag: "derived from sctool/{packageId}/v{version}"
-      browserDownloadUrl: "transport representation is not Registry artifact identity"
-      apiUrl: "transport representation is not Registry artifact identity"
-      releaseId: "unnecessary because expected release is derived by tag"
-      nodeId: "unnecessary backend metadata"
-      contentType: "not an artifact identity/integrity authority"
-      uploader: "not package identity or client authorization"
-      repositoryVisibility: "Registry policy owns backend visibility"
-      provider: "delivery.type selects the GitHub adapter"
-      credentialSource: "REGISTRY_ACCESS_V1/Registry policy own credential behavior"
-
-security_invariants:
-  - "sha256 and size remain common content fields and are verified after retrieval"
-  - "knowing repository + assetId is not authorization"
-  - "delivery access is fail-closed through its registered access contract"
-  - "unknown delivery types have no fallback transport"
-  - "unregistered type/access combinations fail closed"
-  - "missing type-specific locator validation fails closed"
-  - "repository self-redirection outside Registry policy is forbidden"
-  - "assetId must resolve inside the release derived from packageId/version"
-  - "same-name or cross-release fallback is forbidden"
-  - "publisher signature scope remains sctool-submission-v1 unless a separate contract explicitly changes it"
-  - "same packageId + version + target with different sha256 remains a hard reject"
-  - "descriptor contains no credential material"
-  - "Registry-side validation must compare backend observations with canonical content authorities"
-
-schema_strategy:
-  breaking_revision_required: true
-  reason: >-
-    package.schema.json 1.0.0 required a flat HTTPS url. Replacing that required
-    field with structured delivery is a breaking descriptor change.
-  target_schema_version: "2.0.0"
-  implementation_state: "IMPLEMENTED_W4"
-  compatibility_bridge_required: false
-  compatibility_reason: >-
-    REGISTRY_CONTRACT_V2 records packages=0 and production trust inactive, so no
-    published package depends on the transitional v1 locator.
-  implementation_pattern:
-    - "JSON Schema draft 2020-12 $defs define reusable target/content/delivery/contract/signature shapes"
-    - "delivery.type uses oneOf/const and currently accepts github-release-asset only"
-    - "delivery.access.contract is const registry-access-v1"
-    - "github-release-asset locator requires repository + assetId only"
-    - "content and locator objects reject unknown fields with additionalProperties=false"
-    - "assetId and content.size are constrained to positive JavaScript-safe integers"
-    - "unknown delivery.type values fail schema validation"
+    canonical_repository: "Simple-Connection/sctool-artifacts"
+    asset_id_range: "1..9007199254740991"
+    expected_release_tag: "sctool/{packageId}/v{version}"
+  fail_closed:
+    - "unknown delivery.type"
+    - "mismatched access contract"
+    - "repository policy mismatch"
+    - "missing/invalid assetId"
+    - "credential/private-key metadata injection"
+    - "cross-release or same-name fallback"
+    - "retrieved size/hash mismatch"
 
 work_unit_numbering:
   scope: "session-local"
-  reset_rule: "Each primary P-session starts its own work-unit sequence at W1."
+  reset_rule: "Each primary P-session starts at W1."
 
 work_units:
   - id: "W1"
     title: "artifact_content_delivery_separation"
     status: "COMPLETE"
-    objective: >-
-      Define the stable artifact entry envelope and move filename/sha256/size
-      into a backend-independent content object without altering immutable
-      package/version/target semantics.
+    evidence:
+      contract: "docs/ARTIFACT_DELIVERY_V1.md"
+      implementation_commit: "f75e4e240581e7a0f072268cf7111e2c8cecac46"
+      closeout_commit: "60db56ac691f4f7c5955424266766dee6bba179c"
+    result:
+      - "content and delivery responsibilities separated"
+      - "filename/sha256/size remain backend-independent authorities"
+
   - id: "W2"
     title: "delivery_discriminator_contract"
     status: "COMPLETE"
-    objective: >-
-      Define delivery.type, access contract reference, and type-specific locator
-      validation without pre-authorizing unsupported delivery backends.
+    evidence:
+      contract_commit: "5475ff181716468362371a7f49e701950006cc87"
+      closeout_commit: "6ff2e344e4c1c0c00871408a68ebca1f628dcf80"
+    result:
+      - "delivery.type is sole explicit backend discriminator"
+      - "github-release-asset is the only 1.0.1 backend"
+      - "delivery.access contains only registry-access-v1 contract reference"
+      - "unknown/missing dispatch fails closed"
+
   - id: "W3"
     title: "github_release_asset_locator"
     status: "COMPLETE"
-    objective: >-
-      Define the minimal GitHub Release asset locator as repository + assetId,
-      with filename and release-tag consistency verified from canonical fields
-      rather than duplicated metadata.
+    evidence:
+      contract_commit: "0957ca3c883294d482a408fba26ddf499bf1a104"
+      closeout_commit: "8d9ac911cfda86029d196fedcf89a77516fa54e4"
+    result:
+      - "locator contains repository + assetId only"
+      - "repository must equal Registry policy canonical artifact repository"
+      - "assetId is a positive JavaScript-safe integer"
+      - "release tag is derived from packageId/version and not duplicated"
+      - "asset name/size/hash are cross-checked against content authority"
+
   - id: "W4"
     title: "package_schema_v2_and_validation"
     status: "COMPLETE"
-    objective: >-
-      Upgrade package.schema.json to descriptor schema 2.0.0 and add positive
-      and negative validation coverage for the new delivery boundary.
+    evidence:
+      schema_commit: "f6921b8b0176cf6476e5d66eae80acc413e359c3"
+      validator_commit: "20e10b43d5737368c3ec90226730cad8f8aaaef9"
+      regression_commit: "83994b1459a04f60163b662cbdc2d8b01621ce0a"
+      validator_stability_commit: "cbd7b499822588dc5a976fa2411f4cb19851c6a7"
+      closeout_commit: "ebdded02d1e04e024aedf34cefb1e23809504683"
+    paths:
+      - "schemas/package.schema.json"
+      - "tools/validate-registry.py"
+      - "tools/test-delivery-package-schema-v2.py"
+    result:
+      - "package descriptor schema 2.0.0 implemented"
+      - "legacy flat url-only artifact rejected"
+      - "unknown backend and credential injection rejected"
+      - "channel/version/target/repository policy consistency enforced"
+
   - id: "W5"
     title: "contract_transition_closeout"
-    status: "PLANNED"
-    objective: >-
-      Replace the REGISTRY_CONTRACT_V2 transitional URL note with the adopted
-      structured delivery contract and document exact Registry-side resolution
-      and consistency checks.
+    status: "BLOCKED_EXTERNAL_VALIDATION"
+    implementation:
+      artifact_contract_commit: "26670b5d936d33ff44795ae2f9b1361b5d8dcb38"
+      registry_contract_commit: "4b43500d03fa7dc5069315f807078c5b01b6fd11"
+    result:
+      - "ARTIFACT_DELIVERY_V1 synchronized with implemented schema 2.0.0"
+      - "REGISTRY_CONTRACT_V2 transitional flat URL language retired"
+      - "structured delivery descriptor adopted as canonical v2 package delivery shape"
+      - "exact Registry validation passed"
+      - "Pages package-schema-v2 compatibility passed"
+      - "PTSIP exact conformance remains externally blocked"
 
-w1_audit:
-  completed_at: "2026-08-28"
-  package_schema_current_state: >-
-    At W1, schemas/package.schema.json remained schemaVersion 1.0.0 and still
-    carried flat assetName/url/sha256/size fields. W1 intentionally did not
-    mutate it because the breaking schema revision belonged to W4.
-  pages_builder: >-
-    tools/build-pages.mjs validates package identity/channel references and then
-    embeds each complete descriptor into the signed snapshot. It does not
-    interpret flat artifact transport fields, so defining the content/delivery
-    boundary did not require a Pages builder code change in W1.
-  registry_validator: >-
-    At W1, tools/validate-registry.py delegated descriptor structure to
-    schemas/package.schema.json and did not independently encode flat artifact
-    transport-field assumptions.
-  publication_state: "registry.json packages=0 publishers=0"
-  conclusion: >-
-    The common artifact boundary could be made canonical before W2-W4 implemented
-    delivery discrimination, concrete locator validation, and package schema 2.0.0.
+w5_validation:
+  executed_at: "2026-08-28"
+  reconstruction_method: >-
+    Exact dev/1.0.1 blobs were fetched through the GitHub connection and
+    reconstructed locally because the execution container cannot resolve
+    github.com/raw.githubusercontent.com directly.
+  blob_identity_check:
+    status: "PASS"
+    files_checked: 14
+    rule: "local Git blob SHA == dev/1.0.1 GitHub blob SHA"
+    files:
+      - "schemas/package.schema.json"
+      - "schemas/policy-v1.schema.json"
+      - "schemas/policy.schema.json"
+      - "schemas/publisher.schema.json"
+      - "schemas/registry-head.schema.json"
+      - "schemas/registry-snapshot.schema.json"
+      - "schemas/registry.schema.json"
+      - "schemas/submission.schema.json"
+      - "schemas/trust.schema.json"
+      - "policy/registry-policy.json"
+      - "registry.json"
+      - "tools/validate-registry.py"
+      - "tools/test-delivery-package-schema-v2.py"
+      - "tools/validate-pages.py"
+  exact_commands:
+    - command: "python tools/test-delivery-package-schema-v2.py"
+      exit_code: 0
+      output: "Package descriptor v2 delivery validation PASS cases=14"
+    - command: "python tools/validate-registry.py"
+      exit_code: 0
+      output: "Registry JSON validation PASS packages=0 publishers=0 trust=inactive"
+  pages_compatibility:
+    status: "PASS"
+    method: >-
+      Exact tools/validate-pages.py plus exact package/publisher/head/snapshot/trust
+      schemas validated a synthetic signed-metadata envelope containing a valid
+      package descriptor schema 2.0.0.
+    exit_code: 0
+    output: "Pages JSON validation PASS"
+    builder_assessment: >-
+      tools/build-pages.mjs aggregates complete descriptors and does not interpret
+      removed flat artifact transport fields, so no Pages builder code change is
+      required for descriptor schema 2.0.0.
+  production_trust:
+    status: "INACTIVE_UNCHANGED"
 
-w1_implementation:
-  contract: "docs/ARTIFACT_DELIVERY_V1.md"
-  commit: "f75e4e240581e7a0f072268cf7111e2c8cecac46"
-  implemented_boundary:
-    - "target remains package/version selection identity"
-    - "content.filename is the canonical artifact filename authority"
-    - "content.sha256 is the canonical exact-byte digest authority"
-    - "content.size is the canonical exact-byte-length authority"
-    - "delivery owns retrieval adapter/access/locator concerns only"
-    - "delivery cannot override target/content integrity authorities"
-    - "credentials and authenticated user identity are forbidden from package metadata"
-
-w2_implementation:
-  completed_at: "2026-08-28"
-  contract: "docs/ARTIFACT_DELIVERY_V1.md"
-  contract_commit: "5475ff181716468362371a7f49e701950006cc87"
-  implemented_boundary:
-    - "delivery.type is the sole explicit backend discriminator"
-    - "delivery.type cannot be inferred from locator, URL, repository, access, or content fields"
-    - "github-release-asset is the only registered delivery type for Registry Distribution 1.0.1"
-    - "unknown delivery types have no generic fallback and must fail closed"
-    - "delivery.access contains only a contract reference in the common envelope"
-    - "github-release-asset maps to registry-access-v1 in 1.0.1"
-    - "credential source/provider/permission/user/token/session data are not duplicated into delivery.access"
-    - "delivery.locator is isolated and interpreted only by the validator selected by delivery.type"
-    - "a missing locator validator, mismatched access contract, or invalid locator fails closed"
-    - "metadata dispatch grants no authorization and retrieval begins only after the referenced access contract succeeds"
-
-w3_implementation:
-  completed_at: "2026-08-28"
-  contract: "docs/ARTIFACT_DELIVERY_V1.md"
-  contract_commit: "0957ca3c883294d482a408fba26ddf499bf1a104"
-  registry_policy_evidence:
-    backend: "github-release-asset"
-    repository: "Simple-Connection/sctool-artifacts"
-    access_contract: "registry-access-v1"
-    release_tag_pattern: "sctool/{packageId}/v{version}"
-  implemented_boundary:
-    - "github-release-asset locator contains repository + assetId only"
-    - "repository must equal the Registry policy canonical artifact repository"
-    - "assetId is an opaque positive JavaScript-safe integer from 1 through 9007199254740991"
-    - "expected release tag is derived from packageId/version and is not duplicated in locator metadata"
-    - "the expected release must be non-draft"
-    - "assetId must resolve inside that expected release"
-    - "resolved asset name must equal content.filename"
-    - "backend-reported size must agree with content.size when available"
-    - "downloaded bytes remain subject to content.size/content.sha256 verification"
-    - "cross-release, same-name, arbitrary-URL, and anonymous fallback are forbidden"
-    - "assetId remains delivery locator metadata and does not become part of immutable Registry artifact identity"
-
-w4_implementation:
-  completed_at: "2026-08-28"
-  schema:
-    path: "schemas/package.schema.json"
-    version: "2.0.0"
-    commit: "f6921b8b0176cf6476e5d66eae80acc413e359c3"
-    machine_enforced:
-      - "artifact requires target/content/delivery/publishedAt/contract/signature"
-      - "content requires filename/sha256/size and rejects unknown fields"
-      - "legacy flat assetName/url/sha256/size artifact shape is rejected"
-      - "delivery.type is const github-release-asset"
-      - "delivery.access.contract is const registry-access-v1"
-      - "locator requires repository + assetId and rejects unknown fields"
-      - "assetId must be 1..9007199254740991"
-      - "content.size must be 1..9007199254740991"
-      - "credential/token/private-key field injection is rejected by additionalProperties=false"
-  registry_validator:
-    path: "tools/validate-registry.py"
-    commits:
-      - "20e10b43d5737368c3ec90226730cad8f8aaaef9"
-      - "cbd7b499822588dc5a976fa2411f4cb19851c6a7"
-    machine_enforced:
-      - "package descriptor id matches registry key"
-      - "defaultChannel exists in channels"
-      - "every channel version exists in versions"
-      - "artifact map key equals target.platform-target.arch"
-      - "delivery.type matches Registry policy artifact backend"
-      - "delivery.access.contract matches Registry policy access contract"
-      - "locator.repository matches Registry policy canonical artifact repository"
-      - "schema error ordering is deterministic across mixed path components"
-  regression_fixture:
-    path: "tools/test-delivery-package-schema-v2.py"
-    commit: "83994b1459a04f60163b662cbdc2d8b01621ce0a"
-    cases_total: 14
-    positive_cases: 1
-    negative_cases: 13
-    covered:
-      - "valid github-release-asset descriptor passes"
-      - "legacy flat url-only artifact fails"
-      - "unknown delivery.type fails"
-      - "missing repository fails"
-      - "missing assetId fails"
-      - "assetId zero fails"
-      - "assetId above safe integer fails"
-      - "credential field injection fails"
-      - "private key field injection fails"
-      - "mismatched access contract fails"
-      - "artifact map target mismatch fails consistency validation"
-      - "repository policy mismatch fails consistency validation"
-      - "defaultChannel missing from channels fails consistency validation"
-      - "channel pointing to a missing version fails consistency validation"
-  local_reconstruction_validation:
-    environment: "assistant container reconstruction of adopted W4 schema/consistency rules"
-    jsonschema: "4.26.0"
-    result: "PASS"
-    cases_total: 14
-    cases_passed: 14
-    cases_failed: 0
-    limitation: >-
-      The assistant container could not resolve raw.githubusercontent.com, so it
-      could not execute an exact network checkout of dev/1.0.1. The reconstructed
-      validation used the same adopted schema constraints and consistency cases.
-  exact_repository_validation:
-    status: "PENDING"
-    required_commands:
-      - "python tools/test-delivery-package-schema-v2.py"
-      - "python tools/validate-registry.py"
-    closeout_owner: "P2-W5"
-  pages_code_change_required: false
-  simple_connection_change_required: false
-  registry_contract_v2_closeout: "DEFERRED_TO_W5"
+external_blocker:
+  id: "PTSIP-0.3.6-TOOL-DISTRIBUTION"
+  owner_repository: "Kinirin/PTSIP"
+  state: "OPEN"
+  registry_action_required: false
+  evidence:
+    registry_workflow_install: "python -m pip install PTSIP==0.3.6"
+    registry_dev_branch_actions_runs: 0
+    ptsip_tool_release: "tool-v0.3.6"
+    ptsip_release_state: "development complete / pre-publication"
+    ptsip_bound_specification: "0.3.6-draft @ d6995ed232e845b88d8235b851e80ab54b7804ea"
+  reason: >-
+    The Registry profile is already 0.3.6-draft, but the Registry Pages workflow
+    requires an exact PTSIP==0.3.6 install while upstream Tool 0.3.6 is still at
+    its pre-publication boundary. No dev/1.0.1 Actions run exists that could
+    supply exact Registry PTSIP validate/conform evidence.
+  prohibited_workaround: >-
+    Do not downgrade the Registry profile/tool gate to 0.3.5 and do not change
+    Registry architecture merely to manufacture a conformance result.
+  closeout_requirement: >-
+    After PTSIP Tool 0.3.6 becomes available through the approved installation
+    path, run the Registry workflow-equivalent PTSIP validate/conform gate on
+    the then-current dev/1.0.1 SHA. Record only the resulting evidence if it
+    passes; otherwise reopen P2 for the concrete Registry-owned finding.
 
 scope:
-  allowed_paths:
-    - "schemas/package.schema.json"
-    - "docs/REGISTRY_CONTRACT_V2.md"
-    - "docs/ARTIFACT_DELIVERY_V1.md"
-    - "tools/validate-registry.py"
-    - "tools/**delivery**"
-    - "docs/ver1.0.1/**"
-  may_add_validation_fixtures: true
   excluded:
     - "Kinirin/Simple-Connection source or PTSIP profile changes"
     - "artifact binary download implementation"
@@ -407,62 +211,30 @@ scope:
     - "commercial entitlement or per-device authorization"
     - "additional delivery backend activation"
 
-acceptance_tests:
-  schema:
-    - "package descriptor schema itself passes Draft 2020-12 schema validation"
-    - "valid github-release-asset descriptor passes"
-    - "legacy flat url-only artifact fails schema 2.0.0"
-    - "unknown delivery.type fails"
-    - "github locator without repository fails"
-    - "github locator without assetId fails"
-    - "github locator with non-positive assetId fails"
-    - "github locator with assetId above JavaScript safe integer fails"
-    - "credential/token/private-key fields are rejected by additionalProperties=false"
-    - "common content fields cannot be replaced by backend-specific aliases"
-  consistency:
-    - "defaultChannel resolves to an existing version"
-    - "channel versions exist in versions"
-    - "artifact map target key matches target object"
-    - "GitHub repository matches Registry artifact backend policy"
-    - "delivery access contract matches Registry policy"
-    - "resolved asset name must match content.filename"
-    - "resolved release tag must equal sctool/{packageId}/v{version}"
-    - "resolved release must not be draft"
-  regression:
-    - "Registry JSON validation PASS"
-    - "Pages metadata builder/validator remains compatible with descriptor schema 2.0.0"
-    - "Registry PTSIP applicable gates remain PASS"
-
 completion_criteria:
   descriptor_common_envelope_approved: true
   delivery_discriminator_contract_approved: true
-  delivery_access_contract_reference_approved: true
-  delivery_locator_dispatch_boundary_approved: true
   github_locator_implemented: true
-  github_repository_policy_constraint_approved: true
-  github_asset_id_safe_integer_constraint_approved: true
-  github_release_consistency_contract_approved: true
   package_schema_v2_implemented: true
   unknown_backend_machine_enforced: true
   credential_material_machine_rejected: true
   package_consistency_validation_implemented: true
-  w4_local_reconstruction_passed: true
-  exact_registry_validation_passed: false
-  pages_metadata_regression_passed: false
+  exact_registry_validation_passed: true
+  pages_metadata_regression_passed: true
+  registry_contract_transition_complete: true
   ptsip_applicable_gates_passed: false
   production_trust_activated: false
 
 state:
   audit: "COMPLETE"
   plan: "APPROVED"
-  apply: "IN_PROGRESS"
-  test: "LOCAL_RECONSTRUCTION_PASS_EXACT_PENDING"
-  closeout: "PENDING"
+  apply: "COMPLETE"
+  test: "PASS_WITH_EXTERNAL_PTSIP_PENDING"
+  closeout: "BLOCKED_EXTERNAL"
 
 next:
   action: >-
-    Await approval for P2-W5. W5 must run the exact Registry validation commands,
-    reconcile ARTIFACT_DELIVERY_V1 and REGISTRY_CONTRACT_V2 with the implemented
-    package descriptor schema 2.0.0, confirm Pages/PTSIP applicable gates, and
-    close P2 only if all Registry-owned acceptance evidence passes. Do not modify
-    Kinirin/Simple-Connection for P2.
+    Freeze P2 Registry-owned implementation. Do not make additional P2 code or
+    schema changes solely to bypass upstream PTSIP Tool publication. When the
+    approved PTSIP 0.3.6 installation path becomes available, run exact Registry
+    PTSIP validation/conformance and close P2 only on PASS evidence.
