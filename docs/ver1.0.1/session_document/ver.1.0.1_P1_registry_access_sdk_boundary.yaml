@@ -127,6 +127,48 @@ validation:
       exit_code: 6
       outcome: "INCOMPLETE"
       cause: "profile.valid=false before conformance evaluation could close"
+  latest_external_closeout_review:
+    reviewed_at: "2026-08-30"
+    source_repository: "Kinirin/Simple-Connection"
+    migration_branch: "ptsip/profile-a-migration"
+    branch_head: "7d94b322cb8a5760381f9beba0bf501aba7c6a54"
+    evaluated_sha: "3bce5a323de537ba52de17cbcc0571d2b290350f"
+    diagnostic_commit: "7d94b322cb8a5760381f9beba0bf501aba7c6a54"
+    workflow: "PTSIP Profile A Migration Verification"
+    workflow_run_id: 33262145374
+    ptsip_doctor: "PASS"
+    ptsip_validate: "PASS"
+    ptsip_inspect: "PASS"
+    strict_conform:
+      status: "FAIL"
+      outcome: "INCOMPLETE"
+      audit: "PASS"
+      blocking_gap_count: 1
+      non_blocking_gap_count: 0
+      gap:
+        id: "dependency-target:python:program-sdk/sctool-sdk/localization/argos-adapter.py:35:argostranslate.translate"
+        evidence_id: "python:program-sdk/sctool-sdk/localization/argos-adapter.py:35:argostranslate.translate"
+        rule_ids:
+          - "PTSIP-DEP-001"
+          - "PTSIP-EVD-003"
+        message: >-
+          A Product-owned dependency target is unresolved/dynamic and could conceal
+          a prohibited Product-to-non-Product implementation dependency.
+    implementation_ancestry:
+      status: "NOT_EXACT"
+      p1_implementation_sha: "f66894b8656c52e789826de9b69876b31a928ca4"
+      compared_migration_head: "7d94b322cb8a5760381f9beba0bf501aba7c6a54"
+      comparison_status: "diverged"
+      ahead_by: 77
+      behind_by: 1
+      merge_base: "a0c8173941c4d3fd4376c0834e6ea13951cafc96"
+      p1_implementation_included: false
+    conclusion: >-
+      The prior PTSIP 0.3.6 profile-schema validity failure is no longer the
+      immediate blocker: doctor, validate, and inspect now pass on the migration
+      branch. P1 still cannot close because strict conform reports one blocking
+      dependency-target gap, and the migration branch does not contain the P1
+      implementation commit being closed out.
   security_tests_covered:
     - "authenticated identity + repository read -> authorized"
     - "missing/unexecutable gh -> gh-unavailable"
@@ -141,19 +183,24 @@ validation:
     - "structured results contain no credential material"
 
 external_blocker:
-  id: "SC-PTSIP-0.3.6-LIFECYCLE-CLASSIFICATION"
+  id: "SC-PTSIP-P1-EXACT-CONFORM-CLOSEOUT"
   owner_repository: "Kinirin/Simple-Connection"
   state: "OPEN"
   registry_action_required: false
+  previous_blocker: "SC-PTSIP-0.3.6-LIFECYCLE-CLASSIFICATION"
+  previous_blocker_state: "NARROWED_AFTER_PROFILE_VALIDATION_PASS"
   description: >-
-    Simple Connection is independently reviewing which PTSIP 0.3.6 lifecycle
-    actually owns the repository's SDK/tooling responsibilities before it
-    finalizes its 0.3.6 project profile. This may take time and is outside the
-    Registry responsibility boundary.
+    Simple Connection's migrated PTSIP 0.3.6 profile now passes doctor, validate,
+    and inspect, so the earlier schema/profile-validity failure has been narrowed.
+    Strict conform is still INCOMPLETE with one Product dependency-target evidence
+    gap at argos-adapter.py:35, and the verified migration branch is one commit
+    behind the P1 implementation branch with respect to the P1 implementation SHA.
   closeout_requirement: >-
-    Accept a later Simple Connection-owned PTSIP validation/conformance result
-    showing the relevant SDK plane is valid/conformant. Do not prescribe the
-    lifecycle classification from this Registry session.
+    Accept only Simple Connection-owned PTSIP closeout evidence from a commit that
+    contains P1 implementation commit f66894b8656c52e789826de9b69876b31a928ca4
+    (or a descendant preserving those P1 changes) and reports doctor/validate/conform
+    PASS, outcome CONFORMANT, blocking_gaps empty, and audit PASS. Registry must
+    consume that evidence without prescribing Simple Connection lifecycle ownership.
 
 completion_criteria:
   registry_access_types_implemented: true
@@ -178,7 +225,8 @@ state:
 
 next:
   action: >-
-    Keep P1 frozen with no Registry-side code changes. Continue independent
-    Registry 1.0.1 sessions. When Kinirin/Simple-Connection finishes its own
-    PTSIP 0.3.6 lifecycle/profile work, record only the resulting closeout
-    evidence here and do not reinterpret that repository's lifecycle ownership.
+    Keep P1 frozen with no Registry-side code changes. Wait for
+    Kinirin/Simple-Connection to resolve the remaining strict-conform dependency
+    evidence gap and produce exact conformance evidence on a commit that contains
+    the P1 implementation. Registry must not modify Simple Connection's PTSIP
+    profile or lifecycle classification on its behalf.
