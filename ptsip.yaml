@@ -33,6 +33,7 @@ components:
       - "docs/REGISTRY_CONTRACT_V1.md"
       - "docs/REGISTRY_CONTRACT_V2.md"
       - "docs/REGISTRY_ACCESS_V1.md"
+      - "docs/ARTIFACT_DELIVERY_V1.md"
       - "docs/PAGES_DISTRIBUTION_V1.md"
       - "trust/**"
     purpose: canonical_registry_submission_distribution_trust_integrity_and_admission_contracts
@@ -93,8 +94,10 @@ components:
     include:
       - "ptsip.yaml"
       - "AGENTS.md"
+      - "docs/ver*/**"
       - ".gitignore"
-    purpose: repository_architecture_declaration_and_coding_agent_operating_governance
+      - ".vscode/settings.json"
+    purpose: repository_architecture_declaration_version_session_planning_and_coding_agent_operating_governance
     shipped: false
     runtime_required: false
     executable: false

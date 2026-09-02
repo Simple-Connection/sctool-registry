@@ -1,0 +1,260 @@
+schema_version: "1.0.1"
+document_type: build_session
+
+session:
+  id: "P1"
+  number: 1
+  title: "registry_access_sdk_boundary"
+  status: "COMPLETE"
+  improvement_plan: "docs/ver1.0.1/1.0.1_Improvement_plan.md"
+  branch: "dev/1.0.1"
+  branch_isolation: false
+  authority_repository: "Simple-Connection/sctool-registry"
+
+authority:
+  registry_repository: "Simple-Connection/sctool-registry"
+  registry_access_contract: "docs/REGISTRY_ACCESS_V1.md"
+  registry_contract: "docs/REGISTRY_CONTRACT_V2.md"
+  registry_policy: "policy/registry-policy.json"
+  implementation_repository: "Kinirin/Simple-Connection"
+  implementation_component: "program-sdk/sctool-sdk"
+  implementation_branch: "dev/1.0.1"
+  product_release_session_owner: false
+  authority_rule: >-
+    Registry Distribution 1.0.1 P1 owns the Registry access contract session.
+    Kinirin/Simple-Connection owns its own repository lifecycle classification,
+    PTSIP project profile, and conformance migration. Registry must not modify
+    those repository-governance artifacts merely to close P1.
+
+goal: >-
+  Implement the SDK-side GitHub identity and private artifact-repository access
+  boundary defined by REGISTRY_ACCESS_V1, without depending on Simple Connection
+  desktop internals and without exposing or extracting GitHub credential material.
+
+scope:
+  allowed_implementation_paths:
+    - "program-sdk/sctool-sdk/**"
+  allowed_contract_consumption:
+    - "REGISTRY_ACCESS_V1 identity and access states"
+    - "REGISTRY_CONTRACT_V2 authenticated artifact-access boundary"
+  excluded:
+    - "desktop/src/**"
+    - "renderer/UI changes"
+    - "Simple Connection installer UX"
+    - "Simple Connection product-version session creation for Registry work"
+    - "Simple Connection PTSIP lifecycle/profile migration"
+    - "production Root trust activation"
+    - "trust/trust.json issuance"
+    - "artifact binary download implementation"
+    - "package/channel update resolution"
+    - "per-device credentials or application attestation"
+    - "commercial entitlement or licensing"
+
+work_units:
+  - id: "W5"
+    title: "registry_access_types"
+    status: "COMPLETE"
+  - id: "W6"
+    title: "github_identity_adapter"
+    status: "COMPLETE"
+  - id: "W7"
+    title: "artifact_repository_authorization_probe"
+    status: "COMPLETE"
+  - id: "W8"
+    title: "negative_security_tests"
+    status: "COMPLETE"
+
+behavior_contract:
+  identity_provider: "github.com"
+  credential_source: "gh-cli-credential-store"
+  canonical_identity_command: "gh api user --jq .login"
+  authentication_gate: "gh auth status --hostname github.com"
+  artifact_repository: "Simple-Connection/sctool-artifacts"
+  repository_visibility: "private"
+  token_extraction_allowed: false
+  client_private_key_required: false
+  inherited_token_overrides_allowed: false
+  authorization_fail_closed: true
+  desktop_runtime_dependency_allowed: false
+
+access_states:
+  - "authorized"
+  - "gh-unavailable"
+  - "unauthenticated"
+  - "identity-unresolved"
+  - "access-denied"
+  - "network-unavailable"
+  - "configuration-error"
+
+implementation:
+  repository: "Kinirin/Simple-Connection"
+  branch: "dev/1.0.1"
+  base_sha: "a0c8173941c4d3fd4376c0834e6ea13951cafc96"
+  commit: "f66894b8656c52e789826de9b69876b31a928ca4"
+  changed_paths:
+    - "program-sdk/sctool-sdk/src/registry-access.ts"
+    - "program-sdk/sctool-sdk/cli/lib/github-registry-access.mjs"
+    - "program-sdk/sctool-sdk/tests/registry-access.test.mjs"
+    - "program-sdk/sctool-sdk/tests/run-registry-access-suite.mjs"
+    - "program-sdk/sctool-sdk/package.json"
+  desktop_files_changed: false
+  simple_connection_product_docs_changed: false
+
+validation:
+  exact_package_run:
+    received_at: "2026-08-27"
+    npm_ci: "PASS"
+    typecheck: "PASS"
+    build: "PASS"
+    registry_access_tests:
+      status: "PASS"
+      total: 9
+      passed: 9
+      failed: 0
+    sdk_governance_validation: "PASS"
+    ptsip_doctor:
+      status: "PASS"
+      exit_code: 0
+    ptsip_validate:
+      status: "BLOCKED_EXTERNAL_PROFILE"
+      exit_code: 3
+      cause: >-
+        Kinirin/Simple-Connection's then-current PTSIP project profile used the
+        older lifecycle/schema model and was not valid under installed PTSIP
+        Tool 0.3.6. Registry does not own that profile migration.
+    ptsip_conform:
+      status: "BLOCKED_EXTERNAL_PROFILE"
+      exit_code: 6
+      outcome: "INCOMPLETE"
+      cause: "profile.valid=false before conformance evaluation could close"
+  historical_external_closeout_review:
+    reviewed_at: "2026-08-30"
+    source_repository: "Kinirin/Simple-Connection"
+    migration_branch: "ptsip/profile-a-migration"
+    branch_head: "7d94b322cb8a5760381f9beba0bf501aba7c6a54"
+    evaluated_sha: "3bce5a323de537ba52de17cbcc0571d2b290350f"
+    diagnostic_commit: "7d94b322cb8a5760381f9beba0bf501aba7c6a54"
+    workflow: "PTSIP Profile A Migration Verification"
+    workflow_run_id: 33262145374
+    ptsip_doctor: "PASS"
+    ptsip_validate: "PASS"
+    ptsip_inspect: "PASS"
+    strict_conform:
+      status: "FAIL"
+      outcome: "INCOMPLETE"
+      audit: "PASS"
+      blocking_gap_count: 1
+      non_blocking_gap_count: 0
+      gap:
+        id: "dependency-target:python:program-sdk/sctool-sdk/localization/argos-adapter.py:35:argostranslate.translate"
+        evidence_id: "python:program-sdk/sctool-sdk/localization/argos-adapter.py:35:argostranslate.translate"
+        rule_ids:
+          - "PTSIP-DEP-001"
+          - "PTSIP-EVD-003"
+        message: >-
+          A Product-owned dependency target is unresolved/dynamic and could conceal
+          a prohibited Product-to-non-Product implementation dependency.
+    implementation_ancestry:
+      status: "NOT_EXACT"
+      p1_implementation_sha: "f66894b8656c52e789826de9b69876b31a928ca4"
+      compared_migration_head: "7d94b322cb8a5760381f9beba0bf501aba7c6a54"
+      comparison_status: "diverged"
+      ahead_by: 77
+      behind_by: 1
+      merge_base: "a0c8173941c4d3fd4376c0834e6ea13951cafc96"
+      p1_implementation_included: false
+    conclusion: >-
+      This review is retained as historical evidence only. Its blocker was
+      superseded by the final 2026-09-02 closeout evidence below.
+  final_external_closeout_review:
+    reviewed_at: "2026-09-02"
+    source_repository: "Kinirin/Simple-Connection"
+    source_branch: "dev/2.2.4"
+    source_head: "34b825f6acaf4eb25c27fb30aaf82c8d03af2ae2"
+    integration_commit: "73d1c2a421e66c255c05b4c2e3a7410b5fd4c1cb"
+    evidence_basis: "maintainer-confirmed exact closeout plus Git ancestry corroboration"
+    implementation_ancestry:
+      status: "PASS"
+      p1_implementation_sha: "f66894b8656c52e789826de9b69876b31a928ca4"
+      comparison_status: "ahead"
+      ahead_by: 84
+      behind_by: 0
+      merge_base: "f66894b8656c52e789826de9b69876b31a928ca4"
+      p1_implementation_included: true
+    ptsip_doctor: "PASS"
+    ptsip_validate: "PASS"
+    ptsip_inspect: "PASS"
+    strict_conform:
+      status: "PASS"
+      outcome: "CONFORMANT"
+      audit: "PASS"
+      blocking_gap_count: 0
+      non_blocking_gap_count: 0
+    exact_sha_clean_finish: "PASS"
+    retired_exact_validation_workflow:
+      path: ".github/workflows/registry-p1-validation.yml"
+      state: "RETIRED"
+      removal_commit: "34b825f6acaf4eb25c27fb30aaf82c8d03af2ae2"
+      gate_status: "NOT_APPLICABLE"
+      reason: >-
+        The candidate exact-validation workflow was explicitly discarded and is
+        not a current P1 gate. Its historical run state must not be used to keep
+        P1 blocked after the maintained exact closeout checks pass.
+    conclusion: >-
+      The P1 implementation is contained in the current Simple Connection branch,
+      strict PTSIP conformance is accepted as PASS/CONFORMANT with no gaps and audit
+      PASS, and the obsolete candidate workflow is no longer a gate. The external
+      closeout requirement is satisfied.
+  security_tests_covered:
+    - "authenticated identity + repository read -> authorized"
+    - "missing/unexecutable gh -> gh-unavailable"
+    - "failed gh auth status -> unauthenticated"
+    - "failed/empty gh api user -> identity-unresolved"
+    - "repository probe 403 -> access-denied"
+    - "repository probe 404 -> access-denied"
+    - "transport failure/timeout -> network-unavailable"
+    - "inherited GH_TOKEN removed"
+    - "inherited GITHUB_TOKEN removed"
+    - "gh auth token never invoked"
+    - "structured results contain no credential material"
+
+external_blocker:
+  id: "SC-PTSIP-P1-EXACT-CONFORM-CLOSEOUT"
+  owner_repository: "Kinirin/Simple-Connection"
+  state: "RESOLVED"
+  resolved_at: "2026-09-02"
+  registry_action_required: false
+  previous_blocker: "SC-PTSIP-0.3.6-LIFECYCLE-CLASSIFICATION"
+  previous_blocker_state: "RESOLVED_BY_FINAL_EXACT_CLOSEOUT"
+  description: >-
+    Simple Connection now contains the Registry P1 implementation in dev/2.2.4
+    ancestry and the accepted exact PTSIP closeout reports doctor/validate/conform
+    PASS, outcome CONFORMANT, blocking_gaps empty, and audit PASS. The discarded
+    candidate workflow is not part of the maintained closeout gate.
+  closeout_requirement: "SATISFIED"
+
+completion_criteria:
+  registry_access_types_implemented: true
+  github_identity_adapter_implemented: true
+  token_override_isolation_implemented: true
+  private_repository_probe_implemented: true
+  sdk_typecheck_exact_passed: true
+  sdk_build_exact_passed: true
+  registry_access_exact_suite_passed: true
+  sdk_governance_exact_passed: true
+  ptsip_doctor_passed: true
+  simple_connection_owned_ptsip_closeout_passed: true
+  desktop_ui_changed: false
+  production_trust_activated: false
+
+state:
+  audit: "COMPLETE"
+  plan: "APPROVED"
+  apply: "COMPLETE"
+  test: "PASS"
+  closeout: "COMPLETE"
+
+next:
+  action: >-
+    P1 is closed. Preserve this evidence as historical Registry contract closeout
+    and make no further Simple Connection changes under Registry P1 authority.
