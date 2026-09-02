@@ -5,7 +5,7 @@ session:
   id: "P1"
   number: 1
   title: "registry_access_sdk_boundary"
-  status: "BLOCKED_EXTERNAL_VALIDATION"
+  status: "COMPLETE"
   improvement_plan: "docs/ver1.0.1/1.0.1_Improvement_plan.md"
   branch: "dev/1.0.1"
   branch_isolation: false
@@ -127,7 +127,7 @@ validation:
       exit_code: 6
       outcome: "INCOMPLETE"
       cause: "profile.valid=false before conformance evaluation could close"
-  latest_external_closeout_review:
+  historical_external_closeout_review:
     reviewed_at: "2026-08-30"
     source_repository: "Kinirin/Simple-Connection"
     migration_branch: "ptsip/profile-a-migration"
@@ -164,11 +164,47 @@ validation:
       merge_base: "a0c8173941c4d3fd4376c0834e6ea13951cafc96"
       p1_implementation_included: false
     conclusion: >-
-      The prior PTSIP 0.3.6 profile-schema validity failure is no longer the
-      immediate blocker: doctor, validate, and inspect now pass on the migration
-      branch. P1 still cannot close because strict conform reports one blocking
-      dependency-target gap, and the migration branch does not contain the P1
-      implementation commit being closed out.
+      This review is retained as historical evidence only. Its blocker was
+      superseded by the final 2026-09-02 closeout evidence below.
+  final_external_closeout_review:
+    reviewed_at: "2026-09-02"
+    source_repository: "Kinirin/Simple-Connection"
+    source_branch: "dev/2.2.4"
+    source_head: "34b825f6acaf4eb25c27fb30aaf82c8d03af2ae2"
+    integration_commit: "73d1c2a421e66c255c05b4c2e3a7410b5fd4c1cb"
+    evidence_basis: "maintainer-confirmed exact closeout plus Git ancestry corroboration"
+    implementation_ancestry:
+      status: "PASS"
+      p1_implementation_sha: "f66894b8656c52e789826de9b69876b31a928ca4"
+      comparison_status: "ahead"
+      ahead_by: 84
+      behind_by: 0
+      merge_base: "f66894b8656c52e789826de9b69876b31a928ca4"
+      p1_implementation_included: true
+    ptsip_doctor: "PASS"
+    ptsip_validate: "PASS"
+    ptsip_inspect: "PASS"
+    strict_conform:
+      status: "PASS"
+      outcome: "CONFORMANT"
+      audit: "PASS"
+      blocking_gap_count: 0
+      non_blocking_gap_count: 0
+    exact_sha_clean_finish: "PASS"
+    retired_exact_validation_workflow:
+      path: ".github/workflows/registry-p1-validation.yml"
+      state: "RETIRED"
+      removal_commit: "34b825f6acaf4eb25c27fb30aaf82c8d03af2ae2"
+      gate_status: "NOT_APPLICABLE"
+      reason: >-
+        The candidate exact-validation workflow was explicitly discarded and is
+        not a current P1 gate. Its historical run state must not be used to keep
+        P1 blocked after the maintained exact closeout checks pass.
+    conclusion: >-
+      The P1 implementation is contained in the current Simple Connection branch,
+      strict PTSIP conformance is accepted as PASS/CONFORMANT with no gaps and audit
+      PASS, and the obsolete candidate workflow is no longer a gate. The external
+      closeout requirement is satisfied.
   security_tests_covered:
     - "authenticated identity + repository read -> authorized"
     - "missing/unexecutable gh -> gh-unavailable"
@@ -185,22 +221,17 @@ validation:
 external_blocker:
   id: "SC-PTSIP-P1-EXACT-CONFORM-CLOSEOUT"
   owner_repository: "Kinirin/Simple-Connection"
-  state: "OPEN"
+  state: "RESOLVED"
+  resolved_at: "2026-09-02"
   registry_action_required: false
   previous_blocker: "SC-PTSIP-0.3.6-LIFECYCLE-CLASSIFICATION"
-  previous_blocker_state: "NARROWED_AFTER_PROFILE_VALIDATION_PASS"
+  previous_blocker_state: "RESOLVED_BY_FINAL_EXACT_CLOSEOUT"
   description: >-
-    Simple Connection's migrated PTSIP 0.3.6 profile now passes doctor, validate,
-    and inspect, so the earlier schema/profile-validity failure has been narrowed.
-    Strict conform is still INCOMPLETE with one Product dependency-target evidence
-    gap at argos-adapter.py:35, and the verified migration branch is one commit
-    behind the P1 implementation branch with respect to the P1 implementation SHA.
-  closeout_requirement: >-
-    Accept only Simple Connection-owned PTSIP closeout evidence from a commit that
-    contains P1 implementation commit f66894b8656c52e789826de9b69876b31a928ca4
-    (or a descendant preserving those P1 changes) and reports doctor/validate/conform
-    PASS, outcome CONFORMANT, blocking_gaps empty, and audit PASS. Registry must
-    consume that evidence without prescribing Simple Connection lifecycle ownership.
+    Simple Connection now contains the Registry P1 implementation in dev/2.2.4
+    ancestry and the accepted exact PTSIP closeout reports doctor/validate/conform
+    PASS, outcome CONFORMANT, blocking_gaps empty, and audit PASS. The discarded
+    candidate workflow is not part of the maintained closeout gate.
+  closeout_requirement: "SATISFIED"
 
 completion_criteria:
   registry_access_types_implemented: true
@@ -212,7 +243,7 @@ completion_criteria:
   registry_access_exact_suite_passed: true
   sdk_governance_exact_passed: true
   ptsip_doctor_passed: true
-  simple_connection_owned_ptsip_closeout_passed: false
+  simple_connection_owned_ptsip_closeout_passed: true
   desktop_ui_changed: false
   production_trust_activated: false
 
@@ -221,12 +252,9 @@ state:
   plan: "APPROVED"
   apply: "COMPLETE"
   test: "PASS"
-  closeout: "BLOCKED_EXTERNAL"
+  closeout: "COMPLETE"
 
 next:
   action: >-
-    Keep P1 frozen with no Registry-side code changes. Wait for
-    Kinirin/Simple-Connection to resolve the remaining strict-conform dependency
-    evidence gap and produce exact conformance evidence on a commit that contains
-    the P1 implementation. Registry must not modify Simple Connection's PTSIP
-    profile or lifecycle classification on its behalf.
+    P1 is closed. Preserve this evidence as historical Registry contract closeout
+    and make no further Simple Connection changes under Registry P1 authority.
