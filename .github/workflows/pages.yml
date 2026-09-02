@@ -64,7 +64,10 @@ jobs:
           revision="$(git rev-parse HEAD)"
           tracked="$(python -c "from ptsip.repository.snapshot import capture_snapshot; print(capture_snapshot('.').tracked_content_fingerprint)")"
 
-          ptsip validate . --json > "$validation"
+          if ! ptsip validate . --json > "$validation"; then
+            cat "$validation"
+            exit 1
+          fi
           python tools/generate-ptsip-artifact-evidence.py \
             --validation "$validation" \
             --out "$evidence" \
