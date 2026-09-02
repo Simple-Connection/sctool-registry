@@ -181,18 +181,32 @@ external_blocker:
   registry_action_required: false
   evidence:
     registry_workflow_install: "python -m pip install PTSIP==0.3.6"
+    registry_workflow_path: ".github/workflows/pages.yml"
     registry_dev_branch_actions_runs: 0
     ptsip_tool_release: "tool-v0.3.6"
-    ptsip_release_state: "development complete / pre-publication"
+    ptsip_release_target: "1aaa6868fe9b423b1fa536404115820cc4736ac4"
+    ptsip_release_published_at: "2026-08-23T19:58:30Z"
+    ptsip_release_declared_state: "development complete / pre-publication release candidate"
     ptsip_bound_specification: "0.3.6-draft @ d6995ed232e845b88d8235b851e80ab54b7804ea"
+  latest_external_review:
+    reviewed_at: "2026-09-02"
+    github_release_0_3_6_exists: true
+    github_release_0_3_7_exists: true
+    approved_install_command_unchanged: true
+    pypi_ptsip_latest_available: "0.3.5"
+    exact_pypi_0_3_6_available: false
+    conclusion: "BLOCKER_STILL_VALID"
   reason: >-
-    The Registry profile is already 0.3.6-draft, but the Registry Pages workflow
-    requires an exact PTSIP==0.3.6 install while upstream Tool 0.3.6 is still at
-    its pre-publication boundary. No dev/1.0.1 Actions run exists that could
-    supply exact Registry PTSIP validate/conform evidence.
+    PTSIP Tool 0.3.6 now has a GitHub release record, and upstream has also moved
+    on to a 0.3.7 release candidate. However, Registry's approved Pages gate still
+    installs the exact package requirement PTSIP==0.3.6, while the PyPI PTSIP
+    distribution currently exposes 0.3.5 as the latest available package. The
+    approved exact installation path therefore remains unavailable, so Registry
+    cannot honestly record exact PTSIP validate/conform evidence for dev/1.0.1.
   prohibited_workaround: >-
-    Do not downgrade the Registry profile/tool gate to 0.3.5 and do not change
-    Registry architecture merely to manufacture a conformance result.
+    Do not downgrade the Registry profile/tool gate to 0.3.5, substitute 0.3.7,
+    switch to an unapproved source-install path, or change Registry architecture
+    merely to manufacture a conformance result.
   closeout_requirement: >-
     After PTSIP Tool 0.3.6 becomes available through the approved installation
     path, run the Registry workflow-equivalent PTSIP validate/conform gate on
@@ -234,7 +248,7 @@ state:
 
 next:
   action: >-
-    Freeze P2 Registry-owned implementation. Do not make additional P2 code or
-    schema changes solely to bypass upstream PTSIP Tool publication. When the
-    approved PTSIP 0.3.6 installation path becomes available, run exact Registry
-    PTSIP validation/conformance and close P2 only on PASS evidence.
+    Keep P2 Registry-owned implementation frozen. The 2026-09-02 review confirms
+    that no additional Registry code/schema change is justified. Recheck only the
+    approved PTSIP 0.3.6 installation path; once it exists, run exact Registry
+    PTSIP validation/conformance and close P2 on PASS evidence.
