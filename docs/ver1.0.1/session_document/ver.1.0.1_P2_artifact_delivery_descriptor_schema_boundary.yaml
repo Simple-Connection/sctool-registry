@@ -5,7 +5,7 @@ session:
   id: "P2"
   number: 2
   title: "artifact_delivery_descriptor_schema_boundary"
-  status: "BLOCKED_EXTERNAL_VALIDATION"
+  status: "COMPLETE"
   improvement_plan: "docs/ver1.0.1/1.0.1_Improvement_plan.md"
   branch: "dev/1.0.1"
   branch_isolation: false
@@ -115,103 +115,94 @@ work_units:
 
   - id: "W5"
     title: "contract_transition_closeout"
-    status: "BLOCKED_EXTERNAL_VALIDATION"
+    status: "COMPLETE"
     implementation:
       artifact_contract_commit: "26670b5d936d33ff44795ae2f9b1361b5d8dcb38"
       registry_contract_commit: "4b43500d03fa7dc5069315f807078c5b01b6fd11"
+      ptsip_tool_pin_commit: "2c071c6bc769c3494d6547ff48734f6c7b34dd3d"
+      ptsip_profile_coverage_commit: "c184b9602c6685295188bd05d7ea8a20c883bf94"
+      exact_pr_head_validation_commit: "4c579207295661cdaec4e2b347f353e13fa52f96"
     result:
       - "ARTIFACT_DELIVERY_V1 synchronized with implemented schema 2.0.0"
       - "REGISTRY_CONTRACT_V2 transitional flat URL language retired"
       - "structured delivery descriptor adopted as canonical v2 package delivery shape"
       - "exact Registry validation passed"
       - "Pages package-schema-v2 compatibility passed"
-      - "PTSIP exact conformance remains externally blocked"
+      - "PTSIP Tool pin updated from obsolete 0.3.6 hardcode to current 0.3.7"
+      - "Registry PTSIP component coverage completed with zero unassigned paths"
+      - "exact dev/1.0.1 head PTSIP conformance passed"
 
 w5_validation:
-  executed_at: "2026-08-28"
-  reconstruction_method: >-
-    Exact dev/1.0.1 blobs were fetched through the GitHub connection and
-    reconstructed locally because the execution container cannot resolve
-    github.com/raw.githubusercontent.com directly.
-  blob_identity_check:
-    status: "PASS"
-    files_checked: 14
-    rule: "local Git blob SHA == dev/1.0.1 GitHub blob SHA"
-    files:
-      - "schemas/package.schema.json"
-      - "schemas/policy-v1.schema.json"
-      - "schemas/policy.schema.json"
-      - "schemas/publisher.schema.json"
-      - "schemas/registry-head.schema.json"
-      - "schemas/registry-snapshot.schema.json"
-      - "schemas/registry.schema.json"
-      - "schemas/submission.schema.json"
-      - "schemas/trust.schema.json"
-      - "policy/registry-policy.json"
-      - "registry.json"
-      - "tools/validate-registry.py"
-      - "tools/test-delivery-package-schema-v2.py"
-      - "tools/validate-pages.py"
-  exact_commands:
-    - command: "python tools/test-delivery-package-schema-v2.py"
-      exit_code: 0
-      output: "Package descriptor v2 delivery validation PASS cases=14"
-    - command: "python tools/validate-registry.py"
-      exit_code: 0
+  initial_registry_validation:
+    executed_at: "2026-08-28"
+    blob_identity_check:
+      status: "PASS"
+      files_checked: 14
+      rule: "local Git blob SHA == dev/1.0.1 GitHub blob SHA"
+    exact_commands:
+      - command: "python tools/test-delivery-package-schema-v2.py"
+        exit_code: 0
+        output: "Package descriptor v2 delivery validation PASS cases=14"
+      - command: "python tools/validate-registry.py"
+        exit_code: 0
+        output: "Registry JSON validation PASS packages=0 publishers=0 trust=inactive"
+    pages_compatibility:
+      status: "PASS"
+      output: "Pages JSON validation PASS"
+    production_trust:
+      status: "INACTIVE_UNCHANGED"
+
+  final_ptsip_closeout:
+    executed_at: "2026-09-02"
+    validation_pr: 3
+    workflow: "Publish signed SCTool Registry Pages"
+    workflow_run_id: 33604260387
+    workflow_run_number: 13
+    workflow_conclusion: "success"
+    exact_registry_sha: "4c579207295661cdaec4e2b347f353e13fa52f96"
+    checkout_exact_head: true
+    tool:
+      version: "0.3.7"
+      install: "python -m pip install PTSIP==0.3.7"
+      install_status: "PASS"
+    profile:
+      declared_historical_label: "0.3.6-draft"
+      specification_binding: "0.3.6-draft @ d6995ed232e845b88d8235b851e80ab54b7804ea"
+      compatibility_tool_target: "0.3.7"
+      valid: true
+      conflicts: 0
+      unassigned_count: 0
+      scan_errors: 0
+    conform:
+      status: "PASS"
+      level: "ENFORCED"
+      outcome: "CONFORMANT"
+      blocking_gaps: []
+      non_blocking_gaps: []
+      diagnostics: []
+      audit: "PASS"
+      audit_problem_count: 0
+      snapshot_status: "STABLE"
+      snapshot_dirty: false
+    registry_validation:
+      status: "PASS"
       output: "Registry JSON validation PASS packages=0 publishers=0 trust=inactive"
-  pages_compatibility:
-    status: "PASS"
-    method: >-
-      Exact tools/validate-pages.py plus exact package/publisher/head/snapshot/trust
-      schemas validated a synthetic signed-metadata envelope containing a valid
-      package descriptor schema 2.0.0.
-    exit_code: 0
-    output: "Pages JSON validation PASS"
-    builder_assessment: >-
-      tools/build-pages.mjs aggregates complete descriptors and does not interpret
-      removed flat artifact transport fields, so no Pages builder code change is
-      required for descriptor schema 2.0.0.
-  production_trust:
-    status: "INACTIVE_UNCHANGED"
+    production_trust:
+      status: "INACTIVE_UNCHANGED"
 
 external_blocker:
   id: "PTSIP-0.3.6-TOOL-DISTRIBUTION"
   owner_repository: "Kinirin/PTSIP"
-  state: "OPEN"
+  state: "RESOLVED_AS_OBSOLETE_HARDCODE"
+  resolved_at: "2026-09-02"
   registry_action_required: false
-  evidence:
-    registry_workflow_install: "python -m pip install PTSIP==0.3.6"
-    registry_workflow_path: ".github/workflows/pages.yml"
-    registry_dev_branch_actions_runs: 0
-    ptsip_tool_release: "tool-v0.3.6"
-    ptsip_release_target: "1aaa6868fe9b423b1fa536404115820cc4736ac4"
-    ptsip_release_published_at: "2026-08-23T19:58:30Z"
-    ptsip_release_declared_state: "development complete / pre-publication release candidate"
-    ptsip_bound_specification: "0.3.6-draft @ d6995ed232e845b88d8235b851e80ab54b7804ea"
-  latest_external_review:
-    reviewed_at: "2026-09-02"
-    github_release_0_3_6_exists: true
-    github_release_0_3_7_exists: true
-    approved_install_command_unchanged: true
-    pypi_ptsip_latest_available: "0.3.5"
-    exact_pypi_0_3_6_available: false
-    conclusion: "BLOCKER_STILL_VALID"
-  reason: >-
-    PTSIP Tool 0.3.6 now has a GitHub release record, and upstream has also moved
-    on to a 0.3.7 release candidate. However, Registry's approved Pages gate still
-    installs the exact package requirement PTSIP==0.3.6, while the PyPI PTSIP
-    distribution currently exposes 0.3.5 as the latest available package. The
-    approved exact installation path therefore remains unavailable, so Registry
-    cannot honestly record exact PTSIP validate/conform evidence for dev/1.0.1.
-  prohibited_workaround: >-
-    Do not downgrade the Registry profile/tool gate to 0.3.5, substitute 0.3.7,
-    switch to an unapproved source-install path, or change Registry architecture
-    merely to manufacture a conformance result.
-  closeout_requirement: >-
-    After PTSIP Tool 0.3.6 becomes available through the approved installation
-    path, run the Registry workflow-equivalent PTSIP validate/conform gate on
-    the then-current dev/1.0.1 SHA. Record only the resulting evidence if it
-    passes; otherwise reopen P2 for the concrete Registry-owned finding.
+  resolution: >-
+    The previous blocker was based on an obsolete Registry workflow pin to
+    PTSIP==0.3.6. The maintained Tool version is 0.3.7 and the Registry workflow
+    was updated accordingly. PTSIP 0.3.7 installed successfully from the approved
+    package path and explicitly validated the Registry's historical 0.3.6-draft
+    Specification binding. The exact dev/1.0.1 head then passed enforced conform.
+  closeout_requirement: "SATISFIED"
 
 scope:
   excluded:
@@ -236,19 +227,18 @@ completion_criteria:
   exact_registry_validation_passed: true
   pages_metadata_regression_passed: true
   registry_contract_transition_complete: true
-  ptsip_applicable_gates_passed: false
+  ptsip_applicable_gates_passed: true
   production_trust_activated: false
 
 state:
   audit: "COMPLETE"
   plan: "APPROVED"
   apply: "COMPLETE"
-  test: "PASS_WITH_EXTERNAL_PTSIP_PENDING"
-  closeout: "BLOCKED_EXTERNAL"
+  test: "PASS"
+  closeout: "COMPLETE"
 
 next:
   action: >-
-    Keep P2 Registry-owned implementation frozen. The 2026-09-02 review confirms
-    that no additional Registry code/schema change is justified. Recheck only the
-    approved PTSIP 0.3.6 installation path; once it exists, run exact Registry
-    PTSIP validation/conformance and close P2 on PASS evidence.
+    P2 is closed. Preserve the schema, contract, PTSIP Tool 0.3.7, profile-coverage,
+    and exact conformance evidence. Do not activate production trust or merge the
+    version branch without the separate version-level approval gate.
