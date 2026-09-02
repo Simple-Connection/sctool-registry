@@ -53,6 +53,9 @@ jobs:
           python -m pip install "PTSIP==0.3.7"
           python -m pip install -r tools/requirements.txt
 
+      - name: Validate Registry Client SDK boundary
+        run: npm --prefix packages/registry-client-sdk test
+
       - name: Validate PTSIP architecture with exact Product Artifact evidence
         shell: bash
         run: |
@@ -69,6 +72,7 @@ jobs:
             --revision "$revision" \
             --tracked-content-sha256 "$tracked" \
             --component registry-catalog \
+            --component registry-client-sdk \
             --component registry-contracts \
             --component product-documentation
 

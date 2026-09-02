@@ -14,12 +14,34 @@ components:
       - CONFIGURATION
     include:
       - "registry.json"
+      - "packages/*.json"
     purpose: public_sctool_package_discovery_and_runtime_registry_index
     shipped: true
     runtime_required: true
     executable: false
     release_owner: registry
     compatibility_owner: registry
+
+  - id: registry-client-sdk
+    classification: PRODUCT
+    roles:
+      - IMPLEMENTATION
+    include:
+      - "packages/registry-client-sdk/**"
+    purpose: simple_connection_runtime_registry_metadata_access_delivery_and_integrity_client_sdk
+    shipped: true
+    runtime_required: true
+    executable: true
+    release_owner: registry-client-sdk
+    compatibility_owner: registry-contract
+    manifests:
+      - "packages/registry-client-sdk/package.json"
+    analysis_inputs:
+      - "schemas/package.schema.json"
+      - "policy/registry-policy.json"
+      - "docs/REGISTRY_CONTRACT_V2.md"
+      - "docs/REGISTRY_ACCESS_V1.md"
+      - "docs/ARTIFACT_DELIVERY_V1.md"
 
   - id: registry-contracts
     classification: NEUTRAL_CONTRACT
@@ -110,6 +132,16 @@ relationships:
     to: registry-catalog
     type: SPECIFIES
 
+  - id: registry-contracts-specify-client-sdk
+    from: registry-contracts
+    to: registry-client-sdk
+    type: SPECIFIES
+
+  - id: registry-client-sdk-reads-catalog
+    from: registry-client-sdk
+    to: registry-catalog
+    type: READS
+
   - id: registry-contracts-specify-pages-delivery
     from: registry-contracts
     to: registry-pages-delivery
@@ -138,6 +170,11 @@ relationships:
   - id: repository-governance-governs-catalog
     from: repository-governance
     to: registry-catalog
+    type: GOVERNS
+
+  - id: repository-governance-governs-client-sdk
+    from: repository-governance
+    to: registry-client-sdk
     type: GOVERNS
 
   - id: repository-governance-governs-contracts

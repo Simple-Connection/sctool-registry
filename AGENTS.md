@@ -2,13 +2,14 @@
 
 ## Repository authority
 
-This repository is the public SCTool metadata registry and authenticated artifact-distribution authority for Simple Connection.
+This repository is the public SCTool metadata registry, authenticated artifact-distribution authority, and Registry Client SDK authority for Simple Connection.
 
-Before changing registry identity, schema, publisher trust, package ownership, artifact access/immutability, or distribution behavior, read:
+Before changing registry identity, schema, publisher trust, package ownership, artifact access/immutability, distribution behavior, or Registry Client SDK behavior, read:
 
 ```text
 docs/REGISTRY_CONTRACT_V2.md
 docs/REGISTRY_ACCESS_V1.md
+docs/ARTIFACT_DELIVERY_V1.md
 docs/PAGES_DISTRIBUTION_V1.md
 policy/registry-policy.json
 ptsip.yaml
@@ -54,21 +55,13 @@ Each version has one canonical improvement-plan document named exactly:
 {major}.{minor}.{micro}_Improvement_plan.md
 ```
 
-Examples:
-
-```text
-1.0.0_Improvement_plan.md
-1.1.0_Improvement_plan.md
-2.0.0_Improvement_plan.md
-```
-
 The improvement plan is the version-level index for its sessions. It should record the version objective, session/work-unit breakdown, completion state, acceptance criteria, and final merge gate so that session completion does not get confused with version completion.
 
 Before creating a new development branch, determine the target `distribution_contract_version` and use this naming/document policy. Reuse an existing matching `dev/{major}.{minor}.{micro}` branch when that version is already in progress.
 
 ## Version documentation layout
 
-Version planning documents use a shallow version directory modeled after the version/session separation used by `Kinirin/ERP_suver`:
+Version planning documents use:
 
 ```text
 docs/ver{major}.{minor}.{micro}/
@@ -92,18 +85,20 @@ Version/session planning documents are repository development governance and mus
 Architecture and responsibility ownership are governed by:
 
 ```text
-PTSIP Tool:          0.3.6
+PTSIP Tool:          0.3.7
 Specification:       0.3.6-draft
 Specification rev:   d6995ed232e845b88d8235b851e80ab54b7804ea
 Profile:             ptsip.yaml
 ```
 
-PTSIP is a coding-agent/development tool. Do **not** add PTSIP to registry runtime dependencies or package metadata merely to make it available locally.
+Tool version and bound Specification identity are separate. A compatible Tool update must not silently rewrite the historical Specification binding.
 
-The coding-agent execution environment should install the exact tool version:
+PTSIP is a coding-agent/development tool. Do **not** add PTSIP to registry runtime dependencies or Registry Client SDK dependencies merely to make it available locally.
+
+The coding-agent execution environment should install the exact maintained tool version:
 
 ```powershell
-python -m pip install "PTSIP==0.3.6"
+python -m pip install "PTSIP==0.3.7"
 ptsip --version
 ```
 
@@ -133,7 +128,7 @@ ptsip gate .
 
 A new tracked path must be assigned in `ptsip.yaml` in the same change that introduces it. PTSIP classifications are determined by primary lifecycle ownership, not by directory name, language, framework, or whether a file is executable.
 
-Do not use legacy `TOOLCHAIN` in new declarations. Tool 0.3.6 canonical classifications are:
+Canonical classifications are:
 
 ```text
 PRODUCT
@@ -143,11 +138,29 @@ OPERATIONS
 NEUTRAL_CONTRACT
 ```
 
+## Packages namespace
+
+`packages/` has two distinct meanings that must remain unambiguous:
+
+```text
+packages/{packageId}.json
+= accepted Registry package descriptor
+
+packages/registry-client-sdk/**
+= Registry-owned Simple Connection integration/client SDK
+```
+
+The Registry Client SDK must not implement SCTool scaffold/build/test/sign/package authoring. That responsibility belongs to the separate SCTool Authoring SDK in `Kinirin/Simple-Connection/program-sdk/sctool-sdk`.
+
 ## Current responsibility boundaries
 
 ```text
 registry-catalog
 = public runtime-consumed registry metadata
+= PRODUCT
+
+registry-client-sdk
+= Simple Connection runtime client for Registry metadata/access/delivery/integrity contracts
 = PRODUCT
 
 registry-contracts
@@ -167,7 +180,21 @@ repository-governance
 = DEVELOPMENT_TOOLING
 ```
 
-Do not classify future Registry Intake implementation, artifact release publication outside this Pages metadata boundary, authenticated download implementation, or operational monitoring by analogy. Determine its actual lifecycle ownership when that responsibility is introduced and update `ptsip.yaml` explicitly.
+Do not classify future Registry Intake implementation, artifact release publication outside this Pages metadata boundary, or operational monitoring by analogy. Determine its actual lifecycle ownership when that responsibility is introduced and update `ptsip.yaml` explicitly.
+
+## Registry Client SDK boundary
+
+Canonical path:
+
+```text
+packages/registry-client-sdk/
+```
+
+The SDK owns consumer-side implementation of Registry contracts, including Registry access state semantics, descriptor/channel/version/target resolution, exact delivery locator handling, authenticated artifact retrieval, content integrity verification, and normalized update candidates.
+
+It must not own Simple Connection local installation state, active-version selection, rollback, renderer UI, runtime reconcile policy, or publisher-side `.sctool` authoring.
+
+The package remains non-published/private until an explicit SDK distribution mechanism is approved. Do not invent an npm/GitHub Packages publication path merely because the package directory exists.
 
 ## Registry trust secret boundary
 
@@ -186,7 +213,7 @@ The Distribution private secret may be used by `.github/workflows/pages.yml` for
 
 Never place private key material in generated Pages artifacts, logs, workflow artifacts, test fixtures, committed configuration, or documentation examples.
 
-GitHub end-user credentials are also never Registry repository content. Registry access consumers use the GitHub CLI credential store and must not add GitHub access tokens, OAuth tokens, client private keys, or credential-store material to Registry metadata.
+GitHub end-user credentials are also never Registry repository content. Registry access consumers use the GitHub CLI credential store and must not add GitHub access tokens, OAuth tokens, client private keys, or credential-store material to Registry metadata or SDK results.
 
 ## Registry invariants
 
@@ -201,4 +228,4 @@ GitHub end-user credentials are also never Registry repository content. Registry
 9. `.sctool` binaries are not stored in Registry Git history.
 10. Simple Connection does not hardcode individual SCTool versions; signed Registry channels resolve versions.
 11. Root trust signing and routine Distribution signing use separate Actions Secrets.
-12. Simple Connection UI/install/runtime policy remains outside the Registry access contract.
+12. Simple Connection UI/install/runtime policy remains outside the Registry access contract and Registry Client SDK ownership.
