@@ -4,208 +4,175 @@ document_type: build_session
 session:
   id: "P1"
   number: 1
-  title: "simple_connection_descriptor_consumer"
+  title: "registry_client_sdk_responsibility_boundary"
   status: "IN_PROGRESS"
   improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.md"
   branch: "dev/1.0.2"
-  branch_isolation: false
   authority_repository: "Simple-Connection/sctool-registry"
 
 authority:
   registry_repository: "Simple-Connection/sctool-registry"
   registry_baseline: "c3e881742177aec3eae71d2c336801b6b52c74e5"
+  simple_connection_repository: "Kinirin/Simple-Connection"
+  simple_connection_branch: "dev/2.2.4"
+  reviewed_simple_connection_head: "6a857789159a4f1e6ae8ca5535b8be01c9377141"
   registry_contract: "docs/REGISTRY_CONTRACT_V2.md"
   registry_access_contract: "docs/REGISTRY_ACCESS_V1.md"
   artifact_delivery_contract: "docs/ARTIFACT_DELIVERY_V1.md"
-  registry_policy: "policy/registry-policy.json"
   package_schema: "schemas/package.schema.json"
-  implementation_repository: "Kinirin/Simple-Connection"
-  implementation_branch: "dev/2.2.4"
-  implementation_reviewed_head: "6a857789159a4f1e6ae8ca5535b8be01c9377141"
-  implementation_session: "P2"
-  implementation_plan: "docs/v2.2/v2.2.4/session_document/P2_plan.yaml"
-  authority_rule: >-
-    Registry owns canonical contract provenance and conformance evidence. Simple
-    Connection owns the consumer implementation, local install/runtime behavior,
-    source-path approval, and its own PTSIP lifecycle declarations. Registry must
-    not modify the Simple Connection PTSIP profile or desktop lifecycle policy.
 
-goal: >-
-  Establish a typed, deterministic, fail-closed Simple Connection consumer for
-  Registry package descriptor schema 2.0.0, preserving Registry package/content/
-  delivery authority without performing artifact download, installation, or activation.
+decision:
+  sdk_model: "TWO_SDK"
+  reason:
+    - "SCTool authoring and Registry consumption have different users and lifecycle ownership."
+    - "Authoring SDK produces and validates developer-owned .sctool packages."
+    - "Registry Client SDK integrates Simple Connection with Registry discovery/access/delivery."
+  authoring_sdk:
+    repository: "Kinirin/Simple-Connection"
+    path: "program-sdk/sctool-sdk"
+    responsibility:
+      - "coding-agent/developer SCTool authoring guidance"
+      - "manifest/build/test/package support"
+      - "developer tool -> .sctool production"
+    forbidden_long_term_responsibility:
+      - "Registry artifact authorization"
+      - "Registry descriptor/channel resolution"
+      - "Registry artifact download/update client behavior"
+  registry_client_sdk:
+    repository: "Simple-Connection/sctool-registry"
+    proposed_path: "packages/registry-client-sdk"
+    responsibility:
+      - "Registry metadata consumer types"
+      - "registry-access-v1 implementation"
+      - "package descriptor parsing and deterministic resolution"
+      - "delivery backend resolution"
+      - "authenticated artifact retrieval"
+      - "artifact content integrity verification"
+      - "Simple Connection integration-facing update candidate API"
+    forbidden_responsibility:
+      - "SCTool scaffold/build/sign/package authoring"
 
-contract:
-  package_schema_version: "2.0.0"
-  immutable_identity: "(packageId, version, target)"
-  version_resolution:
-    - "defaultChannel"
-    - "channels"
-    - "versions"
-  target_key: "target.platform + '-' + target.arch"
-  content_authority:
-    - "content.filename"
-    - "content.sha256"
-    - "content.size"
-  delivery:
-    supported_type: "github-release-asset"
-    discriminator: "delivery.type"
-    access_contract: "registry-access-v1"
-    repository: "Simple-Connection/sctool-artifacts"
-    locator_fields:
-      - "repository"
-      - "assetId"
-    asset_id_range: "1..9007199254740991"
-  fail_closed:
-    - "unsupported schema version"
-    - "malformed or structurally unknown descriptor fields"
-    - "missing default channel"
-    - "channel points to absent version"
-    - "target key mismatch or target absent"
-    - "unsupported delivery type"
-    - "access contract mismatch"
-    - "artifact repository mismatch"
-    - "invalid assetId"
-    - "invalid SHA-256 or content size"
-    - "legacy flat URL/assetName transport shape"
-    - "credential fields injected into access/locator"
-  forbidden_fallbacks:
-    - "generic HTTPS"
-    - "cross-release lookup"
-    - "same-name artifact lookup"
-    - "anonymous artifact retrieval"
+ownership_correction:
+  historical_source:
+    repository: "Kinirin/Simple-Connection"
+    sdk_path: "program-sdk/sctool-sdk"
+    misplaced_registry_client_paths:
+      - "src/registry-access.ts"
+      - "cli/lib/github-registry-access.mjs"
+      - "tests/registry-access.test.mjs"
+      - "tests/run-registry-access-suite.mjs"
+    package_export: "./registry-access"
+  migration_rule: >-
+    Preserve Distribution 1.0.1 evidence, but move Registry client ownership into
+    the Registry Client SDK during 1.0.2. Remove the duplicated Registry access
+    surface from the Simple Connection Authoring SDK only after the Registry Client
+    SDK replacement is implemented and Simple Connection integration has migrated.
+  destructive_change_now: false
 
-scope:
-  included:
-    - "Simple Connection SCTool SDK current-boundary audit"
-    - "typed package descriptor v2 consumer model"
-    - "channel/version/target resolution"
-    - "content/delivery boundary preservation"
-    - "fail-closed contract validation and regression tests"
-  excluded:
-    - "GitHub Release exact asset lookup"
-    - "artifact binary download"
-    - "local artifact installation"
-    - "package activation or rollback"
-    - "renderer/UI changes"
-    - "legacy canonical repository sync removal"
-    - "Simple Connection PTSIP profile/classification edits by Registry"
-    - "production Root trust activation"
-
-work_unit_numbering:
-  scope: "session-local"
-  reset_rule: "Each primary P-session starts at W1."
+packages_namespace:
+  current_contract:
+    descriptor_path: "packages/{packageId}.json"
+    evidence: "packages/README.md"
+  conflict: >-
+    Current repository documentation says only accepted package descriptors belong
+    under packages/. A client SDK under packages/ therefore requires an explicit
+    layout exception/clarification and PTSIP component assignment.
+  proposed_layout:
+    descriptors: "packages/{packageId}.json"
+    registry_client_sdk: "packages/registry-client-sdk/**"
+  validator_observation: >-
+    tools/validate-registry.py validates package descriptors by following the paths
+    referenced from registry.json; it does not treat every packages/** path as a
+    descriptor automatically.
 
 work_units:
   - id: "W1"
-    title: "current_sdk_boundary_audit_and_path_proposal"
-    status: "COMPLETE_PENDING_PATH_APPROVAL"
+    title: "sdk_responsibility_reassessment"
+    status: "COMPLETE"
     evidence:
-      simple_connection_head: "6a857789159a4f1e6ae8ca5535b8be01c9377141"
-      sdk_root: "program-sdk/sctool-sdk"
-      existing_source_files:
-        - "src/index.ts"
-        - "src/host-capabilities.ts"
-        - "src/localization.ts"
-        - "src/registry-access.ts"
-      existing_registry_access: "src/registry-access.ts"
-      existing_test_pattern: "tests/*.test.mjs + tests/run-*-suite.mjs"
-      policy: "docs/policy/policy_2.yaml#V22-PATH-001"
+      - "Simple Connection authoring SDK package exports include Registry access despite authoring responsibility."
+      - "Registry packages/ currently contains descriptor README only."
+      - "Registry validator follows registry.json descriptor paths rather than recursively parsing packages/**."
     result:
-      reuse:
-        - "registry-access.ts remains the sole GitHub identity/authorization boundary"
-        - "existing SCTool SDK package/test conventions are reused"
-      do_not_reuse_for_descriptor_logic:
-        - "src/index.ts: SCTool manifest/environment contract; avoid mixing Registry distribution semantics"
-        - "src/registry-access.ts: authentication/authorization only; do not mix descriptor parsing/resolution"
-      proposed_new_paths:
-        - "program-sdk/sctool-sdk/src/registry-package.ts"
-        - "program-sdk/sctool-sdk/tests/registry-package.test.mjs"
-        - "program-sdk/sctool-sdk/tests/run-registry-package-suite.mjs"
-      proposed_modified_paths:
-        - "program-sdk/sctool-sdk/package.json"
-    gate:
-      state: "BLOCKED_USER_PATH_APPROVAL"
-      reason: >-
-        Simple Connection active policy V22-PATH-001 requires explicit approval
-        before an unlisted new source path is created.
+      - "Previous proposal to add Registry descriptor consumer code to Kinirin/Simple-Connection/program-sdk/sctool-sdk is WITHDRAWN."
+      - "Two-SDK model selected."
+      - "Registry access implementation identified as 1.0.2 migration responsibility."
 
   - id: "W2"
-    title: "descriptor_type_contract"
-    status: "BLOCKED_BY_W1_PATH_APPROVAL"
+    title: "registry_client_sdk_path_and_component_approval"
+    status: "PENDING_USER_APPROVAL"
+    proposal:
+      path: "packages/registry-client-sdk/**"
+      package_name: "@simple-connection/sctool-registry-sdk"
+      required_same_change_updates:
+        - "packages/README.md"
+        - "ptsip.yaml"
+        - "AGENTS.md responsibility boundary"
+    completion:
+      - "exact SDK path approved"
+      - "packages descriptor namespace remains unambiguous"
+      - "new PTSIP component lifecycle ownership defined"
 
   - id: "W3"
-    title: "channel_version_target_resolution"
+    title: "registry_access_migration"
     status: "BLOCKED_BY_W2"
+    source:
+      - "Kinirin/Simple-Connection/program-sdk/sctool-sdk/src/registry-access.ts"
+      - "Kinirin/Simple-Connection/program-sdk/sctool-sdk/cli/lib/github-registry-access.mjs"
+      - "Kinirin/Simple-Connection/program-sdk/sctool-sdk/tests/registry-access.test.mjs"
+      - "Kinirin/Simple-Connection/program-sdk/sctool-sdk/tests/run-registry-access-suite.mjs"
+    target: "packages/registry-client-sdk"
+    rule: "behavior-preserving migration before source removal"
 
   - id: "W4"
-    title: "content_delivery_boundary"
-    status: "BLOCKED_BY_W2"
+    title: "descriptor_and_update_candidate_client_boundary"
+    status: "BLOCKED_BY_W3"
+    scope:
+      - "package schema 2.0.0 typed model"
+      - "defaultChannel/channels/versions resolution"
+      - "target/content/delivery fail-closed validation"
+      - "normalized Registry update candidate"
 
   - id: "W5"
-    title: "negative_contract_validation"
-    status: "BLOCKED_BY_W3_W4"
+    title: "simple_connection_integration_handoff"
+    status: "BLOCKED_BY_W4"
+    scope:
+      - "define Simple Connection consumption surface"
+      - "remove Registry client exports from Authoring SDK after migration"
+      - "preserve Authoring SDK build/test/package responsibility"
+      - "record exact integration evidence"
 
-path_approval_request:
-  owner_repository: "Kinirin/Simple-Connection"
-  policy_id: "V22-PATH-001"
-  state: "PENDING_USER_APPROVAL"
-  new_paths:
-    - path: "program-sdk/sctool-sdk/src/registry-package.ts"
-      purpose: "Registry package descriptor v2 typed parser and deterministic resolver"
-    - path: "program-sdk/sctool-sdk/tests/registry-package.test.mjs"
-      purpose: "positive and fail-closed descriptor consumer regression cases"
-    - path: "program-sdk/sctool-sdk/tests/run-registry-package-suite.mjs"
-      purpose: "SDK-local test runner matching existing suite convention"
-  existing_path_modification:
-    - path: "program-sdk/sctool-sdk/package.json"
-      purpose: "public ./registry-package export and test:registry-package script"
+withdrawn_previous_path_request:
+  state: "WITHDRAWN"
+  paths:
+    - "Kinirin/Simple-Connection/program-sdk/sctool-sdk/src/registry-package.ts"
+    - "Kinirin/Simple-Connection/program-sdk/sctool-sdk/tests/registry-package.test.mjs"
+    - "Kinirin/Simple-Connection/program-sdk/sctool-sdk/tests/run-registry-package-suite.mjs"
+    - "Kinirin/Simple-Connection/program-sdk/sctool-sdk/package.json Registry consumer export modification"
+  reason: "Would mix Registry consumer responsibility into the SCTool Authoring SDK."
 
 verification:
-  state: "NOT_RUN_IMPLEMENTATION_BLOCKED"
-  required:
-    - "SCTool SDK typecheck"
-    - "SCTool SDK build"
-    - "Registry package descriptor positive tests"
-    - "Registry package descriptor fail-closed negative tests"
-    - "Registry Access regression suite"
-    - "Simple Connection SDK governance validation"
-    - "applicable Simple Connection PTSIP validation/conformance evidence"
-  local_environment_note: >-
-    Current execution environment cannot resolve github.com for local dependency/
-    tool execution. Do not report local npm/PTSIP PASS without exact evidence.
-
-deliverables:
-  - "P1 Registry-to-Simple-Connection contract mapping"
-  - "P2-W1 SDK reuse map"
-  - "minimal new source-path proposal"
-
-blockers:
-  - id: "SC-P2-PATH-APPROVAL"
-    owner_repository: "Kinirin/Simple-Connection"
-    state: "OPEN"
-    registry_action_required: false
-    reason: "V22-PATH-001 requires user approval for the three proposed new SDK paths."
-
-completion_criteria:
-  typed_descriptor_model_implemented: false
-  deterministic_resolution_implemented: false
-  fail_closed_tests_passed: false
-  registry_access_regression_passed: false
-  simple_connection_validation_passed: false
-  registry_contract_redefined: false
-  simple_connection_ptsip_profile_modified_by_registry: false
+  state: "ARCHITECTURE_ONLY"
+  required_after_W2:
+    - "Registry PTSIP doctor/inspect before path change"
+    - "Registry Client SDK typecheck/build/tests"
+    - "Registry access regression"
+    - "Registry descriptor regression"
+    - "Registry PTSIP validate/conform after change"
+    - "Registry JSON validation"
+    - "Simple Connection integration validation after handoff"
 
 state:
   audit: "COMPLETE"
-  plan: "APPROVED_BY_VERSION_START"
-  apply: "BLOCKED_PATH_APPROVAL"
+  plan: "CORRECTED"
+  apply: "BLOCKED_EXACT_PATH_APPROVAL"
   test: "NOT_RUN"
   closeout: "INCOMPLETE"
 
 next:
   action: >-
-    Obtain explicit user approval for the three proposed Simple Connection new
-    source paths. After approval, fresh-read dev/2.2.4 HEAD and active path policy,
-    record the approval in the current Simple Connection policy/session authority,
-    then implement P2-W2 through P2-W5 without adding download/install/runtime behavior.
+    Obtain approval for packages/registry-client-sdk/** as the Registry-owned
+    Simple Connection integration SDK path. After approval, materialize the SDK
+    together with packages/README.md, AGENTS.md and ptsip.yaml responsibility
+    updates in one architecture commit. Do not remove the Simple Connection
+    registry-access implementation until replacement integration is proven.
