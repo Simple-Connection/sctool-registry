@@ -14,7 +14,6 @@ components:
       - CONFIGURATION
     include:
       - "registry.json"
-      - "packages/*.json"
     purpose: public_sctool_package_discovery_and_runtime_registry_index
     shipped: true
     runtime_required: true
