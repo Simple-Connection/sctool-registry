@@ -9,3 +9,5 @@ export const REGISTRY_CLIENT_CONTRACT = Object.freeze({
   deliveryType: "github-release-asset",
   artifactRepository: "Simple-Connection/sctool-artifacts",
 });
+
+export * from "./registry-access.mjs";

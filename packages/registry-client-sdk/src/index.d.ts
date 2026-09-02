@@ -11,3 +11,5 @@ export interface RegistryClientContractIdentity {
 }
 
 export declare const REGISTRY_CLIENT_CONTRACT: Readonly<RegistryClientContractIdentity>;
+
+export * from "./registry-access.mjs";

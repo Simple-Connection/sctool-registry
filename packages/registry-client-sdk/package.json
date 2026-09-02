@@ -8,6 +8,10 @@
     ".": {
       "types": "./src/index.d.ts",
       "import": "./src/index.mjs"
+    },
+    "./registry-access": {
+      "types": "./src/registry-access.d.ts",
+      "import": "./src/registry-access.mjs"
     }
   },
   "files": [
@@ -15,7 +19,7 @@
     "README.md"
   ],
   "scripts": {
-    "test": "node ./tests/boundary.test.mjs"
+    "test": "node ./tests/boundary.test.mjs && node ./tests/registry-access.test.mjs"
   },
   "engines": {
     "node": ">=20"
