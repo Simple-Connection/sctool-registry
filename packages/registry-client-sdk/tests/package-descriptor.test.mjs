@@ -16,13 +16,13 @@ function requireEqual(actual, expected, label) {
   if (actual !== expected) throw new Error(`${label}: expected=${expected} actual=${actual}`);
 }
 
-function require(condition, label) {
+function assertCondition(condition, label) {
   if (!condition) throw new Error(label);
 }
 
 function requireIssue(result, code, label) {
-  require(!result.ok, `${label}: expected validation failure`);
-  require(result.issues.some((entry) => entry.code === code), `${label}: missing issue ${code}`);
+  assertCondition(!result.ok, `${label}: expected validation failure`);
+  assertCondition(result.issues.some((entry) => entry.code === code), `${label}: missing issue ${code}`);
 }
 
 const validDescriptor = {
@@ -79,9 +79,9 @@ requireEqual(PACKAGE_DESCRIPTOR_ACCESS_CONTRACT, "registry-access-v1", "access c
 requireEqual(PACKAGE_DESCRIPTOR_ARTIFACT_REPOSITORY, "Simple-Connection/sctool-artifacts", "artifact repository constant");
 
 const valid = validatePackageDescriptor(validDescriptor, { expectedPackageId: "example-tool" });
-require(valid.ok, "valid descriptor must pass");
-require(Object.isFrozen(valid.descriptor), "validated descriptor must be frozen");
-require(Object.isFrozen(valid.descriptor.versions["1.2.3"].artifacts["win-x64"].content), "nested descriptor content must be frozen");
+assertCondition(valid.ok, "valid descriptor must pass");
+assertCondition(Object.isFrozen(valid.descriptor), "validated descriptor must be frozen");
+assertCondition(Object.isFrozen(valid.descriptor.versions["1.2.3"].artifacts["win-x64"].content), "nested descriptor content must be frozen");
 requireEqual(valid.descriptor.defaultChannel, "stable", "default channel preserved");
 
 const parsed = parsePackageDescriptor(validDescriptor);
@@ -93,7 +93,7 @@ try {
 } catch (error) {
   threw = error instanceof RegistryPackageDescriptorError;
 }
-require(threw, "parsePackageDescriptor must throw RegistryPackageDescriptorError");
+assertCondition(threw, "parsePackageDescriptor must throw RegistryPackageDescriptorError");
 
 const unsupported = clone(validDescriptor);
 unsupported.schemaVersion = "3.0.0";
@@ -145,7 +145,7 @@ requireIssue(validatePackageDescriptor(invalidDate), "invalid-value", "invalid d
 
 const lowercaseDateTime = clone(validDescriptor);
 lowercaseDateTime.versions["1.2.3"].artifacts["win-x64"].publishedAt = "2026-09-03t00:00:00z";
-require(validatePackageDescriptor(lowercaseDateTime).ok, "lowercase RFC3339 t/z must be accepted");
+assertCondition(validatePackageDescriptor(lowercaseDateTime).ok, "lowercase RFC3339 t/z must be accepted");
 
 const leapSecond = clone(validDescriptor);
 leapSecond.versions["1.2.3"].artifacts["win-x64"].publishedAt = "2026-09-03T00:00:60Z";
