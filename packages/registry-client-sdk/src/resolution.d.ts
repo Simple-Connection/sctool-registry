@@ -4,9 +4,8 @@ import type {
   RegistryArtifactDelivery,
   RegistryArtifactSignature,
   RegistryArtifactTarget,
-  RegistryPackageDescriptor,
   RegistryPackageVersion,
-} from "./package-descriptor.mjs";
+} from "./package-descriptor.d.ts";
 
 export interface RegistryResolutionDetails {
   readonly [key: string]: unknown;
@@ -51,11 +50,11 @@ export interface ResolvedRegistryPackageTarget {
 export declare function deriveTargetKey(platform: string, arch: string): string;
 
 export declare function resolvePackageVersion(
-  input: RegistryPackageDescriptor | unknown,
+  input: unknown,
   selector?: RegistryPackageVersionSelector,
 ): ResolvedRegistryPackageVersion;
 
 export declare function resolvePackageTarget(
-  input: RegistryPackageDescriptor | unknown,
+  input: unknown,
   selector: RegistryPackageTargetSelector,
 ): ResolvedRegistryPackageTarget;
