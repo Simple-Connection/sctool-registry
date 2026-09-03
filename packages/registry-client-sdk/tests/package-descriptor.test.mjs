@@ -151,4 +151,8 @@ const leapSecond = clone(validDescriptor);
 leapSecond.versions["1.2.3"].artifacts["win-x64"].publishedAt = "2026-09-03T00:00:60Z";
 requireIssue(validatePackageDescriptor(leapSecond), "invalid-value", "leap second rejected by canonical format checker");
 
-console.log("Registry Client SDK package descriptor PASS cases=20");
+const yearZero = clone(validDescriptor);
+yearZero.versions["1.2.3"].artifacts["win-x64"].publishedAt = "0000-01-01T00:00:00Z";
+requireIssue(validatePackageDescriptor(yearZero), "invalid-value", "year zero rejected by canonical format checker");
+
+console.log("Registry Client SDK package descriptor PASS cases=21");
