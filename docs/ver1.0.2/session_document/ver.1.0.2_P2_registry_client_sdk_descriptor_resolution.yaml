@@ -11,6 +11,7 @@ session:
   branch: "dev/1.0.2"
   authority_repository: "Simple-Connection/sctool-registry"
   start_head: "efc9314be1ab2d20b71cb10ef7fb02a94328b2d5"
+  implementation_head: "1b544eb300e4a67b711f2baad9c40b37ae62e3c2"
 
 authority:
   registry_repository: "Simple-Connection/sctool-registry"
@@ -92,23 +93,22 @@ contract_rules:
 
 implementation_target:
   package_root: "packages/registry-client-sdk"
-  existing:
+  runtime:
     - "src/index.mjs"
-    - "src/index.d.ts"
     - "src/registry-access.mjs"
-    - "src/registry-access.d.ts"
+    - "src/package-descriptor.mjs"
+    - "src/resolution.mjs"
+  declarations:
+    - "src/index.d.mts"
+    - "src/registry-access.d.mts"
+    - "src/package-descriptor.d.mts"
+    - "src/resolution.d.mts"
+  tests:
     - "tests/boundary.test.mjs"
     - "tests/registry-access.test.mjs"
-  add:
-    - "src/package-descriptor.mjs"
-    - "src/package-descriptor.d.ts"
-    - "src/resolution.mjs"
-    - "src/resolution.d.ts"
     - "tests/package-descriptor.test.mjs"
     - "tests/resolution.test.mjs"
-  modify:
-    - "src/index.mjs"
-    - "src/index.d.ts"
+  modified:
     - "package.json"
     - "README.md"
 
@@ -134,13 +134,14 @@ work_units:
 
   - id: "W2"
     title: "package_descriptor_runtime_model_and_validation"
-    status: "READY"
+    status: "COMPLETE"
     inputs:
       - "schemas/package.schema.json"
       - "docs/REGISTRY_CONTRACT_V2.md"
+      - "policy/registry-policy.json"
     outputs:
       - "src/package-descriptor.mjs"
-      - "src/package-descriptor.d.ts"
+      - "src/package-descriptor.d.mts"
       - "tests/package-descriptor.test.mjs"
     completion:
       - "valid schema 2.0.0 descriptor accepted"
@@ -148,10 +149,11 @@ work_units:
       - "malformed required fields rejected"
       - "unknown descriptor/artifact fields rejected where the canonical schema forbids them"
       - "cross-field package descriptor consistency required by Registry validation is enforced"
+      - "canonical RFC3339 format-checker edge behavior covered"
 
   - id: "W3"
     title: "channel_and_version_resolution"
-    status: "BLOCKED_BY_W2"
+    status: "COMPLETE"
     inputs:
       - "validated package descriptor"
     outputs:
@@ -162,18 +164,19 @@ work_units:
       - "missing channel fails closed"
       - "channel pointing to missing version fails closed"
       - "missing explicit version fails closed"
+      - "channel and version selectors together fail as ambiguous"
       - "no version fallback or hardcoded package version"
 
   - id: "W4"
     title: "target_content_delivery_resolution"
-    status: "BLOCKED_BY_W2_W3"
+    status: "COMPLETE"
     inputs:
       - "validated resolved version"
       - "requested platform"
       - "requested arch"
     outputs:
       - "src/resolution.mjs"
-      - "src/resolution.d.ts"
+      - "src/resolution.d.mts"
       - "tests/resolution.test.mjs"
     completion:
       - "target key is derived exactly from platform-arch"
@@ -181,16 +184,17 @@ work_units:
       - "missing target fails closed"
       - "content authority is returned without reinterpretation"
       - "delivery discriminator/access/locator are returned without backend lookup"
-      - "unsupported delivery metadata fails closed"
+      - "unsupported delivery metadata fails closed during descriptor validation"
 
   - id: "W5"
     title: "public_surface_and_negative_regression"
-    status: "BLOCKED_BY_W2_W3_W4"
+    status: "COMPLETE"
     inputs:
       - "completed descriptor and resolution modules"
     outputs:
       - "updated SDK root exports"
-      - "updated package exports"
+      - "explicit package-descriptor and resolution package subpath exports"
+      - "ESM .d.mts declaration surfaces"
       - "updated README responsibility documentation"
       - "negative regression coverage"
     completion:
@@ -198,23 +202,24 @@ work_units:
       - "new descriptor/resolution surfaces are explicit"
       - "SDK has no SCTool authoring dependency"
       - "SDK performs no live GitHub Release lookup or artifact retrieval in P2"
+      - "NodeNext declaration consumer resolves root and subpath types"
 
   - id: "W6"
     title: "p2_validation_and_closeout"
-    status: "BLOCKED_BY_W5"
+    status: "VALIDATION_READY"
     inputs:
-      - "all P2 implementation and test changes"
+      - "all P2 implementation and test changes through implementation head"
     outputs:
-      - "exact validation evidence"
+      - "exact repository validation evidence"
       - "P2 closeout state"
     completion:
-      - "Registry Client SDK tests PASS"
+      - "Registry Client SDK tests PASS on exact dev/1.0.2 checkout"
       - "Registry validation PASS"
       - "PTSIP validate/conform PASS"
       - "Production Trust remains inactive unless separately approved"
 
 verification:
-  state: "PENDING"
+  state: "PARTIAL_PASS_PENDING_REPOSITORY_GATES"
   required:
     - "Registry Client SDK boundary test PASS"
     - "Registry Access V1 regression PASS"
@@ -226,16 +231,51 @@ verification:
     - "No Registry Client SDK dependency on Kinirin/Simple-Connection internals"
     - "No artifact backend lookup/download introduced in P2"
     - "Production Trust remains inactive/unchanged"
-  results: []
+  results:
+    - "Node syntax check PASS for package-descriptor.mjs"
+    - "Node syntax check PASS for resolution.mjs"
+    - "Package descriptor regression PASS cases=21 in local isolated execution"
+    - "Channel/version/target resolution regression PASS cases=20 in local isolated execution"
+    - "TypeScript 5.8.3 NodeNext declaration consumer PASS using .d.mts root/subpath declarations"
+    - "Full exact-checkout Registry JSON and PTSIP repository gates remain pending; execution environment could not clone github.com because DNS/network access was unavailable"
+
+implementation_commits:
+  - "7e1fef88ea0621778520ae69020e47541a6d4f90"
+  - "cea48d302a24e04f8baba50b639ee2c94d88b7a2"
+  - "044c70fe10661a546ac33985284066fea2bfb343"
+  - "23da58f8bb27719a439c5a2ccf109d2a4afa62d5"
+  - "e19e050607bd4d1785f36e0979ac4dfd8d409668"
+  - "d51a63d6f311d6a94595a5465a4f7678e02d0410"
+  - "e4f96b875ee9b825a30e03a5eb7106deab243968"
+  - "ee65cae1e28d86d9f76c98fb655e3bc5d7fbd6f8"
+  - "a4fbc9bea28fb13bde2bca828902bcd162f0db81"
+  - "870e58b48f4cce9c85f7a2917189ab066a30ce6a"
+  - "0ef8e5075ea040acb6aeb6b98086220a525d457c"
+  - "f3d22e793fa3914949398599d4b31b0cb9c7688d"
+  - "ee1d4ef317065712d336404e943a64a914741acd"
+  - "d8c2506d5af425635d2e85452ec3290fff9afbff"
+  - "9391f1edf163e4f5a32fabb7adcb0185bc272cd3"
+  - "b212e702195fff95f1aa256f7a4d7c4346e5793d"
+  - "04bcb93624019cbd9c91daa14c5aa757b23b31b6"
+  - "195469663fd8fc127176dbc960511b8b5c2481b3"
+  - "c747d86c0c2d1809fe7d3c608d4fc95b2d5a69b6"
+  - "6c7eb890d6c29d514285d0aa1a3ba8bffb1206fe"
+  - "65ce9a327b4637e62218f4d560a687563cd1c489"
+  - "3a69e873a64847d41541496e7d359759120304a6"
+  - "fce51682093d25733055906215f2bfe3ef8e6941"
+  - "8cdec823322ac306987cfdb9ce06a1d41affbe82"
+  - "1b544eb300e4a67b711f2baad9c40b37ae62e3c2"
 
 state:
   audit: "COMPLETE"
   plan: "APPROVED"
-  apply: "IN_PROGRESS"
-  test: "PENDING"
+  apply: "COMPLETE"
+  test: "PARTIAL_PASS_PENDING_REPOSITORY_GATES"
   closeout: "PENDING"
 
 next:
   action: >-
-    Implement W2 package descriptor runtime validation first. Do not begin live
-    GitHub Release asset resolution or artifact retrieval; those remain P3 scope.
+    Run the exact dev/1.0.2 repository gates: Registry Client SDK tests,
+    Registry JSON validation, and PTSIP 0.3.7 validate/conform. Close P2 only after
+    those exact-checkout gates pass. Do not begin live GitHub Release asset resolution
+    or artifact retrieval; those remain P3 scope.
