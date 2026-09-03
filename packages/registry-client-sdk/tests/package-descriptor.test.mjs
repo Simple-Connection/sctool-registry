@@ -143,4 +143,12 @@ const invalidDate = clone(validDescriptor);
 invalidDate.versions["1.2.3"].artifacts["win-x64"].publishedAt = "2026-02-30T00:00:00Z";
 requireIssue(validatePackageDescriptor(invalidDate), "invalid-value", "invalid date-time");
 
-console.log("Registry Client SDK package descriptor PASS cases=18");
+const lowercaseDateTime = clone(validDescriptor);
+lowercaseDateTime.versions["1.2.3"].artifacts["win-x64"].publishedAt = "2026-09-03t00:00:00z";
+require(validatePackageDescriptor(lowercaseDateTime).ok, "lowercase RFC3339 t/z must be accepted");
+
+const leapSecond = clone(validDescriptor);
+leapSecond.versions["1.2.3"].artifacts["win-x64"].publishedAt = "2026-09-03T00:00:60Z";
+requireIssue(validatePackageDescriptor(leapSecond), "invalid-value", "leap second rejected by canonical format checker");
+
+console.log("Registry Client SDK package descriptor PASS cases=20");
