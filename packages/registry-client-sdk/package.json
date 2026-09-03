@@ -12,6 +12,14 @@
     "./registry-access": {
       "types": "./src/registry-access.d.ts",
       "import": "./src/registry-access.mjs"
+    },
+    "./package-descriptor": {
+      "types": "./src/package-descriptor.d.ts",
+      "import": "./src/package-descriptor.mjs"
+    },
+    "./resolution": {
+      "types": "./src/resolution.d.ts",
+      "import": "./src/resolution.mjs"
     }
   },
   "files": [
@@ -19,7 +27,7 @@
     "README.md"
   ],
   "scripts": {
-    "test": "node ./tests/boundary.test.mjs && node ./tests/registry-access.test.mjs"
+    "test": "node ./tests/boundary.test.mjs && node ./tests/registry-access.test.mjs && node ./tests/package-descriptor.test.mjs && node ./tests/resolution.test.mjs"
   },
   "engines": {
     "node": ">=20"
