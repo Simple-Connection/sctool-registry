@@ -6,19 +6,19 @@
   "private": true,
   "exports": {
     ".": {
-      "types": "./src/index.d.ts",
+      "types": "./src/index.d.mts",
       "import": "./src/index.mjs"
     },
     "./registry-access": {
-      "types": "./src/registry-access.d.ts",
+      "types": "./src/registry-access.d.mts",
       "import": "./src/registry-access.mjs"
     },
     "./package-descriptor": {
-      "types": "./src/package-descriptor.d.ts",
+      "types": "./src/package-descriptor.d.mts",
       "import": "./src/package-descriptor.mjs"
     },
     "./resolution": {
-      "types": "./src/resolution.d.ts",
+      "types": "./src/resolution.d.mts",
       "import": "./src/resolution.mjs"
     }
   },
