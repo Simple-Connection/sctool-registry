@@ -9,7 +9,7 @@ function requireEqual(actual, expected, label) {
   if (actual !== expected) throw new Error(`${label}: expected=${expected} actual=${actual}`);
 }
 
-function require(condition, label) {
+function assertCondition(condition, label) {
   if (!condition) throw new Error(label);
 }
 
@@ -104,7 +104,7 @@ requireEqual(resolved.content.filename, "example-tool-1.2.3-win-x64.sctool", "co
 requireEqual(resolved.content.size, 100, "content size authority");
 requireEqual(resolved.delivery.type, "github-release-asset", "delivery discriminator authority");
 requireEqual(resolved.delivery.locator.assetId, 101, "delivery asset id preservation");
-require(Object.isFrozen(resolved.content), "resolved content must remain frozen");
+assertCondition(Object.isFrozen(resolved.content), "resolved content must remain frozen");
 
 const betaTarget = resolvePackageTarget(descriptor, { channel: "beta", platform: "win", arch: "x64" });
 requireEqual(betaTarget.version, "1.3.0-beta.1", "beta target version");
