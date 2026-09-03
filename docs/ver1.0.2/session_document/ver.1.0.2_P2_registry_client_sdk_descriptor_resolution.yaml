@@ -1,0 +1,241 @@
+schema_version: "1.0.2"
+document_type: build_session
+
+session:
+  id: "P2"
+  number: 2
+  title: "registry_client_sdk_descriptor_resolution"
+  status: "IN_PROGRESS"
+  approval: "USER_APPROVED"
+  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.md"
+  branch: "dev/1.0.2"
+  authority_repository: "Simple-Connection/sctool-registry"
+  start_head: "efc9314be1ab2d20b71cb10ef7fb02a94328b2d5"
+
+authority:
+  registry_repository: "Simple-Connection/sctool-registry"
+  registry_baseline: "c3e881742177aec3eae71d2c336801b6b52c74e5"
+  registry_client_sdk: "packages/registry-client-sdk"
+  package_name: "@simple-connection/sctool-registry-client-sdk"
+  registry_contract: "docs/REGISTRY_CONTRACT_V2.md"
+  artifact_delivery_contract: "docs/ARTIFACT_DELIVERY_V1.md"
+  package_schema: "schemas/package.schema.json"
+  package_schema_version: "2.0.0"
+  registry_policy: "policy/registry-policy.json"
+
+objective:
+  code: "descriptor_channel_version_target_resolution"
+  summary: >-
+    Implement the Registry-owned consumer boundary that validates package descriptor
+    schema 2.0.0 inputs and deterministically resolves channel, version, and target
+    metadata without performing artifact backend lookup or retrieval.
+
+scope:
+  in:
+    - "Package descriptor schemaVersion 2.0.0 runtime validation"
+    - "required root field and additional-property validation"
+    - "semantic-version key/value validation required by the descriptor contract"
+    - "defaultChannel and explicit channel resolution"
+    - "channel version existence validation"
+    - "explicit version resolution"
+    - "platform/arch target key derivation and exact artifact selection"
+    - "artifact map key == target.platform-target.arch consistency validation"
+    - "content filename/sha256/size authority preservation"
+    - "delivery.type/access/locator structural preservation"
+    - "Registry policy checks required to interpret the current github-release-asset descriptor"
+    - "fail-closed unsupported/malformed descriptor behavior"
+    - "public Registry Client SDK exports and regression tests for the above"
+  out:
+    - "GitHub Release lookup"
+    - "release tag API resolution"
+    - "GitHub Release asset ID lookup against a live backend"
+    - "authenticated artifact download"
+    - "downloaded byte-length verification"
+    - "downloaded SHA-256 verification"
+    - "normalized update candidate API"
+    - "Simple Connection integration"
+    - "removal of the historical Registry access surface from Kinirin/Simple-Connection"
+    - "install/activation/rollback/runtime/UI policy"
+    - "SCTool scaffold/build/test/sign/package authoring"
+    - "production Root trust activation"
+
+contract_rules:
+  descriptor:
+    schema_version: "2.0.0"
+    required_root:
+      - "schemaVersion"
+      - "id"
+      - "publisher"
+      - "defaultChannel"
+      - "channels"
+      - "versions"
+    additional_properties: "FAIL_CLOSED"
+  resolution:
+    default_channel: "descriptor.defaultChannel -> descriptor.channels[channel]"
+    explicit_channel: "descriptor.channels[channel]"
+    explicit_version: "descriptor.versions[version]"
+    target_key: "platform + '-' + arch"
+    target_consistency: "artifact map key must equal artifact.target.platform + '-' + artifact.target.arch"
+    fallback: "FORBIDDEN"
+  artifact_authority:
+    content:
+      - "filename"
+      - "sha256"
+      - "size"
+    delivery_discriminator: "delivery.type"
+    allowed_delivery_type: "github-release-asset"
+    access_contract: "registry-access-v1"
+    policy_repository: "Simple-Connection/sctool-artifacts"
+    note: >-
+      P2 validates and preserves delivery metadata but does not resolve the GitHub
+      Release or retrieve artifact bytes.
+
+implementation_target:
+  package_root: "packages/registry-client-sdk"
+  existing:
+    - "src/index.mjs"
+    - "src/index.d.ts"
+    - "src/registry-access.mjs"
+    - "src/registry-access.d.ts"
+    - "tests/boundary.test.mjs"
+    - "tests/registry-access.test.mjs"
+  add:
+    - "src/package-descriptor.mjs"
+    - "src/package-descriptor.d.ts"
+    - "src/resolution.mjs"
+    - "src/resolution.d.ts"
+    - "tests/package-descriptor.test.mjs"
+    - "tests/resolution.test.mjs"
+  modify:
+    - "src/index.mjs"
+    - "src/index.d.ts"
+    - "package.json"
+    - "README.md"
+
+work_units:
+  - id: "W1"
+    title: "p2_scope_and_contract_materialization"
+    status: "COMPLETE"
+    approval: "USER_APPROVED"
+    inputs:
+      - "docs/REGISTRY_CONTRACT_V2.md"
+      - "docs/ARTIFACT_DELIVERY_V1.md"
+      - "schemas/package.schema.json"
+      - "policy/registry-policy.json"
+      - "P1 Registry Client SDK boundary closeout"
+    outputs:
+      - "P2 session scope"
+      - "P2 implementation path list"
+      - "P2/P3/P4 responsibility boundary"
+    completion:
+      - "descriptor/channel/version/target resolution assigned to P2"
+      - "backend lookup/retrieval remains outside P2"
+      - "Simple Connection integration remains outside P2"
+
+  - id: "W2"
+    title: "package_descriptor_runtime_model_and_validation"
+    status: "READY"
+    inputs:
+      - "schemas/package.schema.json"
+      - "docs/REGISTRY_CONTRACT_V2.md"
+    outputs:
+      - "src/package-descriptor.mjs"
+      - "src/package-descriptor.d.ts"
+      - "tests/package-descriptor.test.mjs"
+    completion:
+      - "valid schema 2.0.0 descriptor accepted"
+      - "unsupported schema version rejected"
+      - "malformed required fields rejected"
+      - "unknown descriptor/artifact fields rejected where the canonical schema forbids them"
+      - "cross-field package descriptor consistency required by Registry validation is enforced"
+
+  - id: "W3"
+    title: "channel_and_version_resolution"
+    status: "BLOCKED_BY_W2"
+    inputs:
+      - "validated package descriptor"
+    outputs:
+      - "deterministic defaultChannel resolution"
+      - "deterministic explicit channel resolution"
+      - "deterministic explicit version resolution"
+    completion:
+      - "missing channel fails closed"
+      - "channel pointing to missing version fails closed"
+      - "missing explicit version fails closed"
+      - "no version fallback or hardcoded package version"
+
+  - id: "W4"
+    title: "target_content_delivery_resolution"
+    status: "BLOCKED_BY_W2_W3"
+    inputs:
+      - "validated resolved version"
+      - "requested platform"
+      - "requested arch"
+    outputs:
+      - "src/resolution.mjs"
+      - "src/resolution.d.ts"
+      - "tests/resolution.test.mjs"
+    completion:
+      - "target key is derived exactly from platform-arch"
+      - "artifact target identity matches artifact map key"
+      - "missing target fails closed"
+      - "content authority is returned without reinterpretation"
+      - "delivery discriminator/access/locator are returned without backend lookup"
+      - "unsupported delivery metadata fails closed"
+
+  - id: "W5"
+    title: "public_surface_and_negative_regression"
+    status: "BLOCKED_BY_W2_W3_W4"
+    inputs:
+      - "completed descriptor and resolution modules"
+    outputs:
+      - "updated SDK root exports"
+      - "updated package exports"
+      - "updated README responsibility documentation"
+      - "negative regression coverage"
+    completion:
+      - "Registry Access V1 public surface remains compatible"
+      - "new descriptor/resolution surfaces are explicit"
+      - "SDK has no SCTool authoring dependency"
+      - "SDK performs no live GitHub Release lookup or artifact retrieval in P2"
+
+  - id: "W6"
+    title: "p2_validation_and_closeout"
+    status: "BLOCKED_BY_W5"
+    inputs:
+      - "all P2 implementation and test changes"
+    outputs:
+      - "exact validation evidence"
+      - "P2 closeout state"
+    completion:
+      - "Registry Client SDK tests PASS"
+      - "Registry validation PASS"
+      - "PTSIP validate/conform PASS"
+      - "Production Trust remains inactive unless separately approved"
+
+verification:
+  state: "PENDING"
+  required:
+    - "Registry Client SDK boundary test PASS"
+    - "Registry Access V1 regression PASS"
+    - "Package descriptor positive/negative tests PASS"
+    - "Channel/version/target resolution tests PASS"
+    - "Registry JSON validation PASS"
+    - "PTSIP Tool 0.3.7 validate PASS"
+    - "PTSIP Tool 0.3.7 conform PASS"
+    - "No Registry Client SDK dependency on Kinirin/Simple-Connection internals"
+    - "No artifact backend lookup/download introduced in P2"
+    - "Production Trust remains inactive/unchanged"
+  results: []
+
+state:
+  audit: "COMPLETE"
+  plan: "APPROVED"
+  apply: "IN_PROGRESS"
+  test: "PENDING"
+  closeout: "PENDING"
+
+next:
+  action: >-
+    Implement W2 package descriptor runtime validation first. Do not begin live
+    GitHub Release asset resolution or artifact retrieval; those remain P3 scope.
