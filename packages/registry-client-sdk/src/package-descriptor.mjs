@@ -14,7 +14,7 @@ const SHA256_RE = /^[a-f0-9]{64}$/;
 const REPOSITORY_RE = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})\/[A-Za-z0-9._-]{1,100}$/;
 const KEY_ID_RE = /^[A-Za-z0-9](?:[A-Za-z0-9._:-]{0,126}[A-Za-z0-9])?$/;
 const BASE64_RE = /^[A-Za-z0-9+/]+={0,2}$/;
-const DATE_TIME_RE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(Z|[+-]\d{2}:\d{2})$/;
+const DATE_TIME_RE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(Z|[+-]\d{2}:\d{2})$/i;
 
 const ROOT_KEYS = new Set(["$schema", "schemaVersion", "id", "publisher", "source", "defaultChannel", "channels", "versions"]);
 const SOURCE_KEYS = new Set(["visibility", "repository"]);
@@ -103,10 +103,10 @@ function isValidDateTime(value) {
   const hour = Number(hourText);
   const minute = Number(minuteText);
   const second = Number(secondText);
-  if (month < 1 || month > 12 || hour > 23 || minute > 59 || second > 60) return false;
+  if (month < 1 || month > 12 || hour > 23 || minute > 59 || second > 59) return false;
   const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   if (day < 1 || day > monthDays[month - 1]) return false;
-  if (zone !== "Z") {
+  if (zone.toUpperCase() !== "Z") {
     const offsetHour = Number(zone.slice(1, 3));
     const offsetMinute = Number(zone.slice(4, 6));
     if (offsetHour > 23 || offsetMinute > 59) return false;
