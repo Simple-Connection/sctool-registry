@@ -1,2 +1,3 @@
 _site/
 *-private.pk8.b64
+*/*.log

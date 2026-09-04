@@ -1,0 +1,57 @@
+{
+  "format": "ptsip-artifact-evidence/v1",
+  "artifact_id": "sctool-registry-public-surface-e89b278eb92b9c8e",
+  "classification": "PRODUCT",
+  "producer_component": null,
+  "artifact_type": "public-registry-source-surface",
+  "shipping_scope": "public-registry-distribution-metadata",
+  "contents": {
+    "paths": [
+      "README.md",
+      "docs/ARTIFACT_DELIVERY_V1.md",
+      "docs/PAGES_DISTRIBUTION_V1.md",
+      "docs/REGISTRY_ACCESS_V1.md",
+      "docs/REGISTRY_CONTRACT_V1.md",
+      "docs/REGISTRY_CONTRACT_V2.md",
+      "packages/README.md",
+      "packages/registry-client-sdk/README.md",
+      "packages/registry-client-sdk/package.json",
+      "packages/registry-client-sdk/src/index.d.mts",
+      "packages/registry-client-sdk/src/index.mjs",
+      "packages/registry-client-sdk/src/package-descriptor.d.mts",
+      "packages/registry-client-sdk/src/package-descriptor.mjs",
+      "packages/registry-client-sdk/src/registry-access.d.mts",
+      "packages/registry-client-sdk/src/registry-access.mjs",
+      "packages/registry-client-sdk/src/resolution.d.mts",
+      "packages/registry-client-sdk/src/resolution.mjs",
+      "packages/registry-client-sdk/tests/boundary.test.mjs",
+      "packages/registry-client-sdk/tests/package-descriptor.test.mjs",
+      "packages/registry-client-sdk/tests/registry-access.test.mjs",
+      "packages/registry-client-sdk/tests/resolution.test.mjs",
+      "policy/registry-policy.json",
+      "publishers/README.md",
+      "registry.json",
+      "schemas/package.schema.json",
+      "schemas/policy-v1.schema.json",
+      "schemas/policy.schema.json",
+      "schemas/publisher.schema.json",
+      "schemas/registry-head.schema.json",
+      "schemas/registry-snapshot.schema.json",
+      "schemas/registry.schema.json",
+      "schemas/submission.schema.json",
+      "schemas/trust.schema.json",
+      "trust/README.md"
+    ],
+    "components": [
+      "product-documentation",
+      "registry-catalog",
+      "registry-client-sdk",
+      "registry-contracts"
+    ],
+    "complete": true
+  },
+  "provenance": "OBSERVED",
+  "evidence_ids": [
+    "git-tree:e89b278eb92b9c8eda519c6daff6f67b43cbd400"
+  ]
+}

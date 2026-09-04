@@ -1,0 +1,9 @@
+{
+  "format": "ptsip-artifact-evidence-binding/v1",
+  "artifact_sha256": "cd08bde8b669a0c674d72684583c0446129fed8135f3c7a787c6e352851e13e5",
+  "subject": {
+    "repository": "Simple-Connection/sctool-registry",
+    "revision": "e89b278eb92b9c8eda519c6daff6f67b43cbd400",
+    "tracked_content_sha256": "4bdcb9bb197998b494d88d99187d4bff500bd92c696156068d11456ea9d75051"
+  }
+}
