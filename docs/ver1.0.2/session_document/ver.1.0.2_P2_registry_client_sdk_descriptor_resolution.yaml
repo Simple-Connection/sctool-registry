@@ -5,13 +5,14 @@ session:
   id: "P2"
   number: 2
   title: "registry_client_sdk_descriptor_resolution"
-  status: "IN_PROGRESS"
+  status: "COMPLETE"
   approval: "USER_APPROVED"
   improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.md"
   branch: "dev/1.0.2"
   authority_repository: "Simple-Connection/sctool-registry"
   start_head: "efc9314be1ab2d20b71cb10ef7fb02a94328b2d5"
   implementation_head: "1b544eb300e4a67b711f2baad9c40b37ae62e3c2"
+  exact_validation_head: "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
 
 authority:
   registry_repository: "Simple-Connection/sctool-registry"
@@ -206,9 +207,9 @@ work_units:
 
   - id: "W6"
     title: "p2_validation_and_closeout"
-    status: "VALIDATION_READY"
+    status: "COMPLETE"
     inputs:
-      - "all P2 implementation and test changes through implementation head"
+      - "all P2 implementation and test changes through exact validation head"
     outputs:
       - "exact repository validation evidence"
       - "P2 closeout state"
@@ -219,7 +220,8 @@ work_units:
       - "Production Trust remains inactive unless separately approved"
 
 verification:
-  state: "PARTIAL_PASS_PENDING_REPOSITORY_GATES"
+  state: "PASS"
+  exact_code_head: "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
   required:
     - "Registry Client SDK boundary test PASS"
     - "Registry Access V1 regression PASS"
@@ -232,12 +234,18 @@ verification:
     - "No artifact backend lookup/download introduced in P2"
     - "Production Trust remains inactive/unchanged"
   results:
-    - "Node syntax check PASS for package-descriptor.mjs"
-    - "Node syntax check PASS for resolution.mjs"
-    - "Package descriptor regression PASS cases=21 in local isolated execution"
-    - "Channel/version/target resolution regression PASS cases=20 in local isolated execution"
-    - "TypeScript 5.8.3 NodeNext declaration consumer PASS using .d.mts root/subpath declarations"
-    - "Full exact-checkout Registry JSON and PTSIP repository gates remain pending; execution environment could not clone github.com because DNS/network access was unavailable"
+    - "Exact dev/1.0.2 validation head e89b278eb92b9c8eda519c6daff6f67b43cbd400"
+    - "Registry Client SDK boundary PASS cases=8"
+    - "Registry Access V1 regression PASS cases=11"
+    - "Package descriptor regression PASS cases=21"
+    - "Channel/version/target resolution regression PASS cases=20"
+    - "Registry JSON validation PASS packages=0 publishers=0 trust=inactive"
+    - "PTSIP Tool 0.3.7 validate PASS with profile valid=true, errors=0, warnings=0"
+    - "PTSIP Tool 0.3.7 conform outcome CONFORMANT"
+    - "PTSIP Product Artifact evidence valid with revision binding to e89b278eb92b9c8eda519c6daff6f67b43cbd400"
+    - "PTSIP conformance blocking_gaps=0, non_blocking_gaps=0, audit PASS, coverage_gap_count=0"
+    - "Tracked repository content clean at exact validation head; only untracked logs/ validation evidence directory present"
+    - "Production Trust remains inactive/unchanged"
 
 implementation_commits:
   - "7e1fef88ea0621778520ae69020e47541a6d4f90"
@@ -265,17 +273,18 @@ implementation_commits:
   - "fce51682093d25733055906215f2bfe3ef8e6941"
   - "8cdec823322ac306987cfdb9ce06a1d41affbe82"
   - "1b544eb300e4a67b711f2baad9c40b37ae62e3c2"
+  - "de8a4fefc70b0475a57d7c66745dbeca21c86928"
+  - "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
 
 state:
   audit: "COMPLETE"
   plan: "APPROVED"
   apply: "COMPLETE"
-  test: "PARTIAL_PASS_PENDING_REPOSITORY_GATES"
-  closeout: "PENDING"
+  test: "PASS"
+  closeout: "COMPLETE"
 
 next:
   action: >-
-    Run the exact dev/1.0.2 repository gates: Registry Client SDK tests,
-    Registry JSON validation, and PTSIP 0.3.7 validate/conform. Close P2 only after
-    those exact-checkout gates pass. Do not begin live GitHub Release asset resolution
-    or artifact retrieval; those remain P3 scope.
+    P2 is closed. Do not begin live GitHub Release exact asset resolution,
+    authenticated artifact retrieval, downloaded-byte verification, or update-candidate
+    normalization without a separately approved and materialized P3 session.
