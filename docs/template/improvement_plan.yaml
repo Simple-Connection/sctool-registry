@@ -26,6 +26,7 @@ sessions:
 
 gates:
   approved_sessions: "<PASS|PENDING|BLOCKED>"
+  machine_document_routing: "<PASS|PENDING|BLOCKED>"
   registry_validation: "<PASS|PENDING|BLOCKED>"
   ptsip_validation: "<PASS|PENDING|BLOCKED>"
   external_integration: "<PASS|PENDING|BLOCKED|NOT_APPLICABLE>"

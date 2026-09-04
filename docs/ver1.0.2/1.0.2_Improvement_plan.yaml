@@ -71,8 +71,9 @@ sessions:
 
 gates:
   approved_sessions: PASS
-  registry_validation: PASS
-  ptsip_validation: PASS
+  machine_document_routing: PENDING
+  registry_validation: PENDING
+  ptsip_validation: PENDING
   external_integration: PENDING
   version_completion: BLOCKED
   merge_to_main: BLOCKED
