@@ -1,0 +1,24 @@
+schema_version: "1.0"
+document_type: session_type_template
+template_id: session_type_C_v1
+session_type: C
+semantic: VALIDATION_CLOSEOUT
+natural_language: PAYLOAD_ONLY
+
+payload:
+  validation_context:
+    code: "<MACHINE_ID>"
+    statement: "<NATURAL_LANGUAGE>"
+  gate_interpretation:
+    - gate_id: "<MACHINE_ID>"
+      statement: "<NATURAL_LANGUAGE>"
+  exceptions:
+    - code: "<MACHINE_ID>"
+      statement: "<NATURAL_LANGUAGE>"
+      disposition: "<MACHINE_ID>"
+  closeout:
+    code: "<MACHINE_ID>"
+    statement: "<NATURAL_LANGUAGE>"
+  next_action:
+    code: "<MACHINE_ID>"
+    statement: "<NATURAL_LANGUAGE>"

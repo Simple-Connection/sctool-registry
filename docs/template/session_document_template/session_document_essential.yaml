@@ -1,0 +1,62 @@
+schema_version: "1.0"
+document_type: session_document_template
+template_id: session_document_essential_v1
+natural_language: FORBIDDEN
+
+required_sections:
+  - session
+  - routing
+  - heads
+  - work_units
+  - verification
+  - state
+  - next
+
+session:
+  id: "<SESSION_ID>"
+  type: "<A|B|C>"
+  status: "<SESSION_STATE>"
+  approval: "<APPROVAL_STATE>"
+  distribution_contract_version: "<SEMVER>"
+  branch: "dev/<SEMVER>"
+  authority_repository: "<OWNER/REPOSITORY>"
+  improvement_plan: "<PATH>"
+
+routing:
+  docs_index: "docs/index.yaml"
+  template_index: "docs/template/index.yaml"
+  essential_template: "docs/template/session_document_template/session_document_essential.yaml"
+  type_template: "<PATH>"
+
+heads:
+  start: "<GIT_SHA>"
+  implementation: "<GIT_SHA|null>"
+  exact_validation: "<GIT_SHA|null>"
+
+work_units:
+  - id: "<WORK_UNIT_ID>"
+    status: "<WORK_UNIT_STATE>"
+    input_refs:
+      - "<PATH|ID>"
+    output_refs:
+      - "<PATH|ID>"
+    completion_codes:
+      - "<MACHINE_ID>"
+
+verification:
+  state: "<PENDING|PASS|FAIL|BLOCKED>"
+  required_gate_ids:
+    - "<MACHINE_ID>"
+  evidence_refs:
+    - "<PATH|ID|GIT_SHA>"
+
+state:
+  audit: "<STATE>"
+  plan: "<STATE>"
+  apply: "<STATE>"
+  test: "<STATE>"
+  closeout: "<STATE>"
+
+next:
+  state: "<AWAITING_APPROVAL|APPROVED|MATERIALIZED|NONE>"
+  session_id: "<SESSION_ID|null>"

@@ -1,0 +1,82 @@
+schema_version: "1.0"
+document_type: improvement_plan
+template_id: improvement_plan_v1
+natural_language: FORBIDDEN
+
+version:
+  distribution_contract_version: "1.0.2"
+  branch: "dev/1.0.2"
+  state: IN_PROGRESS_AWAITING_NEXT_SESSION_APPROVAL
+  baseline_main: "c3e881742177aec3eae71d2c336801b6b52c74e5"
+  previous_distribution_contract_version: "1.0.1"
+
+routing:
+  docs_index: "docs/index.yaml"
+  template_index: "docs/template/index.yaml"
+  session_document_root: "docs/ver1.0.2/session_document"
+
+sessions:
+  - id: P1
+    type: LEGACY
+    state: COMPLETE
+    approval: APPROVED
+    capability_codes:
+      - TWO_SDK_RESPONSIBILITY_BOUNDARY
+      - REGISTRY_ACCESS_V1
+    document: "docs/ver1.0.2/session_document/ver.1.0.2_P1_simple_connection_descriptor_consumer.yaml"
+
+  - id: P2
+    type: LEGACY
+    state: COMPLETE
+    approval: APPROVED
+    capability_codes:
+      - PACKAGE_DESCRIPTOR_V2
+      - CHANNEL_VERSION_TARGET_RESOLUTION
+    document: "docs/ver1.0.2/session_document/ver.1.0.2_P2_registry_client_sdk_descriptor_resolution.yaml"
+
+  - id: P3
+    type: B
+    state: AWAITING_APPROVAL
+    approval: REQUIRED
+    capability_codes:
+      - GITHUB_RELEASE_EXACT_ASSET_RESOLUTION
+      - AUTHENTICATED_ARTIFACT_RETRIEVAL
+    document: null
+
+  - id: P4
+    type: B
+    state: NOT_APPROVED
+    approval: REQUIRED
+    capability_codes:
+      - ARTIFACT_INTEGRITY
+      - VERIFIED_UPDATE_CANDIDATE
+    document: null
+
+  - id: P5
+    type: B
+    state: NOT_APPROVED
+    approval: REQUIRED
+    capability_codes:
+      - SIMPLE_CONNECTION_INTEGRATION
+      - LEGACY_REGISTRY_CLIENT_RETIREMENT
+    document: null
+
+  - id: P6
+    type: C
+    state: NOT_APPROVED
+    approval: REQUIRED
+    capability_codes:
+      - INSTALL_ACTIVATION_ROLLBACK_RUNTIME_UI_E2E
+    document: null
+
+gates:
+  approved_sessions: PASS
+  registry_validation: PASS
+  ptsip_validation: PASS
+  external_integration: PENDING
+  version_completion: BLOCKED
+  merge_to_main: BLOCKED
+
+next:
+  session_id: P3
+  state: AWAITING_APPROVAL

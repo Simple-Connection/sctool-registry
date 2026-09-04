@@ -1,0 +1,37 @@
+schema_version: "1.0"
+document_type: improvement_plan_template
+template_id: improvement_plan_v1
+natural_language: FORBIDDEN
+
+version:
+  distribution_contract_version: "<SEMVER>"
+  branch: "dev/<SEMVER>"
+  state: "<VERSION_STATE>"
+  baseline_main: "<GIT_SHA>"
+  previous_distribution_contract_version: "<SEMVER|null>"
+
+routing:
+  docs_index: "docs/index.yaml"
+  template_index: "docs/template/index.yaml"
+  session_document_root: "docs/ver<SEMVER>/session_document"
+
+sessions:
+  - id: "<SESSION_ID>"
+    type: "<A|B|C|LEGACY>"
+    state: "<SESSION_STATE>"
+    approval: "<APPROVAL_STATE>"
+    capability_codes:
+      - "<MACHINE_ID>"
+    document: "<PATH|null>"
+
+gates:
+  approved_sessions: "<PASS|PENDING|BLOCKED>"
+  registry_validation: "<PASS|PENDING|BLOCKED>"
+  ptsip_validation: "<PASS|PENDING|BLOCKED>"
+  external_integration: "<PASS|PENDING|BLOCKED|NOT_APPLICABLE>"
+  version_completion: "<PASS|PENDING|BLOCKED>"
+  merge_to_main: "<BLOCKED|READY|APPROVED>"
+
+next:
+  session_id: "<SESSION_ID|null>"
+  state: "<AWAITING_APPROVAL|APPROVED|MATERIALIZED|NONE>"

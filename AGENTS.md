@@ -19,66 +19,85 @@ ptsip.yaml
 
 ## Version-scoped development branches
 
-Development work is organized by `distribution_contract_version`. One distribution contract version may contain multiple implementation sessions or work units.
-
-For each version, create one persistent development branch using exactly:
+Development work is organized by `distribution_contract_version`. One version uses one persistent branch:
 
 ```text
 dev/{major}.{minor}.{micro}
 ```
 
-Examples:
+Do not create a branch per session. Do not infer the active version or session from prose, package versions, schema versions, SDK versions, or Tool versions.
+
+The canonical machine entry point for development documentation is:
 
 ```text
-dev/1.0.0
-dev/1.1.0
-dev/2.0.0
+docs/index.yaml
 ```
 
-The version in the branch name is the version being developed for that distribution contract. Do not infer a different branch version from an unrelated package, schema, policy, SDK, or tool version.
-
-Multiple sessions belonging to the same version must remain on the same `dev/{major}.{minor}.{micro}` branch. At the end of an individual session:
+A coding agent entering version/session work must resolve routing in this order:
 
 ```text
-commit the completed session to the version branch
-run the session's required validation
-continue later sessions from the same version branch
+docs/index.yaml
+-> docs/template/index.yaml
+-> current version improvement_plan
+-> approved current session_document
+-> session_document_essential template
+-> selected session_type template
 ```
 
-Do **not** create a new branch for every session and do **not** merge the version branch to `main` merely because one session is complete.
+`docs/index.yaml` is authoritative for the current distribution contract version, version state, current/next session state, version-plan path, session-document paths, and template routing. It must contain machine values only and must not contain free-form natural-language planning text.
 
-The version branch is merged to `main` only when all planned sessions for that version are complete and the version-level acceptance, Registry validation, and applicable PTSIP gates have passed.
-
-Each version has one canonical improvement-plan document named exactly:
+Each version has one canonical machine improvement plan named exactly:
 
 ```text
-{major}.{minor}.{micro}_Improvement_plan.md
+{major}.{minor}.{micro}_Improvement_plan.yaml
 ```
 
-The improvement plan is the version-level index for its sessions. It should record the version objective, session/work-unit breakdown, completion state, acceptance criteria, and final merge gate so that session completion does not get confused with version completion.
+The improvement plan must follow `docs/template/improvement_plan.yaml`. Natural-language fields are forbidden in the improvement plan. Version goals and future work must be represented by stable machine identifiers, enums, paths, states, gate IDs, and evidence references.
 
-Before creating a new development branch, determine the target `distribution_contract_version` and use this naming/document policy. Reuse an existing matching `dev/{major}.{minor}.{micro}` branch when that version is already in progress.
+Before creating a new development branch, resolve the target version from `docs/index.yaml`. Reuse an existing matching `dev/{major}.{minor}.{micro}` branch when that version is already active.
 
-## Version documentation layout
+Multiple sessions belonging to the same version remain on that version branch. Session completion does not authorize a merge to `main`. The version branch becomes merge-eligible only after version-level machine gates are satisfied and any required explicit approval is recorded.
 
-Version planning documents use:
+## Machine session entry and documentation layout
+
+Canonical layout:
 
 ```text
-docs/ver{major}.{minor}.{micro}/
-├─ {major}.{minor}.{micro}_Improvement_plan.md
-└─ session_document/
-   └─ ver.{major}.{minor}.{micro}_P{N}_{topic}.yaml
+docs/
+├─ index.yaml
+├─ template/
+│  ├─ index.yaml
+│  ├─ improvement_plan.yaml
+│  └─ session_document_template/
+│     ├─ session_document_essential.yaml
+│     ├─ session_type_A.yaml
+│     ├─ session_type_B.yaml
+│     └─ session_type_C.yaml
+└─ ver{major}.{minor}.{micro}/
+   ├─ {major}.{minor}.{micro}_Improvement_plan.yaml
+   └─ session_document/
+      └─ ver.{major}.{minor}.{micro}_P{N}_{topic}.yaml
 ```
 
-The improvement plan is the version-level index. Detailed session scope must not be duplicated into multiple Markdown planning files.
+`session_document_essential.yaml` defines the common machine-only routing/state/evidence fields. It must not introduce natural-language payload fields.
 
-For each approved session, create one YAML document under `session_document/`. The session YAML owns the detailed goal, allowed/excluded scope, work units, validation evidence, completion criteria, state, and next action.
+Natural-language planning payload is isolated behind a selected session type template:
+
+```text
+A = DECISION
+B = IMPLEMENTATION
+C = VALIDATION_CLOSEOUT
+```
+
+The type templates define the payload shape and the fields where natural language may appear. Do not move free-form planning text back into `docs/index.yaml`, the improvement plan, or the essential session template.
+
+A new primary session is not materialized before explicit approval. After approval, create exactly one session YAML by combining the essential machine fields with the selected type payload, then update the version improvement plan and `docs/index.yaml` in the same logical change.
 
 Primary sessions use `P1`, `P2`, `P3`, ... . Use `P1.1`, `P1.2`, ... only when an already approved primary session must be split into a subordinate session.
 
-Do not pre-generate empty session documents for speculative future work. Add a session YAML when that session is approved to begin, and add its path/status to the version improvement plan.
+Historical session documents created before this machine-entry model may retain their recorded payload. Their routing references must point to the current YAML improvement plan, and new sessions must use the template routing above.
 
-Version/session planning documents are repository development governance and must be assigned to `repository-governance` in `ptsip.yaml`, not to runtime Registry contracts or product documentation.
+All version/session/template/index governance paths are owned by `repository-governance` in `ptsip.yaml`.
 
 ## PTSIP is mandatory from the first commit
 

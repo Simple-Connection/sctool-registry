@@ -115,6 +115,8 @@ components:
     include:
       - "ptsip.yaml"
       - "AGENTS.md"
+      - "docs/index.yaml"
+      - "docs/template/**"
       - "docs/ver*/**"
       - ".gitignore"
       - ".vscode/settings.json"

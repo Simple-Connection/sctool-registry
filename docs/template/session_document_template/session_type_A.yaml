@@ -1,0 +1,25 @@
+schema_version: "1.0"
+document_type: session_type_template
+template_id: session_type_A_v1
+session_type: A
+semantic: DECISION
+natural_language: PAYLOAD_ONLY
+
+payload:
+  objective:
+    code: "<MACHINE_ID>"
+    statement: "<NATURAL_LANGUAGE>"
+  context:
+    - code: "<MACHINE_ID>"
+      statement: "<NATURAL_LANGUAGE>"
+  decisions:
+    - code: "<MACHINE_ID>"
+      statement: "<NATURAL_LANGUAGE>"
+      rationale: "<NATURAL_LANGUAGE>"
+  alternatives:
+    - code: "<MACHINE_ID>"
+      statement: "<NATURAL_LANGUAGE>"
+      disposition: "<MACHINE_ID>"
+  constraints:
+    - code: "<MACHINE_ID>"
+      statement: "<NATURAL_LANGUAGE>"

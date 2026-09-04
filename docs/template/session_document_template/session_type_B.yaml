@@ -1,0 +1,30 @@
+schema_version: "1.0"
+document_type: session_type_template
+template_id: session_type_B_v1
+session_type: B
+semantic: IMPLEMENTATION
+natural_language: PAYLOAD_ONLY
+
+payload:
+  objective:
+    code: "<MACHINE_ID>"
+    statement: "<NATURAL_LANGUAGE>"
+  scope:
+    in:
+      - code: "<MACHINE_ID>"
+        statement: "<NATURAL_LANGUAGE>"
+    out:
+      - code: "<MACHINE_ID>"
+        statement: "<NATURAL_LANGUAGE>"
+  interfaces:
+    - code: "<MACHINE_ID>"
+      path: "<PATH|null>"
+      statement: "<NATURAL_LANGUAGE>"
+  work_unit_payloads:
+    - id: "<WORK_UNIT_ID>"
+      action: "<NATURAL_LANGUAGE>"
+      completion:
+        - "<NATURAL_LANGUAGE>"
+  constraints:
+    - code: "<MACHINE_ID>"
+      statement: "<NATURAL_LANGUAGE>"

@@ -7,7 +7,7 @@ session:
   title: "registry_client_sdk_descriptor_resolution"
   status: "COMPLETE"
   approval: "USER_APPROVED"
-  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.md"
+  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
   branch: "dev/1.0.2"
   authority_repository: "Simple-Connection/sctool-registry"
   start_head: "efc9314be1ab2d20b71cb10ef7fb02a94328b2d5"
