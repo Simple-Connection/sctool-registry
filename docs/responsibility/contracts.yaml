@@ -1,0 +1,14 @@
+schema_version: "1.0"
+document_type: contract_registry
+natural_language: FORBIDDEN
+contracts:
+  CONTRACT_REGISTRY_V2:
+    path: "docs/REGISTRY_CONTRACT_V2.md"
+  CONTRACT_REGISTRY_ACCESS_V1:
+    path: "docs/REGISTRY_ACCESS_V1.md"
+  CONTRACT_ARTIFACT_DELIVERY_V1:
+    path: "docs/ARTIFACT_DELIVERY_V1.md"
+  CONTRACT_PACKAGE_SCHEMA_V2:
+    path: "schemas/package.schema.json"
+  CONTRACT_REGISTRY_POLICY:
+    path: "policy/registry-policy.json"
