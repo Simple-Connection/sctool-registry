@@ -1,0 +1,47 @@
+schema_version: "1.0"
+document_type: authority_registry
+natural_language: FORBIDDEN
+repositories:
+  SCTOOL_REGISTRY:
+    locator: "Simple-Connection/sctool-registry"
+    scope: INTERNAL
+  SIMPLE_CONNECTION:
+    locator: "Kinirin/Simple-Connection"
+    scope: EXTERNAL
+  SCTOOL_ARTIFACTS:
+    locator: "Simple-Connection/sctool-artifacts"
+    scope: EXTERNAL
+components:
+  COMP_REGISTRY_CLIENT_SDK:
+    repository_id: SCTOOL_REGISTRY
+    path: "packages/registry-client-sdk"
+    ptsip_component: registry-client-sdk
+    lifecycle_classification: PRODUCT
+  COMP_REGISTRY_CONTRACTS:
+    repository_id: SCTOOL_REGISTRY
+    path: "docs"
+    ptsip_component: registry-contracts
+    lifecycle_classification: NEUTRAL_CONTRACT
+  COMP_SCTOOL_AUTHORING_SDK:
+    repository_id: SIMPLE_CONNECTION
+    path: "program-sdk/sctool-sdk"
+    ptsip_component: null
+    lifecycle_classification: EXTERNAL_PRODUCT
+  COMP_SIMPLE_CONNECTION_DESKTOP:
+    repository_id: SIMPLE_CONNECTION
+    path: "."
+    ptsip_component: null
+    lifecycle_classification: EXTERNAL_PRODUCT
+authorities:
+  AUTH_REGISTRY_CLIENT_SDK:
+    repository_id: SCTOOL_REGISTRY
+    component_id: COMP_REGISTRY_CLIENT_SDK
+  AUTH_REGISTRY_CONTRACTS:
+    repository_id: SCTOOL_REGISTRY
+    component_id: COMP_REGISTRY_CONTRACTS
+  AUTH_SCTOOL_AUTHORING_SDK:
+    repository_id: SIMPLE_CONNECTION
+    component_id: COMP_SCTOOL_AUTHORING_SDK
+  AUTH_SIMPLE_CONNECTION_DESKTOP:
+    repository_id: SIMPLE_CONNECTION
+    component_id: COMP_SIMPLE_CONNECTION_DESKTOP
