@@ -19,8 +19,8 @@ routing:
   type_template: "docs/template/session_document_template/session_type_B.yaml"
 heads:
   start: "357498290d4b2c49a321893405e7e59606c1fd0d"
-  implementation: null
-  exact_validation: null
+  implementation: "25bedebd8f30b26b38533298eed6381b705028ea"
+  exact_validation: "25bedebd8f30b26b38533298eed6381b705028ea"
 responsibility_model:
   effects:
     assign:
@@ -73,8 +73,13 @@ payload:
       - CONTRACT_UPDATE_CANDIDATE_V1
     path_allow:
       - "packages/registry-client-sdk/**"
+      - "docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml"
+      - "docs/UPDATE_CANDIDATE_V1.yaml"
       - "docs/rules/**"
       - "docs/responsibility/**"
+      - "docs/governance/**"
+      - "ptsip.yaml"
+      - ".github/workflows/pages.yml"
     path_deny:
       - "program-sdk/**"
       - "Kinirin/Simple-Connection/**"
@@ -84,7 +89,7 @@ payload:
     - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
 work_units:
   - id: W1
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
       - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
@@ -98,9 +103,9 @@ work_units:
       - CONTRACT_STAGED_ARTIFACT_LIFECYCLE_V1
       - CONTRACT_UPDATE_CANDIDATE_V1
     completion_codes:
-      - P4_AUTHORITY_CONTRACTS_PENDING
+      - P4_AUTHORITY_CONTRACTS_COMPLETE
   - id: W2
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_REGISTRY_ARTIFACT_RETRIEVAL
       - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
@@ -110,9 +115,9 @@ work_units:
     output_refs:
       - "packages/registry-client-sdk/src/artifact-delivery.mjs"
     completion_codes:
-      - STREAMING_RETRIEVAL_PENDING
+      - STREAMING_RETRIEVAL_COMPLETE
   - id: W3
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
       - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
@@ -121,9 +126,9 @@ work_units:
     output_refs:
       - "packages/registry-client-sdk/src/artifact-staging.mjs"
     completion_codes:
-      - EPHEMERAL_STAGING_PENDING
+      - EPHEMERAL_STAGING_COMPLETE
   - id: W4
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_REGISTRY_ARTIFACT_INTEGRITY
     input_refs:
@@ -132,9 +137,9 @@ work_units:
     output_refs:
       - "packages/registry-client-sdk/src/artifact-integrity.mjs"
     completion_codes:
-      - STREAMING_INTEGRITY_PENDING
+      - STREAMING_INTEGRITY_COMPLETE
   - id: W5
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
     input_refs:
@@ -142,9 +147,9 @@ work_units:
     output_refs:
       - "packages/registry-client-sdk/src/verified-artifact.mjs"
     completion_codes:
-      - VERIFIED_READ_LEASE_PENDING
+      - VERIFIED_READ_LEASE_COMPLETE
   - id: W6
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_REGISTRY_UPDATE_CANDIDATE
     input_refs:
@@ -153,9 +158,9 @@ work_units:
     output_refs:
       - "packages/registry-client-sdk/src/update-candidate.mjs"
     completion_codes:
-      - VERIFIED_UPDATE_CANDIDATE_PENDING
+      - VERIFIED_UPDATE_CANDIDATE_COMPLETE
   - id: W7
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
       - RESP_REGISTRY_ARTIFACT_INTEGRITY
@@ -170,29 +175,67 @@ work_units:
     output_refs:
       - E_P4_EXACT_VALIDATION
     completion_codes:
-      - P4_EXACT_VALIDATION_PENDING
+      - P4_EXACT_VALIDATION_COMPLETE
 evidence:
   - id: E_P4_APPROVAL
     kind: USER_APPROVAL
     head: null
     refs:
       approval: APPROVED
+  - id: E_P4_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "25bedebd8f30b26b38533298eed6381b705028ea"
+    refs:
+      materialization_head: "e4c8895e56073b38123c2c6c0114fc6f3ec319e2"
+      implementation_head: "25bedebd8f30b26b38533298eed6381b705028ea"
+  - id: E_P4_GOVERNANCE
+    kind: WORKFLOW_RUN
+    head: "607aac49a011d268ac4b0e12d95fe8facda3ac7d"
+    refs:
+      run_id: 33987181148
+      run_number: 43
+      conclusion: SUCCESS
+  - id: E_P4_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "25bedebd8f30b26b38533298eed6381b705028ea"
+    refs:
+      run_id: 33987239640
+      run_number: 66
+      conclusion: SUCCESS
+      sdk_boundary_cases: 10
+      registry_access_cases: 11
+      package_descriptor_cases: 21
+      resolution_cases: 20
+      artifact_delivery_cases: 29
+      artifact_staging_cases: 11
+      artifact_integrity_cases: 18
+      verified_artifact_access_cases: 8
+      update_candidate_cases: 20
+      node_platform_evidence_edges: 31
+      registry_json: PASS
+      ptsip_tool: "0.3.7"
+      ptsip_profile: PASS
+      ptsip_conformance: CONFORMANT
+      blocking_gap_count: 0
+      non_blocking_gap_count: 0
+      audit: PASS
+      production_trust: INACTIVE
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P4_APPROVAL]}
-  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_SDK_BOUNDARY, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_REGISTRY_ACCESS_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PACKAGE_DESCRIPTOR_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_RESOLUTION_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_ARTIFACT_DELIVERY_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_STAGING_LIFECYCLE_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_ARTIFACT_INTEGRITY_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_VERIFIED_ARTIFACT_ACCESS_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_REGISTRY_JSON, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PTSIP_PROFILE, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PRODUCTION_TRUST_INACTIVE, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P4_GOVERNANCE]}
+  - {id: GATE_SDK_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P4_EXACT_VALIDATION]}
+  - {id: GATE_REGISTRY_ACCESS_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_EXACT_VALIDATION]}
+  - {id: GATE_PACKAGE_DESCRIPTOR_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_EXACT_VALIDATION]}
+  - {id: GATE_RESOLUTION_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_EXACT_VALIDATION]}
+  - {id: GATE_ARTIFACT_DELIVERY_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_EXACT_VALIDATION]}
+  - {id: GATE_STAGING_LIFECYCLE_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_EXACT_VALIDATION]}
+  - {id: GATE_ARTIFACT_INTEGRITY_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_EXACT_VALIDATION]}
+  - {id: GATE_VERIFIED_ARTIFACT_ACCESS_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_EXACT_VALIDATION]}
+  - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_EXACT_VALIDATION]}
+  - {id: GATE_REGISTRY_JSON, required: true, status: PASS, evidence_refs: [E_P4_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_PROFILE, required: true, status: PASS, evidence_refs: [E_P4_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P4_EXACT_VALIDATION]}
+  - {id: GATE_PRODUCTION_TRUST_INACTIVE, required: true, status: PASS, evidence_refs: [E_P4_EXACT_VALIDATION]}
 blockers: []
 state:
   mode: DERIVED
