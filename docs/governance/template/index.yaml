@@ -1,27 +1,28 @@
-schema_version: "2.0"
-document_type: docs_template_index
-template_root: "docs/template"
+schema_version: "3.0"
+document_type: governance_template_index
+template_root: "docs/governance/template"
 natural_language: FORBIDDEN
-responsibility_index: "docs/responsibility/index.yaml"
+rules_index: "docs/governance/rules/index.yaml"
+responsibility_index: "docs/governance/responsibility/index.yaml"
 routes:
   improvement_plan:
-    template: "docs/template/improvement_plan.yaml"
+    template: "docs/governance/template/improvement_plan.yaml"
     natural_language: FORBIDDEN
   session_document:
     essential:
-      template: "docs/template/session_document_template/session_document_essential.yaml"
+      template: "docs/governance/template/session/essential.yaml"
       natural_language: FORBIDDEN
     types:
       A:
-        template: "docs/template/session_document_template/session_type_A.yaml"
+        template: "docs/governance/template/session/type_A.yaml"
         semantic: DECISION
         natural_language: REFERENCE_ONLY
       B:
-        template: "docs/template/session_document_template/session_type_B.yaml"
+        template: "docs/governance/template/session/type_B.yaml"
         semantic: IMPLEMENTATION
         natural_language: REFERENCE_ONLY
       C:
-        template: "docs/template/session_document_template/session_type_C.yaml"
+        template: "docs/governance/template/session/type_C.yaml"
         semantic: VALIDATION_CLOSEOUT
         natural_language: REFERENCE_ONLY
 composition:

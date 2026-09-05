@@ -1,6 +1,6 @@
-schema_version: "2.0"
+schema_version: "3.0"
 document_type: improvement_plan_template
-template_id: improvement_plan_v2
+template_id: improvement_plan_v3
 natural_language: FORBIDDEN
 version:
   distribution_contract_version: "<SEMVER>"
@@ -9,10 +9,11 @@ version:
   baseline_main: "<GIT_SHA>"
   previous_distribution_contract_version: "<SEMVER|null>"
 routing:
-  docs_index: "docs/index.yaml"
-  template_index: "docs/template/index.yaml"
-  responsibility_index: "docs/responsibility/index.yaml"
-  session_document_root: "docs/ver<SEMVER>/session_document"
+  governance_index: "docs/governance/index.yaml"
+  rules_index: "docs/governance/rules/index.yaml"
+  template_index: "docs/governance/template/index.yaml"
+  responsibility_index: "docs/governance/responsibility/index.yaml"
+  session_document_root: "docs/governance/versions/<SEMVER>/sessions"
 sessions:
   - id: "<SESSION_ID>"
     type: "<A|B|C>"
@@ -24,6 +25,7 @@ migrations:
   machine_routing: "<COMPLETE|PENDING|BLOCKED>"
   responsibility_model: "<COMPLETE|VALIDATION_PENDING|BLOCKED>"
   interpretation_layer: "<COMPLETE|VALIDATION_PENDING|BLOCKED>"
+  governance_layout: "<COMPLETE|VALIDATION_PENDING|BLOCKED>"
 validation:
   evidence_head: "<GIT_SHA|null>"
   development_docs: "<PASS|PENDING|BLOCKED>"
@@ -36,6 +38,7 @@ gates:
   machine_document_routing: "<PASS|PENDING|BLOCKED>"
   responsibility_model_validation: "<PASS|PENDING|BLOCKED>"
   interpretation_layer_validation: "<PASS|PENDING|BLOCKED>"
+  governance_layout_validation: "<PASS|PENDING|BLOCKED>"
   development_docs_validation: "<PASS|PENDING|BLOCKED>"
   registry_validation: "<PASS|PENDING|BLOCKED>"
   ptsip_profile_validation: "<PASS|PENDING|BLOCKED>"

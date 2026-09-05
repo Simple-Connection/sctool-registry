@@ -1,0 +1,187 @@
+from __future__ import annotations
+
+from .common import current_branch, need, scan_machine
+from .context import ValidationContext
+
+
+def validate(ctx: ValidationContext, errors: list[str]) -> None:
+    improvement_template_path = ctx.template_index["routes"]["improvement_plan"]["template"]
+    essential_template_path = ctx.template_index["routes"]["session_document"]["essential"]["template"]
+
+    machine_docs = {
+        ctx.index_path: ctx.index,
+        ctx.plan_path: ctx.plan,
+        ctx.rules_index_path: ctx.rules_index,
+        ctx.state_rules_path: ctx.state_rules,
+        ctx.template_index_path: ctx.template_index,
+        improvement_template_path: ctx.load(improvement_template_path),
+        essential_template_path: ctx.load(essential_template_path),
+        ctx.responsibility_index_path: ctx.responsibility_index,
+        ctx.responsibility_index["routes"]["authorities"]: ctx.authorities,
+        ctx.responsibility_index["routes"]["vocabulary"]: ctx.vocabulary,
+        ctx.responsibility_index["routes"]["contracts"]: ctx.contracts,
+        ctx.responsibility_index["routes"]["responsibilities"]: ctx.responsibilities,
+        ctx.responsibility_index["routes"]["gates"]: ctx.gate_registry,
+    }
+    for rel, doc in machine_docs.items():
+        if doc.get("natural_language") == "FORBIDDEN":
+            scan_machine(doc, rel, errors)
+
+    index = ctx.index
+    plan = ctx.plan
+    version = plan["version"]["distribution_contract_version"]
+
+    need(
+        index["current"]["distribution_contract_version"] == version,
+        "INDEX_PLAN_VERSION",
+        errors,
+    )
+    need(
+        index["current"]["branch"] == plan["version"]["branch"],
+        "INDEX_PLAN_BRANCH",
+        errors,
+    )
+    need(
+        index["current"]["improvement_plan"] == ctx.plan_path,
+        "INDEX_PLAN_ROUTE",
+        errors,
+    )
+    need(
+        index["template_index"] == ctx.template_index_path,
+        "INDEX_TEMPLATE_ROUTE",
+        errors,
+    )
+    need(
+        index["rules_index"] == ctx.rules_index_path,
+        "INDEX_RULES_ROUTE",
+        errors,
+    )
+    need(
+        index["responsibility_index"] == ctx.responsibility_index_path,
+        "INDEX_RESPONSIBILITY_ROUTE",
+        errors,
+    )
+
+    plan_routing = plan["routing"]
+    need(
+        plan_routing["governance_index"] == ctx.index_path,
+        "PLAN_GOVERNANCE_INDEX_ROUTE",
+        errors,
+    )
+    need(
+        plan_routing["rules_index"] == ctx.rules_index_path,
+        "PLAN_RULES_ROUTE",
+        errors,
+    )
+    need(
+        plan_routing["template_index"] == ctx.template_index_path,
+        "PLAN_TEMPLATE_ROUTE",
+        errors,
+    )
+    need(
+        plan_routing["responsibility_index"] == ctx.responsibility_index_path,
+        "PLAN_RESPONSIBILITY_ROUTE",
+        errors,
+    )
+
+    version_entry = index["versions"][version]
+    need(
+        version_entry["improvement_plan"]["path"] == ctx.plan_path,
+        "VERSION_PLAN_ROUTE",
+        errors,
+    )
+    need(
+        version_entry["session_document_root"] == plan_routing["session_document_root"],
+        "VERSION_SESSION_ROOT",
+        errors,
+    )
+
+    migration_ids = ctx.rules_index["migration_ids"]
+    current_migrations = index["current"].get("migrations", {})
+    version_migrations = version_entry.get("migrations", {})
+    plan_migrations = plan.get("migrations", {})
+    for migration_id in migration_ids:
+        need(migration_id in current_migrations, f"CURRENT_MIGRATION_MISSING:{migration_id}", errors)
+        need(migration_id in version_migrations, f"VERSION_MIGRATION_MISSING:{migration_id}", errors)
+        need(migration_id in plan_migrations, f"PLAN_MIGRATION_MISSING:{migration_id}", errors)
+        need(
+            current_migrations.get(migration_id) == plan_migrations.get(migration_id),
+            f"CURRENT_MIGRATION_STATE:{migration_id}",
+            errors,
+        )
+        need(
+            version_migrations.get(migration_id) == plan_migrations.get(migration_id),
+            f"VERSION_MIGRATION_STATE:{migration_id}",
+            errors,
+        )
+
+    template_index = ctx.template_index
+    need(
+        template_index["rules_index"] == ctx.rules_index_path,
+        "TEMPLATE_RULES_ROUTE",
+        errors,
+    )
+    need(
+        template_index["responsibility_index"] == ctx.responsibility_index_path,
+        "TEMPLATE_RESPONSIBILITY_ROUTE",
+        errors,
+    )
+    need(
+        index["templates"]["improvement_plan"] == improvement_template_path,
+        "INDEX_IMPROVEMENT_TEMPLATE_ROUTE",
+        errors,
+    )
+    need(
+        index["templates"]["session_essential"] == essential_template_path,
+        "INDEX_ESSENTIAL_TEMPLATE_ROUTE",
+        errors,
+    )
+
+    for session_type, route in template_index["routes"]["session_document"]["types"].items():
+        type_path = route["template"]
+        type_doc = ctx.load(type_path)
+        if type_doc.get("natural_language") in {"FORBIDDEN", "REFERENCE_ONLY"}:
+            scan_machine(type_doc, type_path, errors)
+        need(type_doc["session_type"] == session_type, f"TEMPLATE_TYPE:{session_type}", errors)
+        need(
+            index["templates"]["session_types"][session_type] == type_path,
+            f"INDEX_TYPE_TEMPLATE_ROUTE:{session_type}",
+            errors,
+        )
+
+    layout = ctx.rules_index.get("layout", {})
+    canonical_root = layout.get("canonical_root")
+    if canonical_root:
+        canonical_prefix = canonical_root.rstrip("/") + "/"
+        for route_name, route_path in (
+            ("INDEX", ctx.index_path),
+            ("PLAN", ctx.plan_path),
+            ("RULES", ctx.rules_index_path),
+            ("TEMPLATE", ctx.template_index_path),
+            ("RESPONSIBILITY", ctx.responsibility_index_path),
+        ):
+            need(
+                route_path.startswith(canonical_prefix),
+                f"GOVERNANCE_ROOT:{route_name}:{route_path}",
+                errors,
+            )
+
+    for forbidden_path in layout.get("forbidden_paths", []):
+        need(
+            not (ctx.root / forbidden_path).exists(),
+            f"LEGACY_GOVERNANCE_PATH:{forbidden_path}",
+            errors,
+        )
+
+    legacy_pattern = layout.get("current_version_legacy_root_pattern")
+    if legacy_pattern:
+        legacy_path = legacy_pattern.replace("{version}", version)
+        need(
+            not (ctx.root / legacy_path).exists(),
+            f"LEGACY_CURRENT_VERSION_ROOT:{legacy_path}",
+            errors,
+        )
+
+    branch = current_branch(ctx.root)
+    if branch:
+        need(branch == plan["version"]["branch"], f"GIT_BRANCH:{branch}:{plan['version']['branch']}", errors)

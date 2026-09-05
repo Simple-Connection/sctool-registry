@@ -1,6 +1,6 @@
-schema_version: "2.1"
+schema_version: "3.0"
 document_type: session_type_template
-template_id: session_type_A_v2
+template_id: session_type_A_v3
 session_type: A
 semantic: DECISION
 natural_language: REFERENCE_ONLY

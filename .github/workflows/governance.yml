@@ -10,7 +10,6 @@ on:
       - "ptsip.yaml"
       - ".github/workflows/governance.yml"
       - ".github/workflows/pages.yml"
-      - ".github/workflows/pages.yml"
   push:
     branches:
       - "dev/**"
@@ -20,6 +19,7 @@ on:
       - "governance/**"
       - "ptsip.yaml"
       - ".github/workflows/governance.yml"
+      - ".github/workflows/pages.yml"
 
 permissions:
   contents: read
@@ -40,7 +40,7 @@ jobs:
           python -m pip install "PTSIP==0.3.7"
 
       - name: Validate machine development documentation
-        run: python governance/validate-development-docs.py --root .
+        run: python governance/validate.py --root .
 
       - name: Validate PTSIP profile and ownership partition
         run: ptsip validate .

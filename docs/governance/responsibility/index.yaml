@@ -1,0 +1,19 @@
+schema_version: "3.0"
+document_type: responsibility_index
+natural_language: FORBIDDEN
+routes:
+  authorities: "docs/governance/responsibility/authorities.yaml"
+  vocabulary: "docs/governance/responsibility/vocabulary.yaml"
+  contracts: "docs/governance/responsibility/contracts.yaml"
+  responsibilities: "docs/governance/responsibility/responsibilities.yaml"
+  descriptions: "docs/governance/responsibility/descriptions.yaml"
+  rationale: "docs/governance/responsibility/rationale.yaml"
+  gates: "docs/governance/responsibility/gates.yaml"
+semantic_policy:
+  authority_semantics: CLOSED_DIMENSIONS
+  expansion_mode: QUALIFIED_REGISTRY_EXTENSION
+  interpretation_layer: REQUIRED
+  natural_language_description: UNMODELED_AUTHORITY_SEMANTIC_ONLY
+  natural_language_rationale: DECISION_INTENT_ONLY
+  description_complete_coverage: FORBIDDEN
+  fallback_required_only_when_unrepresented: true

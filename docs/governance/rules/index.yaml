@@ -1,0 +1,17 @@
+schema_version: "1.0"
+document_type: governance_rules_index
+natural_language: FORBIDDEN
+migration_ids:
+  - machine_routing
+  - responsibility_model
+  - interpretation_layer
+  - governance_layout
+routes:
+  session_state: "docs/governance/rules/session-state.yaml"
+layout:
+  canonical_root: "docs/governance"
+  forbidden_paths:
+    - "docs/index.yaml"
+    - "docs/template"
+    - "docs/responsibility"
+  current_version_legacy_root_pattern: "docs/ver{version}"

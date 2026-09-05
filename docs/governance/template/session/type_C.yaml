@@ -1,6 +1,6 @@
-schema_version: "2.1"
+schema_version: "3.0"
 document_type: session_type_template
-template_id: session_type_C_v2
+template_id: session_type_C_v3
 session_type: C
 semantic: VALIDATION_CLOSEOUT
 natural_language: REFERENCE_ONLY

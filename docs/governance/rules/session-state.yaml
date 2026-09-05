@@ -1,0 +1,39 @@
+schema_version: "1.0"
+document_type: session_state_rules
+natural_language: FORBIDDEN
+ruleset_id: SESSION_STATE_V1
+
+plan_state_map:
+  COMPLETE: CLOSED
+  ACTIVE: ACTIVE
+  BLOCKED: BLOCKED
+  APPROVED: ACTIVE
+  AWAITING_APPROVAL: AWAITING_APPROVAL
+  NOT_APPROVED: AWAITING_APPROVAL
+
+derivation:
+  approved_value: APPROVED
+  unapproved_state: AWAITING_APPROVAL
+  blocked_state: BLOCKED
+  closed_state: CLOSED
+  fallback_state: ACTIVE
+  blocking_work_unit_statuses:
+    - BLOCKED
+  blocking_gate_statuses:
+    - BLOCKED
+    - FAIL
+  closed_work_unit_status: COMPLETE
+  closed_gate_status: PASS
+  require_nonempty_work_units_for_closed: true
+  require_nonempty_required_gates_for_closed: true
+
+materialization:
+  approved_value: APPROVED
+  document_requires_approval: true
+  unmaterialized_approval_values:
+    - REQUIRED
+    - REJECTED
+  unmaterialized_plan_states:
+    - AWAITING_APPROVAL
+    - NOT_APPROVED
+  current_session_null_requires_document_null: true
