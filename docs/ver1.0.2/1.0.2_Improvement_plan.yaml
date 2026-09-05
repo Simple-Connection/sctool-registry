@@ -1,97 +1,92 @@
-schema_version: "1.0"
+schema_version: "2.0"
 document_type: improvement_plan
-template_id: improvement_plan_v1
+template_id: improvement_plan_v2
 natural_language: FORBIDDEN
-
 version:
   distribution_contract_version: "1.0.2"
   branch: "dev/1.0.2"
   state: IN_PROGRESS_AWAITING_NEXT_SESSION_APPROVAL
   baseline_main: "c3e881742177aec3eae71d2c336801b6b52c74e5"
   previous_distribution_contract_version: "1.0.1"
-
 routing:
   docs_index: "docs/index.yaml"
   template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
   session_document_root: "docs/ver1.0.2/session_document"
-
 sessions:
   - id: P1
-    type: LEGACY
+    type: A
     state: COMPLETE
     approval: APPROVED
-    capability_codes:
-      - TWO_SDK_RESPONSIBILITY_BOUNDARY
-      - REGISTRY_ACCESS_V1
+    responsibility_refs:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_REGISTRY_ACCESS
+      - RESP_SIMPLE_CONNECTION_INSTALL
     document: "docs/ver1.0.2/session_document/ver.1.0.2_P1_simple_connection_descriptor_consumer.yaml"
-
   - id: P2
-    type: LEGACY
+    type: B
     state: COMPLETE
     approval: APPROVED
-    capability_codes:
-      - PACKAGE_DESCRIPTOR_V2
-      - CHANNEL_VERSION_TARGET_RESOLUTION
+    responsibility_refs:
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
     document: "docs/ver1.0.2/session_document/ver.1.0.2_P2_registry_client_sdk_descriptor_resolution.yaml"
-
   - id: P3
     type: B
     state: AWAITING_APPROVAL
     approval: REQUIRED
-    capability_codes:
-      - GITHUB_RELEASE_EXACT_ASSET_RESOLUTION
-      - AUTHENTICATED_ARTIFACT_RETRIEVAL
+    responsibility_refs:
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
     document: null
-
   - id: P4
     type: B
     state: NOT_APPROVED
     approval: REQUIRED
-    capability_codes:
-      - ARTIFACT_INTEGRITY
-      - VERIFIED_UPDATE_CANDIDATE
+    responsibility_refs:
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_UPDATE_CANDIDATE
     document: null
-
   - id: P5
     type: B
     state: NOT_APPROVED
     approval: REQUIRED
-    capability_codes:
-      - SIMPLE_CONNECTION_INTEGRATION
-      - LEGACY_REGISTRY_CLIENT_RETIREMENT
+    responsibility_refs:
+      - RESP_REGISTRY_ACCESS
+      - RESP_SIMPLE_CONNECTION_INSTALL
     document: null
-
   - id: P6
     type: C
     state: NOT_APPROVED
     approval: REQUIRED
-    capability_codes:
-      - INSTALL_ACTIVATION_ROLLBACK_RUNTIME_UI_E2E
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
     document: null
-
+migrations:
+  machine_routing: COMPLETE
+  responsibility_model: VALIDATION_PENDING
 validation:
-  evidence_head: "c7cd6aa7ed5b3590332678aa06f8771ca92459f4"
-  yaml_parse: PASS
-  registry_json: PASS
-  ptsip_profile: PASS
-  ptsip_tool:
-    required: "0.3.7"
-    observed: "0.3.7"
-    state: MATCH
-  ptsip_conformance:
-    outcome: CONFORMANT
-    gate: PASS
-
+  evidence_head: null
+  development_docs: PENDING
+  registry_json: PENDING
+  ptsip_profile: PENDING
+  ptsip_conformance: PENDING
 gates:
   approved_sessions: PASS
   machine_document_routing: PASS
-  registry_validation: PASS
-  ptsip_profile_validation: PASS
-  ptsip_conformance: PASS
+  responsibility_model_validation: PENDING
+  development_docs_validation: PENDING
+  registry_validation: PENDING
+  ptsip_profile_validation: PENDING
+  ptsip_conformance: PENDING
   external_integration: PENDING
   version_completion: BLOCKED
   merge_to_main: BLOCKED
-
 next:
   session_id: P3
   state: AWAITING_APPROVAL
