@@ -15,7 +15,12 @@ responsibilities:
     scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SCTOOL_AUTHORING_SDK, root: "program-sdk/sctool-sdk"}
     contract_refs: []
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SCTOOL_AUTHORING_SDK, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_TWO_SDK_BOUNDARY
   RESP_SCTOOL_MANIFEST_VALIDATION:
     subject: AUTH_SCTOOL_AUTHORING_SDK
     authority_domain: AUTHORING
@@ -29,7 +34,12 @@ responsibilities:
     scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SCTOOL_AUTHORING_SDK, root: "program-sdk/sctool-sdk"}
     contract_refs: []
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SCTOOL_AUTHORING_SDK, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_TWO_SDK_BOUNDARY
   RESP_SCTOOL_PACKAGE_BUILD:
     subject: AUTH_SCTOOL_AUTHORING_SDK
     authority_domain: AUTHORING
@@ -43,7 +53,12 @@ responsibilities:
     scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SCTOOL_AUTHORING_SDK, root: "program-sdk/sctool-sdk"}
     contract_refs: []
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SCTOOL_AUTHORING_SDK, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_TWO_SDK_BOUNDARY
   RESP_SCTOOL_PACKAGE_TEST:
     subject: AUTH_SCTOOL_AUTHORING_SDK
     authority_domain: AUTHORING
@@ -57,7 +72,12 @@ responsibilities:
     scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SCTOOL_AUTHORING_SDK, root: "program-sdk/sctool-sdk"}
     contract_refs: []
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SCTOOL_AUTHORING_SDK, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_TWO_SDK_BOUNDARY
   RESP_REGISTRY_ACCESS:
     subject: AUTH_REGISTRY_CLIENT_SDK
     authority_domain: REGISTRY_ACCESS
@@ -71,7 +91,13 @@ responsibilities:
     scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
     contract_refs: [CONTRACT_REGISTRY_ACCESS_V1]
     transfer: {state: MIGRATED, from_authority_id: AUTH_SCTOOL_AUTHORING_SDK, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: PENDING_REPLACEMENT}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_TWO_SDK_BOUNDARY
+        - ADR_REGISTRY_ACCESS_AUTHORITY_TRANSFER
   RESP_REGISTRY_DESCRIPTOR_CONSUMPTION:
     subject: AUTH_REGISTRY_CLIENT_SDK
     authority_domain: REGISTRY_METADATA
@@ -85,7 +111,13 @@ responsibilities:
     scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
     contract_refs: [CONTRACT_REGISTRY_V2, CONTRACT_PACKAGE_SCHEMA_V2, CONTRACT_REGISTRY_POLICY]
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_TWO_SDK_BOUNDARY
+        - ADR_REGISTRY_DESCRIPTOR_RESOLUTION_BOUNDARY
   RESP_REGISTRY_CHANNEL_RESOLUTION:
     subject: AUTH_REGISTRY_CLIENT_SDK
     authority_domain: REGISTRY_METADATA
@@ -99,7 +131,13 @@ responsibilities:
     scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
     contract_refs: [CONTRACT_REGISTRY_V2, CONTRACT_PACKAGE_SCHEMA_V2]
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_TWO_SDK_BOUNDARY
+        - ADR_REGISTRY_DESCRIPTOR_RESOLUTION_BOUNDARY
   RESP_REGISTRY_VERSION_RESOLUTION:
     subject: AUTH_REGISTRY_CLIENT_SDK
     authority_domain: REGISTRY_METADATA
@@ -113,7 +151,13 @@ responsibilities:
     scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
     contract_refs: [CONTRACT_REGISTRY_V2, CONTRACT_PACKAGE_SCHEMA_V2]
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_TWO_SDK_BOUNDARY
+        - ADR_REGISTRY_DESCRIPTOR_RESOLUTION_BOUNDARY
   RESP_REGISTRY_TARGET_RESOLUTION:
     subject: AUTH_REGISTRY_CLIENT_SDK
     authority_domain: REGISTRY_METADATA
@@ -127,7 +171,13 @@ responsibilities:
     scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
     contract_refs: [CONTRACT_REGISTRY_V2, CONTRACT_PACKAGE_SCHEMA_V2]
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_TWO_SDK_BOUNDARY
+        - ADR_REGISTRY_DESCRIPTOR_RESOLUTION_BOUNDARY
   RESP_REGISTRY_RELEASE_RESOLUTION:
     subject: AUTH_REGISTRY_CLIENT_SDK
     authority_domain: ARTIFACT_DELIVERY
@@ -141,7 +191,12 @@ responsibilities:
     scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
     contract_refs: [CONTRACT_ARTIFACT_DELIVERY_V1, CONTRACT_REGISTRY_ACCESS_V1]
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
   RESP_REGISTRY_ARTIFACT_RETRIEVAL:
     subject: AUTH_REGISTRY_CLIENT_SDK
     authority_domain: ARTIFACT_DELIVERY
@@ -155,7 +210,12 @@ responsibilities:
     scope: {repository_id: SCTOOL_ARTIFACTS, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
     contract_refs: [CONTRACT_ARTIFACT_DELIVERY_V1, CONTRACT_REGISTRY_ACCESS_V1]
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
   RESP_REGISTRY_ARTIFACT_INTEGRITY:
     subject: AUTH_REGISTRY_CLIENT_SDK
     authority_domain: ARTIFACT_INTEGRITY
@@ -169,7 +229,12 @@ responsibilities:
     scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
     contract_refs: [CONTRACT_ARTIFACT_DELIVERY_V1, CONTRACT_PACKAGE_SCHEMA_V2]
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
   RESP_REGISTRY_UPDATE_CANDIDATE:
     subject: AUTH_REGISTRY_CLIENT_SDK
     authority_domain: UPDATE_CANDIDATE
@@ -183,7 +248,12 @@ responsibilities:
     scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
     contract_refs: [CONTRACT_REGISTRY_V2, CONTRACT_ARTIFACT_DELIVERY_V1]
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
   RESP_SIMPLE_CONNECTION_INSTALL:
     subject: AUTH_SIMPLE_CONNECTION_DESKTOP
     authority_domain: LOCAL_INSTALLATION
@@ -197,7 +267,12 @@ responsibilities:
     scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
     contract_refs: []
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY
   RESP_SIMPLE_CONNECTION_ACTIVATION:
     subject: AUTH_SIMPLE_CONNECTION_DESKTOP
     authority_domain: ACTIVATION
@@ -211,7 +286,12 @@ responsibilities:
     scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
     contract_refs: []
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY
   RESP_SIMPLE_CONNECTION_ROLLBACK:
     subject: AUTH_SIMPLE_CONNECTION_DESKTOP
     authority_domain: ROLLBACK
@@ -225,7 +305,12 @@ responsibilities:
     scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
     contract_refs: []
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY
   RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE:
     subject: AUTH_SIMPLE_CONNECTION_DESKTOP
     authority_domain: RUNTIME_RECONCILIATION
@@ -239,7 +324,12 @@ responsibilities:
     scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
     contract_refs: []
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY
   RESP_SIMPLE_CONNECTION_RENDERER_UI:
     subject: AUTH_SIMPLE_CONNECTION_DESKTOP
     authority_domain: RENDERER_UI
@@ -253,7 +343,12 @@ responsibilities:
     scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
     contract_refs: []
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
-    responsibility_description_id: null
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY
 ownership_policy:
   AUTH_REGISTRY_CLIENT_SDK:
     allow:
