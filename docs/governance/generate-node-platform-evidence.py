@@ -6,6 +6,9 @@ import json
 import subprocess
 from pathlib import Path
 
+from ptsip.inspection.dependencies_030 import scan_dependency_edges
+from ptsip.model import EvidenceNodeScope, ResolutionStatus
+
 
 PRODUCER_ID = "sctool-registry-node-platform-observer"
 PRODUCER_VERSION = "1"
@@ -46,49 +49,43 @@ def main() -> int:
     args = parser.parse_args()
 
     validation = load_json(Path(args.validation))
-    dependencies = validation.get("dependencies", {})
-    if not isinstance(dependencies, dict):
-        raise ValueError("validation dependencies must be an object")
-    edges = dependencies.get("edges", [])
-    if not isinstance(edges, list):
-        raise ValueError("validation dependency edges must be an array")
+    if validation.get("valid") is not True:
+        raise ValueError("PTSIP validation payload must be valid before platform evidence is generated")
+
+    scan = scan_dependency_edges(Path("."))
+    if scan.issues:
+        raise ValueError(
+            "PTSIP dependency scan has unresolved collection issues: "
+            + "; ".join(f"{item.adapter}:{item.path}:{item.message}" for item in scan.issues)
+        )
 
     builtins = node_builtin_modules()
     evidence: list[dict[str, object]] = []
     unrecognized: list[str] = []
 
-    for edge in edges:
-        if not isinstance(edge, dict):
+    for edge in scan.edges:
+        if edge.adapter != "javascript-typescript":
             continue
-        if edge.get("adapter") != "javascript-typescript":
+        if edge.resolution != ResolutionStatus.UNRESOLVED:
             continue
-        if edge.get("resolution") != "UNRESOLVED":
+        if edge.target_scope != EvidenceNodeScope.UNRESOLVED_TARGET:
             continue
-        if edge.get("target_scope") != "UNRESOLVED_TARGET":
-            continue
-        target = edge.get("target")
-        if not isinstance(target, str) or not target.startswith("node:"):
+        target = edge.target
+        if not target.startswith("node:"):
             continue
 
         if target not in builtins and target.removeprefix("node:") not in builtins:
             unrecognized.append(target)
             continue
 
-        source = edge.get("source")
-        edge_type = edge.get("edge_type")
-        phase = edge.get("phase")
-        line = edge.get("line")
-        if not all(isinstance(value, str) and value for value in (source, edge_type, phase)):
-            raise ValueError(f"incomplete Node platform edge: {edge!r}")
-
         evidence.append(
             {
                 "kind": "dependency",
-                "evidence_id": f"node-platform:{source}:{line or 0}:{target}",
-                "source": source,
+                "evidence_id": f"node-platform:{edge.source}:{edge.line or 0}:{target}",
+                "source": edge.source,
                 "target": target,
-                "relationship_type": edge_type,
-                "phase": phase,
+                "relationship_type": edge.edge_type.value,
+                "phase": edge.phase.value,
                 "resolution": "EXTERNAL",
                 "target_scope": "PLATFORM",
                 "provenance": "OBSERVED",
