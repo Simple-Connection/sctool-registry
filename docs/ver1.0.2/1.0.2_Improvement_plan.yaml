@@ -5,7 +5,7 @@ natural_language: FORBIDDEN
 version:
   distribution_contract_version: "1.0.2"
   branch: "dev/1.0.2"
-  state: IN_PROGRESS_ACTIVE_SESSION
+  state: IN_PROGRESS_AWAITING_NEXT_SESSION_APPROVAL
   baseline_main: "c3e881742177aec3eae71d2c336801b6b52c74e5"
   previous_distribution_contract_version: "1.0.1"
 routing:
@@ -36,7 +36,7 @@ sessions:
     document: "docs/ver1.0.2/session_document/ver.1.0.2_P2_registry_client_sdk_descriptor_resolution.yaml"
   - id: P3
     type: B
-    state: ACTIVE
+    state: COMPLETE
     approval: APPROVED
     responsibility_refs:
       - RESP_REGISTRY_RELEASE_RESOLUTION
@@ -44,7 +44,7 @@ sessions:
     document: "docs/ver1.0.2/session_document/ver.1.0.2_P3_registry_client_sdk_release_retrieval.yaml"
   - id: P4
     type: B
-    state: NOT_APPROVED
+    state: AWAITING_APPROVAL
     approval: REQUIRED
     responsibility_refs:
       - RESP_REGISTRY_ARTIFACT_INTEGRITY
@@ -74,29 +74,26 @@ migrations:
   interpretation_layer: COMPLETE
   governance_layout: COMPLETE
 validation:
-  evidence_head: "5c6f10a45e1039dfa07f47eb2842eb3bba89b4c7"
-  development_docs: PASS
-  interpretation_layer: PASS
-  registry_json: PASS
-  ptsip_profile: PASS
-  ptsip_conformance: PASS
-  automation:
-    governance_run_id: 33971684047
-    exact_registry_run_id: 33971684072
+  evidence_head: null
+  development_docs: PENDING
+  interpretation_layer: PENDING
+  registry_json: PENDING
+  ptsip_profile: PENDING
+  ptsip_conformance: PENDING
 
 gates:
   approved_sessions: PASS
-  machine_document_routing: PASS
-  responsibility_model_validation: PASS
-  interpretation_layer_validation: PASS
-  governance_layout_validation: PASS
-  development_docs_validation: PASS
-  registry_validation: PASS
-  ptsip_profile_validation: PASS
-  ptsip_conformance: PASS
+  machine_document_routing: PENDING
+  responsibility_model_validation: PENDING
+  interpretation_layer_validation: PENDING
+  governance_layout_validation: PENDING
+  development_docs_validation: PENDING
+  registry_validation: PENDING
+  ptsip_profile_validation: PENDING
+  ptsip_conformance: PENDING
   external_integration: PENDING
   version_completion: BLOCKED
   merge_to_main: BLOCKED
 next:
   session_id: P4
-  state: NOT_APPROVED
+  state: AWAITING_APPROVAL

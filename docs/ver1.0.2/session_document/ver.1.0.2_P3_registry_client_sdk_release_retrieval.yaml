@@ -19,8 +19,8 @@ routing:
   type_template: "docs/template/session_document_template/session_type_B.yaml"
 heads:
   start: "e70e7e97e8130670b835f61a5c2e1619f9882877"
-  implementation: null
-  exact_validation: null
+  implementation: "060f3cdc4e8656e3ebc73bf941e90469057d3b0b"
+  exact_validation: "060f3cdc4e8656e3ebc73bf941e90469057d3b0b"
 responsibility_model:
   effects:
     assign: []
@@ -69,7 +69,7 @@ payload:
     - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
 work_units:
   - id: W1
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_REGISTRY_RELEASE_RESOLUTION
     input_refs:
@@ -79,9 +79,9 @@ work_units:
     output_refs:
       - "packages/registry-client-sdk/src/artifact-delivery.mjs"
     completion_codes:
-      - EXACT_RELEASE_ASSET_RESOLUTION_PENDING
+      - EXACT_RELEASE_ASSET_RESOLUTION_IMPLEMENTED
   - id: W2
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_REGISTRY_ARTIFACT_RETRIEVAL
     input_refs:
@@ -90,9 +90,9 @@ work_units:
     output_refs:
       - "packages/registry-client-sdk/src/artifact-delivery.mjs"
     completion_codes:
-      - AUTHENTICATED_ASSET_RETRIEVAL_PENDING
+      - AUTHENTICATED_ASSET_RETRIEVAL_IMPLEMENTED
   - id: W3
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_REGISTRY_RELEASE_RESOLUTION
       - RESP_REGISTRY_ARTIFACT_RETRIEVAL
@@ -103,9 +103,9 @@ work_units:
     output_refs:
       - "packages/registry-client-sdk/tests/artifact-delivery.test.mjs"
     completion_codes:
-      - P3_REGRESSION_COVERAGE_PENDING
+      - P3_REGRESSION_COVERAGE_COMPLETE
   - id: W4
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_REGISTRY_RELEASE_RESOLUTION
       - RESP_REGISTRY_ARTIFACT_RETRIEVAL
@@ -116,25 +116,58 @@ work_units:
     output_refs:
       - E_P3_EXACT_VALIDATION
     completion_codes:
-      - EXACT_VALIDATION_PENDING
+      - EXACT_VALIDATION_COMPLETE
 evidence:
   - id: E_P3_APPROVAL
     kind: USER_APPROVAL
     head: null
     refs:
       approval: APPROVED
+  - id: E_P3_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "060f3cdc4e8656e3ebc73bf941e90469057d3b0b"
+    refs:
+      materialization_head: "4155f0b81b6d48e5ea44acf7fc3eb56d23792918"
+      implementation_head: "060f3cdc4e8656e3ebc73bf941e90469057d3b0b"
+  - id: E_P3_GOVERNANCE
+    kind: WORKFLOW_RUN
+    head: "4155f0b81b6d48e5ea44acf7fc3eb56d23792918"
+    refs:
+      run_id: 33972256317
+      run_number: 37
+      conclusion: SUCCESS
+  - id: E_P3_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "060f3cdc4e8656e3ebc73bf941e90469057d3b0b"
+    refs:
+      run_id: 33972496157
+      run_number: 58
+      conclusion: SUCCESS
+      sdk_boundary_cases: 8
+      registry_access_cases: 11
+      package_descriptor_cases: 21
+      resolution_cases: 20
+      artifact_delivery_cases: 24
+      registry_json: PASS
+      ptsip_tool: "0.3.7"
+      ptsip_profile: PASS
+      ptsip_conformance: CONFORMANT
+      blocking_gap_count: 0
+      non_blocking_gap_count: 0
+      audit: PASS
+      production_trust: INACTIVE
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P3_APPROVAL]}
-  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_SDK_BOUNDARY, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_REGISTRY_ACCESS_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PACKAGE_DESCRIPTOR_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_RESOLUTION_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_REQUIRED_OUTPUTS, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_REGISTRY_JSON, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PTSIP_PROFILE, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PRODUCTION_TRUST_INACTIVE, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P3_GOVERNANCE]}
+  - {id: GATE_SDK_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
+  - {id: GATE_REGISTRY_ACCESS_REGRESSION, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
+  - {id: GATE_PACKAGE_DESCRIPTOR_REGRESSION, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
+  - {id: GATE_RESOLUTION_REGRESSION, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
+  - {id: GATE_REQUIRED_OUTPUTS, required: true, status: PASS, evidence_refs: [E_P3_IMPLEMENTATION]}
+  - {id: GATE_REGISTRY_JSON, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_PROFILE, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
+  - {id: GATE_PRODUCTION_TRUST_INACTIVE, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
 blockers: []
 state:
   mode: DERIVED
