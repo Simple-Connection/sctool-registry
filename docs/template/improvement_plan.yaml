@@ -23,9 +23,11 @@ sessions:
 migrations:
   machine_routing: "<COMPLETE|PENDING|BLOCKED>"
   responsibility_model: "<COMPLETE|VALIDATION_PENDING|BLOCKED>"
+  interpretation_layer: "<COMPLETE|VALIDATION_PENDING|BLOCKED>"
 validation:
   evidence_head: "<GIT_SHA|null>"
   development_docs: "<PASS|PENDING|BLOCKED>"
+  interpretation_layer: "<PASS|PENDING|BLOCKED>"
   registry_json: "<PASS|PENDING|BLOCKED>"
   ptsip_profile: "<PASS|PENDING|BLOCKED>"
   ptsip_conformance: "<PASS|PENDING|BLOCKED>"
@@ -33,6 +35,7 @@ gates:
   approved_sessions: "<PASS|PENDING|BLOCKED>"
   machine_document_routing: "<PASS|PENDING|BLOCKED>"
   responsibility_model_validation: "<PASS|PENDING|BLOCKED>"
+  interpretation_layer_validation: "<PASS|PENDING|BLOCKED>"
   development_docs_validation: "<PASS|PENDING|BLOCKED>"
   registry_validation: "<PASS|PENDING|BLOCKED>"
   ptsip_profile_validation: "<PASS|PENDING|BLOCKED>"
