@@ -48,6 +48,9 @@ responsibility_model:
       - RESP_SCTOOL_PACKAGE_BUILD
       - RESP_SCTOOL_PACKAGE_TEST
   description_ids: []
+  rationale_ids:
+    - ADR_REGISTRY_DESCRIPTOR_RESOLUTION_BOUNDARY
+    - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
 payload:
   implementation:
     responsibility_refs:
@@ -65,6 +68,9 @@ payload:
     path_deny:
       - "program-sdk/**"
   responsibility_description_ids: []
+  decision_rationale_ids:
+    - ADR_REGISTRY_DESCRIPTOR_RESOLUTION_BOUNDARY
+    - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
 work_units:
   - id: W1
     status: COMPLETE
