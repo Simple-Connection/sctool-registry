@@ -1,4 +1,4 @@
-schema_version: "2.0"
+schema_version: "2.1"
 document_type: session_document_template
 template_id: session_document_essential_v2
 natural_language: FORBIDDEN
@@ -32,6 +32,7 @@ responsibility_model:
     retire: []
     forbid: []
   description_ids: []
+  rationale_ids: []
 work_units:
   - id: "<WORK_UNIT_ID>"
     status: "<COMPLETE|PENDING|BLOCKED>"
