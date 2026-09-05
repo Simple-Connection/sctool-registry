@@ -102,24 +102,26 @@ export async function stageAndVerifyRetrievedArtifact(resolvedTarget, retrieval,
   temporaryRoot,
 } = {}) {
   const content = requireTarget(resolvedTarget);
-  requireBinding(resolvedTarget, retrieval);
+  let resource = null;
 
-  if (retrieval.backendAssetName !== content.filename) {
-    throw new RegistryArtifactIntegrityError("backend-filename-mismatch", "GitHub asset name does not match Registry content.filename", {
-      expected: content.filename,
-      actual: retrieval.backendAssetName ?? null,
-    });
-  }
-  if (retrieval.backendAssetSize !== null && retrieval.backendAssetSize !== undefined && retrieval.backendAssetSize !== content.size) {
-    throw new RegistryArtifactIntegrityError("backend-size-mismatch", "GitHub asset size does not match Registry content.size", {
-      expected: content.size,
-      actual: retrieval.backendAssetSize,
-    });
-  }
-
-  const resource = await allocateArtifactStagingResource({ temporaryRoot });
-  const integrity = createIntegrityTransform(content.size);
   try {
+    requireBinding(resolvedTarget, retrieval);
+
+    if (retrieval.backendAssetName !== content.filename) {
+      throw new RegistryArtifactIntegrityError("backend-filename-mismatch", "GitHub asset name does not match Registry content.filename", {
+        expected: content.filename,
+        actual: retrieval.backendAssetName ?? null,
+      });
+    }
+    if (retrieval.backendAssetSize !== null && retrieval.backendAssetSize !== undefined && retrieval.backendAssetSize !== content.size) {
+      throw new RegistryArtifactIntegrityError("backend-size-mismatch", "GitHub asset size does not match Registry content.size", {
+        expected: content.size,
+        actual: retrieval.backendAssetSize,
+      });
+    }
+
+    resource = await allocateArtifactStagingResource({ temporaryRoot });
+    const integrity = createIntegrityTransform(content.size);
     const destination = resource.openWriteStream();
     await pipeline(retrieval.stream, integrity.stream, destination);
     await retrieval.completed;
@@ -154,9 +156,9 @@ export async function stageAndVerifyRetrievedArtifact(resolvedTarget, retrieval,
       sha256: content.sha256,
     });
   } catch (error) {
-    try { retrieval.abort(); } catch {}
-    try { await retrieval.completed; } catch {}
-    try { await resource.dispose(); } catch {}
+    try { retrieval?.abort?.(); } catch {}
+    try { await retrieval?.completed; } catch {}
+    try { await resource?.dispose(); } catch {}
     throw error;
   }
 }

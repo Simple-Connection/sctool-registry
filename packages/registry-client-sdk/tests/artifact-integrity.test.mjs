@@ -73,21 +73,29 @@ try {
   await lease.dispose();
   equal((await readdir(root)).length, 0, "success disposal removes staging directory");
 
+  const filenameMismatch = retrieval({ backendAssetName: "other.sctool" });
   await integrityError(
-    () => stageAndVerifyRetrievedArtifact(target, retrieval({ backendAssetName: "other.sctool" }).value, { temporaryRoot: root }),
+    () => stageAndVerifyRetrievedArtifact(target, filenameMismatch.value, { temporaryRoot: root }),
     "backend-filename-mismatch",
     "filename mismatch",
   );
+  equal(filenameMismatch.wasAborted(), true, "filename mismatch aborts retrieval");
+
+  const backendSizeMismatch = retrieval({ backendAssetSize: bytes.length + 1 });
   await integrityError(
-    () => stageAndVerifyRetrievedArtifact(target, retrieval({ backendAssetSize: bytes.length + 1 }).value, { temporaryRoot: root }),
+    () => stageAndVerifyRetrievedArtifact(target, backendSizeMismatch.value, { temporaryRoot: root }),
     "backend-size-mismatch",
     "backend size mismatch",
   );
+  equal(backendSizeMismatch.wasAborted(), true, "backend size mismatch aborts retrieval");
+
+  const bindingMismatch = retrieval({ version: "1.2.4" });
   await integrityError(
-    () => stageAndVerifyRetrievedArtifact(target, retrieval({ version: "1.2.4" }).value, { temporaryRoot: root }),
+    () => stageAndVerifyRetrievedArtifact(target, bindingMismatch.value, { temporaryRoot: root }),
     "artifact-binding-mismatch",
     "identity binding mismatch",
   );
+  equal(bindingMismatch.wasAborted(), true, "binding mismatch aborts retrieval");
 
   const oversized = retrieval({
     backendAssetSize: null,
@@ -134,4 +142,4 @@ try {
   await rm(root, { recursive: true, force: true });
 }
 
-console.log("Registry Client SDK artifact integrity PASS cases=15");
+console.log("Registry Client SDK artifact integrity PASS cases=18");
