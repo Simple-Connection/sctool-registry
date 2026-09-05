@@ -13,3 +13,4 @@ export const REGISTRY_CLIENT_CONTRACT = Object.freeze({
 export * from "./registry-access.mjs";
 export * from "./package-descriptor.mjs";
 export * from "./resolution.mjs";
+export * from "./artifact-delivery.mjs";

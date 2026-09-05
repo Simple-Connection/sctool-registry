@@ -15,3 +15,4 @@ export declare const REGISTRY_CLIENT_CONTRACT: Readonly<RegistryClientContractId
 export * from "./registry-access.mjs";
 export * from "./package-descriptor.mjs";
 export * from "./resolution.mjs";
+export * from "./artifact-delivery.mjs";

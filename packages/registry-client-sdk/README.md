@@ -25,6 +25,7 @@ The Registry Client SDK owns the consumer-side implementation of Registry contra
 @simple-connection/sctool-registry-client-sdk/registry-access
 @simple-connection/sctool-registry-client-sdk/package-descriptor
 @simple-connection/sctool-registry-client-sdk/resolution
+@simple-connection/sctool-registry-client-sdk/artifact-delivery
 ```
 
 `package-descriptor` validates the current package descriptor contract (`schemaVersion = 2.0.0`) and the Registry policy consistency needed by a consumer. Validation is fail-closed and returns an immutable validated descriptor or structured issues.
@@ -56,7 +57,13 @@ delivery.locator.repository
 delivery.locator.assetId
 ```
 
-P2 does **not** use the locator to query a live GitHub Release or download bytes. Exact release/asset lookup and authenticated retrieval remain a later session responsibility, followed separately by downloaded-byte integrity verification and update-candidate normalization.
+P2 does **not** use the locator to query a live GitHub Release or download bytes.
+
+## P3 boundary
+
+Distribution `1.0.2` P3 resolves the derived release tag `sctool/{packageId}/v{version}`, requires the exact numeric `delivery.locator.assetId` to exist in that non-draft release, and retrieves that exact asset through the authenticated GitHub CLI credential-store boundary.
+
+`artifact-delivery` deliberately treats backend asset name and size as observations only. It does not compare them with `content.filename` or `content.size`, and it does not compute or compare `content.sha256`. Those downloaded-byte integrity checks remain P4 responsibility, followed separately by update-candidate normalization.
 
 ## Non-goals
 

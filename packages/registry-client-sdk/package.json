@@ -20,6 +20,10 @@
     "./resolution": {
       "types": "./src/resolution.d.mts",
       "import": "./src/resolution.mjs"
+    },
+    "./artifact-delivery": {
+      "types": "./src/artifact-delivery.d.mts",
+      "import": "./src/artifact-delivery.mjs"
     }
   },
   "files": [
@@ -27,7 +31,7 @@
     "README.md"
   ],
   "scripts": {
-    "test": "node ./tests/boundary.test.mjs && node ./tests/registry-access.test.mjs && node ./tests/package-descriptor.test.mjs && node ./tests/resolution.test.mjs"
+    "test": "node ./tests/boundary.test.mjs && node ./tests/registry-access.test.mjs && node ./tests/package-descriptor.test.mjs && node ./tests/resolution.test.mjs && node ./tests/artifact-delivery.test.mjs"
   },
   "engines": {
     "node": ">=20"
