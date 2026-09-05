@@ -29,7 +29,13 @@ validation:
   yaml_parse: "<PASS|PENDING|BLOCKED>"
   registry_json: "<PASS|PENDING|BLOCKED>"
   ptsip_profile: "<PASS|PENDING|BLOCKED>"
-  ptsip_conformance: "<PASS|PENDING|BLOCKED>"
+  ptsip_tool:
+    required: "<SEMVER>"
+    observed: "<SEMVER|null>"
+    state: "<MATCH|MISMATCH|PENDING>"
+  ptsip_conformance:
+    outcome: "<CONFORMANT|NONCONFORMANT|INCOMPLETE|null>"
+    gate: "<PASS|PENDING|BLOCKED>"
 
 gates:
   approved_sessions: "<PASS|PENDING|BLOCKED>"

@@ -70,18 +70,24 @@ sessions:
     document: null
 
 validation:
-  evidence_head: "7eb2dbac44539e17fd7e2547963af320b1636799"
+  evidence_head: "8b79fab05490df4b1c3c2224a276e578e4922fe2"
   yaml_parse: PASS
   registry_json: PASS
   ptsip_profile: PASS
-  ptsip_conformance: PENDING
+  ptsip_tool:
+    required: "0.3.7"
+    observed: "0.3.6"
+    state: MISMATCH
+  ptsip_conformance:
+    outcome: CONFORMANT
+    gate: BLOCKED
 
 gates:
   approved_sessions: PASS
   machine_document_routing: PASS
   registry_validation: PASS
   ptsip_profile_validation: PASS
-  ptsip_conformance: PENDING
+  ptsip_conformance: BLOCKED
   external_integration: PENDING
   version_completion: BLOCKED
   merge_to_main: BLOCKED

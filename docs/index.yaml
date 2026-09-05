@@ -9,7 +9,7 @@ current:
   distribution_contract_version: "1.0.2"
   branch: "dev/1.0.2"
   state: IN_PROGRESS_AWAITING_NEXT_SESSION_APPROVAL
-  governance_migration: CONFORMANCE_PENDING
+  governance_migration: CONFORMANCE_BLOCKED
   improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
   current_session: null
   current_session_document: null
@@ -38,7 +38,7 @@ versions:
 
   "1.0.2":
     state: IN_PROGRESS_AWAITING_NEXT_SESSION_APPROVAL
-    governance_migration: CONFORMANCE_PENDING
+    governance_migration: CONFORMANCE_BLOCKED
     branch: "dev/1.0.2"
     improvement_plan:
       path: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
