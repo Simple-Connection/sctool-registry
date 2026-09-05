@@ -1,52 +1,45 @@
-schema_version: "1.0"
+schema_version: "2.0"
 document_type: improvement_plan_template
-template_id: improvement_plan_v1
+template_id: improvement_plan_v2
 natural_language: FORBIDDEN
-
 version:
   distribution_contract_version: "<SEMVER>"
   branch: "dev/<SEMVER>"
   state: "<VERSION_STATE>"
   baseline_main: "<GIT_SHA>"
   previous_distribution_contract_version: "<SEMVER|null>"
-
 routing:
   docs_index: "docs/index.yaml"
   template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
   session_document_root: "docs/ver<SEMVER>/session_document"
-
 sessions:
   - id: "<SESSION_ID>"
-    type: "<A|B|C|LEGACY>"
+    type: "<A|B|C>"
     state: "<SESSION_STATE>"
     approval: "<APPROVAL_STATE>"
-    capability_codes:
-      - "<MACHINE_ID>"
+    responsibility_refs: ["<RESPONSIBILITY_ID>"]
     document: "<PATH|null>"
-
+migrations:
+  machine_routing: "<COMPLETE|PENDING|BLOCKED>"
+  responsibility_model: "<COMPLETE|VALIDATION_PENDING|BLOCKED>"
 validation:
   evidence_head: "<GIT_SHA|null>"
-  yaml_parse: "<PASS|PENDING|BLOCKED>"
+  development_docs: "<PASS|PENDING|BLOCKED>"
   registry_json: "<PASS|PENDING|BLOCKED>"
   ptsip_profile: "<PASS|PENDING|BLOCKED>"
-  ptsip_tool:
-    required: "<SEMVER>"
-    observed: "<SEMVER|null>"
-    state: "<MATCH|MISMATCH|PENDING>"
-  ptsip_conformance:
-    outcome: "<CONFORMANT|NONCONFORMANT|INCOMPLETE|null>"
-    gate: "<PASS|PENDING|BLOCKED>"
-
+  ptsip_conformance: "<PASS|PENDING|BLOCKED>"
 gates:
   approved_sessions: "<PASS|PENDING|BLOCKED>"
   machine_document_routing: "<PASS|PENDING|BLOCKED>"
+  responsibility_model_validation: "<PASS|PENDING|BLOCKED>"
+  development_docs_validation: "<PASS|PENDING|BLOCKED>"
   registry_validation: "<PASS|PENDING|BLOCKED>"
   ptsip_profile_validation: "<PASS|PENDING|BLOCKED>"
   ptsip_conformance: "<PASS|PENDING|BLOCKED>"
   external_integration: "<PASS|PENDING|BLOCKED|NOT_APPLICABLE>"
   version_completion: "<PASS|PENDING|BLOCKED>"
   merge_to_main: "<BLOCKED|READY|APPROVED>"
-
 next:
   session_id: "<SESSION_ID|null>"
   state: "<AWAITING_APPROVAL|APPROVED|MATERIALIZED|NONE>"
