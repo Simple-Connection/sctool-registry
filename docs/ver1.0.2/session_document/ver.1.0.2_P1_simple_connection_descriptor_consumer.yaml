@@ -1,191 +1,139 @@
-schema_version: "1.0.2"
-document_type: build_session
-
+schema_version: "2.0"
+document_type: machine_session
+natural_language: FORBIDDEN
 session:
-  id: "P1"
+  id: P1
+  type: A
   number: 1
-  title: "registry_client_sdk_responsibility_boundary"
-  status: "COMPLETE"
-  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
+  approval: APPROVED
+  distribution_contract_version: "1.0.2"
   branch: "dev/1.0.2"
   authority_repository: "Simple-Connection/sctool-registry"
-
-authority:
-  registry_repository: "Simple-Connection/sctool-registry"
-  registry_baseline: "c3e881742177aec3eae71d2c336801b6b52c74e5"
-  simple_connection_repository: "Kinirin/Simple-Connection"
-  simple_connection_branch: "dev/2.2.4"
-  reviewed_simple_connection_head: "6a857789159a4f1e6ae8ca5535b8be01c9377141"
-  registry_contract: "docs/REGISTRY_CONTRACT_V2.md"
-  registry_access_contract: "docs/REGISTRY_ACCESS_V1.md"
-  artifact_delivery_contract: "docs/ARTIFACT_DELIVERY_V1.md"
-  package_schema: "schemas/package.schema.json"
-
-decision:
-  sdk_model: "TWO_SDK"
-  authoring_sdk:
-    repository: "Kinirin/Simple-Connection"
-    path: "program-sdk/sctool-sdk"
-    responsibility:
-      - "coding-agent/developer SCTool authoring guidance"
-      - "manifest/build/test/package support"
-      - "developer tool -> .sctool production"
-    forbidden_long_term_responsibility:
-      - "Registry artifact authorization"
-      - "Registry descriptor/channel resolution"
-      - "Registry artifact download/update client behavior"
-  registry_client_sdk:
-    repository: "Simple-Connection/sctool-registry"
-    path: "packages/registry-client-sdk"
-    package_name: "@simple-connection/sctool-registry-client-sdk"
-    initial_version: "0.1.0"
-    publication_state: "PRIVATE_UNTIL_SEPARATE_DISTRIBUTION_APPROVAL"
-    responsibility:
-      - "Registry metadata consumer types"
-      - "registry-access-v1 implementation"
-      - "package descriptor parsing and deterministic resolution"
-      - "delivery backend resolution"
-      - "authenticated artifact retrieval"
-      - "artifact content integrity verification"
-      - "Simple Connection integration-facing update candidate API"
-    forbidden_responsibility:
-      - "SCTool scaffold/build/test/sign/package authoring"
-      - "Simple Connection local install/activation/rollback/UI policy"
-
-ownership_correction:
-  historical_source:
-    repository: "Kinirin/Simple-Connection"
-    sdk_path: "program-sdk/sctool-sdk"
-    misplaced_registry_client_paths:
-      - "src/registry-access.ts"
-      - "cli/lib/github-registry-access.mjs"
-      - "tests/registry-access.test.mjs"
-      - "tests/run-registry-access-suite.mjs"
-    package_export: "./registry-access"
-  rule: >-
-    Distribution 1.0.1 evidence remains historical truth. Registry access ownership
-    is now implemented in the Registry Client SDK. The duplicate Simple Connection
-    Authoring SDK surface is not removed until a later Simple Connection integration
-    session proves replacement consumption.
-  destructive_change_now: false
-
-packages_namespace:
-  descriptors: "packages/{packageId}.json"
-  registry_client_sdk: "packages/registry-client-sdk/**"
-  status: "CLARIFIED"
-  note: >-
-    packages/README.md reserves registry-client-sdk as an implementation namespace.
-    Registry descriptor validation continues to follow registry.json references and
-    does not recursively interpret the SDK directory as descriptor JSON.
-
+  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
+routing:
+  docs_index: "docs/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  essential_template: "docs/template/session_document_template/session_document_essential.yaml"
+  type_template: "docs/template/session_document_template/session_type_A.yaml"
+heads:
+  start: null
+  implementation: "e3b0c14d6dd79dc7711bc1cda604eb2895905a4f"
+  exact_validation: "e3b0c14d6dd79dc7711bc1cda604eb2895905a4f"
+responsibility_model:
+  effects:
+    assign:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+      - RESP_REGISTRY_ACCESS
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+      - RESP_SIMPLE_CONNECTION_INSTALL
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    implement:
+      - RESP_REGISTRY_ACCESS
+    preserve:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+      - RESP_SIMPLE_CONNECTION_INSTALL
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    defer:
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    transfer:
+      - RESP_REGISTRY_ACCESS
+    retire: []
+    forbid: []
+  description_ids: []
+payload:
+  authority_changes:
+    assign:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_REGISTRY_ACCESS
+    transfer:
+      - RESP_REGISTRY_ACCESS
+    preserve:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    forbid: []
+  responsibility_description_ids: []
 work_units:
-  - id: "W1"
-    title: "sdk_responsibility_reassessment"
-    status: "COMPLETE"
-    result:
-      - "Previous proposal to add Registry consumer code to Kinirin/Simple-Connection/program-sdk/sctool-sdk was withdrawn."
-      - "Two-SDK model selected."
-      - "Registry access implementation identified as Registry-owned migration responsibility."
-
-  - id: "W2"
-    title: "registry_client_sdk_path_and_component_approval"
-    status: "COMPLETE"
-    approval: "USER_APPROVED"
-    path: "packages/registry-client-sdk/**"
-    package_name: "@simple-connection/sctool-registry-client-sdk"
-    implementation:
-      architecture_commit: "1a3f57d74a2a4047e8495707f239cf2917a0ba79"
-      diagnostic_commit: "4d7da1c9f8c6387d60e88ba453d7de4717c7ba35"
-      empty_selector_fix_commit: "e3e62e800edd9b2d73c1febde52e4cfd78299ed4"
-      dependency_free_test_commit: "41021bdfd08995c60d906316e2f056458cbb3f60"
-    result:
-      - "packages descriptor namespace remains explicit and unambiguous"
-      - "registry-client-sdk PRODUCT component added to ptsip.yaml"
-      - "AGENTS.md records Registry Client SDK responsibility and Tool 0.3.7"
-      - "SDK is private and no publication mechanism was invented"
-    validation:
-      workflow: "Publish signed SCTool Registry Pages"
-      run_id: 33614205637
-      run_number: 21
-      exact_sha: "41021bdfd08995c60d906316e2f056458cbb3f60"
-      conclusion: "SUCCESS"
-      sdk_boundary_test: "PASS"
-      ptsip: "PASS / CONFORMANT"
-      registry_json: "PASS"
-      production_trust: "INACTIVE_UNCHANGED"
-
-  - id: "W3"
-    title: "registry_access_migration"
-    status: "COMPLETE"
-    source_evidence:
-      registry_access_blob: "76d48cf345b45d008194141cad2d148192822174"
-      github_cli_adapter_blob: "e028655b3683ddcce60bb30b8f90d762e27c6e1f"
-      regression_blob: "5d2d502251e1ce3be80901c8d74654228c95cfa1"
-    target:
-      - "packages/registry-client-sdk/src/registry-access.mjs"
-      - "packages/registry-client-sdk/src/registry-access.d.ts"
-      - "packages/registry-client-sdk/tests/registry-access.test.mjs"
-    implementation_commit: "e3b0c14d6dd79dc7711bc1cda604eb2895905a4f"
-    migration_properties:
-      - "stable Registry Access V1 states preserved"
-      - "exact gh command sequence preserved"
-      - "GH_TOKEN/GITHUB_TOKEN overrides removed case-insensitively"
-      - "403/404 normalize to access-denied"
-      - "network/timeout normalize to network-unavailable"
-      - "gh auth token is never invoked"
-      - "credential material is absent from structured results"
-      - "host process execution is injected; Registry Client SDK imports no node:child_process"
-    validation:
-      workflow: "Publish signed SCTool Registry Pages"
-      run_id: 33614696061
-      run_number: 22
-      exact_sha: "e3b0c14d6dd79dc7711bc1cda604eb2895905a4f"
-      conclusion: "SUCCESS"
-      registry_access_regression: "PASS"
-      ptsip: "PASS / CONFORMANT"
-      registry_json: "PASS"
-      production_trust: "INACTIVE_UNCHANGED"
-
-moved_to_later_sessions:
-  - responsibility: "package schema 2.0.0 typed model and channel/version/target resolution"
-    proposed_session: "P2"
-  - responsibility: "GitHub Release exact asset resolution and authenticated retrieval"
-    proposed_session: "P3"
-  - responsibility: "artifact integrity and normalized update candidate"
-    proposed_session: "P4"
-  - responsibility: "Simple Connection integration and removal of misplaced Registry client surface"
-    proposed_session: "P5"
-  - responsibility: "install/activation/rollback/runtime/UI E2E closeout"
-    proposed_session: "P6"
-
-withdrawn_previous_path_request:
-  state: "WITHDRAWN"
-  paths:
-    - "Kinirin/Simple-Connection/program-sdk/sctool-sdk/src/registry-package.ts"
-    - "Kinirin/Simple-Connection/program-sdk/sctool-sdk/tests/registry-package.test.mjs"
-    - "Kinirin/Simple-Connection/program-sdk/sctool-sdk/tests/run-registry-package-suite.mjs"
-    - "Kinirin/Simple-Connection/program-sdk/sctool-sdk/package.json Registry consumer export modification"
-  reason: "Would mix Registry consumer responsibility into the SCTool Authoring SDK."
-
-verification:
-  state: "PASS"
-  exact_code_head: "e3b0c14d6dd79dc7711bc1cda604eb2895905a4f"
-  results:
-    - "Registry Client SDK boundary PASS"
-    - "Registry Access V1 regression PASS"
-    - "PTSIP Tool 0.3.7 validate/conform PASS"
-    - "Registry JSON validation PASS"
-    - "Production Trust inactive/unchanged"
-
+  - id: W1
+    status: COMPLETE
+    responsibility_refs: [RESP_SCTOOL_AUTHORING_GUIDANCE, RESP_REGISTRY_ACCESS]
+    input_refs: [CONTRACT_REGISTRY_V2, CONTRACT_REGISTRY_ACCESS_V1, CONTRACT_ARTIFACT_DELIVERY_V1]
+    output_refs: [RESP_REGISTRY_ACCESS]
+    completion_codes: [TWO_SDK_MODEL_SELECTED, REGISTRY_ACCESS_OWNER_CORRECTED]
+  - id: W2
+    status: COMPLETE
+    responsibility_refs: [RESP_REGISTRY_ACCESS]
+    input_refs: [COMP_REGISTRY_CLIENT_SDK]
+    output_refs: ["packages/registry-client-sdk"]
+    completion_codes: [REGISTRY_CLIENT_SDK_BOUNDARY_ESTABLISHED]
+  - id: W3
+    status: COMPLETE
+    responsibility_refs: [RESP_REGISTRY_ACCESS]
+    input_refs: [CONTRACT_REGISTRY_ACCESS_V1]
+    output_refs: ["packages/registry-client-sdk/src/registry-access.mjs"]
+    completion_codes: [REGISTRY_ACCESS_MIGRATED]
+evidence:
+  - id: E_P1_APPROVAL
+    kind: USER_APPROVAL
+    head: null
+    refs: {approval: APPROVED}
+  - id: E_P1_WORKFLOW_21
+    kind: WORKFLOW_RUN
+    head: "41021bdfd08995c60d906316e2f056458cbb3f60"
+    refs: {run_id: 33614205637, run_number: 21, conclusion: SUCCESS}
+  - id: E_P1_WORKFLOW_22
+    kind: WORKFLOW_RUN
+    head: "e3b0c14d6dd79dc7711bc1cda604eb2895905a4f"
+    refs: {run_id: 33614696061, run_number: 22, conclusion: SUCCESS}
+  - id: E_P1_ARCHITECTURE
+    kind: COMMIT_SET
+    head: "e3b0c14d6dd79dc7711bc1cda604eb2895905a4f"
+    refs:
+      commits:
+        - "b888f3a9460c54ff7c41e716c8b96fe0fc23144c"
+        - "1a3f57d74a2a4047e8495707f239cf2917a0ba79"
+        - "4d7da1c9f8c6387d60e88ba453d7de4717c7ba35"
+        - "e3e62e800edd9b2d73c1febde52e4cfd78299ed4"
+        - "41021bdfd08995c60d906316e2f056458cbb3f60"
+        - "e3b0c14d6dd79dc7711bc1cda604eb2895905a4f"
+gates:
+  - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P1_APPROVAL]}
+  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P1_ARCHITECTURE]}
+  - {id: GATE_SDK_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P1_WORKFLOW_21]}
+  - {id: GATE_REGISTRY_ACCESS_REGRESSION, required: true, status: PASS, evidence_refs: [E_P1_WORKFLOW_22]}
+  - {id: GATE_REGISTRY_JSON, required: true, status: PASS, evidence_refs: [E_P1_WORKFLOW_22]}
+  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P1_WORKFLOW_22]}
+  - {id: GATE_PRODUCTION_TRUST_INACTIVE, required: true, status: PASS, evidence_refs: [E_P1_WORKFLOW_22]}
+blockers: []
 state:
-  audit: "COMPLETE"
-  plan: "APPROVED"
-  apply: "COMPLETE"
-  test: "PASS"
-  closeout: "COMPLETE"
-
-next:
-  action: >-
-    P1 is closed. Do not remove the duplicate Registry access implementation from
-    Kinirin/Simple-Connection yet. The next Registry session should be approved and
-    materialized separately for Registry Client SDK package descriptor/channel/version/target resolution.
+  mode: DERIVED
+  ruleset: SESSION_STATE_V1
