@@ -1,0 +1,126 @@
+schema_version: "1.0"
+document_type: responsibility_vocabulary
+natural_language: FORBIDDEN
+dimensions:
+  authority_domain:
+    - AUTHORING
+    - REGISTRY_METADATA
+    - REGISTRY_ACCESS
+    - ARTIFACT_DELIVERY
+    - ARTIFACT_INTEGRITY
+    - UPDATE_CANDIDATE
+    - LOCAL_INSTALLATION
+    - ACTIVATION
+    - ROLLBACK
+    - RUNTIME_RECONCILIATION
+    - RENDERER_UI
+    - PACKAGE_PUBLICATION
+    - TRUST
+  lifecycle_phase:
+    - AUTHORING
+    - BUILD
+    - VALIDATION
+    - PACKAGING
+    - PUBLICATION
+    - DISCOVERY
+    - RESOLUTION
+    - AUTHORIZATION
+    - RETRIEVAL
+    - VERIFICATION
+    - INSTALLATION
+    - ACTIVATION
+    - EXECUTION
+    - ROLLBACK
+    - RETIREMENT
+  operation:
+    - DEFINE
+    - AUTHOR
+    - BUILD
+    - TEST
+    - VALIDATE
+    - PARSE
+    - CONSUME
+    - RESOLVE
+    - AUTHORIZE
+    - LOCATE
+    - RETRIEVE
+    - VERIFY
+    - NORMALIZE
+    - PUBLISH
+    - INSTALL
+    - ACTIVATE
+    - ROLLBACK
+    - RECONCILE
+    - RENDER
+    - REMOVE
+    - MIGRATE
+    - SIGN
+  object_class:
+    - AUTHORING_GUIDANCE
+    - MANIFEST
+    - PACKAGE
+    - PACKAGE_DESCRIPTOR
+    - REGISTRY_METADATA
+    - REGISTRY_IDENTITY
+    - ARTIFACT_LOCATOR
+    - ARTIFACT
+    - ARTIFACT_CONTENT
+    - INTEGRITY_METADATA
+    - UPDATE_CANDIDATE
+    - LOCAL_INSTALL_STATE
+    - ACTIVE_VERSION
+    - RUNTIME_STATE
+    - RENDERER_UI
+    - TRUST_ROOT
+    - SIGNATURE
+  object_subtype:
+    - SCTOOL
+    - SCTOOL_PACKAGE
+    - PACKAGE_DESCRIPTOR_V2
+    - CHANNEL
+    - VERSION
+    - TARGET
+    - GITHUB_RELEASE_ASSET
+    - REGISTRY_ACCESS_V1
+    - SHA256_SIZE_FILENAME
+    - SIMPLE_CONNECTION
+    - NONE
+  relation:
+    - OWNS
+    - SPECIFIES
+    - CONSUMES
+    - PRODUCES
+    - READS
+    - WRITES
+    - PUBLISHES
+    - AUTHORIZES
+    - VERIFIES
+    - INTEGRATES
+    - GOVERNS
+    - DEPENDS_ON
+    - REPLACES
+  ownership:
+    - PRIMARY
+    - SECONDARY
+    - DELEGATED
+    - NONE
+  normative:
+    - MUST
+    - MAY
+    - MUST_NOT
+  transfer_state:
+    - NONE
+    - PLANNED
+    - IN_PROGRESS
+    - MIGRATED
+    - RETIREMENT_PENDING
+    - RETIRED
+  retirement_state:
+    - NOT_APPLICABLE
+    - PENDING_REPLACEMENT
+    - REPLACEMENT_PROVEN
+    - RETIRED
+  responsibility_state:
+    - ALLOCATED
+    - DEPRECATED
+    - RETIRED
