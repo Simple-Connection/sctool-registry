@@ -1,25 +1,13 @@
-schema_version: "1.0"
+schema_version: "2.0"
 document_type: session_type_template
-template_id: session_type_A_v1
+template_id: session_type_A_v2
 session_type: A
 semantic: DECISION
-natural_language: PAYLOAD_ONLY
-
+natural_language: DESCRIPTION_REFERENCE_ONLY
 payload:
-  objective:
-    code: "<MACHINE_ID>"
-    statement: "<NATURAL_LANGUAGE>"
-  context:
-    - code: "<MACHINE_ID>"
-      statement: "<NATURAL_LANGUAGE>"
-  decisions:
-    - code: "<MACHINE_ID>"
-      statement: "<NATURAL_LANGUAGE>"
-      rationale: "<NATURAL_LANGUAGE>"
-  alternatives:
-    - code: "<MACHINE_ID>"
-      statement: "<NATURAL_LANGUAGE>"
-      disposition: "<MACHINE_ID>"
-  constraints:
-    - code: "<MACHINE_ID>"
-      statement: "<NATURAL_LANGUAGE>"
+  authority_changes:
+    assign: []
+    transfer: []
+    preserve: []
+    forbid: []
+  responsibility_description_ids: []
