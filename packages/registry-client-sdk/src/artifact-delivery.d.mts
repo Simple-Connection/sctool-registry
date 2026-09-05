@@ -1,5 +1,4 @@
 import type {
-  GitHubExecError,
   GitHubExecFile,
   RegistryCommandRunner,
   RegistryGitHubIdentity,
@@ -33,41 +32,56 @@ export interface ResolvedGitHubReleaseAsset {
   readonly identity: RegistryGitHubIdentity;
 }
 
-export type RegistryBinaryCommandOutcome =
-  | { readonly kind: "completed"; readonly exitCode: number; readonly stdout: Uint8Array; readonly stderr: string }
+export interface RegistryArtifactReadableStream extends AsyncIterable<Uint8Array> {
+  pipe(destination: unknown): unknown;
+  destroy(error?: Error): void;
+}
+
+export type RegistryStreamCompletionOutcome =
+  | { readonly kind: "completed"; readonly exitCode: number; readonly stderr: string }
   | { readonly kind: "not-found" }
   | { readonly kind: "timeout" }
   | { readonly kind: "transport-error" };
 
-export interface RegistryBinaryCommandRequest {
+export type RegistryStreamCommandOutcome =
+  | {
+      readonly kind: "started";
+      readonly stdout: RegistryArtifactReadableStream;
+      readonly completion: Promise<RegistryStreamCompletionOutcome>;
+      readonly abort: () => boolean;
+    }
+  | { readonly kind: "transport-error" };
+
+export interface RegistryStreamCommandRequest {
   readonly command: "gh";
   readonly args: readonly string[];
   readonly env: Readonly<Record<string, string | undefined>>;
   readonly timeoutMs: number;
 }
 
-export type RegistryBinaryCommandRunner = (
-  request: RegistryBinaryCommandRequest,
-) => Promise<RegistryBinaryCommandOutcome>;
+export type RegistryStreamCommandRunner = (
+  request: RegistryStreamCommandRequest,
+) => Promise<RegistryStreamCommandOutcome>;
 
-export interface GitHubBinaryExecFileOptions {
-  readonly env: Readonly<Record<string, string | undefined>>;
-  readonly encoding: null;
-  readonly windowsHide: true;
-  readonly timeout: number;
-  readonly maxBuffer: number;
+export interface GitHubSpawnChild {
+  readonly stdout: RegistryArtifactReadableStream;
+  readonly stderr?: {
+    on(event: "data", listener: (chunk: unknown) => void): unknown;
+  };
+  once(event: "error", listener: (error: { readonly code?: string }) => void): unknown;
+  once(event: "close", listener: (code: number | null) => void): unknown;
+  kill(): boolean;
 }
 
-export type GitHubBinaryExecFile = (
+export type GitHubSpawn = (
   command: string,
   args: string[],
-  options: GitHubBinaryExecFileOptions,
-  callback: (
-    error: GitHubExecError | null,
-    stdout?: Uint8Array,
-    stderr?: Uint8Array,
-  ) => void,
-) => void;
+  options: {
+    readonly env: Readonly<Record<string, string | undefined>>;
+    readonly windowsHide: true;
+    readonly stdio: readonly ["ignore", "pipe", "pipe"];
+  },
+) => GitHubSpawnChild;
 
 export interface ResolveGitHubReleaseAssetOptions {
   readonly runner?: RegistryCommandRunner;
@@ -76,38 +90,32 @@ export interface ResolveGitHubReleaseAssetOptions {
   readonly timeoutMs?: number;
 }
 
-export interface RetrieveGitHubReleaseAssetOptions {
-  readonly runner?: RegistryCommandRunner;
-  readonly binaryRunner?: RegistryBinaryCommandRunner;
-  readonly environment?: Readonly<Record<string, string | undefined>>;
-  readonly artifactRepository?: string;
-  readonly timeoutMs?: number;
+export interface OpenGitHubReleaseAssetStreamOptions extends ResolveGitHubReleaseAssetOptions {
+  readonly streamRunner?: RegistryStreamCommandRunner;
 }
 
-export interface ResolveGitHubReleaseAssetWithGitHubCliOptions {
+export interface OpenGitHubReleaseAssetStreamWithGitHubCliOptions {
   readonly execFileImpl?: GitHubExecFile;
+  readonly spawnImpl?: GitHubSpawn;
   readonly environment?: Readonly<Record<string, string | undefined>>;
   readonly artifactRepository?: string;
   readonly timeoutMs?: number;
 }
 
-export interface RetrieveGitHubReleaseAssetWithGitHubCliOptions {
-  readonly execFileImpl?: GitHubExecFile & GitHubBinaryExecFile;
-  readonly maxBufferBytes?: number;
-  readonly environment?: Readonly<Record<string, string | undefined>>;
-  readonly artifactRepository?: string;
-  readonly timeoutMs?: number;
-}
-
-export interface RetrievedGitHubReleaseAsset {
+export interface OpenedGitHubReleaseAssetStream {
   readonly packageId: string;
   readonly version: string;
   readonly targetKey: string | null;
   readonly repository: string;
   readonly expectedTag: string;
+  readonly releaseId: number | null;
   readonly assetId: number;
+  readonly backendAssetName: string | null;
+  readonly backendAssetSize: number | null;
   readonly identity: RegistryGitHubIdentity;
-  readonly bytes: Uint8Array;
+  readonly stream: RegistryArtifactReadableStream;
+  readonly completed: Promise<Readonly<{ exitCode: 0 }>>;
+  readonly abort: () => boolean;
 }
 
 export declare class RegistryArtifactDeliveryError extends Error {
@@ -122,24 +130,27 @@ export declare function resolveGitHubReleaseAsset(
   options?: ResolveGitHubReleaseAssetOptions,
 ): Promise<ResolvedGitHubReleaseAsset>;
 
-export declare function createGitHubCliBinaryCommandRunner(
-  options?: {
-    readonly execFileImpl?: GitHubBinaryExecFile;
-    readonly maxBufferBytes?: number;
-  },
-): RegistryBinaryCommandRunner | null;
+export declare function createGitHubCliStreamCommandRunner(options?: {
+  readonly spawnImpl?: GitHubSpawn;
+  readonly maxDiagnosticBytes?: number;
+}): RegistryStreamCommandRunner | null;
 
-export declare function retrieveGitHubReleaseAsset(
+export declare function openGitHubReleaseAssetStream(
   resolvedTarget: ResolvedRegistryTargetDelivery,
-  options?: RetrieveGitHubReleaseAssetOptions,
-): Promise<RetrievedGitHubReleaseAsset>;
+  options?: OpenGitHubReleaseAssetStreamOptions,
+): Promise<OpenedGitHubReleaseAssetStream>;
 
 export declare function resolveGitHubReleaseAssetWithGitHubCli(
   resolvedTarget: ResolvedRegistryTargetDelivery,
-  options?: ResolveGitHubReleaseAssetWithGitHubCliOptions,
+  options?: {
+    readonly execFileImpl?: GitHubExecFile;
+    readonly environment?: Readonly<Record<string, string | undefined>>;
+    readonly artifactRepository?: string;
+    readonly timeoutMs?: number;
+  },
 ): Promise<ResolvedGitHubReleaseAsset>;
 
-export declare function retrieveGitHubReleaseAssetWithGitHubCli(
+export declare function openGitHubReleaseAssetStreamWithGitHubCli(
   resolvedTarget: ResolvedRegistryTargetDelivery,
-  options?: RetrieveGitHubReleaseAssetWithGitHubCliOptions,
-): Promise<RetrievedGitHubReleaseAsset>;
+  options?: OpenGitHubReleaseAssetStreamWithGitHubCliOptions,
+): Promise<OpenedGitHubReleaseAssetStream>;

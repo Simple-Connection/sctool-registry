@@ -8,6 +8,7 @@ import {
 
 const DELIVERY_TYPE = "github-release-asset";
 const ACCESS_CONTRACT = "registry-access-v1";
+const DEFAULT_DIAGNOSTIC_LIMIT = 16 * 1024;
 
 function freeze(value) {
   return Object.freeze(value);
@@ -178,56 +179,98 @@ export async function resolveGitHubReleaseAsset(resolvedTarget, {
   });
 }
 
-export function createGitHubCliBinaryCommandRunner({ execFileImpl, maxBufferBytes } = {}) {
-  if (typeof execFileImpl !== "function") return null;
-  if (!Number.isSafeInteger(maxBufferBytes) || maxBufferBytes <= 0) return null;
+export function createGitHubCliStreamCommandRunner({
+  spawnImpl,
+  maxDiagnosticBytes = DEFAULT_DIAGNOSTIC_LIMIT,
+} = {}) {
+  if (typeof spawnImpl !== "function") return null;
+  if (!Number.isSafeInteger(maxDiagnosticBytes) || maxDiagnosticBytes <= 0) return null;
 
-  return ({ command, args, env, timeoutMs }) =>
-    new Promise((resolve) => {
-      execFileImpl(
-        command,
-        [...args],
-        {
-          env,
-          encoding: null,
-          windowsHide: true,
-          timeout: timeoutMs,
-          maxBuffer: maxBufferBytes,
-        },
-        (error, stdout = new Uint8Array(), stderr = new Uint8Array()) => {
-          const bytes = stdout instanceof Uint8Array ? new Uint8Array(stdout) : new TextEncoder().encode(String(stdout ?? ""));
-          const diagnostic = stderr instanceof Uint8Array ? new TextDecoder().decode(stderr) : String(stderr ?? "");
-          if (!error) {
-            resolve({ kind: "completed", exitCode: 0, stdout: bytes, stderr: diagnostic });
-            return;
-          }
-          if (error.code === "ENOENT") {
-            resolve({ kind: "not-found" });
-            return;
-          }
-          if (error.killed || error.code === "ETIMEDOUT") {
-            resolve({ kind: "timeout" });
-            return;
-          }
-          if (typeof error.code === "number") {
-            resolve({ kind: "completed", exitCode: error.code, stdout: bytes, stderr: diagnostic });
-            return;
-          }
-          resolve({ kind: "transport-error" });
-        },
-      );
+  return async ({ command, args, env, timeoutMs }) => {
+    let child;
+    try {
+      child = spawnImpl(command, [...args], {
+        env,
+        windowsHide: true,
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+    } catch {
+      return { kind: "transport-error" };
+    }
+
+    if (!child || !child.stdout || typeof child.once !== "function" || typeof child.kill !== "function") {
+      try { child?.kill?.(); } catch {}
+      return { kind: "transport-error" };
+    }
+
+    let stderr = "";
+    if (child.stderr && typeof child.stderr.on === "function") {
+      child.stderr.on("data", (chunk) => {
+        if (stderr.length >= maxDiagnosticBytes) return;
+        stderr += String(chunk).slice(0, maxDiagnosticBytes - stderr.length);
+      });
+    }
+
+    const completion = new Promise((resolve) => {
+      let settled = false;
+      let timedOut = false;
+      const finish = (value) => {
+        if (settled) return;
+        settled = true;
+        if (timer !== null) clearTimeout(timer);
+        resolve(value);
+      };
+      const timer = Number.isFinite(timeoutMs) && timeoutMs > 0
+        ? setTimeout(() => {
+            timedOut = true;
+            try { child.kill(); } catch {}
+          }, timeoutMs)
+        : null;
+
+      child.once("error", (error) => {
+        if (error?.code === "ENOENT") {
+          finish({ kind: "not-found" });
+          return;
+        }
+        if (timedOut || error?.code === "ETIMEDOUT") {
+          finish({ kind: "timeout" });
+          return;
+        }
+        finish({ kind: "transport-error" });
+      });
+      child.once("close", (code) => {
+        if (timedOut) {
+          finish({ kind: "timeout" });
+          return;
+        }
+        finish({
+          kind: "completed",
+          exitCode: Number.isInteger(code) ? code : 1,
+          stderr,
+        });
+      });
     });
+
+    return {
+      kind: "started",
+      stdout: child.stdout,
+      completion,
+      abort: () => {
+        try { return child.kill(); } catch { return false; }
+      },
+    };
+  };
 }
 
-export async function retrieveGitHubReleaseAsset(resolvedTarget, {
+export async function openGitHubReleaseAssetStream(resolvedTarget, {
   runner,
-  binaryRunner,
+  streamRunner,
   environment = {},
   artifactRepository = DEFAULT_REGISTRY_ARTIFACT_REPOSITORY,
   timeoutMs = DEFAULT_REGISTRY_GITHUB_TIMEOUT_MS,
 } = {}) {
-  if (typeof runner !== "function" || typeof binaryRunner !== "function") {
-    throw new RegistryArtifactDeliveryError("configuration-error", "text and binary GitHub CLI runners are required");
+  if (typeof runner !== "function" || typeof streamRunner !== "function") {
+    throw new RegistryArtifactDeliveryError("configuration-error", "text and stream GitHub CLI runners are required");
   }
 
   const resolvedAsset = await resolveGitHubReleaseAsset(resolvedTarget, {
@@ -237,29 +280,38 @@ export async function retrieveGitHubReleaseAsset(resolvedTarget, {
     timeoutMs,
   });
   const env = sanitizeRegistryGitHubEnvironment(environment);
-  const outcome = await binaryRunner({
+  const started = await streamRunner({
     command: "gh",
     args: ["api", resolvedAsset.assetApiPath, "-H", "Accept: application/octet-stream"],
     env,
     timeoutMs,
   });
-  if (outcome?.kind !== "completed" || outcome.exitCode !== 0) {
-    throw commandFailure("download-failed", "exact GitHub release asset retrieval failed", outcome);
-  }
-  if (!(outcome.stdout instanceof Uint8Array)) {
-    throw new RegistryArtifactDeliveryError("download-response-invalid", "artifact retrieval did not return binary bytes");
+  if (started?.kind !== "started" || !started.stdout || !started.completion || typeof started.abort !== "function") {
+    throw commandFailure("download-start-failed", "exact GitHub release asset stream could not be started", started);
   }
 
-  return {
+  const completed = Promise.resolve(started.completion).then((outcome) => {
+    if (outcome?.kind !== "completed" || outcome.exitCode !== 0) {
+      throw commandFailure("download-failed", "exact GitHub release asset retrieval failed", outcome);
+    }
+    return freeze({ exitCode: 0 });
+  });
+
+  return freeze({
     packageId: resolvedAsset.packageId,
     version: resolvedAsset.version,
     targetKey: resolvedAsset.targetKey,
     repository: resolvedAsset.repository,
     expectedTag: resolvedAsset.expectedTag,
+    releaseId: resolvedAsset.releaseId,
     assetId: resolvedAsset.assetId,
+    backendAssetName: resolvedAsset.backendAssetName,
+    backendAssetSize: resolvedAsset.backendAssetSize,
     identity: resolvedAsset.identity,
-    bytes: new Uint8Array(outcome.stdout),
-  };
+    stream: started.stdout,
+    completed,
+    abort: started.abort,
+  });
 }
 
 export async function resolveGitHubReleaseAssetWithGitHubCli(resolvedTarget, {
@@ -280,21 +332,21 @@ export async function resolveGitHubReleaseAssetWithGitHubCli(resolvedTarget, {
   });
 }
 
-export async function retrieveGitHubReleaseAssetWithGitHubCli(resolvedTarget, {
+export async function openGitHubReleaseAssetStreamWithGitHubCli(resolvedTarget, {
   execFileImpl,
-  maxBufferBytes,
+  spawnImpl,
   environment = globalThis.process?.env ?? {},
   artifactRepository = DEFAULT_REGISTRY_ARTIFACT_REPOSITORY,
   timeoutMs = DEFAULT_REGISTRY_GITHUB_TIMEOUT_MS,
 } = {}) {
   const runner = createGitHubCliCommandRunner({ execFileImpl });
-  const binaryRunner = createGitHubCliBinaryCommandRunner({ execFileImpl, maxBufferBytes });
-  if (!runner || !binaryRunner) {
-    throw new RegistryArtifactDeliveryError("configuration-error", "execFileImpl and positive maxBufferBytes are required");
+  const streamRunner = createGitHubCliStreamCommandRunner({ spawnImpl });
+  if (!runner || !streamRunner) {
+    throw new RegistryArtifactDeliveryError("configuration-error", "execFileImpl and spawnImpl are required");
   }
-  return retrieveGitHubReleaseAsset(resolvedTarget, {
+  return openGitHubReleaseAssetStream(resolvedTarget, {
     runner,
-    binaryRunner,
+    streamRunner,
     environment,
     artifactRepository,
     timeoutMs,

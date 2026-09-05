@@ -24,6 +24,10 @@
     "./artifact-delivery": {
       "types": "./src/artifact-delivery.d.mts",
       "import": "./src/artifact-delivery.mjs"
+    },
+    "./update-candidate": {
+      "types": "./src/update-candidate.d.mts",
+      "import": "./src/update-candidate.mjs"
     }
   },
   "files": [
@@ -31,7 +35,7 @@
     "README.md"
   ],
   "scripts": {
-    "test": "node ./tests/boundary.test.mjs && node ./tests/registry-access.test.mjs && node ./tests/package-descriptor.test.mjs && node ./tests/resolution.test.mjs && node ./tests/artifact-delivery.test.mjs"
+    "test": "node ./tests/boundary.test.mjs && node ./tests/registry-access.test.mjs && node ./tests/package-descriptor.test.mjs && node ./tests/resolution.test.mjs && node ./tests/artifact-delivery.test.mjs && node ./tests/artifact-staging.test.mjs && node ./tests/artifact-integrity.test.mjs && node ./tests/verified-artifact.test.mjs && node ./tests/update-candidate.test.mjs"
   },
   "engines": {
     "node": ">=20"
