@@ -15,15 +15,15 @@ routes:
       A:
         template: "docs/template/session_document_template/session_type_A.yaml"
         semantic: DECISION
-        natural_language: DESCRIPTION_REFERENCE_ONLY
+        natural_language: REFERENCE_ONLY
       B:
         template: "docs/template/session_document_template/session_type_B.yaml"
         semantic: IMPLEMENTATION
-        natural_language: DESCRIPTION_REFERENCE_ONLY
+        natural_language: REFERENCE_ONLY
       C:
         template: "docs/template/session_document_template/session_type_C.yaml"
         semantic: VALIDATION_CLOSEOUT
-        natural_language: DESCRIPTION_REFERENCE_ONLY
+        natural_language: REFERENCE_ONLY
 composition:
   session_document:
     required: [ESSENTIAL, RESPONSIBILITY_MODEL, SESSION_TYPE]
