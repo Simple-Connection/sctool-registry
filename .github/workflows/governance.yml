@@ -1,0 +1,48 @@
+name: Validate development governance
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "AGENTS.md"
+      - "docs/**"
+      - "governance/**"
+      - "ptsip.yaml"
+      - ".github/workflows/governance.yml"
+  push:
+    branches:
+      - "dev/**"
+    paths:
+      - "AGENTS.md"
+      - "docs/**"
+      - "governance/**"
+      - "ptsip.yaml"
+      - ".github/workflows/governance.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Install governance validation dependencies
+        run: |
+          python -m pip install -r governance/requirements.txt
+          python -m pip install "PTSIP==0.3.7"
+          python -m pip install -r tools/requirements.txt
+
+      - name: Validate machine development documentation
+        run: python governance/validate-development-docs.py --root .
+
+      - name: Validate PTSIP profile and ownership partition
+        run: ptsip validate .
+
+      - name: Validate Registry JSON contracts
+        run: python tools/validate-registry.py
