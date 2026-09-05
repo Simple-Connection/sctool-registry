@@ -1,9 +1,9 @@
-schema_version: "2.0"
+schema_version: "2.1"
 document_type: session_type_template
 template_id: session_type_B_v2
 session_type: B
 semantic: IMPLEMENTATION
-natural_language: DESCRIPTION_REFERENCE_ONLY
+natural_language: REFERENCE_ONLY
 payload:
   implementation:
     responsibility_refs: []
@@ -11,3 +11,4 @@ payload:
     path_allow: []
     path_deny: []
   responsibility_description_ids: []
+  decision_rationale_ids: []
