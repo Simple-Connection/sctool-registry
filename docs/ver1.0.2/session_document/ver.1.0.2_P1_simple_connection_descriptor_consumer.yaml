@@ -1,4 +1,4 @@
-schema_version: "3.0"
+schema_version: "4.0"
 document_type: machine_session
 natural_language: FORBIDDEN
 session:
@@ -9,14 +9,14 @@ session:
   distribution_contract_version: "1.0.2"
   branch: "dev/1.0.2"
   authority_repository: "Simple-Connection/sctool-registry"
-  improvement_plan: "docs/governance/versions/1.0.2/improvement_plan.yaml"
+  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
 routing:
-  governance_index: "docs/governance/index.yaml"
-  rules_index: "docs/governance/rules/index.yaml"
-  template_index: "docs/governance/template/index.yaml"
-  responsibility_index: "docs/governance/responsibility/index.yaml"
-  essential_template: "docs/governance/template/session/essential.yaml"
-  type_template: "docs/governance/template/session/type_A.yaml"
+  docs_index: "docs/index.yaml"
+  rules_index: "docs/rules/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  essential_template: "docs/template/session_document_template/session_document_essential.yaml"
+  type_template: "docs/template/session_document_template/session_type_A.yaml"
 heads:
   start: null
   implementation: "e3b0c14d6dd79dc7711bc1cda604eb2895905a4f"

@@ -30,33 +30,33 @@ Do not create a branch per session. Do not infer the active version or session f
 The canonical machine entry point for development documentation is:
 
 ```text
-docs/governance/index.yaml
+docs/index.yaml
 ```
 
 A coding agent entering version/session work must resolve routing in this order:
 
 ```text
-docs/governance/index.yaml
--> docs/governance/rules/index.yaml
--> docs/governance/template/index.yaml
--> docs/governance/responsibility/index.yaml
+docs/index.yaml
+-> docs/rules/index.yaml
+-> docs/template/index.yaml
+-> docs/responsibility/index.yaml
 -> current version improvement_plan
 -> approved current session_document
 -> session_document_essential template
 -> selected session_type template
 ```
 
-`docs/governance/index.yaml` is authoritative for the current distribution contract version, version state, current/next session state, version-plan path, session-document paths, and template routing. It must contain machine values only and must not contain free-form natural-language planning text.
+`docs/index.yaml` is authoritative for the current distribution contract version, version state, current/next session state, version-plan path, session-document paths, and template routing. It must contain machine values only and must not contain free-form natural-language planning text.
 
 Each machine-governed version has one canonical improvement plan at:
 
 ```text
-docs/governance/versions/{major}.{minor}.{micro}/improvement_plan.yaml
+docs/ver{major}.{minor}.{micro}/{major}.{minor}.{micro}_Improvement_plan.yaml
 ```
 
-The improvement plan must follow `docs/governance/template/improvement_plan.yaml`. Natural-language fields are forbidden in the improvement plan. Version goals and future work must be represented by stable machine identifiers, enums, paths, states, gate IDs, and evidence references.
+The improvement plan must follow `docs/template/improvement_plan.yaml`. Natural-language fields are forbidden in the improvement plan. Version goals and future work must be represented by stable machine identifiers, enums, paths, states, gate IDs, and evidence references.
 
-Before creating a new development branch, resolve the target version from `docs/governance/index.yaml`. Reuse an existing matching `dev/{major}.{minor}.{micro}` branch when that version is already active.
+Before creating a new development branch, resolve the target version from `docs/index.yaml`. Reuse an existing matching `dev/{major}.{minor}.{micro}` branch when that version is already active.
 
 Multiple sessions belonging to the same version remain on that version branch. Session completion does not authorize a merge to `main`. The version branch becomes merge-eligible only after version-level machine gates are satisfied and any required explicit approval is recorded.
 
@@ -66,38 +66,48 @@ Canonical layout:
 
 ```text
 docs/
-└─ governance/
-   ├─ index.yaml
-   ├─ rules/
-   │  ├─ index.yaml
-   │  └─ session-state.yaml
-   ├─ responsibility/
-   │  ├─ index.yaml
-   │  ├─ authorities.yaml
-   │  ├─ vocabulary.yaml
-   │  ├─ contracts.yaml
-   │  ├─ responsibilities.yaml
-   │  ├─ descriptions.yaml
-   │  ├─ rationale.yaml
-   │  └─ gates.yaml
-   ├─ template/
-   │  ├─ index.yaml
-   │  ├─ improvement_plan.yaml
-   │  └─ session/
-   │     ├─ essential.yaml
-   │     ├─ type_A.yaml
-   │     ├─ type_B.yaml
-   │     └─ type_C.yaml
-   └─ versions/
-      └─ {major}.{minor}.{micro}/
-         ├─ improvement_plan.yaml
-         └─ sessions/
-            └─ P{N}.yaml
+├─ index.yaml
+├─ rules/
+│  ├─ index.yaml
+│  └─ session-state.yaml
+├─ template/
+│  ├─ index.yaml
+│  ├─ improvement_plan.yaml
+│  └─ session_document_template/
+│     ├─ session_document_essential.yaml
+│     ├─ session_type_A.yaml
+│     ├─ session_type_B.yaml
+│     └─ session_type_C.yaml
+├─ responsibility/
+│  ├─ index.yaml
+│  ├─ authorities.yaml
+│  ├─ vocabulary.yaml
+│  ├─ contracts.yaml
+│  ├─ responsibilities.yaml
+│  ├─ descriptions.yaml
+│  ├─ rationale.yaml
+│  └─ gates.yaml
+├─ governance/
+│  ├─ validate.py
+│  ├─ requirements.txt
+│  └─ validation/
+│     ├─ common.py
+│     ├─ context.py
+│     ├─ interpretation.py
+│     ├─ responsibility.py
+│     ├─ routing.py
+│     ├─ session.py
+│     └─ state.py
+└─ ver{major}.{minor}.{micro}/
+   ├─ {major}.{minor}.{micro}_Improvement_plan.yaml
+   └─ session_document/
+      └─ ver.{major}.{minor}.{micro}_P{N}_*.yaml
 ```
 
-`docs/governance/template/session/essential.yaml` defines the common machine-only routing/state/evidence fields. It must not introduce natural-language payload fields.
 
-The governance validator and its Python package are colocated in the same subsystem:
+`docs/template/session_document_template/session_document_essential.yaml` defines the common machine-only routing/state/evidence fields. It must not introduce natural-language payload fields.
+
+The governance validator and its Python package are colocated under the validator namespace:
 
 ```text
 docs/governance/validate.py
@@ -105,7 +115,7 @@ docs/governance/requirements.txt
 docs/governance/validation/**
 ```
 
-This placement is intentional: declarative governance state, governance rules, and the validator that enforces them are one repository-governance subsystem.
+This placement is intentionally limited to validator tooling. Machine state, rules, templates, responsibility semantics, and version/session records remain sibling authorities under `docs/` rather than children of the validator namespace.
 
 Session type templates remain machine/reference-only:
 
@@ -115,33 +125,33 @@ B = IMPLEMENTATION
 C = VALIDATION_CLOSEOUT
 ```
 
-Natural language must not be embedded in the governance index, improvement plan, session templates, or session documents. Authority-relevant unmodeled semantics and decision intent are preserved only through registered description/rationale references under `docs/governance/responsibility/`.
+Natural language must not be embedded in the docs index, improvement plan, session templates, or session documents. Authority-relevant unmodeled semantics and decision intent are preserved only through registered description/rationale references under `docs/responsibility/`.
 
-A new primary session is not materialized before explicit approval. After approval, create exactly one session YAML by combining the essential machine fields with the selected type payload, then update the version improvement plan and `docs/governance/index.yaml` in the same logical change.
+A new primary session is not materialized before explicit approval. After approval, create exactly one session YAML by combining the essential machine fields with the selected type payload, then update the version improvement plan and `docs/index.yaml` in the same logical change.
 
 Primary sessions use `P1`, `P2`, `P3`, ... . Use `P1.1`, `P1.2`, ... only when an already approved primary session must be split into a subordinate session.
 
 Historical session documents created before this machine-entry model may retain their recorded payload. Their routing references must point to the current YAML improvement plan, and new sessions must use the template routing above.
 
-All current governance state, rules, templates, rationale, and executable validation tooling under `docs/governance/**`, plus historical governance state under `docs/ver1.0.1/**`, are owned by `repository-governance` in `ptsip.yaml`. Do not recreate a top-level `governance/` tooling root.
+Repository-governance owns `docs/index.yaml`, `docs/rules/**`, `docs/template/**`, `docs/responsibility/**`, `docs/ver*/**`, and the validator tooling under `docs/governance/**`. Keep these authorities flat: do not move rules, templates, responsibility semantics, or version/session state under `docs/governance/`.
 
 ## Responsibility machine model
 
-Authority responsibility must be decomposed into closed machine dimensions instead of replacing prose with opaque constants. Canonical dimensions and allocations are routed by `docs/governance/responsibility/index.yaml`.
+Authority responsibility must be decomposed into closed machine dimensions instead of replacing prose with opaque constants. Canonical dimensions and allocations are routed by `docs/responsibility/index.yaml`.
 
 If authority-relevant semantics are not expressible by the current closed dimensions, qualify the missing semantic as a candidate dimension or value. Register it only when it is stable, reusable, and orthogonal. Otherwise keep a `responsibility_description_id` reference.
 
-Natural language is preserved in a separate interpretation layer instead of being removed. `docs/governance/responsibility/descriptions.yaml` is only for authority-relevant semantics that remain unmodeled by closed dimensions. `docs/governance/responsibility/rationale.yaml` preserves why an authority allocation or boundary was chosen, including historical migration intent and review triggers. Rationale is explanatory and does not override the machine responsibility dimensions.
+Natural language is preserved in a separate interpretation layer instead of being removed. `docs/responsibility/descriptions.yaml` is only for authority-relevant semantics that remain unmodeled by closed dimensions. `docs/responsibility/rationale.yaml` preserves why an authority allocation or boundary was chosen, including historical migration intent and review triggers. Rationale is explanatory and does not override the machine responsibility dimensions.
 
 Each responsibility declares `interpretation.semantic_coverage`. `COMPLETE` requires `responsibility_description_id: null`; `PARTIAL` requires a registered description. Responsibilities marked `rationale_required: true` must reference active rationale entries whose `applies_to` includes that responsibility. Superseded rationale must not be used as active interpretation.
 
 A future change that matches a rationale `review_on` trigger must re-evaluate the linked rationale before changing the responsibility dimensions. Do not infer that a machine dimension change automatically preserves the prior design intent.
 
-Session state is derived. Session documents must not assert independent `audit`, `plan`, `apply`, `test`, or `closeout` state values. `docs/governance/rules/session-state.yaml` owns the machine state rules; `docs/governance/validation/state.py` evaluates them, and `docs/governance/validate.py` checks that the version improvement plan agrees.
+Session state is derived. Session documents must not assert independent `audit`, `plan`, `apply`, `test`, or `closeout` state values. `docs/rules/session-state.yaml` owns the machine state rules; `docs/governance/validation/state.py` evaluates them, and `docs/governance/validate.py` checks that the version improvement plan agrees.
 
 `docs/governance/validate.py` is the single public governance-validation command. Domain checks are implemented behind it in `docs/governance/validation/`; do not add separate public validator commands for routing, responsibility, interpretation, session, or state checks.
 
-The session named by `docs/governance/index.yaml -> current.next_session` remains unmaterialized until explicit approval. Validator failures must not be bypassed by pre-creating its session document or changing approval state outside the declared machine rules.
+The session named by `docs/index.yaml -> current.next_session` remains unmaterialized until explicit approval. Validator failures must not be bypassed by pre-creating its session document or changing approval state outside the declared machine rules.
 
 ## PTSIP is mandatory from the first commit
 

@@ -1,6 +1,6 @@
-schema_version: "3.0"
+schema_version: "4.0"
 document_type: session_document_template
-template_id: session_document_essential_v3
+template_id: session_document_essential_v4
 natural_language: FORBIDDEN
 required_sections: [session, routing, heads, responsibility_model, work_units, evidence, gates, state]
 session:
@@ -13,11 +13,11 @@ session:
   authority_repository: "<OWNER/REPOSITORY>"
   improvement_plan: "<PATH>"
 routing:
-  governance_index: "docs/governance/index.yaml"
-  rules_index: "docs/governance/rules/index.yaml"
-  template_index: "docs/governance/template/index.yaml"
-  responsibility_index: "docs/governance/responsibility/index.yaml"
-  essential_template: "docs/governance/template/session/essential.yaml"
+  docs_index: "docs/index.yaml"
+  rules_index: "docs/rules/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  essential_template: "docs/template/session_document_template/session_document_essential.yaml"
   type_template: "<PATH>"
 heads:
   start: "<GIT_SHA|null>"

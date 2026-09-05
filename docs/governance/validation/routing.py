@@ -64,8 +64,8 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
 
     plan_routing = plan["routing"]
     need(
-        plan_routing["governance_index"] == ctx.index_path,
-        "PLAN_GOVERNANCE_INDEX_ROUTE",
+        plan_routing["docs_index"] == ctx.index_path,
+        "PLAN_DOCS_INDEX_ROUTE",
         errors,
     )
     need(
@@ -150,39 +150,78 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
         )
 
     layout = ctx.rules_index.get("layout", {})
-    canonical_root = layout.get("canonical_root")
-    if canonical_root:
-        canonical_prefix = canonical_root.rstrip("/") + "/"
-        for route_name, route_path in (
-            ("INDEX", ctx.index_path),
-            ("PLAN", ctx.plan_path),
-            ("RULES", ctx.rules_index_path),
-            ("TEMPLATE", ctx.template_index_path),
-            ("RESPONSIBILITY", ctx.responsibility_index_path),
-        ):
+    need(
+        ctx.index_path == layout.get("docs_index"),
+        f"DOCS_INDEX_LAYOUT:{ctx.index_path}",
+        errors,
+    )
+
+    route_roots = (
+        ("RULES", ctx.rules_index_path, layout.get("rules_root")),
+        ("TEMPLATE", ctx.template_index_path, layout.get("template_root")),
+        ("RESPONSIBILITY", ctx.responsibility_index_path, layout.get("responsibility_root")),
+    )
+    for route_name, route_path, root_path in route_roots:
+        need(
+            isinstance(root_path, str)
+            and (route_path == root_path or route_path.startswith(root_path.rstrip("/") + "/")),
+            f"FLAT_ROUTE_ROOT:{route_name}:{route_path}:{root_path}",
+            errors,
+        )
+
+    version_root_pattern = layout.get("version_root_pattern")
+    version_root = (
+        version_root_pattern.replace("{version}", version)
+        if isinstance(version_root_pattern, str)
+        else None
+    )
+    need(
+        isinstance(version_root, str)
+        and (ctx.plan_path == version_root or ctx.plan_path.startswith(version_root.rstrip("/") + "/")),
+        f"VERSION_PLAN_ROOT:{ctx.plan_path}:{version_root}",
+        errors,
+    )
+    need(
+        isinstance(version_root, str)
+        and (
+            plan_routing["session_document_root"] == version_root
+            or plan_routing["session_document_root"].startswith(version_root.rstrip("/") + "/")
+        ),
+        f"VERSION_SESSION_ROOT_LAYOUT:{plan_routing['session_document_root']}:{version_root}",
+        errors,
+    )
+
+    responsibility_root = layout.get("responsibility_root")
+    if isinstance(responsibility_root, str):
+        responsibility_prefix = responsibility_root.rstrip("/") + "/"
+        for route_name, route_path in ctx.responsibility_index["routes"].items():
             need(
-                route_path.startswith(canonical_prefix),
-                f"GOVERNANCE_ROOT:{route_name}:{route_path}",
+                route_path.startswith(responsibility_prefix),
+                f"RESPONSIBILITY_ROUTE_ROOT:{route_name}:{route_path}",
                 errors,
             )
+
+    template_root = layout.get("template_root")
+    need(
+        ctx.template_index.get("template_root") == template_root,
+        f"TEMPLATE_ROOT:{ctx.template_index.get('template_root')}:{template_root}",
+        errors,
+    )
 
     for forbidden_path in layout.get("forbidden_paths", []):
         need(
             not (ctx.root / forbidden_path).exists(),
-            f"LEGACY_GOVERNANCE_PATH:{forbidden_path}",
-            errors,
-        )
-
-    legacy_pattern = layout.get("current_version_legacy_root_pattern")
-    if legacy_pattern:
-        legacy_path = legacy_pattern.replace("{version}", version)
-        need(
-            not (ctx.root / legacy_path).exists(),
-            f"LEGACY_CURRENT_VERSION_ROOT:{legacy_path}",
+            f"NESTED_GOVERNANCE_PATH:{forbidden_path}",
             errors,
         )
 
     tooling = ctx.rules_index.get("tooling", {})
+    tooling_root = layout.get("tooling_root")
+    tooling_prefix = (
+        tooling_root.rstrip("/") + "/"
+        if isinstance(tooling_root, str)
+        else None
+    )
     for tooling_key in ("entrypoint", "requirements", "package_root"):
         tooling_path = tooling.get(tooling_key)
         need(
@@ -190,17 +229,11 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
             f"GOVERNANCE_TOOLING_PATH:{tooling_key}:{tooling_path}",
             errors,
         )
-        if isinstance(tooling_path, str) and canonical_root:
-            need(
-                tooling_path == canonical_root or tooling_path.startswith(canonical_prefix),
-                f"GOVERNANCE_TOOLING_ROOT:{tooling_key}:{tooling_path}",
-                errors,
-            )
-
-    for forbidden_root in tooling.get("forbidden_roots", []):
         need(
-            not (ctx.root / forbidden_root).exists(),
-            f"FORBIDDEN_GOVERNANCE_TOOLING_ROOT:{forbidden_root}",
+            isinstance(tooling_path, str)
+            and isinstance(tooling_root, str)
+            and (tooling_path == tooling_root or tooling_path.startswith(tooling_prefix)),
+            f"GOVERNANCE_TOOLING_ROOT:{tooling_key}:{tooling_path}:{tooling_root}",
             errors,
         )
 

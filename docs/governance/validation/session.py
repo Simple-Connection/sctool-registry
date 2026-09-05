@@ -114,8 +114,8 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
 
         routing = doc["routing"]
         need(
-            routing["governance_index"] == ctx.index_path,
-            f"SESSION_GOVERNANCE_ROUTE:{session_id}",
+            routing["docs_index"] == ctx.index_path,
+            f"SESSION_DOCS_INDEX_ROUTE:{session_id}",
             errors,
         )
         need(

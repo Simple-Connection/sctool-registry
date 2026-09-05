@@ -1,11 +1,11 @@
-schema_version: "3.0"
-document_type: governance_index
+schema_version: "4.0"
+document_type: docs_index
 repository: "Simple-Connection/sctool-registry"
 authority: REPOSITORY_GOVERNANCE
 natural_language: FORBIDDEN
-rules_index: "docs/governance/rules/index.yaml"
-template_index: "docs/governance/template/index.yaml"
-responsibility_index: "docs/governance/responsibility/index.yaml"
+rules_index: "docs/rules/index.yaml"
+template_index: "docs/template/index.yaml"
+responsibility_index: "docs/responsibility/index.yaml"
 
 current:
   distribution_contract_version: "1.0.2"
@@ -15,8 +15,8 @@ current:
     machine_routing: COMPLETE
     responsibility_model: COMPLETE
     interpretation_layer: COMPLETE
-    governance_layout: COMPLETE
-  improvement_plan: "docs/governance/versions/1.0.2/improvement_plan.yaml"
+    governance_layout: VALIDATION_PENDING
+  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
   current_session: null
   current_session_document: null
   next_session:
@@ -45,20 +45,20 @@ versions:
       machine_routing: COMPLETE
       responsibility_model: COMPLETE
       interpretation_layer: COMPLETE
-      governance_layout: COMPLETE
+      governance_layout: VALIDATION_PENDING
     improvement_plan:
-      path: "docs/governance/versions/1.0.2/improvement_plan.yaml"
+      path: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
       format: MACHINE_YAML
-    session_document_root: "docs/governance/versions/1.0.2/sessions"
+    session_document_root: "docs/ver1.0.2/session_document"
     sessions:
-      - {id: P1, state: COMPLETE, format: MACHINE_SESSION, document: "docs/governance/versions/1.0.2/sessions/P1.yaml"}
-      - {id: P2, state: COMPLETE, format: MACHINE_SESSION, document: "docs/governance/versions/1.0.2/sessions/P2.yaml"}
+      - {id: P1, state: COMPLETE, format: MACHINE_SESSION, document: "docs/ver1.0.2/session_document/ver.1.0.2_P1_simple_connection_descriptor_consumer.yaml"}
+      - {id: P2, state: COMPLETE, format: MACHINE_SESSION, document: "docs/ver1.0.2/session_document/ver.1.0.2_P2_registry_client_sdk_descriptor_resolution.yaml"}
       - {id: P3, state: AWAITING_APPROVAL, format: MACHINE_SESSION, document: null}
 
 templates:
-  improvement_plan: "docs/governance/template/improvement_plan.yaml"
-  session_essential: "docs/governance/template/session/essential.yaml"
+  improvement_plan: "docs/template/improvement_plan.yaml"
+  session_essential: "docs/template/session_document_template/session_document_essential.yaml"
   session_types:
-    A: "docs/governance/template/session/type_A.yaml"
-    B: "docs/governance/template/session/type_B.yaml"
-    C: "docs/governance/template/session/type_C.yaml"
+    A: "docs/template/session_document_template/session_type_A.yaml"
+    B: "docs/template/session_document_template/session_type_B.yaml"
+    C: "docs/template/session_document_template/session_type_C.yaml"

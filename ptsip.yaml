@@ -120,11 +120,15 @@ components:
       - "ptsip.yaml"
       - "AGENTS.md"
       - ".github/workflows/governance.yml"
+      - "docs/index.yaml"
+      - "docs/rules/**"
+      - "docs/template/**"
+      - "docs/responsibility/**"
       - "docs/governance/**"
-      - "docs/ver1.0.1/**"
+      - "docs/ver*/**"
       - ".gitignore"
       - ".vscode/settings.json"
-    purpose: repository_architecture_declaration_machine_governance_and_validation_engine
+    purpose: repository_architecture_declaration_flat_machine_governance_and_validation_engine
     shipped: false
     runtime_required: false
     executable: true

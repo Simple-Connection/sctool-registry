@@ -13,7 +13,7 @@ from validation import interpretation, responsibility, routing, session
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", default=".")
-    parser.add_argument("--index", default="docs/governance/index.yaml")
+    parser.add_argument("--index", default="docs/index.yaml")
     args = parser.parse_args()
 
     root = Path(args.root).resolve()

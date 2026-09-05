@@ -1,6 +1,6 @@
-schema_version: "3.0"
+schema_version: "4.0"
 document_type: improvement_plan_template
-template_id: improvement_plan_v3
+template_id: improvement_plan_v4
 natural_language: FORBIDDEN
 version:
   distribution_contract_version: "<SEMVER>"
@@ -9,11 +9,11 @@ version:
   baseline_main: "<GIT_SHA>"
   previous_distribution_contract_version: "<SEMVER|null>"
 routing:
-  governance_index: "docs/governance/index.yaml"
-  rules_index: "docs/governance/rules/index.yaml"
-  template_index: "docs/governance/template/index.yaml"
-  responsibility_index: "docs/governance/responsibility/index.yaml"
-  session_document_root: "docs/governance/versions/<SEMVER>/sessions"
+  docs_index: "docs/index.yaml"
+  rules_index: "docs/rules/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  session_document_root: "docs/ver<SEMVER>/session_document"
 sessions:
   - id: "<SESSION_ID>"
     type: "<A|B|C>"

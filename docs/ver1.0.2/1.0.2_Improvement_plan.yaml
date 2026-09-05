@@ -1,6 +1,6 @@
-schema_version: "3.0"
+schema_version: "4.0"
 document_type: improvement_plan
-template_id: improvement_plan_v3
+template_id: improvement_plan_v4
 natural_language: FORBIDDEN
 version:
   distribution_contract_version: "1.0.2"
@@ -9,11 +9,11 @@ version:
   baseline_main: "c3e881742177aec3eae71d2c336801b6b52c74e5"
   previous_distribution_contract_version: "1.0.1"
 routing:
-  governance_index: "docs/governance/index.yaml"
-  rules_index: "docs/governance/rules/index.yaml"
-  template_index: "docs/governance/template/index.yaml"
-  responsibility_index: "docs/governance/responsibility/index.yaml"
-  session_document_root: "docs/governance/versions/1.0.2/sessions"
+  docs_index: "docs/index.yaml"
+  rules_index: "docs/rules/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  session_document_root: "docs/ver1.0.2/session_document"
 sessions:
   - id: P1
     type: A
@@ -23,7 +23,7 @@ sessions:
       - RESP_SCTOOL_AUTHORING_GUIDANCE
       - RESP_REGISTRY_ACCESS
       - RESP_SIMPLE_CONNECTION_INSTALL
-    document: "docs/governance/versions/1.0.2/sessions/P1.yaml"
+    document: "docs/ver1.0.2/session_document/ver.1.0.2_P1_simple_connection_descriptor_consumer.yaml"
   - id: P2
     type: B
     state: COMPLETE
@@ -33,7 +33,7 @@ sessions:
       - RESP_REGISTRY_CHANNEL_RESOLUTION
       - RESP_REGISTRY_VERSION_RESOLUTION
       - RESP_REGISTRY_TARGET_RESOLUTION
-    document: "docs/governance/versions/1.0.2/sessions/P2.yaml"
+    document: "docs/ver1.0.2/session_document/ver.1.0.2_P2_registry_client_sdk_descriptor_resolution.yaml"
   - id: P3
     type: B
     state: AWAITING_APPROVAL
@@ -72,28 +72,25 @@ migrations:
   machine_routing: COMPLETE
   responsibility_model: COMPLETE
   interpretation_layer: COMPLETE
-  governance_layout: COMPLETE
+  governance_layout: VALIDATION_PENDING
 validation:
-  evidence_head: "6de8ea28c4665cc7cb317df40ba1f013f83e8eb1"
-  development_docs: PASS
-  interpretation_layer: PASS
-  registry_json: PASS
-  ptsip_profile: PASS
-  ptsip_conformance: PASS
-  automation:
-    governance_run_id: 33970712681
-    exact_registry_run_id: 33970712664
+  evidence_head: null
+  development_docs: PENDING
+  interpretation_layer: PENDING
+  registry_json: PENDING
+  ptsip_profile: PENDING
+  ptsip_conformance: PENDING
 
 gates:
   approved_sessions: PASS
-  machine_document_routing: PASS
-  responsibility_model_validation: PASS
-  interpretation_layer_validation: PASS
-  governance_layout_validation: PASS
-  development_docs_validation: PASS
-  registry_validation: PASS
-  ptsip_profile_validation: PASS
-  ptsip_conformance: PASS
+  machine_document_routing: PENDING
+  responsibility_model_validation: PENDING
+  interpretation_layer_validation: PENDING
+  governance_layout_validation: PENDING
+  development_docs_validation: PENDING
+  registry_validation: PENDING
+  ptsip_profile_validation: PENDING
+  ptsip_conformance: PENDING
   external_integration: PENDING
   version_completion: BLOCKED
   merge_to_main: BLOCKED
