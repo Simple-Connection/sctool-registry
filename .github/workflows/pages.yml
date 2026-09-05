@@ -11,11 +11,15 @@ on:
       - "policy/**"
       - "trust/**"
       - "tools/**"
+      - "docs/**"
+      - "governance/**"
+      - "AGENTS.md"
       - "ptsip.yaml"
       - ".github/workflows/*.yml"
   push:
     branches:
       - main
+      - "dev/**"
     paths:
       - "registry.json"
       - "packages/**"
@@ -24,6 +28,9 @@ on:
       - "policy/**"
       - "trust/**"
       - "tools/**"
+      - "docs/**"
+      - "governance/**"
+      - "AGENTS.md"
       - "ptsip.yaml"
       - ".github/workflows/*.yml"
 
