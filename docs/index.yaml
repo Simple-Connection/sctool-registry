@@ -10,18 +10,18 @@ responsibility_index: "docs/responsibility/index.yaml"
 current:
   distribution_contract_version: "1.0.2"
   branch: "dev/1.0.2"
-  state: IN_PROGRESS_AWAITING_NEXT_SESSION_APPROVAL
+  state: IN_PROGRESS_ACTIVE_SESSION
   migrations:
     machine_routing: COMPLETE
     responsibility_model: COMPLETE
     interpretation_layer: COMPLETE
     governance_layout: COMPLETE
   improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
-  current_session: null
-  current_session_document: null
+  current_session: P4
+  current_session_document: "docs/ver1.0.2/session_document/ver.1.0.2_P4_file_backed_verified_candidate.yaml"
   next_session:
-    id: P4
-    state: AWAITING_APPROVAL
+    id: P5
+    state: NOT_APPROVED
     document: null
 
 versions:
@@ -38,7 +38,7 @@ versions:
       - {id: P2, state: COMPLETE, format: LEGACY_BUILD_SESSION, document: "docs/ver1.0.1/session_document/ver.1.0.1_P2_artifact_delivery_descriptor_schema_boundary.yaml"}
 
   "1.0.2":
-    state: IN_PROGRESS_AWAITING_NEXT_SESSION_APPROVAL
+    state: IN_PROGRESS_ACTIVE_SESSION
     branch: "dev/1.0.2"
     source_format: MACHINE
     migrations:
@@ -54,6 +54,7 @@ versions:
       - {id: P1, state: COMPLETE, format: MACHINE_SESSION, document: "docs/ver1.0.2/session_document/ver.1.0.2_P1_simple_connection_descriptor_consumer.yaml"}
       - {id: P2, state: COMPLETE, format: MACHINE_SESSION, document: "docs/ver1.0.2/session_document/ver.1.0.2_P2_registry_client_sdk_descriptor_resolution.yaml"}
       - {id: P3, state: COMPLETE, format: MACHINE_SESSION, document: "docs/ver1.0.2/session_document/ver.1.0.2_P3_registry_client_sdk_release_retrieval.yaml"}
+      - {id: P4, state: ACTIVE, format: MACHINE_SESSION, document: "docs/ver1.0.2/session_document/ver.1.0.2_P4_file_backed_verified_candidate.yaml"}
 
 templates:
   improvement_plan: "docs/template/improvement_plan.yaml"

@@ -216,6 +216,46 @@ responsibilities:
       responsibility_description_id: null
       decision_rationale_ids:
         - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
+  RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE:
+    subject: AUTH_REGISTRY_CLIENT_SDK
+    authority_domain: ARTIFACT_STAGING
+    lifecycle_phase: RETRIEVAL
+    operation: CONTROL_LIFECYCLE
+    object: {class: STAGING_RESOURCE, subtype: EPHEMERAL_FILE}
+    relation: OWNS
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
+    contract_refs: [CONTRACT_STAGED_ARTIFACT_LIFECYCLE_V1]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
+        - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
+  RESP_REGISTRY_ARTIFACT_STAGING_WRITE:
+    subject: AUTH_REGISTRY_CLIENT_SDK
+    authority_domain: ARTIFACT_STAGING
+    lifecycle_phase: RETRIEVAL
+    operation: WRITE
+    object: {class: STAGED_ARTIFACT, subtype: EPHEMERAL_FILE}
+    relation: WRITES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
+    contract_refs: [CONTRACT_STAGED_ARTIFACT_LIFECYCLE_V1, CONTRACT_ARTIFACT_DELIVERY_V1]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
+        - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
   RESP_REGISTRY_ARTIFACT_INTEGRITY:
     subject: AUTH_REGISTRY_CLIENT_SDK
     authority_domain: ARTIFACT_INTEGRITY
@@ -227,7 +267,7 @@ responsibilities:
     normative: MUST
     state: ALLOCATED
     scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
-    contract_refs: [CONTRACT_ARTIFACT_DELIVERY_V1, CONTRACT_PACKAGE_SCHEMA_V2]
+    contract_refs: [CONTRACT_ARTIFACT_DELIVERY_V1, CONTRACT_PACKAGE_SCHEMA_V2, CONTRACT_STAGED_ARTIFACT_LIFECYCLE_V1]
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
     interpretation:
       semantic_coverage: COMPLETE
@@ -235,6 +275,27 @@ responsibilities:
       responsibility_description_id: null
       decision_rationale_ids:
         - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
+        - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
+  RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS:
+    subject: AUTH_REGISTRY_CLIENT_SDK
+    authority_domain: VERIFIED_ARTIFACT_ACCESS
+    lifecycle_phase: VERIFICATION
+    operation: EXPOSE_READ
+    object: {class: VERIFIED_ARTIFACT, subtype: READ_ONLY_LEASE}
+    relation: PRODUCES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
+    contract_refs: [CONTRACT_STAGED_ARTIFACT_LIFECYCLE_V1, CONTRACT_UPDATE_CANDIDATE_V1]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
+        - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
   RESP_REGISTRY_UPDATE_CANDIDATE:
     subject: AUTH_REGISTRY_CLIENT_SDK
     authority_domain: UPDATE_CANDIDATE
@@ -246,7 +307,7 @@ responsibilities:
     normative: MUST
     state: ALLOCATED
     scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
-    contract_refs: [CONTRACT_REGISTRY_V2, CONTRACT_ARTIFACT_DELIVERY_V1]
+    contract_refs: [CONTRACT_REGISTRY_V2, CONTRACT_ARTIFACT_DELIVERY_V1, CONTRACT_UPDATE_CANDIDATE_V1]
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
     interpretation:
       semantic_coverage: COMPLETE
@@ -254,6 +315,7 @@ responsibilities:
       responsibility_description_id: null
       decision_rationale_ids:
         - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
+        - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
   RESP_SIMPLE_CONNECTION_INSTALL:
     subject: AUTH_SIMPLE_CONNECTION_DESKTOP
     authority_domain: LOCAL_INSTALLATION
@@ -359,6 +421,9 @@ ownership_policy:
       - RESP_REGISTRY_TARGET_RESOLUTION
       - RESP_REGISTRY_RELEASE_RESOLUTION
       - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
+      - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
       - RESP_REGISTRY_ARTIFACT_INTEGRITY
       - RESP_REGISTRY_UPDATE_CANDIDATE
     deny:
@@ -384,6 +449,9 @@ ownership_policy:
       - RESP_REGISTRY_TARGET_RESOLUTION
       - RESP_REGISTRY_RELEASE_RESOLUTION
       - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
+      - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
       - RESP_REGISTRY_ARTIFACT_INTEGRITY
       - RESP_REGISTRY_UPDATE_CANDIDATE
   AUTH_SIMPLE_CONNECTION_DESKTOP:
@@ -398,4 +466,8 @@ ownership_policy:
       - RESP_SCTOOL_PACKAGE_BUILD
       - RESP_REGISTRY_RELEASE_RESOLUTION
       - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
+      - RESP_REGISTRY_UPDATE_CANDIDATE
       - RESP_REGISTRY_ARTIFACT_INTEGRITY

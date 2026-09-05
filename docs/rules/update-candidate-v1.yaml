@@ -1,0 +1,46 @@
+schema_version: "1.0"
+document_type: update_candidate_contract
+natural_language: FORBIDDEN
+contract_id: UPDATE_CANDIDATE_V1
+candidate_type: VERIFIED_UPDATE_CANDIDATE
+required_fields:
+  - packageId
+  - channel
+  - version
+  - targetKey
+  - target
+  - content
+  - delivery
+  - publishedAt
+  - contract
+  - artifact
+channel_semantics: PROVENANCE_NULLABLE
+artifact:
+  type: VERIFIED_ARTIFACT_LEASE
+  required_operations:
+    - OPEN_READ_STREAM
+    - DISPOSE
+  raw_path: FORBIDDEN
+  write_access: FORBIDDEN
+  disposed_access: FORBIDDEN
+forbidden_fields:
+  - githubIdentity
+  - githubToken
+  - credentialPath
+  - installedVersion
+  - isUpdateAvailable
+  - shouldInstall
+  - shouldActivate
+  - installPath
+  - rollbackTarget
+  - runtimeState
+  - rendererState
+identity_fields:
+  - packageId
+  - version
+  - targetKey
+delivery_provenance_fields:
+  - type
+  - repository
+  - assetId
+  - expectedTag

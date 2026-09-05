@@ -78,7 +78,10 @@ rationales:
     applies_to:
       - RESP_REGISTRY_RELEASE_RESOLUTION
       - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
       - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
       - RESP_REGISTRY_UPDATE_CANDIDATE
     established_in:
       version: "1.0.2"
@@ -121,3 +124,28 @@ rationales:
       therefore remain outside Registry Client SDK authority. The Registry Client SDK
       may provide a verified update candidate but must not decide or mutate those local
       product states.
+
+  ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    established_in:
+      version: "1.0.2"
+      session: P4
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - CONTRACT_CHANGE
+      - RESPONSIBILITY_DIMENSION_CHANGE
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+      - LIFECYCLE_CHANGE
+    statement: >-
+      Registry Client SDK owns only ephemeral file-backed staging needed to retrieve,
+      verify, and expose an immutable read capability for a Registry artifact. Staging
+      paths are SDK-internal, failed or partial resources are disposed, and verified
+      access is read-only. Persistent product-owned installation state begins only
+      after a verified update candidate crosses into Simple Connection authority.

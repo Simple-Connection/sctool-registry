@@ -12,3 +12,7 @@ contracts:
     path: "schemas/package.schema.json"
   CONTRACT_REGISTRY_POLICY:
     path: "policy/registry-policy.json"
+  CONTRACT_STAGED_ARTIFACT_LIFECYCLE_V1:
+    path: "docs/rules/staged-artifact-lifecycle-v1.yaml"
+  CONTRACT_UPDATE_CANDIDATE_V1:
+    path: "docs/rules/update-candidate-v1.yaml"

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from validation.common import ValidationError
 from validation.context import load_context
-from validation import interpretation, responsibility, routing, session
+from validation import artifact, interpretation, responsibility, routing, session
 
 
 def main() -> int:
@@ -29,6 +29,7 @@ def main() -> int:
         routing.validate,
         responsibility.validate,
         interpretation.validate,
+        artifact.validate,
         session.validate,
     ):
         validator(ctx, errors)

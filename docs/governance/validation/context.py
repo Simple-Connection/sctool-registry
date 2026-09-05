@@ -18,6 +18,8 @@ class ValidationContext:
     rules_index: dict[str, Any]
     state_rules_path: str
     state_rules: dict[str, Any]
+    staged_artifact_lifecycle: dict[str, Any]
+    update_candidate_contract: dict[str, Any]
     template_index_path: str
     template_index: dict[str, Any]
     responsibility_index_path: str
@@ -43,6 +45,8 @@ def load_context(root: Path, index_path: str) -> ValidationContext:
     rules_index = load_yaml(root, rules_index_path)
     state_rules_path = rules_index["routes"]["session_state"]
     state_rules = load_yaml(root, state_rules_path)
+    staged_artifact_lifecycle = load_yaml(root, rules_index["routes"]["staged_artifact_lifecycle"])
+    update_candidate_contract = load_yaml(root, rules_index["routes"]["update_candidate"])
 
     template_index_path = index["template_index"]
     template_index = load_yaml(root, template_index_path)
@@ -61,6 +65,8 @@ def load_context(root: Path, index_path: str) -> ValidationContext:
         rules_index=rules_index,
         state_rules_path=state_rules_path,
         state_rules=state_rules,
+        staged_artifact_lifecycle=staged_artifact_lifecycle,
+        update_candidate_contract=update_candidate_contract,
         template_index_path=template_index_path,
         template_index=template_index,
         responsibility_index_path=responsibility_index_path,
