@@ -69,21 +69,24 @@ sessions:
     document: null
 migrations:
   machine_routing: COMPLETE
-  responsibility_model: VALIDATION_PENDING
+  responsibility_model: COMPLETE
 validation:
-  evidence_head: null
-  development_docs: PENDING
-  registry_json: PENDING
-  ptsip_profile: PENDING
-  ptsip_conformance: PENDING
+  evidence_head: "4080827d8d03f57004e069e4d3168f8669d5b7f2"
+  development_docs: PASS
+  registry_json: PASS
+  ptsip_profile: PASS
+  ptsip_conformance: PASS
+  automation:
+    governance_run_id: 33965126975
+    exact_registry_run_id: 33965126959
 gates:
   approved_sessions: PASS
   machine_document_routing: PASS
-  responsibility_model_validation: PENDING
-  development_docs_validation: PENDING
-  registry_validation: PENDING
-  ptsip_profile_validation: PENDING
-  ptsip_conformance: PENDING
+  responsibility_model_validation: PASS
+  development_docs_validation: PASS
+  registry_validation: PASS
+  ptsip_profile_validation: PASS
+  ptsip_conformance: PASS
   external_integration: PENDING
   version_completion: BLOCKED
   merge_to_main: BLOCKED
