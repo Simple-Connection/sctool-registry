@@ -37,7 +37,7 @@ versions:
     migrations:
       machine_routing: COMPLETE
       responsibility_model: COMPLETE
-    interpretation_layer: COMPLETE
+      interpretation_layer: COMPLETE
     improvement_plan:
       path: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
       format: MACHINE_YAML
