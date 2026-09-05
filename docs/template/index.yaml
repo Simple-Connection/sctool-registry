@@ -1,8 +1,8 @@
-schema_version: "1.0"
+schema_version: "2.0"
 document_type: docs_template_index
 template_root: "docs/template"
 natural_language: FORBIDDEN
-
+responsibility_index: "docs/responsibility/index.yaml"
 routes:
   improvement_plan:
     template: "docs/template/improvement_plan.yaml"
@@ -15,21 +15,16 @@ routes:
       A:
         template: "docs/template/session_document_template/session_type_A.yaml"
         semantic: DECISION
-        natural_language: PAYLOAD_ONLY
+        natural_language: DESCRIPTION_REFERENCE_ONLY
       B:
         template: "docs/template/session_document_template/session_type_B.yaml"
         semantic: IMPLEMENTATION
-        natural_language: PAYLOAD_ONLY
+        natural_language: DESCRIPTION_REFERENCE_ONLY
       C:
         template: "docs/template/session_document_template/session_type_C.yaml"
         semantic: VALIDATION_CLOSEOUT
-        natural_language: PAYLOAD_ONLY
-
+        natural_language: DESCRIPTION_REFERENCE_ONLY
 composition:
   session_document:
-    required:
-      - ESSENTIAL
-      - SESSION_TYPE
-    order:
-      - ESSENTIAL
-      - SESSION_TYPE
+    required: [ESSENTIAL, RESPONSIBILITY_MODEL, SESSION_TYPE]
+    order: [ESSENTIAL, RESPONSIBILITY_MODEL, SESSION_TYPE]
