@@ -69,11 +69,19 @@ sessions:
       - INSTALL_ACTIVATION_ROLLBACK_RUNTIME_UI_E2E
     document: null
 
+validation:
+  evidence_head: "7eb2dbac44539e17fd7e2547963af320b1636799"
+  yaml_parse: PASS
+  registry_json: PASS
+  ptsip_profile: PASS
+  ptsip_conformance: PENDING
+
 gates:
   approved_sessions: PASS
-  machine_document_routing: PENDING
-  registry_validation: PENDING
-  ptsip_validation: PENDING
+  machine_document_routing: PASS
+  registry_validation: PASS
+  ptsip_profile_validation: PASS
+  ptsip_conformance: PENDING
   external_integration: PENDING
   version_completion: BLOCKED
   merge_to_main: BLOCKED

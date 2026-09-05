@@ -24,11 +24,19 @@ sessions:
       - "<MACHINE_ID>"
     document: "<PATH|null>"
 
+validation:
+  evidence_head: "<GIT_SHA|null>"
+  yaml_parse: "<PASS|PENDING|BLOCKED>"
+  registry_json: "<PASS|PENDING|BLOCKED>"
+  ptsip_profile: "<PASS|PENDING|BLOCKED>"
+  ptsip_conformance: "<PASS|PENDING|BLOCKED>"
+
 gates:
   approved_sessions: "<PASS|PENDING|BLOCKED>"
   machine_document_routing: "<PASS|PENDING|BLOCKED>"
   registry_validation: "<PASS|PENDING|BLOCKED>"
-  ptsip_validation: "<PASS|PENDING|BLOCKED>"
+  ptsip_profile_validation: "<PASS|PENDING|BLOCKED>"
+  ptsip_conformance: "<PASS|PENDING|BLOCKED>"
   external_integration: "<PASS|PENDING|BLOCKED|NOT_APPLICABLE>"
   version_completion: "<PASS|PENDING|BLOCKED>"
   merge_to_main: "<BLOCKED|READY|APPROVED>"
