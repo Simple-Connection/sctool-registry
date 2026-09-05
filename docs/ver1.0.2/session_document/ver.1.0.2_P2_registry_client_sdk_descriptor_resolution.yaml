@@ -1,290 +1,162 @@
-schema_version: "1.0.2"
-document_type: build_session
-
+schema_version: "2.0"
+document_type: machine_session
+natural_language: FORBIDDEN
 session:
-  id: "P2"
+  id: P2
+  type: B
   number: 2
-  title: "registry_client_sdk_descriptor_resolution"
-  status: "COMPLETE"
-  approval: "USER_APPROVED"
-  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
+  approval: APPROVED
+  distribution_contract_version: "1.0.2"
   branch: "dev/1.0.2"
   authority_repository: "Simple-Connection/sctool-registry"
-  start_head: "efc9314be1ab2d20b71cb10ef7fb02a94328b2d5"
-  implementation_head: "1b544eb300e4a67b711f2baad9c40b37ae62e3c2"
-  exact_validation_head: "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
-
-authority:
-  registry_repository: "Simple-Connection/sctool-registry"
-  registry_baseline: "c3e881742177aec3eae71d2c336801b6b52c74e5"
-  registry_client_sdk: "packages/registry-client-sdk"
-  package_name: "@simple-connection/sctool-registry-client-sdk"
-  registry_contract: "docs/REGISTRY_CONTRACT_V2.md"
-  artifact_delivery_contract: "docs/ARTIFACT_DELIVERY_V1.md"
-  package_schema: "schemas/package.schema.json"
-  package_schema_version: "2.0.0"
-  registry_policy: "policy/registry-policy.json"
-
-objective:
-  code: "descriptor_channel_version_target_resolution"
-  summary: >-
-    Implement the Registry-owned consumer boundary that validates package descriptor
-    schema 2.0.0 inputs and deterministically resolves channel, version, and target
-    metadata without performing artifact backend lookup or retrieval.
-
-scope:
-  in:
-    - "Package descriptor schemaVersion 2.0.0 runtime validation"
-    - "required root field and additional-property validation"
-    - "semantic-version key/value validation required by the descriptor contract"
-    - "defaultChannel and explicit channel resolution"
-    - "channel version existence validation"
-    - "explicit version resolution"
-    - "platform/arch target key derivation and exact artifact selection"
-    - "artifact map key == target.platform-target.arch consistency validation"
-    - "content filename/sha256/size authority preservation"
-    - "delivery.type/access/locator structural preservation"
-    - "Registry policy checks required to interpret the current github-release-asset descriptor"
-    - "fail-closed unsupported/malformed descriptor behavior"
-    - "public Registry Client SDK exports and regression tests for the above"
-  out:
-    - "GitHub Release lookup"
-    - "release tag API resolution"
-    - "GitHub Release asset ID lookup against a live backend"
-    - "authenticated artifact download"
-    - "downloaded byte-length verification"
-    - "downloaded SHA-256 verification"
-    - "normalized update candidate API"
-    - "Simple Connection integration"
-    - "removal of the historical Registry access surface from Kinirin/Simple-Connection"
-    - "install/activation/rollback/runtime/UI policy"
-    - "SCTool scaffold/build/test/sign/package authoring"
-    - "production Root trust activation"
-
-contract_rules:
-  descriptor:
-    schema_version: "2.0.0"
-    required_root:
-      - "schemaVersion"
-      - "id"
-      - "publisher"
-      - "defaultChannel"
-      - "channels"
-      - "versions"
-    additional_properties: "FAIL_CLOSED"
-  resolution:
-    default_channel: "descriptor.defaultChannel -> descriptor.channels[channel]"
-    explicit_channel: "descriptor.channels[channel]"
-    explicit_version: "descriptor.versions[version]"
-    target_key: "platform + '-' + arch"
-    target_consistency: "artifact map key must equal artifact.target.platform + '-' + artifact.target.arch"
-    fallback: "FORBIDDEN"
-  artifact_authority:
-    content:
-      - "filename"
-      - "sha256"
-      - "size"
-    delivery_discriminator: "delivery.type"
-    allowed_delivery_type: "github-release-asset"
-    access_contract: "registry-access-v1"
-    policy_repository: "Simple-Connection/sctool-artifacts"
-    note: >-
-      P2 validates and preserves delivery metadata but does not resolve the GitHub
-      Release or retrieve artifact bytes.
-
-implementation_target:
-  package_root: "packages/registry-client-sdk"
-  runtime:
-    - "src/index.mjs"
-    - "src/registry-access.mjs"
-    - "src/package-descriptor.mjs"
-    - "src/resolution.mjs"
-  declarations:
-    - "src/index.d.mts"
-    - "src/registry-access.d.mts"
-    - "src/package-descriptor.d.mts"
-    - "src/resolution.d.mts"
-  tests:
-    - "tests/boundary.test.mjs"
-    - "tests/registry-access.test.mjs"
-    - "tests/package-descriptor.test.mjs"
-    - "tests/resolution.test.mjs"
-  modified:
-    - "package.json"
-    - "README.md"
-
+  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
+routing:
+  docs_index: "docs/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  essential_template: "docs/template/session_document_template/session_document_essential.yaml"
+  type_template: "docs/template/session_document_template/session_type_B.yaml"
+heads:
+  start: "efc9314be1ab2d20b71cb10ef7fb02a94328b2d5"
+  implementation: "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
+  exact_validation: "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
+responsibility_model:
+  effects:
+    assign: []
+    implement:
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    preserve:
+      - RESP_REGISTRY_ACCESS
+    defer:
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+      - RESP_SIMPLE_CONNECTION_INSTALL
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    transfer: []
+    retire: []
+    forbid:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+  description_ids: []
+payload:
+  implementation:
+    responsibility_refs:
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    contract_refs:
+      - CONTRACT_REGISTRY_V2
+      - CONTRACT_ARTIFACT_DELIVERY_V1
+      - CONTRACT_PACKAGE_SCHEMA_V2
+      - CONTRACT_REGISTRY_POLICY
+    path_allow:
+      - "packages/registry-client-sdk/**"
+    path_deny:
+      - "program-sdk/**"
+  responsibility_description_ids: []
 work_units:
-  - id: "W1"
-    title: "p2_scope_and_contract_materialization"
-    status: "COMPLETE"
-    approval: "USER_APPROVED"
-    inputs:
-      - "docs/REGISTRY_CONTRACT_V2.md"
-      - "docs/ARTIFACT_DELIVERY_V1.md"
-      - "schemas/package.schema.json"
-      - "policy/registry-policy.json"
-      - "P1 Registry Client SDK boundary closeout"
-    outputs:
-      - "P2 session scope"
-      - "P2 implementation path list"
-      - "P2/P3/P4 responsibility boundary"
-    completion:
-      - "descriptor/channel/version/target resolution assigned to P2"
-      - "backend lookup/retrieval remains outside P2"
-      - "Simple Connection integration remains outside P2"
-
-  - id: "W2"
-    title: "package_descriptor_runtime_model_and_validation"
-    status: "COMPLETE"
-    inputs:
-      - "schemas/package.schema.json"
-      - "docs/REGISTRY_CONTRACT_V2.md"
-      - "policy/registry-policy.json"
-    outputs:
-      - "src/package-descriptor.mjs"
-      - "src/package-descriptor.d.mts"
-      - "tests/package-descriptor.test.mjs"
-    completion:
-      - "valid schema 2.0.0 descriptor accepted"
-      - "unsupported schema version rejected"
-      - "malformed required fields rejected"
-      - "unknown descriptor/artifact fields rejected where the canonical schema forbids them"
-      - "cross-field package descriptor consistency required by Registry validation is enforced"
-      - "canonical RFC3339 format-checker edge behavior covered"
-
-  - id: "W3"
-    title: "channel_and_version_resolution"
-    status: "COMPLETE"
-    inputs:
-      - "validated package descriptor"
-    outputs:
-      - "deterministic defaultChannel resolution"
-      - "deterministic explicit channel resolution"
-      - "deterministic explicit version resolution"
-    completion:
-      - "missing channel fails closed"
-      - "channel pointing to missing version fails closed"
-      - "missing explicit version fails closed"
-      - "channel and version selectors together fail as ambiguous"
-      - "no version fallback or hardcoded package version"
-
-  - id: "W4"
-    title: "target_content_delivery_resolution"
-    status: "COMPLETE"
-    inputs:
-      - "validated resolved version"
-      - "requested platform"
-      - "requested arch"
-    outputs:
-      - "src/resolution.mjs"
-      - "src/resolution.d.mts"
-      - "tests/resolution.test.mjs"
-    completion:
-      - "target key is derived exactly from platform-arch"
-      - "artifact target identity matches artifact map key"
-      - "missing target fails closed"
-      - "content authority is returned without reinterpretation"
-      - "delivery discriminator/access/locator are returned without backend lookup"
-      - "unsupported delivery metadata fails closed during descriptor validation"
-
-  - id: "W5"
-    title: "public_surface_and_negative_regression"
-    status: "COMPLETE"
-    inputs:
-      - "completed descriptor and resolution modules"
-    outputs:
-      - "updated SDK root exports"
-      - "explicit package-descriptor and resolution package subpath exports"
-      - "ESM .d.mts declaration surfaces"
-      - "updated README responsibility documentation"
-      - "negative regression coverage"
-    completion:
-      - "Registry Access V1 public surface remains compatible"
-      - "new descriptor/resolution surfaces are explicit"
-      - "SDK has no SCTool authoring dependency"
-      - "SDK performs no live GitHub Release lookup or artifact retrieval in P2"
-      - "NodeNext declaration consumer resolves root and subpath types"
-
-  - id: "W6"
-    title: "p2_validation_and_closeout"
-    status: "COMPLETE"
-    inputs:
-      - "all P2 implementation and test changes through exact validation head"
-    outputs:
-      - "exact repository validation evidence"
-      - "P2 closeout state"
-    completion:
-      - "Registry Client SDK tests PASS on exact dev/1.0.2 checkout"
-      - "Registry validation PASS"
-      - "PTSIP validate/conform PASS"
-      - "Production Trust remains inactive unless separately approved"
-
-verification:
-  state: "PASS"
-  exact_code_head: "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
-  required:
-    - "Registry Client SDK boundary test PASS"
-    - "Registry Access V1 regression PASS"
-    - "Package descriptor positive/negative tests PASS"
-    - "Channel/version/target resolution tests PASS"
-    - "Registry JSON validation PASS"
-    - "PTSIP Tool 0.3.7 validate PASS"
-    - "PTSIP Tool 0.3.7 conform PASS"
-    - "No Registry Client SDK dependency on Kinirin/Simple-Connection internals"
-    - "No artifact backend lookup/download introduced in P2"
-    - "Production Trust remains inactive/unchanged"
-  results:
-    - "Exact dev/1.0.2 validation head e89b278eb92b9c8eda519c6daff6f67b43cbd400"
-    - "Registry Client SDK boundary PASS cases=8"
-    - "Registry Access V1 regression PASS cases=11"
-    - "Package descriptor regression PASS cases=21"
-    - "Channel/version/target resolution regression PASS cases=20"
-    - "Registry JSON validation PASS packages=0 publishers=0 trust=inactive"
-    - "PTSIP Tool 0.3.7 validate PASS with profile valid=true, errors=0, warnings=0"
-    - "PTSIP Tool 0.3.7 conform outcome CONFORMANT"
-    - "PTSIP Product Artifact evidence valid with revision binding to e89b278eb92b9c8eda519c6daff6f67b43cbd400"
-    - "PTSIP conformance blocking_gaps=0, non_blocking_gaps=0, audit PASS, coverage_gap_count=0"
-    - "Tracked repository content clean at exact validation head; only untracked logs/ validation evidence directory present"
-    - "Production Trust remains inactive/unchanged"
-
-implementation_commits:
-  - "7e1fef88ea0621778520ae69020e47541a6d4f90"
-  - "cea48d302a24e04f8baba50b639ee2c94d88b7a2"
-  - "044c70fe10661a546ac33985284066fea2bfb343"
-  - "23da58f8bb27719a439c5a2ccf109d2a4afa62d5"
-  - "e19e050607bd4d1785f36e0979ac4dfd8d409668"
-  - "d51a63d6f311d6a94595a5465a4f7678e02d0410"
-  - "e4f96b875ee9b825a30e03a5eb7106deab243968"
-  - "ee65cae1e28d86d9f76c98fb655e3bc5d7fbd6f8"
-  - "a4fbc9bea28fb13bde2bca828902bcd162f0db81"
-  - "870e58b48f4cce9c85f7a2917189ab066a30ce6a"
-  - "0ef8e5075ea040acb6aeb6b98086220a525d457c"
-  - "f3d22e793fa3914949398599d4b31b0cb9c7688d"
-  - "ee1d4ef317065712d336404e943a64a914741acd"
-  - "d8c2506d5af425635d2e85452ec3290fff9afbff"
-  - "9391f1edf163e4f5a32fabb7adcb0185bc272cd3"
-  - "b212e702195fff95f1aa256f7a4d7c4346e5793d"
-  - "04bcb93624019cbd9c91daa14c5aa757b23b31b6"
-  - "195469663fd8fc127176dbc960511b8b5c2481b3"
-  - "c747d86c0c2d1809fe7d3c608d4fc95b2d5a69b6"
-  - "6c7eb890d6c29d514285d0aa1a3ba8bffb1206fe"
-  - "65ce9a327b4637e62218f4d560a687563cd1c489"
-  - "3a69e873a64847d41541496e7d359759120304a6"
-  - "fce51682093d25733055906215f2bfe3ef8e6941"
-  - "8cdec823322ac306987cfdb9ce06a1d41affbe82"
-  - "1b544eb300e4a67b711f2baad9c40b37ae62e3c2"
-  - "de8a4fefc70b0475a57d7c66745dbeca21c86928"
-  - "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
-
+  - id: W1
+    status: COMPLETE
+    responsibility_refs: [RESP_REGISTRY_DESCRIPTOR_CONSUMPTION]
+    input_refs: [CONTRACT_REGISTRY_V2, CONTRACT_PACKAGE_SCHEMA_V2]
+    output_refs: ["packages/registry-client-sdk/src/package-descriptor.mjs"]
+    completion_codes: [DESCRIPTOR_MODEL_IMPLEMENTED]
+  - id: W2
+    status: COMPLETE
+    responsibility_refs: [RESP_REGISTRY_DESCRIPTOR_CONSUMPTION]
+    input_refs: [CONTRACT_PACKAGE_SCHEMA_V2]
+    output_refs: ["packages/registry-client-sdk/tests/package-descriptor.test.mjs"]
+    completion_codes: [DESCRIPTOR_VALIDATION_IMPLEMENTED]
+  - id: W3
+    status: COMPLETE
+    responsibility_refs: [RESP_REGISTRY_CHANNEL_RESOLUTION, RESP_REGISTRY_VERSION_RESOLUTION]
+    input_refs: [CONTRACT_REGISTRY_V2]
+    output_refs: ["packages/registry-client-sdk/src/resolution.mjs"]
+    completion_codes: [CHANNEL_VERSION_RESOLUTION_IMPLEMENTED]
+  - id: W4
+    status: COMPLETE
+    responsibility_refs: [RESP_REGISTRY_TARGET_RESOLUTION]
+    input_refs: [CONTRACT_ARTIFACT_DELIVERY_V1]
+    output_refs: ["packages/registry-client-sdk/src/resolution.mjs"]
+    completion_codes: [TARGET_RESOLUTION_IMPLEMENTED]
+  - id: W5
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    input_refs: [COMP_REGISTRY_CLIENT_SDK]
+    output_refs:
+      - "packages/registry-client-sdk/src/index.mjs"
+      - "packages/registry-client-sdk/src/index.d.mts"
+    completion_codes: [PUBLIC_SURFACE_EXPORTED]
+  - id: W6
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    input_refs:
+      - GATE_PACKAGE_DESCRIPTOR_REGRESSION
+      - GATE_RESOLUTION_REGRESSION
+      - GATE_PTSIP_CONFORMANCE
+    output_refs: [E_P2_EXACT_VALIDATION]
+    completion_codes: [EXACT_VALIDATION_COMPLETE]
+evidence:
+  - id: E_P2_APPROVAL
+    kind: USER_APPROVAL
+    head: null
+    refs: {approval: APPROVED}
+  - id: E_P2_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
+    refs:
+      sdk_boundary_cases: 8
+      registry_access_cases: 11
+      package_descriptor_cases: 21
+      resolution_cases: 20
+      registry_json: PASS
+      ptsip_tool: "0.3.7"
+      ptsip_profile: PASS
+      ptsip_conformance: CONFORMANT
+      blocking_gap_count: 0
+      non_blocking_gap_count: 0
+      audit: PASS
+      production_trust: INACTIVE
+  - id: E_P2_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
+    refs:
+      implementation_head: "1b544eb300e4a67b711f2baad9c40b37ae62e3c2"
+      validation_fixes:
+        - "de8a4fefc70b0475a57d7c66745dbeca21c86928"
+        - "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
+gates:
+  - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P2_APPROVAL]}
+  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P2_IMPLEMENTATION]}
+  - {id: GATE_SDK_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_REGISTRY_ACCESS_REGRESSION, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_PACKAGE_DESCRIPTOR_REGRESSION, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_RESOLUTION_REGRESSION, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_REGISTRY_JSON, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_PROFILE, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_PRODUCTION_TRUST_INACTIVE, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_NO_LIVE_DELIVERY_P2, required: true, status: PASS, evidence_refs: [E_P2_IMPLEMENTATION]}
+blockers: []
 state:
-  audit: "COMPLETE"
-  plan: "APPROVED"
-  apply: "COMPLETE"
-  test: "PASS"
-  closeout: "COMPLETE"
-
-next:
-  action: >-
-    P2 is closed. Do not begin live GitHub Release exact asset resolution,
-    authenticated artifact retrieval, downloaded-byte verification, or update-candidate
-    normalization without a separately approved and materialized P3 session.
+  mode: DERIVED
+  ruleset: SESSION_STATE_V1
