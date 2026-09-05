@@ -1,0 +1,306 @@
+schema_version: "1.0"
+document_type: responsibility_registry
+natural_language: FORBIDDEN
+responsibilities:
+  RESP_SCTOOL_AUTHORING_GUIDANCE:
+    subject: AUTH_SCTOOL_AUTHORING_SDK
+    authority_domain: AUTHORING
+    lifecycle_phase: AUTHORING
+    operation: AUTHOR
+    object: {class: AUTHORING_GUIDANCE, subtype: SCTOOL}
+    relation: PRODUCES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SCTOOL_AUTHORING_SDK, root: "program-sdk/sctool-sdk"}
+    contract_refs: []
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SCTOOL_AUTHORING_SDK, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_SCTOOL_MANIFEST_VALIDATION:
+    subject: AUTH_SCTOOL_AUTHORING_SDK
+    authority_domain: AUTHORING
+    lifecycle_phase: VALIDATION
+    operation: VALIDATE
+    object: {class: MANIFEST, subtype: SCTOOL}
+    relation: PRODUCES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SCTOOL_AUTHORING_SDK, root: "program-sdk/sctool-sdk"}
+    contract_refs: []
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SCTOOL_AUTHORING_SDK, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_SCTOOL_PACKAGE_BUILD:
+    subject: AUTH_SCTOOL_AUTHORING_SDK
+    authority_domain: AUTHORING
+    lifecycle_phase: BUILD
+    operation: BUILD
+    object: {class: PACKAGE, subtype: SCTOOL_PACKAGE}
+    relation: PRODUCES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SCTOOL_AUTHORING_SDK, root: "program-sdk/sctool-sdk"}
+    contract_refs: []
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SCTOOL_AUTHORING_SDK, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_SCTOOL_PACKAGE_TEST:
+    subject: AUTH_SCTOOL_AUTHORING_SDK
+    authority_domain: AUTHORING
+    lifecycle_phase: VALIDATION
+    operation: TEST
+    object: {class: PACKAGE, subtype: SCTOOL_PACKAGE}
+    relation: VERIFIES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SCTOOL_AUTHORING_SDK, root: "program-sdk/sctool-sdk"}
+    contract_refs: []
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SCTOOL_AUTHORING_SDK, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_REGISTRY_ACCESS:
+    subject: AUTH_REGISTRY_CLIENT_SDK
+    authority_domain: REGISTRY_ACCESS
+    lifecycle_phase: AUTHORIZATION
+    operation: AUTHORIZE
+    object: {class: REGISTRY_IDENTITY, subtype: REGISTRY_ACCESS_V1}
+    relation: AUTHORIZES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
+    contract_refs: [CONTRACT_REGISTRY_ACCESS_V1]
+    transfer: {state: MIGRATED, from_authority_id: AUTH_SCTOOL_AUTHORING_SDK, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: PENDING_REPLACEMENT}
+    responsibility_description_id: null
+  RESP_REGISTRY_DESCRIPTOR_CONSUMPTION:
+    subject: AUTH_REGISTRY_CLIENT_SDK
+    authority_domain: REGISTRY_METADATA
+    lifecycle_phase: DISCOVERY
+    operation: CONSUME
+    object: {class: PACKAGE_DESCRIPTOR, subtype: PACKAGE_DESCRIPTOR_V2}
+    relation: CONSUMES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
+    contract_refs: [CONTRACT_REGISTRY_V2, CONTRACT_PACKAGE_SCHEMA_V2, CONTRACT_REGISTRY_POLICY]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_REGISTRY_CHANNEL_RESOLUTION:
+    subject: AUTH_REGISTRY_CLIENT_SDK
+    authority_domain: REGISTRY_METADATA
+    lifecycle_phase: RESOLUTION
+    operation: RESOLVE
+    object: {class: REGISTRY_METADATA, subtype: CHANNEL}
+    relation: CONSUMES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
+    contract_refs: [CONTRACT_REGISTRY_V2, CONTRACT_PACKAGE_SCHEMA_V2]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_REGISTRY_VERSION_RESOLUTION:
+    subject: AUTH_REGISTRY_CLIENT_SDK
+    authority_domain: REGISTRY_METADATA
+    lifecycle_phase: RESOLUTION
+    operation: RESOLVE
+    object: {class: REGISTRY_METADATA, subtype: VERSION}
+    relation: CONSUMES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
+    contract_refs: [CONTRACT_REGISTRY_V2, CONTRACT_PACKAGE_SCHEMA_V2]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_REGISTRY_TARGET_RESOLUTION:
+    subject: AUTH_REGISTRY_CLIENT_SDK
+    authority_domain: REGISTRY_METADATA
+    lifecycle_phase: RESOLUTION
+    operation: RESOLVE
+    object: {class: REGISTRY_METADATA, subtype: TARGET}
+    relation: CONSUMES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
+    contract_refs: [CONTRACT_REGISTRY_V2, CONTRACT_PACKAGE_SCHEMA_V2]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_REGISTRY_RELEASE_RESOLUTION:
+    subject: AUTH_REGISTRY_CLIENT_SDK
+    authority_domain: ARTIFACT_DELIVERY
+    lifecycle_phase: RESOLUTION
+    operation: LOCATE
+    object: {class: ARTIFACT_LOCATOR, subtype: GITHUB_RELEASE_ASSET}
+    relation: CONSUMES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
+    contract_refs: [CONTRACT_ARTIFACT_DELIVERY_V1, CONTRACT_REGISTRY_ACCESS_V1]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_REGISTRY_ARTIFACT_RETRIEVAL:
+    subject: AUTH_REGISTRY_CLIENT_SDK
+    authority_domain: ARTIFACT_DELIVERY
+    lifecycle_phase: RETRIEVAL
+    operation: RETRIEVE
+    object: {class: ARTIFACT, subtype: SCTOOL_PACKAGE}
+    relation: CONSUMES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SCTOOL_ARTIFACTS, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
+    contract_refs: [CONTRACT_ARTIFACT_DELIVERY_V1, CONTRACT_REGISTRY_ACCESS_V1]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_REGISTRY_ARTIFACT_INTEGRITY:
+    subject: AUTH_REGISTRY_CLIENT_SDK
+    authority_domain: ARTIFACT_INTEGRITY
+    lifecycle_phase: VERIFICATION
+    operation: VERIFY
+    object: {class: ARTIFACT_CONTENT, subtype: SHA256_SIZE_FILENAME}
+    relation: VERIFIES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
+    contract_refs: [CONTRACT_ARTIFACT_DELIVERY_V1, CONTRACT_PACKAGE_SCHEMA_V2]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_REGISTRY_UPDATE_CANDIDATE:
+    subject: AUTH_REGISTRY_CLIENT_SDK
+    authority_domain: UPDATE_CANDIDATE
+    lifecycle_phase: RESOLUTION
+    operation: NORMALIZE
+    object: {class: UPDATE_CANDIDATE, subtype: SIMPLE_CONNECTION}
+    relation: PRODUCES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
+    contract_refs: [CONTRACT_REGISTRY_V2, CONTRACT_ARTIFACT_DELIVERY_V1]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_SIMPLE_CONNECTION_INSTALL:
+    subject: AUTH_SIMPLE_CONNECTION_DESKTOP
+    authority_domain: LOCAL_INSTALLATION
+    lifecycle_phase: INSTALLATION
+    operation: INSTALL
+    object: {class: LOCAL_INSTALL_STATE, subtype: SIMPLE_CONNECTION}
+    relation: OWNS
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
+    contract_refs: []
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_SIMPLE_CONNECTION_ACTIVATION:
+    subject: AUTH_SIMPLE_CONNECTION_DESKTOP
+    authority_domain: ACTIVATION
+    lifecycle_phase: ACTIVATION
+    operation: ACTIVATE
+    object: {class: ACTIVE_VERSION, subtype: SIMPLE_CONNECTION}
+    relation: OWNS
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
+    contract_refs: []
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_SIMPLE_CONNECTION_ROLLBACK:
+    subject: AUTH_SIMPLE_CONNECTION_DESKTOP
+    authority_domain: ROLLBACK
+    lifecycle_phase: ROLLBACK
+    operation: ROLLBACK
+    object: {class: ACTIVE_VERSION, subtype: SIMPLE_CONNECTION}
+    relation: OWNS
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
+    contract_refs: []
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE:
+    subject: AUTH_SIMPLE_CONNECTION_DESKTOP
+    authority_domain: RUNTIME_RECONCILIATION
+    lifecycle_phase: EXECUTION
+    operation: RECONCILE
+    object: {class: RUNTIME_STATE, subtype: SIMPLE_CONNECTION}
+    relation: OWNS
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
+    contract_refs: []
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+  RESP_SIMPLE_CONNECTION_RENDERER_UI:
+    subject: AUTH_SIMPLE_CONNECTION_DESKTOP
+    authority_domain: RENDERER_UI
+    lifecycle_phase: EXECUTION
+    operation: RENDER
+    object: {class: RENDERER_UI, subtype: SIMPLE_CONNECTION}
+    relation: OWNS
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
+    contract_refs: []
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
+    responsibility_description_id: null
+ownership_policy:
+  AUTH_REGISTRY_CLIENT_SDK:
+    allow:
+      - RESP_REGISTRY_ACCESS
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    deny:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+      - RESP_SIMPLE_CONNECTION_INSTALL
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+  AUTH_SCTOOL_AUTHORING_SDK:
+    allow:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+    deny:
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+  AUTH_SIMPLE_CONNECTION_DESKTOP:
+    allow:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    deny:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
