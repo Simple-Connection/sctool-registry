@@ -71,7 +71,8 @@ components:
       - VERIFICATION
       - CONFIGURATION
     include:
-      - ".github/workflows/*.yml"
+      - ".github/workflows/pages.yml"
+      - ".github/workflows/sign-trust.yml"
       - "tools/**"
     purpose: signed_registry_snapshot_assembly_root_trust_signing_verification_key_bootstrap_and_github_pages_publication
     shipped: false
@@ -112,10 +113,16 @@ components:
       - CONFIGURATION
       - GOVERNANCE
       - DOCUMENTATION
+      - IMPLEMENTATION
+      - VERIFICATION
+      - AUTOMATION
     include:
       - "ptsip.yaml"
       - "AGENTS.md"
+      - ".github/workflows/governance.yml"
+      - "governance/**"
       - "docs/index.yaml"
+      - "docs/responsibility/**"
       - "docs/template/**"
       - "docs/ver*/**"
       - ".gitignore"
@@ -123,9 +130,11 @@ components:
     purpose: repository_architecture_declaration_version_session_planning_and_coding_agent_operating_governance
     shipped: false
     runtime_required: false
-    executable: false
+    executable: true
     release_owner: development-tooling
     compatibility_owner: development-tooling
+    manifests:
+      - "governance/requirements.txt"
 
 relationships:
   - id: registry-contracts-specify-catalog
