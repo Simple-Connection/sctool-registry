@@ -42,6 +42,16 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
         errors,
     )
     need(
+        index["current"]["state"] == plan["version"]["state"],
+        "INDEX_PLAN_STATE",
+        errors,
+    )
+    need(
+        index["versions"][version]["state"] == plan["version"]["state"],
+        "VERSION_PLAN_STATE",
+        errors,
+    )
+    need(
         index["current"]["improvement_plan"] == ctx.plan_path,
         "INDEX_PLAN_ROUTE",
         errors,

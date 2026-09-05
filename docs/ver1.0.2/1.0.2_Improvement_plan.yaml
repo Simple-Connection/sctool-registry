@@ -5,7 +5,7 @@ natural_language: FORBIDDEN
 version:
   distribution_contract_version: "1.0.2"
   branch: "dev/1.0.2"
-  state: IN_PROGRESS_AWAITING_NEXT_SESSION_APPROVAL
+  state: IN_PROGRESS_ACTIVE_SESSION
   baseline_main: "c3e881742177aec3eae71d2c336801b6b52c74e5"
   previous_distribution_contract_version: "1.0.1"
 routing:
@@ -36,12 +36,12 @@ sessions:
     document: "docs/ver1.0.2/session_document/ver.1.0.2_P2_registry_client_sdk_descriptor_resolution.yaml"
   - id: P3
     type: B
-    state: AWAITING_APPROVAL
-    approval: REQUIRED
+    state: ACTIVE
+    approval: APPROVED
     responsibility_refs:
       - RESP_REGISTRY_RELEASE_RESOLUTION
       - RESP_REGISTRY_ARTIFACT_RETRIEVAL
-    document: null
+    document: "docs/ver1.0.2/session_document/ver.1.0.2_P3_registry_client_sdk_release_retrieval.yaml"
   - id: P4
     type: B
     state: NOT_APPROVED
@@ -98,5 +98,5 @@ gates:
   version_completion: BLOCKED
   merge_to_main: BLOCKED
 next:
-  session_id: P3
-  state: AWAITING_APPROVAL
+  session_id: P4
+  state: NOT_APPROVED
