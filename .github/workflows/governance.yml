@@ -9,6 +9,8 @@ on:
       - "governance/**"
       - "ptsip.yaml"
       - ".github/workflows/governance.yml"
+      - ".github/workflows/pages.yml"
+      - ".github/workflows/pages.yml"
   push:
     branches:
       - "dev/**"
