@@ -1,15 +1,17 @@
-schema_version: "1.0"
+schema_version: "2.0"
 document_type: docs_index
 repository: "Simple-Connection/sctool-registry"
 authority: REPOSITORY_GOVERNANCE
 natural_language: FORBIDDEN
 template_index: "docs/template/index.yaml"
-
+responsibility_index: "docs/responsibility/index.yaml"
 current:
   distribution_contract_version: "1.0.2"
   branch: "dev/1.0.2"
   state: IN_PROGRESS_AWAITING_NEXT_SESSION_APPROVAL
-  governance_migration: COMPLETE
+  migrations:
+    machine_routing: COMPLETE
+    responsibility_model: VALIDATION_PENDING
   improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
   current_session: null
   current_session_document: null
@@ -17,7 +19,6 @@ current:
     id: P3
     state: AWAITING_APPROVAL
     document: null
-
 versions:
   "1.0.1":
     state: HISTORICAL_COMPLETE
@@ -27,37 +28,22 @@ versions:
       format: LEGACY_MARKDOWN
     session_document_root: "docs/ver1.0.1/session_document"
     sessions:
-      - id: P1
-        state: COMPLETE
-        format: LEGACY_BUILD_SESSION
-        document: "docs/ver1.0.1/session_document/ver.1.0.1_P1_registry_access_sdk_boundary.yaml"
-      - id: P2
-        state: COMPLETE
-        format: LEGACY_BUILD_SESSION
-        document: "docs/ver1.0.1/session_document/ver.1.0.1_P2_artifact_delivery_descriptor_schema_boundary.yaml"
-
+      - {id: P1, state: COMPLETE, format: LEGACY_BUILD_SESSION, document: "docs/ver1.0.1/session_document/ver.1.0.1_P1_registry_access_sdk_boundary.yaml"}
+      - {id: P2, state: COMPLETE, format: LEGACY_BUILD_SESSION, document: "docs/ver1.0.1/session_document/ver.1.0.1_P2_artifact_delivery_descriptor_schema_boundary.yaml"}
   "1.0.2":
     state: IN_PROGRESS_AWAITING_NEXT_SESSION_APPROVAL
-    governance_migration: COMPLETE
     branch: "dev/1.0.2"
+    migrations:
+      machine_routing: COMPLETE
+      responsibility_model: VALIDATION_PENDING
     improvement_plan:
       path: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
       format: MACHINE_YAML
     session_document_root: "docs/ver1.0.2/session_document"
     sessions:
-      - id: P1
-        state: COMPLETE
-        format: LEGACY_BUILD_SESSION
-        document: "docs/ver1.0.2/session_document/ver.1.0.2_P1_simple_connection_descriptor_consumer.yaml"
-      - id: P2
-        state: COMPLETE
-        format: LEGACY_BUILD_SESSION
-        document: "docs/ver1.0.2/session_document/ver.1.0.2_P2_registry_client_sdk_descriptor_resolution.yaml"
-      - id: P3
-        state: AWAITING_APPROVAL
-        format: MACHINE_SESSION
-        document: null
-
+      - {id: P1, state: COMPLETE, format: MACHINE_SESSION, document: "docs/ver1.0.2/session_document/ver.1.0.2_P1_simple_connection_descriptor_consumer.yaml"}
+      - {id: P2, state: COMPLETE, format: MACHINE_SESSION, document: "docs/ver1.0.2/session_document/ver.1.0.2_P2_registry_client_sdk_descriptor_resolution.yaml"}
+      - {id: P3, state: AWAITING_APPROVAL, format: MACHINE_SESSION, document: null}
 templates:
   improvement_plan: "docs/template/improvement_plan.yaml"
   session_essential: "docs/template/session_document_template/session_document_essential.yaml"
