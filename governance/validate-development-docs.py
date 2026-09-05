@@ -108,6 +108,7 @@ def main() -> int:
     contracts = load(root, routes["contracts"])
     responsibilities = load(root, routes["responsibilities"])
     descriptions = load(root, routes["descriptions"])
+    rationale = load(root, routes["rationale"])
     gate_registry = load(root, routes["gates"])
 
     machine_docs = {
@@ -142,6 +143,7 @@ def main() -> int:
     vocab = {key: set(values) for key, values in vocabulary["dimensions"].items()}
     resp_map = responsibilities["responsibilities"]
     description_map = descriptions.get("descriptions", {})
+    rationale_map = rationale.get("rationales", {})
     ownership_policy = responsibilities.get("ownership_policy", {})
     gate_ids = set(gate_registry["gates"])
 
@@ -177,13 +179,76 @@ def main() -> int:
         for field in ("from_authority_id", "to_authority_id"):
             ref = transfer.get(field)
             need(ref is None or ref in auths, f"RESP_TRANSFER_AUTH:{rid}:{field}:{ref}", errors)
-        desc = r.get("responsibility_description_id")
-        need(desc is None or desc in description_map, f"RESP_DESCRIPTION:{rid}:{desc}", errors)
+        interpretation = r.get("interpretation")
+        need(isinstance(interpretation, dict), f"RESP_INTERPRETATION:{rid}", errors)
+        if isinstance(interpretation, dict):
+            coverage = interpretation.get("semantic_coverage")
+            need(coverage in vocab["semantic_coverage"], f"RESP_COVERAGE:{rid}:{coverage}", errors)
+            desc = interpretation.get("responsibility_description_id")
+            if coverage == "COMPLETE":
+                need(desc is None, f"RESP_COMPLETE_WITH_DESCRIPTION:{rid}:{desc}", errors)
+            elif coverage == "PARTIAL":
+                need(desc is not None, f"RESP_PARTIAL_WITHOUT_DESCRIPTION:{rid}", errors)
+            need(desc is None or desc in description_map, f"RESP_DESCRIPTION:{rid}:{desc}", errors)
+
+            rationale_required = interpretation.get("rationale_required")
+            need(isinstance(rationale_required, bool), f"RESP_RATIONALE_REQUIRED:{rid}", errors)
+            rationale_ids = interpretation.get("decision_rationale_ids", [])
+            need(isinstance(rationale_ids, list), f"RESP_RATIONALE_LIST:{rid}", errors)
+            if rationale_required is True:
+                need(bool(rationale_ids), f"RESP_RATIONALE_MISSING:{rid}", errors)
+            for rationale_id in rationale_ids:
+                need(rationale_id in rationale_map, f"RESP_RATIONALE_UNKNOWN:{rid}:{rationale_id}", errors)
+                if rationale_id in rationale_map:
+                    rationale_entry = rationale_map[rationale_id]
+                    need(rationale_entry.get("status") == "ACTIVE", f"RESP_RATIONALE_INACTIVE:{rid}:{rationale_id}", errors)
+                    need(rid in rationale_entry.get("applies_to", []), f"RESP_RATIONALE_SCOPE:{rid}:{rationale_id}", errors)
         subject = auths.get(r["subject"], {})
         need(subject.get("component_id") == r["scope"]["component_id"], f"RESP_OWNER_COMPONENT:{rid}", errors)
         rules = ownership_policy.get(r["subject"])
         if rules:
             need(rid in rules.get("allow", []), f"RESP_OWNER_ALLOW:{rid}:{r['subject']}", errors)
+
+    for description_id, entry in description_map.items():
+        need(entry.get("status") in vocab["description_status"], f"DESCRIPTION_STATUS:{description_id}", errors)
+        need(entry.get("semantic_role") == "UNMODELED_AUTHORITY_SEMANTIC", f"DESCRIPTION_ROLE:{description_id}", errors)
+        applies_to = entry.get("applies_to", [])
+        need(bool(applies_to), f"DESCRIPTION_SCOPE_EMPTY:{description_id}", errors)
+        for rid in applies_to:
+            need(rid in resp_map, f"DESCRIPTION_RESP_UNKNOWN:{description_id}:{rid}", errors)
+        text_value = entry.get("text")
+        need(isinstance(text_value, str) and bool(text_value.strip()), f"DESCRIPTION_TEXT_EMPTY:{description_id}", errors)
+
+    for rationale_id, entry in rationale_map.items():
+        status = entry.get("status")
+        need(status in vocab["rationale_status"], f"RATIONALE_STATUS:{rationale_id}:{status}", errors)
+        applies_to = entry.get("applies_to", [])
+        need(bool(applies_to), f"RATIONALE_SCOPE_EMPTY:{rationale_id}", errors)
+        for rid in applies_to:
+            need(rid in resp_map, f"RATIONALE_RESP_UNKNOWN:{rationale_id}:{rid}", errors)
+        for trigger in entry.get("review_on", []):
+            need(trigger in vocab["review_trigger"], f"RATIONALE_REVIEW_TRIGGER:{rationale_id}:{trigger}", errors)
+        statement = entry.get("statement")
+        need(isinstance(statement, str) and bool(statement.strip()), f"RATIONALE_STATEMENT_EMPTY:{rationale_id}", errors)
+
+        supersedes = entry.get("supersedes", [])
+        superseded_by = entry.get("superseded_by")
+        for other_id in supersedes:
+            need(other_id in rationale_map, f"RATIONALE_SUPERSEDES_UNKNOWN:{rationale_id}:{other_id}", errors)
+        need(superseded_by is None or superseded_by in rationale_map, f"RATIONALE_SUPERSEDED_BY_UNKNOWN:{rationale_id}:{superseded_by}", errors)
+        if status == "ACTIVE":
+            need(superseded_by is None, f"RATIONALE_ACTIVE_SUPERSEDED:{rationale_id}", errors)
+        if status == "SUPERSEDED":
+            need(superseded_by is not None, f"RATIONALE_SUPERSEDED_WITHOUT_SUCCESSOR:{rationale_id}", errors)
+
+    for rationale_id, entry in rationale_map.items():
+        for predecessor_id in entry.get("supersedes", []):
+            if predecessor_id in rationale_map:
+                need(
+                    rationale_map[predecessor_id].get("superseded_by") == rationale_id,
+                    f"RATIONALE_SUPERSESSION_LINK:{rationale_id}:{predecessor_id}",
+                    errors,
+                )
 
     for aid, rules in ownership_policy.items():
         need(aid in auths, f"POLICY_AUTH:{aid}", errors)
@@ -198,6 +263,14 @@ def main() -> int:
     index_sessions = {s["id"]: s for s in index["versions"][version]["sessions"]}
     need(set(plan_sessions) >= {"P1", "P2", "P3"}, "PLAN_SESSIONS", errors)
     need(set(index_sessions) >= {"P1", "P2", "P3"}, "INDEX_SESSIONS", errors)
+
+    for rationale_id, entry in rationale_map.items():
+        established = entry.get("established_in", {})
+        established_version = established.get("version")
+        established_session = established.get("session")
+        need(established_version in index["versions"], f"RATIONALE_VERSION:{rationale_id}:{established_version}", errors)
+        if established_version == version:
+            need(established_session in plan_sessions, f"RATIONALE_SESSION:{rationale_id}:{established_session}", errors)
 
     for sid, ps in plan_sessions.items():
         for rid in ps.get("responsibility_refs", []):
@@ -230,8 +303,32 @@ def main() -> int:
         evidence_ids = {e["id"] for e in evidence}
         need(len(evidence_ids) == len(evidence), f"EVIDENCE_DUPLICATE:{sid}", errors)
 
+        responsibility_model = doc.get("responsibility_model", {})
+        session_description_ids = responsibility_model.get("description_ids", [])
+        session_rationale_ids = responsibility_model.get("rationale_ids", [])
+        need(isinstance(session_description_ids, list), f"SESSION_DESCRIPTION_LIST:{sid}", errors)
+        need(isinstance(session_rationale_ids, list), f"SESSION_RATIONALE_LIST:{sid}", errors)
+        for description_id in session_description_ids:
+            need(description_id in description_map, f"SESSION_DESCRIPTION_UNKNOWN:{sid}:{description_id}", errors)
+        for rationale_id in session_rationale_ids:
+            need(rationale_id in rationale_map, f"SESSION_RATIONALE_UNKNOWN:{sid}:{rationale_id}", errors)
+            if rationale_id in rationale_map:
+                need(rationale_map[rationale_id].get("status") == "ACTIVE", f"SESSION_RATIONALE_INACTIVE:{sid}:{rationale_id}", errors)
+
+        payload = doc.get("payload", {})
+        need(
+            set(payload.get("responsibility_description_ids", [])) == set(session_description_ids),
+            f"SESSION_DESCRIPTION_PAYLOAD_MISMATCH:{sid}",
+            errors,
+        )
+        need(
+            set(payload.get("decision_rationale_ids", [])) == set(session_rationale_ids),
+            f"SESSION_RATIONALE_PAYLOAD_MISMATCH:{sid}",
+            errors,
+        )
+
         used: set[str] = set()
-        for effect, refs in doc.get("responsibility_model", {}).get("effects", {}).items():
+        for effect, refs in responsibility_model.get("effects", {}).items():
             for rid in refs:
                 need(rid in resp_map, f"SESSION_RESP:{sid}:{effect}:{rid}", errors)
                 used.add(rid)
@@ -254,6 +351,13 @@ def main() -> int:
 
         for rid in ps.get("responsibility_refs", []):
             need(rid in used, f"PLAN_RESP_UNUSED:{sid}:{rid}", errors)
+            if rid in resp_map:
+                interpretation = resp_map[rid].get("interpretation", {})
+                description_id = interpretation.get("responsibility_description_id")
+                if description_id is not None:
+                    need(description_id in session_description_ids, f"SESSION_REQUIRED_DESCRIPTION:{sid}:{rid}:{description_id}", errors)
+                for rationale_id in interpretation.get("decision_rationale_ids", []):
+                    need(rationale_id in session_rationale_ids, f"SESSION_REQUIRED_RATIONALE:{sid}:{rid}:{rationale_id}", errors)
 
     p3 = plan_sessions["P3"]
     need(p3["state"] == "AWAITING_APPROVAL", "P3_STATE", errors)
@@ -274,6 +378,7 @@ def main() -> int:
         f"versions={len(index['versions'])} "
         f"sessions={len(plan_sessions)} "
         f"responsibilities={len(resp_map)} "
+        f"rationales={len(rationale_map)} "
         f"gates={len(gate_ids)}"
     )
     return 0
