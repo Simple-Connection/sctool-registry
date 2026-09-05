@@ -1,11 +1,12 @@
-schema_version: "2.0"
+schema_version: "2.1"
 document_type: session_type_template
 template_id: session_type_C_v2
 session_type: C
 semantic: VALIDATION_CLOSEOUT
-natural_language: DESCRIPTION_REFERENCE_ONLY
+natural_language: REFERENCE_ONLY
 payload:
   validation:
     gate_refs: []
     evidence_refs: []
   responsibility_description_ids: []
+  decision_rationale_ids: []
