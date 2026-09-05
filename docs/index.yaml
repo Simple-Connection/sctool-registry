@@ -11,7 +11,7 @@ current:
   state: IN_PROGRESS_AWAITING_NEXT_SESSION_APPROVAL
   migrations:
     machine_routing: COMPLETE
-    responsibility_model: VALIDATION_PENDING
+    responsibility_model: COMPLETE
   improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
   current_session: null
   current_session_document: null
@@ -35,7 +35,7 @@ versions:
     branch: "dev/1.0.2"
     migrations:
       machine_routing: COMPLETE
-      responsibility_model: VALIDATION_PENDING
+      responsibility_model: COMPLETE
     improvement_plan:
       path: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
       format: MACHINE_YAML
