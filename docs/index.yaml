@@ -12,6 +12,7 @@ current:
   migrations:
     machine_routing: COMPLETE
     responsibility_model: COMPLETE
+    interpretation_layer: VALIDATION_PENDING
   improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
   current_session: null
   current_session_document: null
@@ -36,6 +37,7 @@ versions:
     migrations:
       machine_routing: COMPLETE
       responsibility_model: COMPLETE
+    interpretation_layer: VALIDATION_PENDING
     improvement_plan:
       path: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
       format: MACHINE_YAML
