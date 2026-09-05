@@ -1,4 +1,4 @@
-schema_version: "1.0"
+schema_version: "2.0"
 document_type: responsibility_vocabulary
 natural_language: FORBIDDEN
 dimensions:
@@ -124,3 +124,22 @@ dimensions:
     - ALLOCATED
     - DEPRECATED
     - RETIRED
+  semantic_coverage:
+    - COMPLETE
+    - PARTIAL
+  rationale_status:
+    - ACTIVE
+    - SUPERSEDED
+    - RETIRED
+  description_status:
+    - ACTIVE
+    - SUPERSEDED
+    - RETIRED
+  review_trigger:
+    - AUTHORITY_TRANSFER
+    - COMPONENT_REMOVAL
+    - RESPONSIBILITY_DIMENSION_CHANGE
+    - CONTRACT_CHANGE
+    - LIFECYCLE_CHANGE
+    - OWNERSHIP_POLICY_CHANGE
+    - IMPLEMENTATION_BOUNDARY_CHANGE
