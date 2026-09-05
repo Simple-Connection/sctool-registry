@@ -1,0 +1,15 @@
+schema_version: "1.0"
+document_type: responsibility_index
+natural_language: FORBIDDEN
+routes:
+  authorities: "docs/responsibility/authorities.yaml"
+  vocabulary: "docs/responsibility/vocabulary.yaml"
+  contracts: "docs/responsibility/contracts.yaml"
+  responsibilities: "docs/responsibility/responsibilities.yaml"
+  descriptions: "docs/responsibility/descriptions.yaml"
+  gates: "docs/responsibility/gates.yaml"
+semantic_policy:
+  authority_semantics: CLOSED_DIMENSIONS
+  expansion_mode: QUALIFIED_REGISTRY_EXTENSION
+  natural_language_fallback: RESPONSIBILITY_DESCRIPTION_ID
+  fallback_required_only_when_unrepresented: true
