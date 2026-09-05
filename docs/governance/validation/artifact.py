@@ -9,8 +9,8 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
     candidate = ctx.update_candidate_contract
     responsibilities = ctx.responsibilities["responsibilities"]
 
-    scan_machine(lifecycle, "docs/rules/staged-artifact-lifecycle-v1.yaml", errors)
-    scan_machine(candidate, "docs/rules/update-candidate-v1.yaml", errors)
+    scan_machine(lifecycle, "docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml", errors)
+    scan_machine(candidate, "docs/UPDATE_CANDIDATE_V1.yaml", errors)
 
     need(
         lifecycle.get("contract_id") == "STAGED_ARTIFACT_LIFECYCLE_V1",

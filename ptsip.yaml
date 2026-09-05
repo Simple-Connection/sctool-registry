@@ -41,6 +41,8 @@ components:
       - "docs/REGISTRY_CONTRACT_V2.md"
       - "docs/REGISTRY_ACCESS_V1.md"
       - "docs/ARTIFACT_DELIVERY_V1.md"
+      - "docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml"
+      - "docs/UPDATE_CANDIDATE_V1.yaml"
 
   - id: registry-contracts
     classification: NEUTRAL_CONTRACT
@@ -55,6 +57,8 @@ components:
       - "docs/REGISTRY_CONTRACT_V2.md"
       - "docs/REGISTRY_ACCESS_V1.md"
       - "docs/ARTIFACT_DELIVERY_V1.md"
+      - "docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml"
+      - "docs/UPDATE_CANDIDATE_V1.yaml"
       - "docs/PAGES_DISTRIBUTION_V1.md"
       - "trust/**"
     purpose: canonical_registry_submission_distribution_trust_integrity_and_admission_contracts

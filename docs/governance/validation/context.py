@@ -45,8 +45,9 @@ def load_context(root: Path, index_path: str) -> ValidationContext:
     rules_index = load_yaml(root, rules_index_path)
     state_rules_path = rules_index["routes"]["session_state"]
     state_rules = load_yaml(root, state_rules_path)
-    staged_artifact_lifecycle = load_yaml(root, rules_index["routes"]["staged_artifact_lifecycle"])
-    update_candidate_contract = load_yaml(root, rules_index["routes"]["update_candidate"])
+    contract_routes = load_yaml(root, responsibility_index["routes"]["contracts"])["contracts"]
+    staged_artifact_lifecycle = load_yaml(root, contract_routes["CONTRACT_STAGED_ARTIFACT_LIFECYCLE_V1"]["path"])
+    update_candidate_contract = load_yaml(root, contract_routes["CONTRACT_UPDATE_CANDIDATE_V1"]["path"])
 
     template_index_path = index["template_index"]
     template_index = load_yaml(root, template_index_path)

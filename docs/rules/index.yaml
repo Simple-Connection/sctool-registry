@@ -8,8 +8,6 @@ migration_ids:
   - governance_layout
 routes:
   session_state: "docs/rules/session-state.yaml"
-  staged_artifact_lifecycle: "docs/rules/staged-artifact-lifecycle-v1.yaml"
-  update_candidate: "docs/rules/update-candidate-v1.yaml"
 layout:
   docs_index: "docs/index.yaml"
   rules_root: "docs/rules"
