@@ -132,6 +132,22 @@ def main() -> int:
     need(index["current"]["branch"] == plan["version"]["branch"], "INDEX_PLAN_BRANCH", errors)
     need(tindex["responsibility_index"] == rindex_path, "TEMPLATE_RESPONSIBILITY_ROUTE", errors)
 
+    version = plan["version"]["distribution_contract_version"]
+    current_migrations = index["current"].get("migrations", {})
+    version_migrations = index["versions"][version].get("migrations", {})
+    plan_migrations = plan.get("migrations", {})
+    for migration_id in ("machine_routing", "responsibility_model", "interpretation_layer"):
+        need(
+            current_migrations.get(migration_id) == plan_migrations.get(migration_id),
+            f"CURRENT_MIGRATION_STATE:{migration_id}",
+            errors,
+        )
+        need(
+            version_migrations.get(migration_id) == plan_migrations.get(migration_id),
+            f"VERSION_MIGRATION_STATE:{migration_id}",
+            errors,
+        )
+
     branch = current_branch(root)
     if branch:
         need(branch == plan["version"]["branch"], f"GIT_BRANCH:{branch}:{plan['version']['branch']}", errors)
@@ -258,7 +274,6 @@ def main() -> int:
         for rid in allow | deny:
             need(rid in resp_map, f"POLICY_RESP:{aid}:{rid}", errors)
 
-    version = plan["version"]["distribution_contract_version"]
     plan_sessions = {s["id"]: s for s in plan["sessions"]}
     index_sessions = {s["id"]: s for s in index["versions"][version]["sessions"]}
     need(set(plan_sessions) >= {"P1", "P2", "P3"}, "PLAN_SESSIONS", errors)
