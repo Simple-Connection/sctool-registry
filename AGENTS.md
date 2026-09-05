@@ -97,6 +97,16 @@ docs/
 
 `docs/governance/template/session/essential.yaml` defines the common machine-only routing/state/evidence fields. It must not introduce natural-language payload fields.
 
+The governance validator and its Python package are colocated in the same subsystem:
+
+```text
+docs/governance/validate.py
+docs/governance/requirements.txt
+docs/governance/validation/**
+```
+
+This placement is intentional: declarative governance state, governance rules, and the validator that enforces them are one repository-governance subsystem.
+
 Session type templates remain machine/reference-only:
 
 ```text
@@ -113,7 +123,7 @@ Primary sessions use `P1`, `P2`, `P3`, ... . Use `P1.1`, `P1.2`, ... only when a
 
 Historical session documents created before this machine-entry model may retain their recorded payload. Their routing references must point to the current YAML improvement plan, and new sessions must use the template routing above.
 
-All declarative governance state under `docs/governance/**` and historical governance state under `docs/ver1.0.1/**` are owned by `repository-governance` in `ptsip.yaml`. Executable validation code remains under `governance/**`.
+All current governance state, rules, templates, rationale, and executable validation tooling under `docs/governance/**`, plus historical governance state under `docs/ver1.0.1/**`, are owned by `repository-governance` in `ptsip.yaml`. Do not recreate a top-level `governance/` tooling root.
 
 ## Responsibility machine model
 
@@ -127,9 +137,9 @@ Each responsibility declares `interpretation.semantic_coverage`. `COMPLETE` requ
 
 A future change that matches a rationale `review_on` trigger must re-evaluate the linked rationale before changing the responsibility dimensions. Do not infer that a machine dimension change automatically preserves the prior design intent.
 
-Session state is derived. Session documents must not assert independent `audit`, `plan`, `apply`, `test`, or `closeout` state values. `docs/governance/rules/session-state.yaml` owns the machine state rules; `governance/validation/state.py` evaluates them, and `governance/validate.py` checks that the version improvement plan agrees.
+Session state is derived. Session documents must not assert independent `audit`, `plan`, `apply`, `test`, or `closeout` state values. `docs/governance/rules/session-state.yaml` owns the machine state rules; `docs/governance/validation/state.py` evaluates them, and `docs/governance/validate.py` checks that the version improvement plan agrees.
 
-`governance/validate.py` is the single public governance-validation command. Domain checks are implemented behind it in `governance/validation/`; do not add separate public validator commands for routing, responsibility, interpretation, session, or state checks.
+`docs/governance/validate.py` is the single public governance-validation command. Domain checks are implemented behind it in `docs/governance/validation/`; do not add separate public validator commands for routing, responsibility, interpretation, session, or state checks.
 
 The session named by `docs/governance/index.yaml -> current.next_session` remains unmaterialized until explicit approval. Validator failures must not be bypassed by pre-creating its session document or changing approval state outside the declared machine rules.
 

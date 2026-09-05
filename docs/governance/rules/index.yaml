@@ -15,3 +15,9 @@ layout:
     - "docs/template"
     - "docs/responsibility"
   current_version_legacy_root_pattern: "docs/ver{version}"
+tooling:
+  entrypoint: "docs/governance/validate.py"
+  requirements: "docs/governance/requirements.txt"
+  package_root: "docs/governance/validation"
+  forbidden_roots:
+    - "governance"

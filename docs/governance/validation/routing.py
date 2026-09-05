@@ -182,6 +182,28 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
             errors,
         )
 
+    tooling = ctx.rules_index.get("tooling", {})
+    for tooling_key in ("entrypoint", "requirements", "package_root"):
+        tooling_path = tooling.get(tooling_key)
+        need(
+            isinstance(tooling_path, str) and (ctx.root / tooling_path).exists(),
+            f"GOVERNANCE_TOOLING_PATH:{tooling_key}:{tooling_path}",
+            errors,
+        )
+        if isinstance(tooling_path, str) and canonical_root:
+            need(
+                tooling_path == canonical_root or tooling_path.startswith(canonical_prefix),
+                f"GOVERNANCE_TOOLING_ROOT:{tooling_key}:{tooling_path}",
+                errors,
+            )
+
+    for forbidden_root in tooling.get("forbidden_roots", []):
+        need(
+            not (ctx.root / forbidden_root).exists(),
+            f"FORBIDDEN_GOVERNANCE_TOOLING_ROOT:{forbidden_root}",
+            errors,
+        )
+
     branch = current_branch(ctx.root)
     if branch:
         need(branch == plan["version"]["branch"], f"GIT_BRANCH:{branch}:{plan['version']['branch']}", errors)

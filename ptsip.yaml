@@ -120,7 +120,6 @@ components:
       - "ptsip.yaml"
       - "AGENTS.md"
       - ".github/workflows/governance.yml"
-      - "governance/**"
       - "docs/governance/**"
       - "docs/ver1.0.1/**"
       - ".gitignore"
@@ -132,7 +131,7 @@ components:
     release_owner: development-tooling
     compatibility_owner: development-tooling
     manifests:
-      - "governance/requirements.txt"
+      - "docs/governance/requirements.txt"
 
 relationships:
   - id: registry-contracts-specify-catalog
