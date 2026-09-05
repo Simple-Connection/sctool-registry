@@ -104,7 +104,13 @@ All version/session/template/index/responsibility governance paths are owned by 
 
 Authority responsibility must be decomposed into closed machine dimensions instead of replacing prose with opaque constants. Canonical dimensions and allocations are routed by `docs/responsibility/index.yaml`.
 
-If authority-relevant semantics are not expressible by the current closed dimensions, qualify the missing semantic as a candidate dimension or value. Register it only when it is stable, reusable, and orthogonal. Otherwise keep a `responsibility_description_id` reference. Natural-language explanation may exist only behind that reference.
+If authority-relevant semantics are not expressible by the current closed dimensions, qualify the missing semantic as a candidate dimension or value. Register it only when it is stable, reusable, and orthogonal. Otherwise keep a `responsibility_description_id` reference.
+
+Natural language is preserved in a separate interpretation layer instead of being removed. `docs/responsibility/descriptions.yaml` is only for authority-relevant semantics that remain unmodeled by closed dimensions. `docs/responsibility/rationale.yaml` preserves why an authority allocation or boundary was chosen, including historical migration intent and review triggers. Rationale is explanatory and does not override the machine responsibility dimensions.
+
+Each responsibility declares `interpretation.semantic_coverage`. `COMPLETE` requires `responsibility_description_id: null`; `PARTIAL` requires a registered description. Responsibilities marked `rationale_required: true` must reference active rationale entries whose `applies_to` includes that responsibility. Superseded rationale must not be used as active interpretation.
+
+A future change that matches a rationale `review_on` trigger must re-evaluate the linked rationale before changing the responsibility dimensions. Do not infer that a machine dimension change automatically preserves the prior design intent.
 
 Session state is derived. Session documents must not assert independent `audit`, `plan`, `apply`, `test`, or `closeout` state values. `governance/validate-development-docs.py` derives session state from approval, work-unit completion, blockers, required gates, and evidence references, then checks that the version improvement plan agrees.
 
