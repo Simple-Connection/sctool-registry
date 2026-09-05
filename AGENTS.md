@@ -38,6 +38,7 @@ A coding agent entering version/session work must resolve routing in this order:
 ```text
 docs/index.yaml
 -> docs/template/index.yaml
+-> docs/responsibility/index.yaml
 -> current version improvement_plan
 -> approved current session_document
 -> session_document_essential template
@@ -97,7 +98,17 @@ Primary sessions use `P1`, `P2`, `P3`, ... . Use `P1.1`, `P1.2`, ... only when a
 
 Historical session documents created before this machine-entry model may retain their recorded payload. Their routing references must point to the current YAML improvement plan, and new sessions must use the template routing above.
 
-All version/session/template/index governance paths are owned by `repository-governance` in `ptsip.yaml`.
+All version/session/template/index/responsibility governance paths are owned by `repository-governance` in `ptsip.yaml`.
+
+## Responsibility machine model
+
+Authority responsibility must be decomposed into closed machine dimensions instead of replacing prose with opaque constants. Canonical dimensions and allocations are routed by `docs/responsibility/index.yaml`.
+
+If authority-relevant semantics are not expressible by the current closed dimensions, qualify the missing semantic as a candidate dimension or value. Register it only when it is stable, reusable, and orthogonal. Otherwise keep a `responsibility_description_id` reference. Natural-language explanation may exist only behind that reference.
+
+Session state is derived. Session documents must not assert independent `audit`, `plan`, `apply`, `test`, or `closeout` state values. `governance/validate-development-docs.py` derives session state from approval, work-unit completion, blockers, required gates, and evidence references, then checks that the version improvement plan agrees.
+
+P3 remains unmaterialized until explicit approval. A validator failure must not be bypassed by creating a P3 session document or changing its approval state.
 
 ## PTSIP is mandatory from the first commit
 
