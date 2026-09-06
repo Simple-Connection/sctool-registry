@@ -7,7 +7,7 @@ from pathlib import Path
 
 from validation.common import ValidationError
 from validation.context import load_context
-from validation import artifact, interpretation, planning, responsibility, routing, session
+from validation import artifact, install, interpretation, planning, responsibility, routing, session
 
 
 def main() -> int:
@@ -30,6 +30,7 @@ def main() -> int:
         responsibility.validate,
         interpretation.validate,
         artifact.validate,
+        install.validate,
         planning.validate,
         session.validate,
     ):

@@ -20,6 +20,7 @@ class ValidationContext:
     state_rules: dict[str, Any]
     staged_artifact_lifecycle: dict[str, Any]
     update_candidate_contract: dict[str, Any]
+    simple_connection_install_transaction: dict[str, Any]
     template_index_path: str
     template_index: dict[str, Any]
     responsibility_index_path: str
@@ -56,6 +57,9 @@ def load_context(root: Path, index_path: str) -> ValidationContext:
     contract_routes = contracts["contracts"]
     staged_artifact_lifecycle = load_yaml(root, contract_routes["CONTRACT_STAGED_ARTIFACT_LIFECYCLE_V1"]["path"])
     update_candidate_contract = load_yaml(root, contract_routes["CONTRACT_UPDATE_CANDIDATE_V1"]["path"])
+    simple_connection_install_transaction = load_yaml(
+        root, contract_routes["CONTRACT_SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1"]["path"]
+    )
 
     return ValidationContext(
         root=root,
@@ -69,6 +73,7 @@ def load_context(root: Path, index_path: str) -> ValidationContext:
         state_rules=state_rules,
         staged_artifact_lifecycle=staged_artifact_lifecycle,
         update_candidate_contract=update_candidate_contract,
+        simple_connection_install_transaction=simple_connection_install_transaction,
         template_index_path=template_index_path,
         template_index=template_index,
         responsibility_index_path=responsibility_index_path,

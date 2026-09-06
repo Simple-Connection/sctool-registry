@@ -174,3 +174,31 @@ rationales:
       and verified update-candidate production. Equal precedence and resolved older
       versions do not retrieve an artifact. Registry Client SDK does not decide
       installation, choose an install path, or mutate persistent product state.
+
+  ADR_SIMPLE_CONNECTION_INSTALL_TRANSACTION_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
+      - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
+      - RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION
+      - RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT
+    established_in:
+      version: "1.0.2"
+      session: P5
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - CONTRACT_CHANGE
+      - RESPONSIBILITY_DIMENSION_CHANGE
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+      - LIFECYCLE_CHANGE
+      - OWNERSHIP_POLICY_CHANGE
+    statement: >-
+      Simple Connection accepts a verified Registry update candidate into an explicit
+      install intent, owns the product-local install transaction lifecycle, materializes
+      only the verified artifact lease into a validated product staging tree, and
+      atomically commits persistent installation state. Installation does not select or
+      activate the new version, mutate repo-local runtime descriptors, reconcile runtime
+      state, perform rollback, or decide renderer behavior. Existing sibling versions
+      remain preserved and failed or crashed transactions must not become visible as
+      installed state.

@@ -58,7 +58,10 @@ sessions:
     state: ACTIVE
     approval: APPROVED
     responsibility_refs:
-      - RESP_SIMPLE_CONNECTION_INSTALL
+      - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
+      - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
+      - RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION
+      - RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT
     document: "docs/ver1.0.2/session_document/ver.1.0.2_P5_simple_connection_install.yaml"
     planning_state: CONCRETIZED
     planning_document: "docs/ver1.0.2/session_document/ver.1.0.2_P5_simple_connection_install_work_plan.yaml"

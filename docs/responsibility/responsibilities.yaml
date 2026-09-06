@@ -326,16 +326,92 @@ responsibilities:
     relation: OWNS
     ownership: PRIMARY
     normative: MUST
-    state: ALLOCATED
+    state: DEPRECATED
     scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
     contract_refs: []
-    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
+    transfer: {state: RETIREMENT_PENDING, from_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: PENDING_REPLACEMENT}
     interpretation:
       semantic_coverage: COMPLETE
       rationale_required: true
       responsibility_description_id: null
       decision_rationale_ids:
         - ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY
+  RESP_SIMPLE_CONNECTION_INSTALL_INTENT:
+    subject: AUTH_SIMPLE_CONNECTION_DESKTOP
+    authority_domain: LOCAL_INSTALLATION
+    lifecycle_phase: INSTALLATION
+    operation: DECIDE
+    object: {class: INSTALL_INTENT, subtype: SIMPLE_CONNECTION}
+    relation: PRODUCES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
+    contract_refs: [CONTRACT_UPDATE_CANDIDATE_V1, CONTRACT_SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_SIMPLE_CONNECTION_INSTALL_TRANSACTION_BOUNDARY
+  RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE:
+    subject: AUTH_SIMPLE_CONNECTION_DESKTOP
+    authority_domain: LOCAL_INSTALLATION
+    lifecycle_phase: INSTALLATION
+    operation: CONTROL_LIFECYCLE
+    object: {class: INSTALL_TRANSACTION, subtype: SIMPLE_CONNECTION}
+    relation: OWNS
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
+    contract_refs: [CONTRACT_SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_SIMPLE_CONNECTION_INSTALL_TRANSACTION_BOUNDARY
+  RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION:
+    subject: AUTH_SIMPLE_CONNECTION_DESKTOP
+    authority_domain: LOCAL_INSTALLATION
+    lifecycle_phase: INSTALLATION
+    operation: MATERIALIZE
+    object: {class: INSTALLED_PACKAGE_TREE, subtype: SIMPLE_CONNECTION}
+    relation: PRODUCES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
+    contract_refs: [CONTRACT_UPDATE_CANDIDATE_V1, CONTRACT_SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_SIMPLE_CONNECTION_INSTALL_TRANSACTION_BOUNDARY
+  RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT:
+    subject: AUTH_SIMPLE_CONNECTION_DESKTOP
+    authority_domain: LOCAL_INSTALLATION
+    lifecycle_phase: INSTALLATION
+    operation: COMMIT
+    object: {class: LOCAL_INSTALL_STATE, subtype: SIMPLE_CONNECTION}
+    relation: OWNS
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
+    contract_refs: [CONTRACT_SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_SIMPLE_CONNECTION_INSTALL_TRANSACTION_BOUNDARY
   RESP_SIMPLE_CONNECTION_ACTIVATION:
     subject: AUTH_SIMPLE_CONNECTION_DESKTOP
     authority_domain: ACTIVATION
@@ -428,6 +504,10 @@ ownership_policy:
       - RESP_REGISTRY_ARTIFACT_INTEGRITY
       - RESP_REGISTRY_UPDATE_CANDIDATE
     deny:
+      - RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT
+      - RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION
+      - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
+      - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
       - RESP_SCTOOL_AUTHORING_GUIDANCE
       - RESP_SCTOOL_MANIFEST_VALIDATION
       - RESP_SCTOOL_PACKAGE_BUILD
@@ -444,6 +524,10 @@ ownership_policy:
       - RESP_SCTOOL_PACKAGE_BUILD
       - RESP_SCTOOL_PACKAGE_TEST
     deny:
+      - RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT
+      - RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION
+      - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
+      - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
       - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
       - RESP_REGISTRY_CHANNEL_RESOLUTION
       - RESP_REGISTRY_VERSION_RESOLUTION
@@ -458,6 +542,10 @@ ownership_policy:
   AUTH_SIMPLE_CONNECTION_DESKTOP:
     allow:
       - RESP_SIMPLE_CONNECTION_INSTALL
+      - RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT
+      - RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION
+      - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
+      - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
       - RESP_SIMPLE_CONNECTION_ACTIVATION
       - RESP_SIMPLE_CONNECTION_ROLLBACK
       - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
