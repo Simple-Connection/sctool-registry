@@ -18,7 +18,7 @@ The Registry Client SDK owns the consumer-side implementation of Registry contra
 - ephemeral Registry-owned staging;
 - filename/size/SHA-256 verification;
 - read-only verified artifact access;
-- normalized verified update candidates for Simple Connection.
+- deterministic update-candidate resolution from a product-authoritative installed-version observation.
 
 ## Current public surfaces
 
@@ -48,29 +48,49 @@ No version or target fallback is performed.
 
 Distribution `1.0.2` P2 owns descriptor/channel/version/target resolution only.
 
-P2 may validate and preserve:
-
-```text
-content.filename
-content.sha256
-content.size
-delivery.type
-delivery.access.contract
-delivery.locator.repository
-delivery.locator.assetId
-```
-
-P2 does **not** use the locator to query a live GitHub Release or download bytes.
-
 ## P3 boundary
 
-Distribution `1.0.2` P3 established exact release/asset binding and authenticated GitHub CLI retrieval. P4 preserves that authority while replacing whole-artifact buffering with a streaming transport.
-
-`artifact-delivery` resolves the derived release tag `sctool/{packageId}/v{version}`, requires the exact numeric `delivery.locator.assetId` inside that non-draft release, and opens the exact authenticated asset as a binary stream. Backend asset name and size remain observations until P4 integrity verification.
+Distribution `1.0.2` P3 established exact release/asset binding and authenticated GitHub CLI retrieval. P4 preserves that authority while using streaming transport.
 
 ## P4 boundary
 
-Distribution `1.0.2` P4 owns file-backed verification without creating Simple Connection install state:
+P4 owns both verified file-backed artifact production and update-candidate **eligibility resolution**.
+
+Simple Connection remains authoritative for local installation state. It may pass only this read-only observation into the Registry Client SDK:
+
+```text
+authority = AUTH_SIMPLE_CONNECTION_DESKTOP
+packageId
+targetKey
+installedVersion
+```
+
+The SDK does not retain or mutate that product state. It compares `installedVersion` with the already-resolved Registry version using package-schema semantic-version precedence:
+
+```text
+resolved version newer
+-> UPDATE_AVAILABLE
+-> authenticated retrieval
+-> SDK-internal staging
+-> integrity verification
+-> VerifiedUpdateCandidate
+
+equal precedence
+-> CURRENT
+-> no release query
+-> no artifact retrieval
+-> candidate = null
+
+resolved version older
+-> DOWNGRADE_NOT_CANDIDATE
+-> no release query
+-> no artifact retrieval
+-> candidate = null
+```
+
+Build metadata is ignored for precedence. Prerelease ordering follows semantic-version precedence; numeric prerelease identifiers are compared by integer value to remain compatible with the package schema accepted grammar.
+
+The file-backed verification pipeline is:
 
 ```text
 authenticated asset stream
@@ -82,16 +102,28 @@ authenticated asset stream
 -> VerifiedUpdateCandidate
 ```
 
-The staging filename is SDK-internal and never derived from `content.filename`. Partial or failed staging resources are disposed. Oversized streams abort as soon as the declared `content.size` is exceeded. The public candidate does not expose the raw staging path or write access.
+The staging filename is SDK-internal and never derived from `content.filename`. Partial or failed staging resources are disposed. The public candidate exposes no raw path or write access.
 
-A `VerifiedUpdateCandidate` contains Registry metadata and an `artifact` lease with:
+A `VerifiedUpdateCandidate` deliberately does not contain:
 
 ```text
-openReadStream()
-dispose()
+installedVersion
+isUpdateAvailable
+shouldInstall
+installPath
+persistentInstallState
+activation
+rollback
+runtime state
+renderer state
+GitHub credentials/identity
 ```
 
-It deliberately does not contain GitHub credentials/identity, installed version, update availability decisions, install paths, activation, rollback, runtime state, or renderer state. Persistent product-owned installation begins only after a later approved Simple Connection integration boundary.
+Update availability is represented by the surrounding candidate-resolution state, not by a mutable boolean inside the candidate.
+
+## P5 boundary
+
+P5 is not materialized. Its planned responsibility is only `RESP_SIMPLE_CONNECTION_INSTALL`. It may consume a P4 verified update candidate and decide/create product-owned persistent installation state, but P4 does not make that installation decision.
 
 ## Non-goals
 
@@ -99,7 +131,8 @@ This SDK must not implement:
 
 - SCTool scaffold/build/test/sign/package authoring;
 - publisher submission production;
-- Simple Connection local install state;
+- Simple Connection local install-state ownership or mutation;
+- install-path selection or install policy;
 - active-version selection or rollback;
 - renderer/UI behavior;
 - production Root trust activation.
