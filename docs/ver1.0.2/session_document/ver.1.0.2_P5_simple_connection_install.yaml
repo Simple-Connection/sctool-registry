@@ -222,7 +222,7 @@ work_units:
     completion_codes:
       - P5_INSTALL_AUTOMATION_EVIDENCE_COMPLETE
   - id: P5-W9
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
       - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
@@ -236,7 +236,7 @@ work_units:
       - PTSIP_EXACT_PASS
       - P5_CLOSEOUT_CANDIDATE
     completion_codes:
-      - P5_CROSS_REPOSITORY_EXACT_VALIDATION_PENDING
+      - P5_CROSS_REPOSITORY_EXACT_VALIDATION_COMPLETE
 evidence:
   - id: E_P5_APPROVAL
     kind: USER_APPROVAL
@@ -470,6 +470,65 @@ evidence:
       windows_behavior: FAIL_CLOSED_WITHOUT_PREDELETE_OR_LOCKED_FILE_MUTATION
       evidence_artifact_id: 9991587286
       evidence_artifact_name: "sctool-p5-product-cf840b5ad6ddfc933d2bed768d73e18cf5890db8"
+  - id: E_P5_W9_PRODUCT_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "41f8e1966c1105d0a2394b2466cf404e774d4f0a"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "dev/2.2.4"
+      run_id: 34041251426
+      run_number: 21
+      conclusion: SUCCESS
+      evidence_artifact_id: 9991773078
+      evidence_artifact_name: "sctool-p5-product-41f8e1966c1105d0a2394b2466cf404e774d4f0a"
+      exact_registry_client_sdk: "@simple-connection/sctool-registry-client-sdk@0.1.0"
+      exact_sdk_lock_binding: PASS
+      runtime_sdk_contract: PASS
+      w8_runtime_failure_matrix: PASS
+      product_docs_routing: PASS
+      product_typecheck: PASS
+      product_build: PASS
+      sdk_governance: PASS
+      ptsip_doctor: PASS
+      ptsip_validate: PASS
+      ptsip_conform: CONFORMANT
+      ptsip_tool: "0.3.6"
+      ptsip_tool_revision: "452d0f8b0c78bdebb180ceb2b9994485f59eb43a"
+      ptsip_blocking_gap_count: 0
+      ptsip_non_blocking_gap_count: 0
+      ptsip_audit: PASS
+  - id: E_P5_W9_REGISTRY_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "77678f28823cffcefcc9ed7c059e8b48070e80bf"
+    refs:
+      repository: "Simple-Connection/sctool-registry"
+      branch: "dev/1.0.2"
+      run_id: 34040845818
+      run_number: 102
+      conclusion: SUCCESS
+      sdk_boundary_cases: 10
+      registry_access_cases: 11
+      package_descriptor_cases: 21
+      resolution_cases: 20
+      artifact_delivery_cases: 29
+      artifact_staging_cases: 11
+      artifact_integrity_cases: 18
+      verified_artifact_access_cases: 8
+      update_observation_cases: 8
+      update_version_precedence_cases: 12
+      update_eligibility_cases: 9
+      update_no_retrieval_cases: 11
+      update_eligible_retrieval_cases: 4
+      update_candidate_boundary_cases: 27
+      update_automation_total_cases: 71
+      update_candidate_evidence_artifact_id: 9991617537
+      registry_json: PASS
+      ptsip_tool: "0.3.7"
+      ptsip_profile: PASS
+      ptsip_conformance: CONFORMANT
+      ptsip_blocking_gap_count: 0
+      ptsip_non_blocking_gap_count: 0
+      ptsip_audit: PASS
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P5_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P5_W1_GOVERNANCE]}
@@ -482,13 +541,13 @@ gates:
   - {id: GATE_P5_NO_ACTIVATION_SIDE_EFFECT, required: true, status: PASS, evidence_refs: [E_P5_W7_PRODUCT_IMPLEMENTATION, E_P5_W7_PRODUCT_VALIDATION]}
   - {id: GATE_P5_FAILURE_RECOVERY, required: true, status: PASS, evidence_refs: [E_P5_W8_PRODUCT_IMPLEMENTATION, E_P5_W8_PRODUCT_VALIDATION]}
   - {id: GATE_P5_WINDOWS_INSTALL_REGRESSION, required: true, status: PASS, evidence_refs: [E_P5_W8_PRODUCT_IMPLEMENTATION, E_P5_W8_PRODUCT_VALIDATION]}
-  - {id: GATE_P5_PRODUCT_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P5_P4_COMPATIBILITY, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P5_PTSIP_CONFORMANCE, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_SDK_BOUNDARY, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PTSIP_PROFILE, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_PRODUCT_REGRESSION, required: true, status: PASS, evidence_refs: [E_P5_W9_PRODUCT_EXACT_VALIDATION]}
+  - {id: GATE_P5_P4_COMPATIBILITY, required: true, status: PASS, evidence_refs: [E_P5_W9_REGISTRY_EXACT_VALIDATION]}
+  - {id: GATE_P5_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P5_W9_PRODUCT_EXACT_VALIDATION, E_P5_W9_REGISTRY_EXACT_VALIDATION]}
+  - {id: GATE_SDK_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P5_W9_REGISTRY_EXACT_VALIDATION]}
+  - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PASS, evidence_refs: [E_P5_W9_REGISTRY_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_PROFILE, required: true, status: PASS, evidence_refs: [E_P5_W9_REGISTRY_EXACT_VALIDATION, E_P5_W9_PRODUCT_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P5_W9_REGISTRY_EXACT_VALIDATION, E_P5_W9_PRODUCT_EXACT_VALIDATION]}
 blockers: []
 state:
   mode: DERIVED
