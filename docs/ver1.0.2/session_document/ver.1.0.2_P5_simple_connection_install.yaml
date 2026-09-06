@@ -107,7 +107,7 @@ work_units:
     completion_codes:
       - P5_INSTALL_AUTHORITY_TRANSACTION_CONTRACT_COMPLETE
   - id: P5-W2
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION
     input_refs:
@@ -118,7 +118,7 @@ work_units:
       - EXACT_SDK_VERSION_PIN
       - PACKAGE_PROVENANCE_EVIDENCE
     completion_codes:
-      - P5_GITHUB_PACKAGES_DISTRIBUTION_PENDING
+      - P5_GITHUB_PACKAGES_DISTRIBUTION_COMPLETE
   - id: P5-W3
     status: PENDING
     responsibility_refs:
@@ -268,11 +268,40 @@ evidence:
       run_id: 34031603805
       run_number: 82
       conclusion: SUCCESS
+  - id: E_P5_W2_PACKAGE_PUBLICATION
+    kind: WORKFLOW_RUN
+    head: "218af5d4d3905345f5e04b68586a9ffaed168508"
+    refs:
+      run_id: 34031768653
+      run_number: 1
+      conclusion: SUCCESS
+      package: "@simple-connection/sctool-registry-client-sdk"
+      version: "0.1.0"
+      registry: "https://npm.pkg.github.com"
+      publication_status: PUBLISHED
+      npm_integrity: "sha512-3gyZOkYsdQc/jUrWP+DkDM3UkbZf5FAihpWlr6LaryqeGMdYsIdJNBNgWo5BqQMmKX5k3yI75KdC7qxXQf+RpA=="
+      remote_npm_integrity: "sha512-3gyZOkYsdQc/jUrWP+DkDM3UkbZf5FAihpWlr6LaryqeGMdYsIdJNBNgWo5BqQMmKX5k3yI75KdC7qxXQf+RpA=="
+      package_sha256: "82f14689ea03ef09d32b8df87145238dc2da58cb931773342711dac3aa57a928"
+      evidence_artifact_id: 9988852543
+  - id: E_P5_W2_GOVERNANCE
+    kind: WORKFLOW_RUN
+    head: "8bf433a1c8f114c508a7ea4538271fe5a73a2873"
+    refs:
+      run_id: 34032333392
+      run_number: 63
+      conclusion: SUCCESS
+  - id: E_P5_W2_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "8bf433a1c8f114c508a7ea4538271fe5a73a2873"
+    refs:
+      run_id: 34032333303
+      run_number: 88
+      conclusion: SUCCESS
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P5_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P5_W1_GOVERNANCE]}
   - {id: GATE_P5_RESPONSIBILITY_SPLIT, required: true, status: PASS, evidence_refs: [E_P5_W1_EXACT_VALIDATION]}
-  - {id: GATE_P5_REGISTRY_SDK_CONSUMPTION, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_REGISTRY_SDK_CONSUMPTION, required: true, status: PASS, evidence_refs: [E_P5_W2_PACKAGE_PUBLICATION, E_P5_W2_EXACT_VALIDATION]}
   - {id: GATE_P5_VERIFIED_CANDIDATE_HANDOFF, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P5_INSTALL_TRANSACTION_LIFECYCLE, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P5_ATOMIC_INSTALL_COMMIT, required: true, status: PENDING, evidence_refs: []}
