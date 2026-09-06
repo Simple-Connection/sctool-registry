@@ -41,7 +41,7 @@ preconditions:
   - VERIFIED_INSTALL_STATE_AVAILABLE
 work_units:
   - id: P6-W1
-    state: PLANNED
+    state: COMPLETE
     purpose: ACTIVATION_ROLLBACK_RUNTIME_CONTRACT
     depends_on:
       - P5-W9

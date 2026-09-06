@@ -19,7 +19,7 @@ routing:
   type_template: "docs/template/session_document_template/session_type_C.yaml"
 heads:
   start: "1a04236d54552c19da5390cfbfd979f585b6c833"
-  implementation: null
+  implementation: "aa8e17c5f9e42bb55d04acd3d743138efd4bcdab"
   exact_validation: null
 responsibility_model:
   effects:
@@ -62,7 +62,7 @@ payload:
     - ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY
 work_units:
   - id: P6-W1
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_ACTIVATION
       - RESP_SIMPLE_CONNECTION_ROLLBACK
@@ -77,7 +77,7 @@ work_units:
       - EXPLICIT_ROLLBACK_BOUNDARY
       - RUNTIME_RECONCILE_ORDERING
     completion_codes:
-      - P6_ACTIVATION_ROLLBACK_RUNTIME_CONTRACT_PENDING
+      - P6_ACTIVATION_ROLLBACK_RUNTIME_CONTRACT_COMPLETE
   - id: P6-W2
     status: PENDING
     responsibility_refs:
@@ -181,11 +181,43 @@ evidence:
     refs:
       approval: APPROVED
       scope: ACTIVATION_ROLLBACK_RUNTIME_RENDERER_UI
+  - id: E_P6_W1_CONTRACT
+    kind: COMMIT_SET
+    head: "aa8e17c5f9e42bb55d04acd3d743138efd4bcdab"
+    refs:
+      materialization_head: "428e77c75504ef3f459b6a1d3a9feab123e6c5b4"
+      ptsip_partition_head: "aa8e17c5f9e42bb55d04acd3d743138efd4bcdab"
+      contract: "docs/SIMPLE_CONNECTION_ACTIVATION_ROLLBACK_V1.yaml"
+      product_repository: "Simple-Connection/SC_Linked_App"
+      product_branch: "dev/2.2.4"
+      install_input_state: INSTALLED_NOT_ACTIVATED
+      activation_compound_commit: ATOMIC_OR_ROLLBACK_TO_PRIOR_SNAPSHOT
+      rollback_retrieval: FORBIDDEN
+      runtime_failure_policy: RESTORE_PRIOR_PERSISTENT_AND_RUNTIME_SNAPSHOT
+      renderer_authority: INTENT_AND_PROJECTION_ONLY
+  - id: E_P6_W1_GOVERNANCE
+    kind: WORKFLOW_RUN
+    head: "aa8e17c5f9e42bb55d04acd3d743138efd4bcdab"
+    refs:
+      run_id: 34042516844
+      run_number: 81
+      conclusion: SUCCESS
+  - id: E_P6_W1_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "aa8e17c5f9e42bb55d04acd3d743138efd4bcdab"
+    refs:
+      run_id: 34042516828
+      run_number: 107
+      conclusion: SUCCESS
+      sdk_boundary: PASS
+      p4_update_candidate_regression: PASS
+      ptsip_architecture: PASS
+      registry_json: PASS
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P6_APPROVAL]}
-  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P6_RESPONSIBILITY_SPLIT, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P6_ACTIVATION_ROLLBACK_CONTRACT, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P6_W1_GOVERNANCE]}
+  - {id: GATE_P6_RESPONSIBILITY_SPLIT, required: true, status: PASS, evidence_refs: [E_P6_W1_CONTRACT, E_P6_W1_GOVERNANCE]}
+  - {id: GATE_P6_ACTIVATION_ROLLBACK_CONTRACT, required: true, status: PASS, evidence_refs: [E_P6_W1_CONTRACT, E_P6_W1_EXACT_VALIDATION]}
   - {id: GATE_P6_ACTIVATION_ATOMICITY, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_RUNTIME_RECONCILE, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_ROLLBACK, required: true, status: PENDING, evidence_refs: []}
