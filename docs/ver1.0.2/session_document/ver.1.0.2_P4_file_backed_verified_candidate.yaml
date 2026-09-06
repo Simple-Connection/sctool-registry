@@ -20,7 +20,7 @@ routing:
 heads:
   start: "357498290d4b2c49a321893405e7e59606c1fd0d"
   implementation: "e27ecd7f98749512cfb932d4cea6ddd4a15f8d03"
-  exact_validation: "e27ecd7f98749512cfb932d4cea6ddd4a15f8d03"
+  exact_validation: "d464afa364ebb8d0a80dfac874b59249fdd5d067"
 responsibility_model:
   effects:
     assign:
@@ -236,17 +236,17 @@ evidence:
       implementation_head: "e27ecd7f98749512cfb932d4cea6ddd4a15f8d03"
   - id: E_P4_CORRECTION_GOVERNANCE
     kind: WORKFLOW_RUN
-    head: "0bbb9100f3840b16773ae239724584f4b0ab297e"
+    head: "d464afa364ebb8d0a80dfac874b59249fdd5d067"
     refs:
-      run_id: 34021612263
-      run_number: 46
+      run_id: 34021785544
+      run_number: 47
       conclusion: SUCCESS
   - id: E_P4_CORRECTION_EXACT_VALIDATION
     kind: EXACT_VALIDATION
-    head: "e27ecd7f98749512cfb932d4cea6ddd4a15f8d03"
+    head: "d464afa364ebb8d0a80dfac874b59249fdd5d067"
     refs:
-      run_id: 34021729058
-      run_number: 70
+      run_id: 34021785512
+      run_number: 71
       conclusion: SUCCESS
       sdk_boundary_cases: 10
       registry_access_cases: 11
