@@ -21,6 +21,8 @@ sessions:
     approval: "<APPROVAL_STATE>"
     responsibility_refs: ["<RESPONSIBILITY_ID>"]
     document: "<PATH|null>"
+    planning_state: "<NONE|CONCRETIZED>"
+    planning_document: "<PATH|null>"
 migrations:
   machine_routing: "<COMPLETE|PENDING|BLOCKED>"
   responsibility_model: "<COMPLETE|VALIDATION_PENDING|BLOCKED>"

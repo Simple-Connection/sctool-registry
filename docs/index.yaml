@@ -23,6 +23,8 @@ current:
     id: P5
     state: AWAITING_APPROVAL
     document: null
+    planning_state: CONCRETIZED
+    planning_document: "docs/ver1.0.2/session_document/ver.1.0.2_P5_simple_connection_install_work_plan.yaml"
 
 versions:
   "1.0.1":

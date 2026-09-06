@@ -60,6 +60,8 @@ sessions:
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_INSTALL
     document: null
+    planning_state: CONCRETIZED
+    planning_document: "docs/ver1.0.2/session_document/ver.1.0.2_P5_simple_connection_install_work_plan.yaml"
   - id: P6
     type: C
     state: NOT_APPROVED

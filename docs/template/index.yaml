@@ -8,6 +8,9 @@ routes:
   improvement_plan:
     template: "docs/template/improvement_plan.yaml"
     natural_language: FORBIDDEN
+  session_work_plan:
+    template: "docs/template/session_document_template/session_work_plan.yaml"
+    natural_language: FORBIDDEN
   session_document:
     essential:
       template: "docs/template/session_document_template/session_document_essential.yaml"

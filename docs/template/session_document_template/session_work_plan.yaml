@@ -1,0 +1,28 @@
+schema_version: "1.0"
+document_type: session_work_plan_template
+template_id: session_work_plan_v1
+natural_language: FORBIDDEN
+session:
+  id: "<SESSION_ID>"
+  type: "<A|B|C>"
+  distribution_contract_version: "<SEMVER>"
+  branch: "dev/<SEMVER>"
+  governance_repository: "<OWNER/REPOSITORY>"
+implementation:
+  repository: "<OWNER/REPOSITORY>"
+  branch: "<BRANCH>"
+approval:
+  planning: "<APPROVED|REQUIRED|REJECTED>"
+  implementation: "<APPROVED|REQUIRED|REJECTED>"
+baseline: {}
+boundary: {}
+responsibility_migration: {}
+preconditions: []
+work_units:
+  - id: "<WORK_UNIT_ID>"
+    state: "<PLANNED|BLOCKED|COMPLETE>"
+    purpose: "<MACHINE_CODE>"
+    depends_on: []
+    outputs: []
+proposed_gates: []
+forbidden_effects: []
