@@ -171,7 +171,7 @@ work_units:
     completion_codes:
       - P5_ATOMIC_INSTALL_COMMIT_COMPLETE
   - id: P5-W6
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
       - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
@@ -184,7 +184,7 @@ work_units:
       - SAME_ID_VERSION_CONFLICT_FAILURE
       - SIBLING_VERSION_PRESERVATION
     completion_codes:
-      - P5_INSTALL_IDEMPOTENCY_PENDING
+      - P5_INSTALL_IDEMPOTENCY_COMPLETE
   - id: P5-W7
     status: PENDING
     responsibility_refs:
@@ -379,6 +379,32 @@ evidence:
       exact_dependency_restore_step_conclusion: SUCCESS
       runtime_sdk_identity_step_conclusion: SUCCESS
       post_restore_boundary_step_conclusion: SUCCESS
+  - id: E_P5_W6_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "58274e1064426dcef77ee09ff786baeaa2036584"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "dev/2.2.4"
+      transaction_core: "desktop/src/main/features/mcp/sctool/install-transaction.ts"
+      registry_store: "desktop/src/main/features/mcp/sctool/store.ts"
+      identical_artifact_result: ALREADY_INSTALLED
+      inconsistent_persistent_state: FAIL_CLOSED
+      same_id_version_different_artifact: FAIL_CLOSED
+      sibling_versions: PRESERVED
+  - id: E_P5_W6_PRODUCT_VALIDATION
+    kind: WORKFLOW_RUN
+    head: "58274e1064426dcef77ee09ff786baeaa2036584"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34039230524
+      run_number: 13
+      conclusion: SUCCESS
+      package_independent_boundary_step_conclusion: SUCCESS
+      exact_sdk_identity_step_conclusion: SUCCESS
+      exact_sdk_lock_binding_step_conclusion: SUCCESS
+      exact_dependency_restore_step_conclusion: SUCCESS
+      runtime_sdk_identity_step_conclusion: SUCCESS
+      post_restore_boundary_step_conclusion: SUCCESS
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P5_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P5_W1_GOVERNANCE]}
@@ -387,7 +413,7 @@ gates:
   - {id: GATE_P5_VERIFIED_CANDIDATE_HANDOFF, required: true, status: PASS, evidence_refs: [E_P5_W4_PRODUCT_IMPLEMENTATION, E_P5_W4_PRODUCT_VALIDATION]}
   - {id: GATE_P5_INSTALL_TRANSACTION_LIFECYCLE, required: true, status: PASS, evidence_refs: [E_P5_W5_PRODUCT_IMPLEMENTATION, E_P5_W5_PRODUCT_VALIDATION]}
   - {id: GATE_P5_ATOMIC_INSTALL_COMMIT, required: true, status: PASS, evidence_refs: [E_P5_W5_PRODUCT_IMPLEMENTATION, E_P5_W5_PRODUCT_VALIDATION]}
-  - {id: GATE_P5_INSTALL_IDEMPOTENCY, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_INSTALL_IDEMPOTENCY, required: true, status: PASS, evidence_refs: [E_P5_W6_PRODUCT_IMPLEMENTATION, E_P5_W6_PRODUCT_VALIDATION]}
   - {id: GATE_P5_NO_ACTIVATION_SIDE_EFFECT, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P5_FAILURE_RECOVERY, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P5_WINDOWS_INSTALL_REGRESSION, required: true, status: PENDING, evidence_refs: []}
