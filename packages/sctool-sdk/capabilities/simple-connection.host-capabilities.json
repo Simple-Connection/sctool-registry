@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "host": {
+    "id": "simple-connection",
+    "name": "Simple Connection"
+  },
+  "packageEntry": {
+    "transport": "stdio"
+  },
+  "clientExposure": {
+    "transport": "streamable-http",
+    "bind": "127.0.0.1",
+    "pathPattern": "/mcp/v1/{repoKey}/{endpointKey}",
+    "methods": ["POST", "GET", "DELETE"],
+    "authentication": {
+      "type": "bearer",
+      "required": true
+    },
+    "session": {
+      "header": "Mcp-Session-Id",
+      "lifecycle": "host-managed"
+    },
+    "protocol": {
+      "baseline": "2025-11-25",
+      "discoverProbe": {
+        "method": "server/discover",
+        "behavior": "method-not-found"
+      }
+    }
+  },
+  "bridge": {
+    "mode": "host-managed",
+    "clientTransport": "streamable-http",
+    "packageTransport": "stdio"
+  }
+}

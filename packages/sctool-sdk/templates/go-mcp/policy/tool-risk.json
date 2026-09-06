@@ -1,0 +1,7 @@
+{
+  "health": {
+    "kind": "read",
+    "risk": "low",
+    "requiresConfirmation": false
+  }
+}

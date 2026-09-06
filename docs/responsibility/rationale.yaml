@@ -228,3 +228,51 @@ rationales:
       immutable version only when remote integrity equals the locally produced package.
       Product consumers receive read-only package access and must pin an exact version;
       package publication does not transfer Registry SDK ownership to the consumer.
+
+  ADR_AUTHORING_SDK_REPOSITORY_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_REPOSITORY_TOOL_AUTHORING_GUIDANCE
+      - RESP_REPOSITORY_TOOL_DESCRIPTOR_VALIDATION
+      - RESP_REPOSITORY_TOOL_PACKAGE_BUILD
+      - RESP_REPOSITORY_TOOL_PACKAGE_TEST
+    established_in:
+      version: "1.0.2"
+      session: P6
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - AUTHORITY_TRANSFER
+      - COMPONENT_REMOVAL
+      - RESPONSIBILITY_DIMENSION_CHANGE
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+    statement: >-
+      Repository Tool authoring is a package authoring and compatibility responsibility,
+      not Simple Connection host-runtime state. packages/repository-tool-sdk owns the
+      descriptor schema, semantic validation, identity, scaffold builder, CLI, version
+      compatibility, and package tests. Simple-Connection/SC_Linked_App consumes the
+      published package and retains host projection, runtime registration, enablement,
+      process lifecycle, and renderer responsibilities.
+
+  ADR_AUTHORING_SDK_PACKAGE_DISTRIBUTION_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_SCTOOL_AUTHORING_SDK_PACKAGE_PUBLICATION
+      - RESP_REPOSITORY_TOOL_SDK_PACKAGE_PUBLICATION
+    established_in:
+      version: "1.0.2"
+      session: P6
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - CONTRACT_CHANGE
+      - AUTHORITY_TRANSFER
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+      - OWNERSHIP_POLICY_CHANGE
+    statement: >-
+      Registry-owned Authoring SDK package publication is a Delivery responsibility
+      separate from SDK source authority and Product consumption. The publication
+      workflow builds and tests each canonical package, publishes immutable exact
+      versions to GitHub Packages, verifies remote integrity against the local pack,
+      and records revision-bound evidence. Consumer access does not transfer source,
+      version, compatibility, or publication authority.

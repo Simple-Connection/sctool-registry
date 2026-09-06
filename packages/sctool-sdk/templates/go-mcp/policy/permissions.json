@@ -1,0 +1,12 @@
+{
+  "fileSystem": {
+    "mode": "none",
+    "allowedRoots": [],
+    "allowRead": false,
+    "allowWrite": false,
+    "allowDelete": false
+  },
+  "network": { "allow": false },
+  "process": { "allowSpawn": false },
+  "environment": { "allowInherit": false }
+}

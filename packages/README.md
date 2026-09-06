@@ -1,37 +1,53 @@
 # Packages namespace
 
-This directory contains three intentionally distinct namespaces.
+This directory contains four intentionally distinct namespaces.
 
 ## Registry package descriptors
 
-Accepted package descriptors are direct JSON children of `packages/`:
+Accepted Registry package descriptors are direct JSON children:
 
 ```text
 packages/{packageId}.json
 ```
 
-Package descriptors are Registry output, not publisher-controlled input. Publishers submit a signed `submission` plus the `.sctool` artifact to Registry Intake. The Registry independently validates the submission and then creates or updates the descriptor.
+These descriptors are Registry output and are not SDK source directories.
 
 ## Registry Client SDK
 
-The reserved implementation namespace is:
-
 ```text
 packages/registry-client-sdk/**
+@simple-connection/sctool-registry-client-sdk
 ```
 
-It contains the Registry-owned client SDK used by Simple Connection to consume Registry metadata/access/delivery contracts. It is **not** an SCTool package descriptor and it is **not** the SCTool Authoring SDK.
+Owns Simple Connection runtime consumption of Registry metadata, access, delivery, integrity, and verified update-candidate contracts. It does not own publisher-side tool authoring.
 
 ## SCTool Authoring SDK
 
-The canonical source authority is:
-
 ```text
 packages/sctool-sdk/**
+@simple-connection/sctool-sdk
 ```
 
-This SDK supports developers and coding agents that author, validate, build, test, version, and prepare `.sctool` packages for Registry publication. It remains a separate SDK product from `packages/registry-client-sdk/**` even though both are owned by this repository.
+Owns SCTool manifest validation, localization, host-capability authoring contracts, scaffold templates, build/package verification, and the authoring CLI. Registry access and update-candidate resolution are intentionally excluded and belong to the Registry Client SDK.
 
-`Simple-Connection/SC_Linked_App/program-sdk/sctool-sdk/**` is a transitional predecessor source until physical migration and consumer rebinding are completed. SC_Linked_App may expose the canonical SDK locator and consume the published package, but it does not own Authoring SDK source, version, compatibility, or publication policy.
+## Repository Tool Authoring SDK
 
-Do not commit `.sctool` binaries anywhere under `packages/`.
+```text
+packages/repository-tool-sdk/**
+@simple-connection/repository-tool-sdk
+```
+
+Owns the generic Repository Tool descriptor, semantic validation, canonical identity, runtime-capable classification, scaffold builder, and create/validate CLI. Simple Connection consumes this contract but owns host projection, repository binding, enablement, runtime registration, process lifecycle, and UI.
+
+## Publication
+
+Both Authoring SDKs are published from this repository by:
+
+```text
+.github/workflows/publish-authoring-sdks.yml
+docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml
+```
+
+Published versions are immutable. Consumers pin exact versions. Package consumption does not transfer source, compatibility, version, or publication authority.
+
+Do not commit `.sctool` binaries under `packages/`.

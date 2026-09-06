@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kswdeveloper.cloud/schemas/repository-tool/v1/repository-tool.schema.json",
+  "title": "Repository Tool Package Descriptor V1",
+  "type": "object",
+  "required": ["schemaVersion", "kind", "id", "name", "version", "contentRoot"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "tool" },
+    "id": { "$ref": "#/$defs/safeSegment" },
+    "name": { "$ref": "#/$defs/nonEmptyString" },
+    "version": { "$ref": "#/$defs/safeSegment" },
+    "contentRoot": { "const": "content" },
+    "mcp": { "$ref": "#/$defs/mcp" }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "safeSegment": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]+$",
+      "not": { "enum": [".", ".."] }
+    },
+    "stringArray": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "entrypoint": {
+      "type": "object",
+      "required": ["command", "path", "args", "cwd"],
+      "properties": {
+        "command": { "$ref": "#/$defs/nonEmptyString" },
+        "path": { "$ref": "#/$defs/nonEmptyString" },
+        "args": { "$ref": "#/$defs/stringArray" },
+        "cwd": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "mcp": {
+      "type": "object",
+      "required": ["profileId", "title", "entrypoint", "env", "toolGroups", "tools", "docs"],
+      "properties": {
+        "profileId": { "$ref": "#/$defs/nonEmptyString" },
+        "title": { "$ref": "#/$defs/nonEmptyString" },
+        "entrypoint": { "$ref": "#/$defs/entrypoint" },
+        "env": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "toolGroups": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/stringArray" }
+        },
+        "tools": { "$ref": "#/$defs/stringArray" },
+        "docs": { "$ref": "#/$defs/stringArray" }
+      }
+    }
+  }
+}

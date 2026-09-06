@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "kind": "tool",
+  "id": "fixture-metadata",
+  "name": "Fixture Metadata Tool",
+  "version": "rev_1",
+  "contentRoot": "content"
+}

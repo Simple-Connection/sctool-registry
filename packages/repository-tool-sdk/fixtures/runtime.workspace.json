@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "kind": "tool",
+  "id": "fixture-runtime",
+  "name": "Fixture Runtime Tool",
+  "version": "1.0.0",
+  "contentRoot": "content",
+  "mcp": {
+    "profileId": "workspace/fixture-runtime",
+    "title": "Fixture Runtime Tool",
+    "entrypoint": {
+      "command": "node",
+      "path": "{{package_root}}/content/server.mjs",
+      "args": ["{{package_root}}/content/server.mjs"],
+      "cwd": "{{package_root}}"
+    },
+    "env": {},
+    "toolGroups": {
+      "default": ["fixture.echo"]
+    },
+    "tools": ["fixture.echo"],
+    "docs": ["content/README.md"]
+  }
+}

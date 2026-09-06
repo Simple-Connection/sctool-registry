@@ -7,6 +7,10 @@ on:
       - "AGENTS.md"
       - "docs/**"
       - "ptsip.yaml"
+      - "packages/sctool-sdk/**"
+      - "packages/repository-tool-sdk/**"
+      - "packages/README.md"
+      - ".github/workflows/publish-authoring-sdks.yml"
       - ".github/workflows/governance.yml"
       - ".github/workflows/pages.yml"
   push:
@@ -16,6 +20,10 @@ on:
       - "AGENTS.md"
       - "docs/**"
       - "ptsip.yaml"
+      - "packages/sctool-sdk/**"
+      - "packages/repository-tool-sdk/**"
+      - "packages/README.md"
+      - ".github/workflows/publish-authoring-sdks.yml"
       - ".github/workflows/governance.yml"
       - ".github/workflows/pages.yml"
 

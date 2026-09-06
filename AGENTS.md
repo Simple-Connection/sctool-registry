@@ -2,9 +2,9 @@
 
 ## Repository authority
 
-This repository is the public SCTool metadata registry, authenticated artifact-distribution authority, and Registry Client SDK authority for Simple Connection.
+This repository is the public SCTool metadata registry, authenticated artifact-distribution authority, Registry Client SDK authority, and canonical source/publication authority for the SCTool and Repository Tool Authoring SDKs.
 
-Before changing registry identity, schema, publisher trust, package ownership, artifact access/immutability, distribution behavior, or Registry Client SDK behavior, read:
+Before changing registry identity, schema, publisher trust, package ownership, artifact access/immutability, distribution behavior, Registry Client SDK behavior, or Authoring SDK behavior, read:
 
 ```text
 docs/REGISTRY_CONTRACT_V2.md
@@ -213,17 +213,23 @@ NEUTRAL_CONTRACT
 
 ## Packages namespace
 
-`packages/` has two distinct meanings that must remain unambiguous:
+The canonical package namespaces are:
 
 ```text
 packages/{packageId}.json
 = accepted Registry package descriptor
 
 packages/registry-client-sdk/**
-= Registry-owned Simple Connection integration/client SDK
+= Registry consumption SDK
+
+packages/sctool-sdk/**
+= SCTool Authoring SDK
+
+packages/repository-tool-sdk/**
+= Repository Tool Authoring SDK
 ```
 
-The Registry Client SDK must not implement SCTool scaffold/build/test/sign/package authoring. That responsibility belongs to the separate SCTool Authoring SDK in `Kinirin/Simple-Connection/program-sdk/sctool-sdk`.
+Registry Client SDK, SCTool Authoring SDK, and Repository Tool Authoring SDK are independent Product SDK components. Authoring source/build/test/compatibility responsibilities must not be reintroduced into Simple-Connection/SC_Linked_App.
 
 ## Current responsibility boundaries
 
@@ -235,6 +241,18 @@ registry-catalog
 registry-client-sdk
 = Simple Connection runtime client for Registry metadata/access/delivery/integrity contracts
 = PRODUCT
+
+sctool-authoring-sdk
+= SCTool manifest/scaffold/build/test/package authoring
+= PRODUCT
+
+repository-tool-authoring-sdk
+= generic Repository Tool descriptor/scaffold/validation authoring
+= PRODUCT
+
+authoring-sdk-package-delivery
+= immutable GitHub Packages publication for both Authoring SDKs
+= DELIVERY
 
 registry-contracts
 = schemas, admission/access/distribution/trust policy and canonical contracts
@@ -267,7 +285,22 @@ The SDK owns consumer-side implementation of Registry contracts, including Regis
 
 It must not own Simple Connection local installation state, active-version selection, rollback, renderer UI, runtime reconcile policy, or publisher-side `.sctool` authoring.
 
-The package remains non-published/private until an explicit SDK distribution mechanism is approved. Do not invent an npm/GitHub Packages publication path merely because the package directory exists.
+Registry Client SDK publication is separately governed by its approved Delivery workflow. Authoring SDK publication is governed by `.github/workflows/publish-authoring-sdks.yml` and `docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml`.
+
+## Authoring SDK boundary
+
+Canonical source paths:
+
+```text
+packages/sctool-sdk/
+packages/repository-tool-sdk/
+```
+
+The SCTool Authoring SDK owns SCTool manifest validation, localization, host-capability authoring contracts, scaffold/build/test/package behavior, and its CLI. It must not absorb Registry access, descriptor resolution, artifact retrieval, update-candidate production, or Simple Connection local runtime state.
+
+The Repository Tool Authoring SDK owns Repository Tool descriptor/schema validation, canonical identity, runtime-capable classification, scaffold behavior, and its CLI. It must not own Simple Connection repository binding, host projection, enablement, runtime registration, process lifecycle, or renderer behavior.
+
+Both packages are published as immutable exact versions. Consumer repositories pin package versions and remain consumers, not source or compatibility authorities.
 
 ## Registry trust secret boundary
 

@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SCTool Build Configuration v1",
+  "description": "Repository-independent build, bundle, localization, and verification contract for @simple-connection/sctool-sdk.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "projectRoot", "package", "build", "bundle"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "projectRoot": { "type": "string", "minLength": 1 },
+    "package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "target", "outputDirectory", "manifestTemplate"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "target": { "type": "string", "minLength": 1 },
+        "outputDirectory": { "type": "string", "minLength": 1 },
+        "workDirectory": { "type": "string", "minLength": 1 },
+        "manifestTemplate": { "type": "string", "minLength": 1 }
+      }
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adapter", "workingDirectory", "outputPath"],
+      "properties": {
+        "adapter": { "enum": ["go", "command"] },
+        "workingDirectory": { "type": "string", "minLength": 1 },
+        "outputPath": { "type": "string", "minLength": 1 },
+        "entryPackage": { "type": "string", "minLength": 1 },
+        "trimpath": { "type": "boolean" },
+        "formatPaths": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "testPackages": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "ldflags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "versionVariables": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "commands": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["file"],
+            "properties": {
+              "file": { "type": "string", "minLength": 1 },
+              "args": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "workingDirectory": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "adapter": { "const": "go" } } },
+          "then": { "required": ["entryPackage"] }
+        },
+        {
+          "if": { "properties": { "adapter": { "const": "command" } } },
+          "then": { "required": ["commands"] }
+        }
+      ]
+    },
+    "localization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["generator", "targetLocales"],
+      "properties": {
+        "generator": { "const": "argos" },
+        "targetLocales": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+          }
+        }
+      }
+    },
+    "bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entryCommand", "assets"],
+      "properties": {
+        "entryCommand": { "type": "string", "minLength": 1 },
+        "assets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["source", "destination"],
+            "properties": {
+              "source": { "type": "string", "minLength": 1 },
+              "destination": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "versionArgs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "mcpStdio": { "type": "boolean" },
+        "secretScan": { "type": "boolean" },
+        "timeoutSeconds": { "type": "integer", "minimum": 1, "maximum": 120 },
+        "environment": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    }
+  }
+}
