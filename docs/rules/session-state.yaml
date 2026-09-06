@@ -11,6 +11,12 @@ plan_state_map:
   AWAITING_APPROVAL: AWAITING_APPROVAL
   NOT_APPROVED: AWAITING_APPROVAL
 
+canonical_plan_state_for_derived:
+  CLOSED: COMPLETE
+  ACTIVE: ACTIVE
+  BLOCKED: BLOCKED
+  AWAITING_APPROVAL: NOT_APPROVED
+
 derivation:
   approved_value: APPROVED
   unapproved_state: AWAITING_APPROVAL

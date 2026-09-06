@@ -37,6 +37,9 @@ jobs:
           python -m pip install -r docs/governance/requirements.txt
           python -m pip install "PTSIP==0.3.7"
 
+      - name: Test session-state synchronization tooling
+        run: python docs/governance/test-session-state-sync.py
+
       - name: Validate machine development documentation
         run: python docs/governance/validate.py --root .
 

@@ -256,11 +256,20 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
         )
         if expected_state is not None:
             actual_state = derive_session_state(doc, state_rules)
-            need(
-                actual_state == expected_state,
-                f"DERIVED_STATE:{session_id}:{actual_state}:{expected_state}",
-                errors,
-            )
+            if actual_state != expected_state:
+                canonical_plan_state = state_rules.get(
+                    "canonical_plan_state_for_derived", {}
+                ).get(actual_state)
+                if canonical_plan_state is not None:
+                    errors.append(
+                        "SESSION_STATE_SYNC_REQUIRED:"
+                        f"{session_id}:{plan_session['state']}:{canonical_plan_state}"
+                    )
+                need(
+                    False,
+                    f"DERIVED_STATE:{session_id}:{actual_state}:{expected_state}",
+                    errors,
+                )
 
         for responsibility_id in plan_session.get("responsibility_refs", []):
             need(
