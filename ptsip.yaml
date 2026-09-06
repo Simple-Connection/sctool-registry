@@ -85,6 +85,8 @@ components:
     executable: true
     release_owner: registry-sdk-package-delivery
     compatibility_owner: registry-contract
+    manifests:
+      - "packages/registry-client-sdk/package.json"
     analysis_inputs:
       - "packages/registry-client-sdk/package.json"
       - "packages/registry-client-sdk/src/**"
