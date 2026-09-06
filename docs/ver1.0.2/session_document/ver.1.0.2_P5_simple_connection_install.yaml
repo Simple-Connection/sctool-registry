@@ -86,6 +86,7 @@ payload:
       - "program-sdk/**"
   responsibility_description_ids: []
   decision_rationale_ids:
+    - ADR_TWO_SDK_BOUNDARY
     - ADR_SIMPLE_CONNECTION_INSTALL_TRANSACTION_BOUNDARY
     - ADR_REGISTRY_CLIENT_SDK_PACKAGE_DISTRIBUTION_BOUNDARY
     - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
