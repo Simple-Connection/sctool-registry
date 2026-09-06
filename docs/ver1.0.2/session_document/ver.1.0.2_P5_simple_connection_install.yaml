@@ -19,8 +19,8 @@ routing:
   type_template: "docs/template/session_document_template/session_type_B.yaml"
 heads:
   start: "458045a9cdf37e6b4c7fafa6c451e9c2961a3919"
-  implementation: null
-  exact_validation: null
+  implementation: "77678f28823cffcefcc9ed7c059e8b48070e80bf"
+  exact_validation: "4d1a99bca3459e4d66c9c8fea119c6c3c45c76a8"
 responsibility_model:
   effects:
     assign:
@@ -472,15 +472,16 @@ evidence:
       evidence_artifact_name: "sctool-p5-product-cf840b5ad6ddfc933d2bed768d73e18cf5890db8"
   - id: E_P5_W9_PRODUCT_EXACT_VALIDATION
     kind: EXACT_VALIDATION
-    head: "41f8e1966c1105d0a2394b2466cf404e774d4f0a"
+    head: "aea7144a8dc30beb9a790f5759ef1f9fbf085062"
     refs:
       repository: "Simple-Connection/SC_Linked_App"
       branch: "dev/2.2.4"
-      run_id: 34041251426
-      run_number: 21
+      run_id: 34041651738
+      run_number: 22
       conclusion: SUCCESS
-      evidence_artifact_id: 9991773078
-      evidence_artifact_name: "sctool-p5-product-41f8e1966c1105d0a2394b2466cf404e774d4f0a"
+      evidence_artifact_id: 9991888855
+      evidence_artifact_name: "sctool-p5-product-aea7144a8dc30beb9a790f5759ef1f9fbf085062"
+      product_session_closeout: PASS
       exact_registry_client_sdk: "@simple-connection/sctool-registry-client-sdk@0.1.0"
       exact_sdk_lock_binding: PASS
       runtime_sdk_contract: PASS
