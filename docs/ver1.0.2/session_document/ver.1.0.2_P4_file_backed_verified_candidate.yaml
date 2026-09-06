@@ -20,7 +20,7 @@ routing:
 heads:
   start: "357498290d4b2c49a321893405e7e59606c1fd0d"
   implementation: "329272875e8ce80b0ea90c8895594a549c0850b0"
-  exact_validation: "329272875e8ce80b0ea90c8895594a549c0850b0"
+  exact_validation: "0cfaa288dc3ffc6e9dc2bd80ea9484caff0f64ef"
 responsibility_model:
   effects:
     assign:
@@ -297,22 +297,22 @@ evidence:
       implementation_head: "329272875e8ce80b0ea90c8895594a549c0850b0"
   - id: E_P4_UPDATE_AUTOMATION_GOVERNANCE
     kind: WORKFLOW_RUN
-    head: "329272875e8ce80b0ea90c8895594a549c0850b0"
+    head: "0cfaa288dc3ffc6e9dc2bd80ea9484caff0f64ef"
     refs:
-      run_id: 34026098431
-      run_number: 50
+      run_id: 34026178339
+      run_number: 51
       conclusion: SUCCESS
   - id: E_P4_UPDATE_AUTOMATION_EXACT_VALIDATION
     kind: EXACT_VALIDATION
-    head: "329272875e8ce80b0ea90c8895594a549c0850b0"
+    head: "0cfaa288dc3ffc6e9dc2bd80ea9484caff0f64ef"
     refs:
-      run_id: 34026098429
-      run_number: 74
+      run_id: 34026178338
+      run_number: 75
       conclusion: SUCCESS
       evidence_format: "update-candidate-validation/v1"
-      evidence_artifact_id: 9987093452
-      evidence_artifact_name: "p4-update-candidate-evidence-329272875e8ce80b0ea90c8895594a549c0850b0"
-      evidence_artifact_digest: "sha256:ff3237787aa776a1542868ee227844db596d7e445329c0b60a2a8997ea4f5ed7"
+      evidence_artifact_id: 9987120543
+      evidence_artifact_name: "p4-update-candidate-evidence-0cfaa288dc3ffc6e9dc2bd80ea9484caff0f64ef"
+      evidence_artifact_digest: "sha256:4953f9b09fb70a19f2e7f7532eec92d693bfce60b5f3418d113d00c1436f9725"
       update_observation_cases: 8
       update_version_precedence_cases: 12
       update_eligibility_cases: 9
