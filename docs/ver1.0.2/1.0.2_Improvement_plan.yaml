@@ -55,7 +55,7 @@ sessions:
     document: "docs/ver1.0.2/session_document/ver.1.0.2_P4_file_backed_verified_candidate.yaml"
   - id: P5
     type: B
-    state: ACTIVE
+    state: COMPLETE
     approval: APPROVED
     responsibility_refs:
       - RESP_REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION
