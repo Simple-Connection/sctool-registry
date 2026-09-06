@@ -146,6 +146,41 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
         errors,
     )
 
+    automation = candidate.get("automation_validation", {})
+    expected_checks = {
+        "GATE_UPDATE_OBSERVATION_CONTRACT",
+        "GATE_UPDATE_VERSION_PRECEDENCE",
+        "GATE_UPDATE_ELIGIBILITY_RESOLUTION",
+        "GATE_UPDATE_NO_RETRIEVAL_WHEN_INELIGIBLE",
+        "GATE_UPDATE_RETRIEVAL_WHEN_ELIGIBLE",
+        "GATE_UPDATE_CANDIDATE_BOUNDARY",
+    }
+    need(
+        automation.get("evidence_format") == "update-candidate-validation/v1",
+        "UPDATE_CANDIDATE_AUTOMATION_FORMAT",
+        errors,
+    )
+    need(
+        automation.get("revision_binding") == "REQUIRED",
+        "UPDATE_CANDIDATE_AUTOMATION_REVISION",
+        errors,
+    )
+    need(
+        set(automation.get("required_checks", [])) == expected_checks,
+        "UPDATE_CANDIDATE_AUTOMATION_CHECKS",
+        errors,
+    )
+    need(
+        set(automation.get("required_resolution_states", [])) == set(states),
+        "UPDATE_CANDIDATE_AUTOMATION_STATES",
+        errors,
+    )
+    need(
+        automation.get("aggregate_gate") == "GATE_UPDATE_CANDIDATE_REGRESSION",
+        "UPDATE_CANDIDATE_AUTOMATION_AGGREGATE",
+        errors,
+    )
+
     artifact = candidate.get("artifact", {})
     need(
         artifact.get("type") == "VERIFIED_ARTIFACT_LEASE",
