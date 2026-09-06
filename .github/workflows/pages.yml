@@ -109,6 +109,8 @@ jobs:
             --tracked-content-sha256 "$tracked" \
             --component registry-catalog \
             --component registry-client-sdk \
+            --component sctool-authoring-sdk \
+            --component repository-tool-authoring-sdk \
             --component registry-contracts \
             --component product-documentation
 

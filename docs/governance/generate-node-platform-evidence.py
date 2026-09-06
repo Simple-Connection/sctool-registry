@@ -37,6 +37,9 @@ def node_builtin_modules() -> set[str]:
         raise ValueError("Node builtinModules result must be an array")
     modules = {str(item) for item in payload}
     modules.update(f"node:{item}" for item in list(modules) if not item.startswith("node:"))
+    # Node exposes the test runner as the stable node:test builtin even when
+    # builtinModules does not enumerate it on the selected runtime.
+    modules.update({"test", "node:test"})
     return modules
 
 
