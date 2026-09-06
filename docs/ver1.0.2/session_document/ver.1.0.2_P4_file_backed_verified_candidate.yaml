@@ -19,8 +19,8 @@ routing:
   type_template: "docs/template/session_document_template/session_type_B.yaml"
 heads:
   start: "357498290d4b2c49a321893405e7e59606c1fd0d"
-  implementation: null
-  exact_validation: null
+  implementation: "e27ecd7f98749512cfb932d4cea6ddd4a15f8d03"
+  exact_validation: "e27ecd7f98749512cfb932d4cea6ddd4a15f8d03"
 responsibility_model:
   effects:
     assign:
@@ -151,7 +151,7 @@ work_units:
     completion_codes:
       - VERIFIED_READ_LEASE_COMPLETE
   - id: W6
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_REGISTRY_UPDATE_CANDIDATE
     input_refs:
@@ -160,9 +160,9 @@ work_units:
     output_refs:
       - "packages/registry-client-sdk/src/update-candidate.mjs"
     completion_codes:
-      - UPDATE_CANDIDATE_RESOLUTION_CORRECTION_PENDING
+      - UPDATE_CANDIDATE_RESOLUTION_CORRECTION_COMPLETE
   - id: W7
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
       - RESP_REGISTRY_ARTIFACT_INTEGRITY
@@ -175,9 +175,9 @@ work_units:
       - GATE_VERIFIED_ARTIFACT_ACCESS_REGRESSION
       - GATE_UPDATE_CANDIDATE_REGRESSION
     output_refs:
-      - E_P4_EXACT_VALIDATION
+      - E_P4_CORRECTION_EXACT_VALIDATION
     completion_codes:
-      - P4_EXACT_VALIDATION_PENDING
+      - P4_EXACT_VALIDATION_COMPLETE
 evidence:
   - id: E_P4_APPROVAL
     kind: USER_APPROVAL
@@ -228,22 +228,60 @@ evidence:
       non_blocking_gap_count: 0
       audit: PASS
       production_trust: INACTIVE
+  - id: E_P4_CORRECTION_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "e27ecd7f98749512cfb932d4cea6ddd4a15f8d03"
+    refs:
+      reopen_head: "0bbb9100f3840b16773ae239724584f4b0ab297e"
+      implementation_head: "e27ecd7f98749512cfb932d4cea6ddd4a15f8d03"
+  - id: E_P4_CORRECTION_GOVERNANCE
+    kind: WORKFLOW_RUN
+    head: "0bbb9100f3840b16773ae239724584f4b0ab297e"
+    refs:
+      run_id: 34021612263
+      run_number: 46
+      conclusion: SUCCESS
+  - id: E_P4_CORRECTION_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "e27ecd7f98749512cfb932d4cea6ddd4a15f8d03"
+    refs:
+      run_id: 34021729058
+      run_number: 70
+      conclusion: SUCCESS
+      sdk_boundary_cases: 10
+      registry_access_cases: 11
+      package_descriptor_cases: 21
+      resolution_cases: 20
+      artifact_delivery_cases: 29
+      artifact_staging_cases: 11
+      artifact_integrity_cases: 18
+      verified_artifact_access_cases: 8
+      update_candidate_cases: 49
+      node_platform_evidence_edges: 31
+      registry_json: PASS
+      ptsip_tool: "0.3.7"
+      ptsip_profile: PASS
+      ptsip_conformance: CONFORMANT
+      blocking_gap_count: 0
+      non_blocking_gap_count: 0
+      audit: PASS
+      production_trust: INACTIVE
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P4_APPROVAL]}
-  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_SDK_BOUNDARY, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_REGISTRY_ACCESS_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PACKAGE_DESCRIPTOR_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_RESOLUTION_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_ARTIFACT_DELIVERY_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_STAGING_LIFECYCLE_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_ARTIFACT_INTEGRITY_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_VERIFIED_ARTIFACT_ACCESS_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_REGISTRY_JSON, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PTSIP_PROFILE, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PRODUCTION_TRUST_INACTIVE, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_GOVERNANCE]}
+  - {id: GATE_SDK_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_REGISTRY_ACCESS_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_PACKAGE_DESCRIPTOR_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_RESOLUTION_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_ARTIFACT_DELIVERY_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_STAGING_LIFECYCLE_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_ARTIFACT_INTEGRITY_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_VERIFIED_ARTIFACT_ACCESS_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_REGISTRY_JSON, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_PROFILE, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_PRODUCTION_TRUST_INACTIVE, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
 blockers: []
 state:
   mode: DERIVED
