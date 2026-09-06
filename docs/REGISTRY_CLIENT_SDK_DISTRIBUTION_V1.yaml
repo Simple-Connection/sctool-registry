@@ -1,0 +1,48 @@
+schema_version: "1.0"
+document_type: registry_client_sdk_distribution_contract
+natural_language: FORBIDDEN
+contract_id: REGISTRY_CLIENT_SDK_DISTRIBUTION_V1
+responsibility: RESP_REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION
+authority: AUTH_REGISTRY_SDK_PACKAGE_DELIVERY
+mechanism: GITHUB_PACKAGES
+registry: "https://npm.pkg.github.com"
+package: "@simple-connection/sctool-registry-client-sdk"
+visibility: PRIVATE
+producer:
+  repository: "Simple-Connection/sctool-registry"
+  package_root: "packages/registry-client-sdk"
+  version_source: PACKAGE_JSON
+  source_revision_binding: REQUIRED
+consumer:
+  current_repository: "Kinirin/Simple-Connection"
+  target_repository_after_ownership_transfer: "Simple-Connection/Simple-Connection"
+  access: READ_ONLY
+version_policy:
+  dependency_range: EXACT
+  caret: FORBIDDEN
+  tilde: FORBIDDEN
+  mutable_tag_as_build_authority: FORBIDDEN
+  lockfile: REQUIRED
+publish:
+  workflow: ".github/workflows/publish-registry-client-sdk.yml"
+  from_ci: REQUIRED
+  pack_before_publish: REQUIRED
+  local_integrity_evidence: REQUIRED
+  remote_integrity_verification: REQUIRED
+  existing_version:
+    integrity_equal: REUSE
+    integrity_mismatch: FAIL_CLOSED
+authentication:
+  ci:
+    preferred: GITHUB_TOKEN
+    permission: PACKAGES_WRITE
+  consumer_ci:
+    preferred: PACKAGE_REPOSITORY_ACCESS_WITH_GITHUB_TOKEN
+    fallback: READ_PACKAGES_CREDENTIAL
+  local_development:
+    source_controlled_token: FORBIDDEN
+    user_or_environment_credential: REQUIRED
+ownership_transition:
+  package_scope: "@simple-connection"
+  package_identity_change: FORBIDDEN
+  consumer_access_revalidation: REQUIRED

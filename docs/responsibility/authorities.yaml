@@ -17,6 +17,11 @@ components:
     path: "packages/registry-client-sdk"
     ptsip_component: registry-client-sdk
     lifecycle_classification: PRODUCT
+  COMP_REGISTRY_SDK_PACKAGE_DELIVERY:
+    repository_id: SCTOOL_REGISTRY
+    path: ".github/workflows/publish-registry-client-sdk.yml"
+    ptsip_component: registry-sdk-package-delivery
+    lifecycle_classification: DELIVERY
   COMP_REGISTRY_CONTRACTS:
     repository_id: SCTOOL_REGISTRY
     path: "docs"
@@ -36,6 +41,9 @@ authorities:
   AUTH_REGISTRY_CLIENT_SDK:
     repository_id: SCTOOL_REGISTRY
     component_id: COMP_REGISTRY_CLIENT_SDK
+  AUTH_REGISTRY_SDK_PACKAGE_DELIVERY:
+    repository_id: SCTOOL_REGISTRY
+    component_id: COMP_REGISTRY_SDK_PACKAGE_DELIVERY
   AUTH_REGISTRY_CONTRACTS:
     repository_id: SCTOOL_REGISTRY
     component_id: COMP_REGISTRY_CONTRACTS

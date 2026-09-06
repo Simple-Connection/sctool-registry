@@ -1,0 +1,134 @@
+name: Publish Registry Client SDK Package
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "dev/1.0.2"
+    paths:
+      - "packages/registry-client-sdk/**"
+      - "docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml"
+      - ".github/workflows/publish-registry-client-sdk.yml"
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: registry-client-sdk-package-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Configure Node and GitHub Packages
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@simple-connection"
+
+      - name: Validate Registry Client SDK
+        run: npm --prefix packages/registry-client-sdk test
+
+      - name: Pack, publish or verify immutable package, and bind evidence
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          cd packages/registry-client-sdk
+
+          name="$(node -p "require('./package.json').name")"
+          version="$(node -p "require('./package.json').version")"
+          pack_json="$RUNNER_TEMP/registry-client-sdk-pack.json"
+          evidence="$RUNNER_TEMP/registry-client-sdk-package-evidence.json"
+
+          npm pack --json > "$pack_json"
+          tarball="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(d[0].filename)" "$pack_json")"
+          local_integrity="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(d[0].integrity)" "$pack_json")"
+          local_shasum="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(d[0].shasum)" "$pack_json")"
+          local_sha256="$(sha256sum "$tarball" | awk '{print $1}')"
+
+          set +e
+          remote_integrity="$(npm view "$name@$version" dist.integrity --registry=https://npm.pkg.github.com 2>/dev/null)"
+          view_status=$?
+          set -e
+
+          if [[ $view_status -eq 0 && -n "$remote_integrity" ]]; then
+            if [[ "$remote_integrity" != "$local_integrity" ]]; then
+              echo "Existing package integrity does not match local exact source package." >&2
+              exit 1
+            fi
+            publish_status="EXISTING_VERIFIED"
+          else
+            npm publish "$tarball" --registry=https://npm.pkg.github.com --access restricted
+            publish_status="PUBLISHED"
+            remote_integrity=""
+            for attempt in 1 2 3 4 5; do
+              set +e
+              remote_integrity="$(npm view "$name@$version" dist.integrity --registry=https://npm.pkg.github.com 2>/dev/null)"
+              status=$?
+              set -e
+              if [[ $status -eq 0 && -n "$remote_integrity" ]]; then
+                break
+              fi
+              sleep 2
+            done
+            if [[ "$remote_integrity" != "$local_integrity" ]]; then
+              echo "Published package remote integrity did not match local pack integrity." >&2
+              exit 1
+            fi
+          fi
+
+          export EVIDENCE_PATH="$evidence"
+          export PACKAGE_NAME="$name"
+          export PACKAGE_VERSION="$version"
+          export LOCAL_INTEGRITY="$local_integrity"
+          export REMOTE_INTEGRITY="$remote_integrity"
+          export LOCAL_SHASUM="$local_shasum"
+          export LOCAL_SHA256="$local_sha256"
+          export PUBLISH_STATUS="$publish_status"
+          export SOURCE_REPOSITORY="$GITHUB_REPOSITORY"
+          export SOURCE_REVISION="$GITHUB_SHA"
+          node <<'NODE'
+          const fs = require("fs");
+          const evidence = {
+            format: "registry-client-sdk-package-evidence/v1",
+            package: {
+              name: process.env.PACKAGE_NAME,
+              version: process.env.PACKAGE_VERSION,
+              registry: "https://npm.pkg.github.com",
+            },
+            source: {
+              repository: process.env.SOURCE_REPOSITORY,
+              revision: process.env.SOURCE_REVISION,
+            },
+            integrity: {
+              npm: process.env.LOCAL_INTEGRITY,
+              remoteNpm: process.env.REMOTE_INTEGRITY,
+              sha1: process.env.LOCAL_SHASUM,
+              sha256: process.env.LOCAL_SHA256,
+            },
+            publication: {
+              status: process.env.PUBLISH_STATUS,
+              immutableVersionVerified: true,
+            },
+          };
+          fs.writeFileSync(process.env.EVIDENCE_PATH, JSON.stringify(evidence, null, 2) + "\n");
+          NODE
+          cat "$evidence"
+
+      - name: Upload SDK package evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: registry-client-sdk-package-evidence-${{ github.sha }}
+          path: ${{ runner.temp }}/registry-client-sdk-package-evidence.json
+          if-no-files-found: error
+          retention-days: 30

@@ -23,8 +23,10 @@ heads:
   exact_validation: null
 responsibility_model:
   effects:
-    assign: []
+    assign:
+      - RESP_REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION
     implement:
+      - RESP_REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION
       - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
       - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
       - RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION
@@ -58,6 +60,7 @@ responsibility_model:
   description_ids: []
   rationale_ids:
     - ADR_SIMPLE_CONNECTION_INSTALL_TRANSACTION_BOUNDARY
+    - ADR_REGISTRY_CLIENT_SDK_PACKAGE_DISTRIBUTION_BOUNDARY
     - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
     - ADR_REGISTRY_UPDATE_CANDIDATE_RESOLUTION_BOUNDARY
 payload:
@@ -69,6 +72,7 @@ payload:
       - RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT
     contract_refs:
       - CONTRACT_UPDATE_CANDIDATE_V1
+      - CONTRACT_REGISTRY_CLIENT_SDK_DISTRIBUTION_V1
       - CONTRACT_SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1
     path_allow:
       - "docs/ver1.0.2/**"
@@ -82,11 +86,12 @@ payload:
   responsibility_description_ids: []
   decision_rationale_ids:
     - ADR_SIMPLE_CONNECTION_INSTALL_TRANSACTION_BOUNDARY
+    - ADR_REGISTRY_CLIENT_SDK_PACKAGE_DISTRIBUTION_BOUNDARY
     - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
     - ADR_REGISTRY_UPDATE_CANDIDATE_RESOLUTION_BOUNDARY
 work_units:
   - id: P5-W1
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
       - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
@@ -100,14 +105,11 @@ work_units:
       - CONTRACT_SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1
       - P5_GATE_REGISTRY
     completion_codes:
-      - P5_INSTALL_AUTHORITY_TRANSACTION_CONTRACT_PENDING
+      - P5_INSTALL_AUTHORITY_TRANSACTION_CONTRACT_COMPLETE
   - id: P5-W2
     status: PENDING
     responsibility_refs:
-      - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
-      - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
-      - RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION
-      - RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT
+      - RESP_REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION
     input_refs:
       - GITHUB_PACKAGES
       - "@simple-connection/sctool-registry-client-sdk"
@@ -246,9 +248,41 @@ evidence:
     refs:
       planning_document: "docs/ver1.0.2/session_document/ver.1.0.2_P5_simple_connection_install_work_plan.yaml"
       planning_state: CONCRETIZED
+  - id: E_P5_W1_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "cebfc02ad71fca5537faf0130769a4ca6bd7d945"
+    refs:
+      materialization_head: "c1e168a47d2dd345812a3c90d8d41fe47dc02d5f"
+      routing_correction_head: "cebfc02ad71fca5537faf0130769a4ca6bd7d945"
+  - id: E_P5_W1_GOVERNANCE
+    kind: WORKFLOW_RUN
+    head: "cebfc02ad71fca5537faf0130769a4ca6bd7d945"
+    refs:
+      run_id: 34031603806
+      run_number: 58
+      conclusion: SUCCESS
+  - id: E_P5_W1_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "cebfc02ad71fca5537faf0130769a4ca6bd7d945"
+    refs:
+      run_id: 34031603805
+      run_number: 82
+      conclusion: SUCCESS
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P5_APPROVAL]}
-  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P5_W1_GOVERNANCE]}
+  - {id: GATE_P5_RESPONSIBILITY_SPLIT, required: true, status: PASS, evidence_refs: [E_P5_W1_EXACT_VALIDATION]}
+  - {id: GATE_P5_REGISTRY_SDK_CONSUMPTION, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_VERIFIED_CANDIDATE_HANDOFF, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_INSTALL_TRANSACTION_LIFECYCLE, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_ATOMIC_INSTALL_COMMIT, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_INSTALL_IDEMPOTENCY, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_NO_ACTIVATION_SIDE_EFFECT, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_FAILURE_RECOVERY, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_WINDOWS_INSTALL_REGRESSION, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_PRODUCT_REGRESSION, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_P4_COMPATIBILITY, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_PTSIP_CONFORMANCE, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_SDK_BOUNDARY, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_PTSIP_PROFILE, required: true, status: PENDING, evidence_refs: []}

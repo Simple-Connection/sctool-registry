@@ -21,6 +21,7 @@ class ValidationContext:
     staged_artifact_lifecycle: dict[str, Any]
     update_candidate_contract: dict[str, Any]
     simple_connection_install_transaction: dict[str, Any]
+    registry_client_sdk_distribution: dict[str, Any]
     template_index_path: str
     template_index: dict[str, Any]
     responsibility_index_path: str
@@ -60,6 +61,9 @@ def load_context(root: Path, index_path: str) -> ValidationContext:
     simple_connection_install_transaction = load_yaml(
         root, contract_routes["CONTRACT_SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1"]["path"]
     )
+    registry_client_sdk_distribution = load_yaml(
+        root, contract_routes["CONTRACT_REGISTRY_CLIENT_SDK_DISTRIBUTION_V1"]["path"]
+    )
 
     return ValidationContext(
         root=root,
@@ -74,6 +78,7 @@ def load_context(root: Path, index_path: str) -> ValidationContext:
         staged_artifact_lifecycle=staged_artifact_lifecycle,
         update_candidate_contract=update_candidate_contract,
         simple_connection_install_transaction=simple_connection_install_transaction,
+        registry_client_sdk_distribution=registry_client_sdk_distribution,
         template_index_path=template_index_path,
         template_index=template_index,
         responsibility_index_path=responsibility_index_path,

@@ -317,6 +317,25 @@ responsibilities:
         - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
         - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
         - ADR_REGISTRY_UPDATE_CANDIDATE_RESOLUTION_BOUNDARY
+  RESP_REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION:
+    subject: AUTH_REGISTRY_SDK_PACKAGE_DELIVERY
+    authority_domain: PACKAGE_PUBLICATION
+    lifecycle_phase: PUBLICATION
+    operation: PUBLISH
+    object: {class: PACKAGE, subtype: REGISTRY_CLIENT_SDK_PACKAGE}
+    relation: PUBLISHES
+    ownership: PRIMARY
+    normative: MUST
+    state: ALLOCATED
+    scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_SDK_PACKAGE_DELIVERY, root: ".github/workflows/publish-registry-client-sdk.yml"}
+    contract_refs: [CONTRACT_REGISTRY_CLIENT_SDK_DISTRIBUTION_V1]
+    transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_SDK_PACKAGE_DELIVERY, predecessor_retirement: NOT_APPLICABLE}
+    interpretation:
+      semantic_coverage: COMPLETE
+      rationale_required: true
+      responsibility_description_id: null
+      decision_rationale_ids:
+        - ADR_REGISTRY_CLIENT_SDK_PACKAGE_DISTRIBUTION_BOUNDARY
   RESP_SIMPLE_CONNECTION_INSTALL:
     subject: AUTH_SIMPLE_CONNECTION_DESKTOP
     authority_domain: LOCAL_INSTALLATION
@@ -560,3 +579,14 @@ ownership_policy:
       - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
       - RESP_REGISTRY_UPDATE_CANDIDATE
       - RESP_REGISTRY_ARTIFACT_INTEGRITY
+
+  AUTH_REGISTRY_SDK_PACKAGE_DELIVERY:
+    allow:
+      - RESP_REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION
+    deny:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
+      - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
+      - RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION
+      - RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT

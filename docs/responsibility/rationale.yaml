@@ -202,3 +202,27 @@ rationales:
       state, perform rollback, or decide renderer behavior. Existing sibling versions
       remain preserved and failed or crashed transactions must not become visible as
       installed state.
+
+  ADR_REGISTRY_CLIENT_SDK_PACKAGE_DISTRIBUTION_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION
+    established_in:
+      version: "1.0.2"
+      session: P5
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - CONTRACT_CHANGE
+      - AUTHORITY_TRANSFER
+      - RESPONSIBILITY_DIMENSION_CHANGE
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+      - OWNERSHIP_POLICY_CHANGE
+    statement: >-
+      Registry Client SDK package publication is a delivery automation authority
+      separate from runtime Registry consumption. The delivery workflow publishes an
+      exact versioned package to GitHub Packages, binds the package to the canonical
+      Registry source revision and local pack integrity, and may reuse an existing
+      immutable version only when remote integrity equals the locally produced package.
+      Product consumers receive read-only package access and must pin an exact version;
+      package publication does not transfer Registry SDK ownership to the consumer.

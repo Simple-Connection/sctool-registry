@@ -70,6 +70,25 @@ components:
     release_owner: registry-contract
     compatibility_owner: registry-contract
 
+  - id: registry-sdk-package-delivery
+    classification: DELIVERY
+    roles:
+      - AUTOMATION
+      - VERIFICATION
+      - CONFIGURATION
+    include:
+      - ".github/workflows/publish-registry-client-sdk.yml"
+    purpose: versioned_registry_client_sdk_github_packages_publication_and_integrity_binding
+    shipped: false
+    runtime_required: false
+    executable: true
+    release_owner: registry-sdk-package-delivery
+    compatibility_owner: registry-contract
+    analysis_inputs:
+      - "packages/registry-client-sdk/package.json"
+      - "packages/registry-client-sdk/src/**"
+      - "docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml"
+
   - id: registry-pages-delivery
     classification: DELIVERY
     roles:
@@ -159,6 +178,16 @@ relationships:
     to: registry-catalog
     type: READS
 
+  - id: registry-contracts-specify-sdk-package-delivery
+    from: registry-contracts
+    to: registry-sdk-package-delivery
+    type: SPECIFIES
+
+  - id: registry-sdk-package-delivery-publishes-client-sdk
+    from: registry-sdk-package-delivery
+    to: registry-client-sdk
+    type: PUBLISHES
+
   - id: registry-contracts-specify-pages-delivery
     from: registry-contracts
     to: registry-pages-delivery
@@ -197,6 +226,11 @@ relationships:
   - id: repository-governance-governs-contracts
     from: repository-governance
     to: registry-contracts
+    type: GOVERNS
+
+  - id: repository-governance-governs-sdk-package-delivery
+    from: repository-governance
+    to: registry-sdk-package-delivery
     type: GOVERNS
 
   - id: repository-governance-governs-pages-delivery

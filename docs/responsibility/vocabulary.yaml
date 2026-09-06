@@ -90,6 +90,7 @@ dimensions:
   object_subtype:
     - SCTOOL
     - SCTOOL_PACKAGE
+    - REGISTRY_CLIENT_SDK_PACKAGE
     - PACKAGE_DESCRIPTOR_V2
     - CHANNEL
     - VERSION
