@@ -186,7 +186,7 @@ work_units:
     completion_codes:
       - P5_INSTALL_IDEMPOTENCY_COMPLETE
   - id: P5-W7
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
       - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
@@ -198,10 +198,11 @@ work_units:
     output_refs:
       - SELECTED_VERSION_UNCHANGED
       - EXISTING_ENABLED_SIBLING_UNCHANGED
+      - NEW_UPDATE_COMPATIBILITY_ENABLED_FALSE
       - REPO_LOCAL_DESCRIPTOR_UNCHANGED
       - RUNTIME_RESCAN_ZERO_CALLS
     completion_codes:
-      - P5_NO_ACTIVATION_SIDE_EFFECT_PENDING
+      - P5_NO_ACTIVATION_SIDE_EFFECT_COMPLETE
   - id: P5-W8
     status: PENDING
     responsibility_refs:
@@ -405,6 +406,34 @@ evidence:
       exact_dependency_restore_step_conclusion: SUCCESS
       runtime_sdk_identity_step_conclusion: SUCCESS
       post_restore_boundary_step_conclusion: SUCCESS
+  - id: E_P5_W7_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "a7138376a7f906a05f7c903b68a758c07a37061b"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "dev/2.2.4"
+      verified_candidate_entrypoint: "desktop/src/main/features/mcp/sctool/verified-candidate-install.ts"
+      install_transaction_core: "desktop/src/main/features/mcp/sctool/install-transaction.ts"
+      selected_version_mutation: FORBIDDEN
+      new_update_enabled: false
+      existing_enabled_sibling: PRESERVED
+      repo_local_descriptor_mutation: FORBIDDEN
+      runtime_reconcile: FORBIDDEN
+      runtime_rescan: ZERO_CALLS
+  - id: E_P5_W7_PRODUCT_VALIDATION
+    kind: WORKFLOW_RUN
+    head: "a7138376a7f906a05f7c903b68a758c07a37061b"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34039582645
+      run_number: 14
+      conclusion: SUCCESS
+      package_independent_boundary_step_conclusion: SUCCESS
+      exact_sdk_identity_step_conclusion: SUCCESS
+      exact_sdk_lock_binding_step_conclusion: SUCCESS
+      exact_dependency_restore_step_conclusion: SUCCESS
+      runtime_sdk_identity_step_conclusion: SUCCESS
+      post_restore_boundary_step_conclusion: SUCCESS
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P5_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P5_W1_GOVERNANCE]}
@@ -414,7 +443,7 @@ gates:
   - {id: GATE_P5_INSTALL_TRANSACTION_LIFECYCLE, required: true, status: PASS, evidence_refs: [E_P5_W5_PRODUCT_IMPLEMENTATION, E_P5_W5_PRODUCT_VALIDATION]}
   - {id: GATE_P5_ATOMIC_INSTALL_COMMIT, required: true, status: PASS, evidence_refs: [E_P5_W5_PRODUCT_IMPLEMENTATION, E_P5_W5_PRODUCT_VALIDATION]}
   - {id: GATE_P5_INSTALL_IDEMPOTENCY, required: true, status: PASS, evidence_refs: [E_P5_W6_PRODUCT_IMPLEMENTATION, E_P5_W6_PRODUCT_VALIDATION]}
-  - {id: GATE_P5_NO_ACTIVATION_SIDE_EFFECT, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_NO_ACTIVATION_SIDE_EFFECT, required: true, status: PASS, evidence_refs: [E_P5_W7_PRODUCT_IMPLEMENTATION, E_P5_W7_PRODUCT_VALIDATION]}
   - {id: GATE_P5_FAILURE_RECOVERY, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P5_WINDOWS_INSTALL_REGRESSION, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P5_PRODUCT_REGRESSION, required: true, status: PENDING, evidence_refs: []}
