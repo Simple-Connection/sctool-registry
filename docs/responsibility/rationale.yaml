@@ -25,11 +25,13 @@ rationales:
       - RESPONSIBILITY_DIMENSION_CHANGE
       - IMPLEMENTATION_BOUNDARY_CHANGE
     statement: >-
-      SCTool authoring and Registry consumption belong to different lifecycle and
-      authority boundaries. The Authoring SDK remains responsible for developer-side
-      authoring, validation, build, and test behavior, while the Registry Client SDK
-      owns runtime Registry consumption. Co-locating Registry consumer authority in
-      the Authoring SDK would couple runtime distribution behavior to development tooling.
+      SCTool authoring and Registry consumption remain different package and lifecycle
+      boundaries even when both SDKs are owned by Simple-Connection/sctool-registry.
+      packages/sctool-sdk owns developer and coding-agent authoring, manifest validation,
+      build, test, version compatibility, and publication integration. packages/registry-client-sdk
+      separately owns runtime Registry consumption. Simple-Connection/SC_Linked_App is a
+      read-only consumer and locator surface for the Authoring SDK and must not become
+      its source, version, compatibility, or publication authority.
 
   ADR_REGISTRY_ACCESS_AUTHORITY_TRANSFER:
     status: ACTIVE
@@ -46,7 +48,7 @@ rationales:
       - IMPLEMENTATION_BOUNDARY_CHANGE
     statement: >-
       Registry Access authority moved to the Registry Client SDK even though a
-      historical duplicate implementation may remain in Kinirin/Simple-Connection
+      historical duplicate implementation may remain in Simple-Connection/SC_Linked_App
       during migration. Physical presence of the predecessor code does not retain
       authority ownership. Removal is deferred until replacement consumption is proven
       in a separately approved integration session.
