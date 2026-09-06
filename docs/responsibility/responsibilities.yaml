@@ -300,7 +300,7 @@ responsibilities:
     subject: AUTH_REGISTRY_CLIENT_SDK
     authority_domain: UPDATE_CANDIDATE
     lifecycle_phase: RESOLUTION
-    operation: NORMALIZE
+    operation: RESOLVE
     object: {class: UPDATE_CANDIDATE, subtype: SIMPLE_CONNECTION}
     relation: PRODUCES
     ownership: PRIMARY
@@ -316,6 +316,7 @@ responsibilities:
       decision_rationale_ids:
         - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
         - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
+        - ADR_REGISTRY_UPDATE_CANDIDATE_RESOLUTION_BOUNDARY
   RESP_SIMPLE_CONNECTION_INSTALL:
     subject: AUTH_SIMPLE_CONNECTION_DESKTOP
     authority_domain: LOCAL_INSTALLATION

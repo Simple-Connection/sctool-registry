@@ -149,3 +149,28 @@ rationales:
       paths are SDK-internal, failed or partial resources are disposed, and verified
       access is read-only. Persistent product-owned installation state begins only
       after a verified update candidate crosses into Simple Connection authority.
+
+  ADR_REGISTRY_UPDATE_CANDIDATE_RESOLUTION_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    established_in:
+      version: "1.0.2"
+      session: P4
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - CONTRACT_CHANGE
+      - RESPONSIBILITY_DIMENSION_CHANGE
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+      - LIFECYCLE_CHANGE
+      - OWNERSHIP_POLICY_CHANGE
+    statement: >-
+      Simple Connection remains authoritative for installed-version state while
+      Registry Client SDK may consume an authority-tagged installed-version
+      observation as read-only input. Registry Client SDK compares that observation
+      with the resolved Registry version using deterministic semantic-version
+      precedence. Only a resolved newer version is eligible for artifact retrieval
+      and verified update-candidate production. Equal precedence and resolved older
+      versions do not retrieve an artifact. Registry Client SDK does not decide
+      installation, choose an install path, or mutate persistent product state.

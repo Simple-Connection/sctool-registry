@@ -1,8 +1,38 @@
-schema_version: "1.0"
+schema_version: "1.1"
 document_type: update_candidate_contract
 natural_language: FORBIDDEN
 contract_id: UPDATE_CANDIDATE_V1
 candidate_type: VERIFIED_UPDATE_CANDIDATE
+installation_observation:
+  type: CONSUMER_INSTALLATION_OBSERVATION
+  authority: AUTH_SIMPLE_CONNECTION_DESKTOP
+  access: READ_ONLY
+  required_fields:
+    - authority
+    - packageId
+    - targetKey
+    - installedVersion
+  additional_fields: FORBIDDEN
+  installed_version_role: INPUT_ONLY
+version_precedence:
+  grammar: PACKAGE_SCHEMA_V2_SEMVER
+  build_metadata: IGNORED
+  prerelease: SEMVER_PRECEDENCE
+  numeric_prerelease: INTEGER_VALUE
+resolution:
+  states:
+    UPDATE_AVAILABLE:
+      relation: RESOLVED_NEWER
+      artifact_retrieval: REQUIRED
+      candidate: VERIFIED_UPDATE_CANDIDATE
+    CURRENT:
+      relation: EQUAL_PRECEDENCE
+      artifact_retrieval: FORBIDDEN
+      candidate: null
+    DOWNGRADE_NOT_CANDIDATE:
+      relation: RESOLVED_OLDER
+      artifact_retrieval: FORBIDDEN
+      candidate: null
 required_fields:
   - packageId
   - channel
@@ -35,6 +65,7 @@ forbidden_fields:
   - rollbackTarget
   - runtimeState
   - rendererState
+  - persistentInstallState
 identity_fields:
   - packageId
   - version

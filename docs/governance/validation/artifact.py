@@ -78,6 +78,74 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
     need(len(required) == len(set(required)), "UPDATE_CANDIDATE_REQUIRED_DUPLICATE", errors)
     need(len(forbidden) == len(set(forbidden)), "UPDATE_CANDIDATE_FORBIDDEN_DUPLICATE", errors)
     need(not (set(required) & set(forbidden)), "UPDATE_CANDIDATE_FIELD_OVERLAP", errors)
+    observation = candidate.get("installation_observation", {})
+    need(
+        observation.get("type") == "CONSUMER_INSTALLATION_OBSERVATION",
+        "UPDATE_CANDIDATE_OBSERVATION_TYPE",
+        errors,
+    )
+    need(
+        observation.get("authority") == "AUTH_SIMPLE_CONNECTION_DESKTOP",
+        "UPDATE_CANDIDATE_OBSERVATION_AUTHORITY",
+        errors,
+    )
+    need(
+        observation.get("access") == "READ_ONLY",
+        "UPDATE_CANDIDATE_OBSERVATION_ACCESS",
+        errors,
+    )
+    need(
+        set(observation.get("required_fields", []))
+        == {"authority", "packageId", "targetKey", "installedVersion"},
+        "UPDATE_CANDIDATE_OBSERVATION_FIELDS",
+        errors,
+    )
+    need(
+        observation.get("additional_fields") == "FORBIDDEN",
+        "UPDATE_CANDIDATE_OBSERVATION_ADDITIONAL_FIELDS",
+        errors,
+    )
+    need(
+        observation.get("installed_version_role") == "INPUT_ONLY",
+        "UPDATE_CANDIDATE_INSTALLED_VERSION_ROLE",
+        errors,
+    )
+
+    precedence = candidate.get("version_precedence", {})
+    need(precedence.get("grammar") == "PACKAGE_SCHEMA_V2_SEMVER", "UPDATE_CANDIDATE_SEMVER_GRAMMAR", errors)
+    need(precedence.get("build_metadata") == "IGNORED", "UPDATE_CANDIDATE_BUILD_METADATA", errors)
+    need(precedence.get("prerelease") == "SEMVER_PRECEDENCE", "UPDATE_CANDIDATE_PRERELEASE", errors)
+    need(precedence.get("numeric_prerelease") == "INTEGER_VALUE", "UPDATE_CANDIDATE_NUMERIC_PRERELEASE", errors)
+
+    states = candidate.get("resolution", {}).get("states", {})
+    need(
+        states.get("UPDATE_AVAILABLE") == {
+            "relation": "RESOLVED_NEWER",
+            "artifact_retrieval": "REQUIRED",
+            "candidate": "VERIFIED_UPDATE_CANDIDATE",
+        },
+        "UPDATE_CANDIDATE_NEWER_STATE",
+        errors,
+    )
+    need(
+        states.get("CURRENT") == {
+            "relation": "EQUAL_PRECEDENCE",
+            "artifact_retrieval": "FORBIDDEN",
+            "candidate": None,
+        },
+        "UPDATE_CANDIDATE_CURRENT_STATE",
+        errors,
+    )
+    need(
+        states.get("DOWNGRADE_NOT_CANDIDATE") == {
+            "relation": "RESOLVED_OLDER",
+            "artifact_retrieval": "FORBIDDEN",
+            "candidate": None,
+        },
+        "UPDATE_CANDIDATE_DOWNGRADE_STATE",
+        errors,
+    )
+
     artifact = candidate.get("artifact", {})
     need(
         artifact.get("type") == "VERIFIED_ARTIFACT_LEASE",
