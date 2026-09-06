@@ -34,7 +34,7 @@ components:
     release_owner: registry-client-sdk
     compatibility_owner: registry-contract
     manifests:
-      - "packages/registry-client-sdk/package.json"
+      - "delivery/registry-client-sdk-package/package.json"
     analysis_inputs:
       - "schemas/package.schema.json"
       - "policy/registry-policy.json"
@@ -79,6 +79,7 @@ components:
       - CONFIGURATION
     include:
       - ".github/workflows/publish-registry-client-sdk.yml"
+      - "delivery/registry-client-sdk-package/**"
     purpose: versioned_registry_client_sdk_github_packages_publication_and_integrity_binding
     shipped: false
     runtime_required: false

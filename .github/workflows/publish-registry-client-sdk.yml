@@ -9,6 +9,7 @@ on:
       - "packages/registry-client-sdk/**"
       - "docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml"
       - ".github/workflows/publish-registry-client-sdk.yml"
+      - "delivery/registry-client-sdk-package/**"
 
 permissions:
   contents: read
