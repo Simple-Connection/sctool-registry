@@ -51,7 +51,7 @@ work_units:
       - EXPLICIT_ROLLBACK_BOUNDARY
       - RUNTIME_RECONCILE_ORDERING
   - id: P6-W2
-    state: PLANNED
+    state: COMPLETE
     purpose: PRODUCT_ACTIVATION_ATOMIC_STATE
     depends_on:
       - P6-W1

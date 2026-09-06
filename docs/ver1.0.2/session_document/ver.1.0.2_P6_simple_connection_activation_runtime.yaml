@@ -79,7 +79,7 @@ work_units:
     completion_codes:
       - P6_ACTIVATION_ROLLBACK_RUNTIME_CONTRACT_COMPLETE
   - id: P6-W2
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_ACTIVATION
     input_refs:
@@ -89,7 +89,7 @@ work_units:
       - ATOMIC_SELECTED_ENABLED_STATE
       - ACTIVATION_FAILURE_RESTORE
     completion_codes:
-      - P6_ACTIVATION_ATOMIC_STATE_PENDING
+      - P6_ACTIVATION_ATOMIC_STATE_COMPLETE
   - id: P6-W3
     status: PENDING
     responsibility_refs:
@@ -213,12 +213,63 @@ evidence:
       p4_update_candidate_regression: PASS
       ptsip_architecture: PASS
       registry_json: PASS
+  - id: E_P6_W2_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "ab57d217c8b3e0e27c01633c25b6c97b9291a897"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "dev/2.2.4"
+      product_session_start: "752b11ddb1183d2805596885db4083c5bcfa6dd8"
+      activation_core: "a8b16405b1feec43627e209f73f4f4d1c679dbc1"
+      activation_validation: "9d730bc1262790735de6040225566f3f819d9507"
+      exact_validation_head: "ab57d217c8b3e0e27c01633c25b6c97b9291a897"
+      product_session_w1_closeout: "b37ad703f400b51cbaf819eafc82d2699aec78a0"
+      activation_store: "desktop/src/main/features/mcp/sctool/activation-store.ts"
+      activation_entrypoint: "desktop/src/main/features/mcp/sctool/activation-service.ts"
+      authoritative_state: "settings/activation-state.json"
+      compound_state_fields:
+        - selectedVersion
+        - enabledVersion
+      runtime_descriptor_mutation: FORBIDDEN
+      runtime_rescan: FORBIDDEN
+      missing_install_directory: FAIL_BEFORE_COMMIT
+      write_failure: PRESERVE_PRIOR_ACTIVATION_STATE
+  - id: E_P6_W2_PRODUCT_VALIDATION
+    kind: WORKFLOW_RUN
+    head: "ab57d217c8b3e0e27c01633c25b6c97b9291a897"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34044232805
+      run_number: 2
+      conclusion: SUCCESS
+      documentation_routing: PASS
+      p5_install_boundary_regression: PASS
+      p6_w2_activation_tests: PASS
+      p6_w2_test_count: 2
+      p6_w2_test_pass: 2
+      p6_w2_test_fail: 0
+      exact_registry_client_sdk_restore: PASS
+      product_typecheck: PASS
+      product_build: PASS
+      windows_install_failure_matrix: PASS
+      evidence_artifact_id: 9992629844
+      evidence_artifact_name: "sctool-product-install-ab57d217c8b3e0e27c01633c25b6c97b9291a897"
+  - id: E_P6_W2_PRODUCT_PTSIP
+    kind: EXACT_VALIDATION
+    head: "ab57d217c8b3e0e27c01633c25b6c97b9291a897"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34044232794
+      run_number: 167
+      conclusion: SUCCESS
+      responsibility_map: PASS
+      exact_conformance: PASS
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P6_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P6_W1_GOVERNANCE]}
   - {id: GATE_P6_RESPONSIBILITY_SPLIT, required: true, status: PASS, evidence_refs: [E_P6_W1_CONTRACT, E_P6_W1_GOVERNANCE]}
   - {id: GATE_P6_ACTIVATION_ROLLBACK_CONTRACT, required: true, status: PASS, evidence_refs: [E_P6_W1_CONTRACT, E_P6_W1_EXACT_VALIDATION]}
-  - {id: GATE_P6_ACTIVATION_ATOMICITY, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_ACTIVATION_ATOMICITY, required: true, status: PASS, evidence_refs: [E_P6_W2_PRODUCT_IMPLEMENTATION, E_P6_W2_PRODUCT_VALIDATION, E_P6_W2_PRODUCT_PTSIP]}
   - {id: GATE_P6_RUNTIME_RECONCILE, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_ROLLBACK, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_RENDERER_UI, required: true, status: PENDING, evidence_refs: []}
