@@ -10,6 +10,11 @@ session:
 implementation:
   repository: "Kinirin/Simple-Connection"
   branch: "dev/2.2.4"
+  ownership_transition:
+    current_owner: Kinirin
+    target_owner: Simple-Connection
+    state: PLANNED
+    implementation_repository_identity_changes_only_after_transfer: true
 approval:
   planning: APPROVED
   implementation: REQUIRED
@@ -99,12 +104,14 @@ boundary:
     - SAME_ID_VERSION_REINSTALL_IDEMPOTENT_OR_CONFLICT
     - EXISTING_SIBLING_VERSIONS_PRESERVED
 responsibility_migration:
+  approval: APPROVED
+  option: R1
   source:
     id: RESP_SIMPLE_CONNECTION_INSTALL
     state: CURRENT_BROAD_RESPONSIBILITY
     action_before_implementation: DECOMPOSE
-  proposed:
-    - id: RESP_SIMPLE_CONNECTION_INSTALL_DECISION
+  approved:
+    - id: RESP_SIMPLE_CONNECTION_INSTALL_INTENT
       subject: AUTH_SIMPLE_CONNECTION_DESKTOP
       authority_domain: LOCAL_INSTALLATION
       lifecycle_phase: INSTALLATION
@@ -149,6 +156,50 @@ responsibility_migration:
     source_responsibility: RESP_SIMPLE_CONNECTION_INSTALL
     target_state_after_proof: RETIRED_OR_COMPATIBILITY_ALIAS
     approval_required: P5_IMPLEMENTATION_APPROVAL
+sdk_distribution:
+  option: S1
+  mechanism: GITHUB_PACKAGES
+  registry: "https://npm.pkg.github.com"
+  package: "@simple-connection/sctool-registry-client-sdk"
+  visibility: PRIVATE
+  producer:
+    repository: "Simple-Connection/sctool-registry"
+    owner: Simple-Connection
+    authority: SDK_SOURCE_AND_PACKAGE_PUBLICATION
+  consumer:
+    current_repository: "Kinirin/Simple-Connection"
+    current_owner: Kinirin
+    target_repository_after_ownership_transfer: "Simple-Connection/Simple-Connection"
+    target_owner: Simple-Connection
+    authority: PACKAGE_READ_ONLY
+  version_policy:
+    dependency_range: EXACT
+    caret: FORBIDDEN
+    tilde: FORBIDDEN
+    lockfile: REQUIRED
+    mutable_tags_as_build_authority: FORBIDDEN
+  publish_policy:
+    source_revision_binding: REQUIRED
+    package_version_unique: REQUIRED
+    package_integrity_evidence: REQUIRED
+    package_provenance_evidence: REQUIRED
+    publish_from_ci: REQUIRED
+  authentication:
+    ci_preference:
+      - PACKAGE_REPOSITORY_ACCESS_WITH_GITHUB_TOKEN
+      - READ_PACKAGES_CREDENTIAL_FALLBACK
+    local_development:
+      source_controlled_token: FORBIDDEN
+      environment_or_user_config_credential: REQUIRED
+  ownership_transition:
+    package_scope_stable: "@simple-connection"
+    package_identity_changes_on_consumer_transfer: false
+    consumer_access_revalidation_after_transfer: REQUIRED
+  archival:
+    github_release_tgz: OPTIONAL
+    github_release_tgz_role: PROVENANCE_OR_RECOVERY_ONLY
+    primary_dependency_distribution: GITHUB_PACKAGES
+
 transaction_model:
   proposed_contract_id: SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1
   states:
@@ -184,18 +235,17 @@ preconditions:
     state: SATISFIED
     requirement: P4_WINDOWS_LOCAL_REGRESSION_PASS
   - id: P5_PRECONDITION_SDK_CONSUMPTION
-    state: BLOCKED_DECISION
+    state: SATISFIED
     requirement: APPROVED_REGISTRY_CLIENT_SDK_CONSUMPTION_MECHANISM
-    options:
-      - APPROVED_PACKAGE_DISTRIBUTION
-      - APPROVED_PINNED_SOURCE_INTEGRATION
+    selected: GITHUB_PACKAGES
     forbidden:
       - COPY_REGISTRY_CLIENT_SDK_SOURCE_INTO_PRODUCT
       - DUPLICATE_REGISTRY_UPDATE_CANDIDATE_LOGIC_IN_PRODUCT
       - PRODUCT_OWNERSHIP_OF_REGISTRY_SDK
   - id: P5_PRECONDITION_RESPONSIBILITY_SPLIT
-    state: REQUIRED_BEFORE_IMPLEMENTATION
+    state: SATISFIED
     requirement: APPROVE_P5_RESPONSIBILITY_MIGRATION
+    selected: R1
 work_units:
   - id: P5-W1
     state: PLANNED
@@ -206,13 +256,16 @@ work_units:
       - SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1
       - P5_GATE_REGISTRY
   - id: P5-W2
-    state: BLOCKED
-    purpose: APPROVE_REGISTRY_CLIENT_SDK_CONSUMPTION
+    state: PLANNED
+    purpose: MATERIALIZE_GITHUB_PACKAGES_SDK_DISTRIBUTION
     depends_on:
       - P5_PRECONDITION_SDK_CONSUMPTION
     outputs:
-      - PRODUCT_DEPENDENCY_MECHANISM
-      - PINNED_REGISTRY_SDK_IDENTITY
+      - GITHUB_PACKAGES_PUBLISH_WORKFLOW
+      - PRODUCT_NPM_SCOPE_CONFIGURATION
+      - EXACT_SDK_VERSION_PIN
+      - PACKAGE_LOCK_IDENTITY
+      - PACKAGE_PROVENANCE_EVIDENCE
   - id: P5-W3
     state: PLANNED
     purpose: SEPARATE_INSTALL_FROM_ACTIVATION_RUNTIME
