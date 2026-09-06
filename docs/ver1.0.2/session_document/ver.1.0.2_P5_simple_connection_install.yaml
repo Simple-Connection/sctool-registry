@@ -204,7 +204,7 @@ work_units:
     completion_codes:
       - P5_NO_ACTIVATION_SIDE_EFFECT_COMPLETE
   - id: P5-W8
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
       - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
@@ -220,7 +220,7 @@ work_units:
       - FAILURE_MATRIX
       - WINDOWS_FILE_LOCK_REGRESSION
     completion_codes:
-      - P5_INSTALL_AUTOMATION_EVIDENCE_PENDING
+      - P5_INSTALL_AUTOMATION_EVIDENCE_COMPLETE
   - id: P5-W9
     status: PENDING
     responsibility_refs:
@@ -434,6 +434,42 @@ evidence:
       exact_dependency_restore_step_conclusion: SUCCESS
       runtime_sdk_identity_step_conclusion: SUCCESS
       post_restore_boundary_step_conclusion: SUCCESS
+  - id: E_P5_W8_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "cf840b5ad6ddfc933d2bed768d73e18cf5890db8"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "dev/2.2.4"
+      runtime_harness_head: "d8f77557f09ab5e6f1faf438e185a6c9a3484ebb"
+      workflow_head: "cf840b5ad6ddfc933d2bed768d73e18cf5890db8"
+      transaction_core: "desktop/src/main/features/mcp/sctool/install-transaction.ts"
+      automation_test: "desktop/tests/mcp/sctool/p5-install-transaction.test.mjs"
+      workflow: ".github/workflows/sctool-registry-p5.yml"
+      transaction_archive_extension: ZIP
+      required_scenario_count: 20
+      failure_injection: ENABLED
+      child_process_crash_injection: ENABLED
+      windows_active_file_handle_regression: ENABLED
+  - id: E_P5_W8_PRODUCT_VALIDATION
+    kind: WORKFLOW_RUN
+    head: "cf840b5ad6ddfc933d2bed768d73e18cf5890db8"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34040597658
+      run_number: 18
+      conclusion: SUCCESS
+      runtime_failure_matrix_step_conclusion: SUCCESS
+      runtime_test_count: 33
+      runtime_test_pass: 33
+      runtime_test_fail: 0
+      required_scenarios: 20
+      required_scenarios_missing: 0
+      registry_write_failure_recovery: PASS
+      process_crash_after_files_committed_recovery: PASS
+      windows_active_file_handle_behavior: PASS
+      windows_behavior: FAIL_CLOSED_WITHOUT_PREDELETE_OR_LOCKED_FILE_MUTATION
+      evidence_artifact_id: 9991587286
+      evidence_artifact_name: "sctool-p5-product-cf840b5ad6ddfc933d2bed768d73e18cf5890db8"
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P5_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P5_W1_GOVERNANCE]}
@@ -444,8 +480,8 @@ gates:
   - {id: GATE_P5_ATOMIC_INSTALL_COMMIT, required: true, status: PASS, evidence_refs: [E_P5_W5_PRODUCT_IMPLEMENTATION, E_P5_W5_PRODUCT_VALIDATION]}
   - {id: GATE_P5_INSTALL_IDEMPOTENCY, required: true, status: PASS, evidence_refs: [E_P5_W6_PRODUCT_IMPLEMENTATION, E_P5_W6_PRODUCT_VALIDATION]}
   - {id: GATE_P5_NO_ACTIVATION_SIDE_EFFECT, required: true, status: PASS, evidence_refs: [E_P5_W7_PRODUCT_IMPLEMENTATION, E_P5_W7_PRODUCT_VALIDATION]}
-  - {id: GATE_P5_FAILURE_RECOVERY, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P5_WINDOWS_INSTALL_REGRESSION, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_FAILURE_RECOVERY, required: true, status: PASS, evidence_refs: [E_P5_W8_PRODUCT_IMPLEMENTATION, E_P5_W8_PRODUCT_VALIDATION]}
+  - {id: GATE_P5_WINDOWS_INSTALL_REGRESSION, required: true, status: PASS, evidence_refs: [E_P5_W8_PRODUCT_IMPLEMENTATION, E_P5_W8_PRODUCT_VALIDATION]}
   - {id: GATE_P5_PRODUCT_REGRESSION, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P5_P4_COMPATIBILITY, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P5_PTSIP_CONFORMANCE, required: true, status: PENDING, evidence_refs: []}
