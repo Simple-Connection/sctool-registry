@@ -48,9 +48,17 @@ def main() -> None:
     unassigned = partition.get("unassigned_files", [])
     scan_errors = partition.get("scan_errors", [])
     if conflicts or unassigned or scan_errors:
+        details = []
+        if conflicts:
+            details.append("conflicts=" + json.dumps(conflicts, ensure_ascii=False))
+        if unassigned:
+            details.append("unassigned=" + json.dumps(unassigned, ensure_ascii=False))
+        if scan_errors:
+            details.append("scan_errors=" + json.dumps(scan_errors, ensure_ascii=False))
         raise SystemExit(
             "Cannot assert complete Product Artifact evidence while component partition has "
-            f"conflicts={len(conflicts)} unassigned={len(unassigned)} scan_errors={len(scan_errors)}."
+            f"conflicts={len(conflicts)} unassigned={len(unassigned)} scan_errors={len(scan_errors)}; "
+            + " ".join(details)
         )
 
     requested = sorted(set(args.component))
