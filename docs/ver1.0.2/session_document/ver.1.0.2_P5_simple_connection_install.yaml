@@ -1,0 +1,224 @@
+schema_version: "4.0"
+document_type: machine_session
+natural_language: FORBIDDEN
+session:
+  id: P5
+  type: B
+  number: 5
+  approval: APPROVED
+  distribution_contract_version: "1.0.2"
+  branch: "dev/1.0.2"
+  authority_repository: "Simple-Connection/sctool-registry"
+  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
+routing:
+  docs_index: "docs/index.yaml"
+  rules_index: "docs/rules/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  essential_template: "docs/template/session_document_template/session_document_essential.yaml"
+  type_template: "docs/template/session_document_template/session_type_B.yaml"
+heads:
+  start: "458045a9cdf37e6b4c7fafa6c451e9c2961a3919"
+  implementation: null
+  exact_validation: null
+responsibility_model:
+  effects:
+    assign: []
+    implement:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+    preserve:
+      - RESP_REGISTRY_ACCESS
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    defer:
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    transfer: []
+    retire: []
+    forbid:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+  description_ids: []
+  rationale_ids:
+    - ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY
+    - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
+    - ADR_REGISTRY_UPDATE_CANDIDATE_RESOLUTION_BOUNDARY
+payload:
+  implementation:
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+    contract_refs:
+      - CONTRACT_UPDATE_CANDIDATE_V1
+    path_allow:
+      - "docs/ver1.0.2/**"
+      - "docs/responsibility/**"
+      - "docs/governance/**"
+      - "packages/registry-client-sdk/**"
+      - ".github/workflows/**"
+    path_deny:
+      - "program-sdk/**"
+      - "Kinirin/Simple-Connection/**"
+  responsibility_description_ids: []
+  decision_rationale_ids:
+    - ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY
+    - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
+    - ADR_REGISTRY_UPDATE_CANDIDATE_RESOLUTION_BOUNDARY
+work_units:
+  - id: P5-W1
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+    input_refs:
+      - "docs/ver1.0.2/session_document/ver.1.0.2_P5_simple_connection_install_work_plan.yaml"
+      - CONTRACT_UPDATE_CANDIDATE_V1
+    output_refs:
+      - RESPONSIBILITY_SPLIT_R1
+      - CONTRACT_SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1
+      - P5_GATE_REGISTRY
+    completion_codes:
+      - P5_INSTALL_AUTHORITY_TRANSACTION_CONTRACT_PENDING
+  - id: P5-W2
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+    input_refs:
+      - GITHUB_PACKAGES
+      - "@simple-connection/sctool-registry-client-sdk"
+    output_refs:
+      - GITHUB_PACKAGES_PUBLISH_WORKFLOW
+      - EXACT_SDK_VERSION_PIN
+      - PACKAGE_PROVENANCE_EVIDENCE
+    completion_codes:
+      - P5_GITHUB_PACKAGES_DISTRIBUTION_PENDING
+  - id: P5-W3
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+    input_refs:
+      - P5-W1
+    output_refs:
+      - PERSISTENT_INSTALL_CORE
+      - LEGACY_LOCAL_FILE_INSTALL_COMPATIBILITY_WRAPPER
+      - NO_SELECTION_SIDE_EFFECT
+    completion_codes:
+      - P5_INSTALL_ACTIVATION_SEPARATION_PENDING
+  - id: P5-W4
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+    input_refs:
+      - P5-W2
+      - P5-W3
+      - CONTRACT_UPDATE_CANDIDATE_V1
+    output_refs:
+      - VERIFIED_CANDIDATE_INSTALL_ENTRYPOINT
+      - VALIDATED_PRODUCT_STAGING_TREE
+      - CANDIDATE_IDENTITY_BINDING
+    completion_codes:
+      - P5_VERIFIED_CANDIDATE_MATERIALIZATION_PENDING
+  - id: P5-W5
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+    input_refs:
+      - P5-W4
+    output_refs:
+      - ATOMIC_FINAL_DIRECTORY_PUBLICATION
+      - ATOMIC_INSTALL_REGISTRY_WRITE
+      - INSTALL_TRANSACTION_JOURNAL
+      - CRASH_RECOVERY
+    completion_codes:
+      - P5_ATOMIC_INSTALL_COMMIT_PENDING
+  - id: P5-W6
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+    input_refs:
+      - P5-W5
+    output_refs:
+      - ALREADY_INSTALLED_NOOP
+      - SAME_ID_VERSION_CONFLICT_FAILURE
+      - SIBLING_VERSION_PRESERVATION
+    completion_codes:
+      - P5_INSTALL_IDEMPOTENCY_PENDING
+  - id: P5-W7
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+    input_refs:
+      - P5-W3
+      - P5-W5
+    output_refs:
+      - SELECTED_VERSION_UNCHANGED
+      - EXISTING_ENABLED_SIBLING_UNCHANGED
+      - REPO_LOCAL_DESCRIPTOR_UNCHANGED
+      - RUNTIME_RESCAN_ZERO_CALLS
+    completion_codes:
+      - P5_NO_ACTIVATION_SIDE_EFFECT_PENDING
+  - id: P5-W8
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+    input_refs:
+      - P5-W4
+      - P5-W5
+      - P5-W6
+      - P5-W7
+    output_refs:
+      - REVISION_BOUND_INSTALL_EVIDENCE
+      - FAILURE_MATRIX
+      - WINDOWS_FILE_LOCK_REGRESSION
+    completion_codes:
+      - P5_INSTALL_AUTOMATION_EVIDENCE_PENDING
+  - id: P5-W9
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+    input_refs:
+      - P5-W8
+    output_refs:
+      - REGISTRY_P4_REGRESSION_PASS
+      - SIMPLE_CONNECTION_PRODUCT_REGRESSION_PASS
+      - PTSIP_EXACT_PASS
+      - P5_CLOSEOUT_CANDIDATE
+    completion_codes:
+      - P5_CROSS_REPOSITORY_EXACT_VALIDATION_PENDING
+evidence:
+  - id: E_P5_APPROVAL
+    kind: USER_APPROVAL
+    head: null
+    refs:
+      approval: APPROVED
+      scope: P5_SESSION_START
+      responsibility_split: R1
+      sdk_distribution: GITHUB_PACKAGES
+  - id: E_P5_PLANNING
+    kind: MACHINE_PLAN
+    head: "458045a9cdf37e6b4c7fafa6c451e9c2961a3919"
+    refs:
+      planning_document: "docs/ver1.0.2/session_document/ver.1.0.2_P5_simple_connection_install_work_plan.yaml"
+      planning_state: CONCRETIZED
+gates:
+  - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P5_APPROVAL]}
+  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_SDK_BOUNDARY, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_PTSIP_PROFILE, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PENDING, evidence_refs: []}
+blockers: []
+state:
+  mode: DERIVED
+  ruleset: SESSION_STATE_V1

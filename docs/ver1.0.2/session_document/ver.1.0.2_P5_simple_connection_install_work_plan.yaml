@@ -17,8 +17,8 @@ implementation:
     implementation_repository_identity_changes_only_after_transfer: true
 approval:
   planning: APPROVED
-  implementation: REQUIRED
-  implementation_materialization: FORBIDDEN_BEFORE_APPROVAL
+  implementation: APPROVED
+  implementation_materialization: ALLOWED
 baseline:
   registry_head: "2bb760a31015780fb29f9b1ef7a1860a559e4dd4"
   registry_input_contract: CONTRACT_UPDATE_CANDIDATE_V1
