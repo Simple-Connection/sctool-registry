@@ -43,6 +43,7 @@ components:
       - "docs/ARTIFACT_DELIVERY_V1.md"
       - "docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml"
       - "docs/UPDATE_CANDIDATE_V1.yaml"
+      - "docs/SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1.yaml"
 
   - id: registry-contracts
     classification: NEUTRAL_CONTRACT
