@@ -50,15 +50,16 @@ responsibility_model:
       - RESP_SIMPLE_CONNECTION_ROLLBACK
       - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
       - RESP_SIMPLE_CONNECTION_RENDERER_UI
-    transfer: []
-    retire: []
-    forbid:
+    transfer:
       - RESP_SCTOOL_AUTHORING_GUIDANCE
       - RESP_SCTOOL_MANIFEST_VALIDATION
       - RESP_SCTOOL_PACKAGE_BUILD
       - RESP_SCTOOL_PACKAGE_TEST
+    retire: []
+    forbid: []
   description_ids: []
   rationale_ids:
+    - ADR_TWO_SDK_BOUNDARY
     - ADR_SIMPLE_CONNECTION_INSTALL_TRANSACTION_BOUNDARY
     - ADR_REGISTRY_CLIENT_SDK_PACKAGE_DISTRIBUTION_BOUNDARY
     - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
@@ -79,10 +80,10 @@ payload:
       - "docs/responsibility/**"
       - "docs/governance/**"
       - "packages/registry-client-sdk/**"
+      - "packages/sctool-sdk/**"
       - ".github/workflows/**"
     path_deny:
       - "program-sdk/**"
-      - "Kinirin/Simple-Connection/**"
   responsibility_description_ids: []
   decision_rationale_ids:
     - ADR_SIMPLE_CONNECTION_INSTALL_TRANSACTION_BOUNDARY
