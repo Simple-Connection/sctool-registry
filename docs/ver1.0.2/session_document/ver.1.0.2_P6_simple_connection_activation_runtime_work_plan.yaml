@@ -60,7 +60,7 @@ work_units:
       - ATOMIC_SELECTED_ENABLED_STATE
       - ACTIVATION_FAILURE_RESTORE
   - id: P6-W3
-    state: PLANNED
+    state: COMPLETE
     purpose: PRODUCT_RUNTIME_RECONCILE
     depends_on:
       - P6-W2

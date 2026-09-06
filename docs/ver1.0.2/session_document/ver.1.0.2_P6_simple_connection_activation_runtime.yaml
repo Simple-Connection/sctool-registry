@@ -91,7 +91,7 @@ work_units:
     completion_codes:
       - P6_ACTIVATION_ATOMIC_STATE_COMPLETE
   - id: P6-W3
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
     input_refs:
@@ -102,7 +102,7 @@ work_units:
       - MANAGED_REPO_RESCAN
       - RECONCILE_FAILURE_RESTORE
     completion_codes:
-      - P6_RUNTIME_RECONCILE_PENDING
+      - P6_RUNTIME_RECONCILE_COMPLETE
   - id: P6-W4
     status: PENDING
     responsibility_refs:
@@ -264,13 +264,67 @@ evidence:
       conclusion: SUCCESS
       responsibility_map: PASS
       exact_conformance: PASS
+  - id: E_P6_W3_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "f4c6e431604fe9e745cbf0e83910a4b6ad999327"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "dev/2.2.4"
+      product_session_start: "f91606f67f2dcefb046f00ebae7453a891d09d6f"
+      runtime_reconcile_core: "45ce856066f61f0c16decb19a9f48ced123f197e"
+      runtime_reconcile_validation: "70d4a839aa0e86ee4289458ad5eee1cf12f4ad16"
+      exact_validation_head: "f4c6e431604fe9e745cbf0e83910a4b6ad999327"
+      product_session_w2_closeout: "4f70be2ed690cc260d392d4f2f59618cf3e03ee7"
+      runtime_entrypoint: "desktop/src/main/features/mcp/sctool/runtime-reconcile-service.ts"
+      descriptor_boundary: "desktop/src/main/features/mcp/sctool/managed-repo.ts"
+      descriptor_write: ATOMIC_JSON_REPLACE
+      descriptor_preimage: SNAPSHOT_BEFORE_MUTATION
+      ordering:
+        - DURABLE_ACTIVATION_STATE
+        - REPO_LOCAL_DESCRIPTOR_RECONCILE
+        - MANAGED_REPOSITORY_RESCAN
+      rescan_failure: FAIL_CLOSED
+      failure_restore_order:
+        - PRIOR_PERSISTENT_ACTIVATION
+        - PRIOR_DESCRIPTOR_SNAPSHOT
+        - RESTORED_RUNTIME_RESCAN
+  - id: E_P6_W3_PRODUCT_FOCUSED_VALIDATION
+    kind: WORKFLOW_STEP_EVIDENCE
+    head: "f4c6e431604fe9e745cbf0e83910a4b6ad999327"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34046370096
+      run_number: 8
+      run_conclusion: FAILURE
+      documentation_routing: PASS
+      p5_boundary_regression: PASS
+      p6_w2_activation_tests: PASS
+      p6_w3_runtime_tests: PASS
+      p6_w3_test_count: 3
+      p6_w3_test_pass: 3
+      p6_w3_test_fail: 0
+      evidence_artifact_id: 9993251619
+      failure_scope: OUT_OF_SCOPE_AUTHORING_SDK_PACKAGE_ACCESS
+      failing_step: RESOLVE_EXACT_REGISTRY_OWNED_SDK_PACKAGE_IDENTITIES
+      failing_package: "@simple-connection/sctool-sdk@0.1.0"
+      failing_error: PERMISSION_DENIED_READ_PACKAGE
+  - id: E_P6_W3_PRODUCT_PTSIP
+    kind: EXACT_VALIDATION
+    head: "f4c6e431604fe9e745cbf0e83910a4b6ad999327"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34046370124
+      run_number: 171
+      conclusion: SUCCESS
+      responsibility_map: PASS
+      exact_conformance: PASS
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P6_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P6_W1_GOVERNANCE]}
   - {id: GATE_P6_RESPONSIBILITY_SPLIT, required: true, status: PASS, evidence_refs: [E_P6_W1_CONTRACT, E_P6_W1_GOVERNANCE]}
   - {id: GATE_P6_ACTIVATION_ROLLBACK_CONTRACT, required: true, status: PASS, evidence_refs: [E_P6_W1_CONTRACT, E_P6_W1_EXACT_VALIDATION]}
   - {id: GATE_P6_ACTIVATION_ATOMICITY, required: true, status: PASS, evidence_refs: [E_P6_W2_PRODUCT_IMPLEMENTATION, E_P6_W2_PRODUCT_VALIDATION, E_P6_W2_PRODUCT_PTSIP]}
-  - {id: GATE_P6_RUNTIME_RECONCILE, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_RUNTIME_RECONCILE, required: true, status: PASS, evidence_refs: [E_P6_W3_PRODUCT_IMPLEMENTATION, E_P6_W3_PRODUCT_FOCUSED_VALIDATION, E_P6_W3_PRODUCT_PTSIP]}
   - {id: GATE_P6_ROLLBACK, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_RENDERER_UI, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_FAILURE_RECOVERY, required: true, status: PENDING, evidence_refs: []}
