@@ -35,7 +35,13 @@
     "README.md"
   ],
   "scripts": {
-    "test": "node ./tests/boundary.test.mjs && node ./tests/registry-access.test.mjs && node ./tests/package-descriptor.test.mjs && node ./tests/resolution.test.mjs && node ./tests/artifact-delivery.test.mjs && node ./tests/artifact-staging.test.mjs && node ./tests/artifact-integrity.test.mjs && node ./tests/verified-artifact.test.mjs && node ./tests/update-candidate.test.mjs"
+    "test:update:observation": "node ./tests/update-observation.test.mjs",
+    "test:update:precedence": "node ./tests/update-version-precedence.test.mjs",
+    "test:update:eligibility": "node ./tests/update-eligibility.test.mjs",
+    "test:update:retrieval-gate": "node ./tests/update-retrieval-gate.test.mjs",
+    "test:update:candidate-boundary": "node ./tests/update-candidate-boundary.test.mjs",
+    "test:update": "npm run test:update:observation && npm run test:update:precedence && npm run test:update:eligibility && npm run test:update:retrieval-gate && npm run test:update:candidate-boundary",
+    "test": "node ./tests/boundary.test.mjs && node ./tests/registry-access.test.mjs && node ./tests/package-descriptor.test.mjs && node ./tests/resolution.test.mjs && node ./tests/artifact-delivery.test.mjs && node ./tests/artifact-staging.test.mjs && node ./tests/artifact-integrity.test.mjs && node ./tests/verified-artifact.test.mjs && npm run test:update"
   },
   "engines": {
     "node": ">=20"

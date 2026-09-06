@@ -63,6 +63,31 @@ jobs:
       - name: Validate Registry Client SDK boundary
         run: npm --prefix packages/registry-client-sdk test
 
+      - name: Validate P4 update candidate automation
+        shell: bash
+        run: |
+          update_evidence="$RUNNER_TEMP/update-candidate-validation.json"
+          revision="$(git rev-parse HEAD)"
+          node packages/registry-client-sdk/tests/generate-update-candidate-evidence.mjs \
+            --out "$update_evidence" \
+            --repository "$GITHUB_REPOSITORY" \
+            --revision "$revision"
+          python tools/validate-update-candidate-evidence.py \
+            --contract docs/UPDATE_CANDIDATE_V1.yaml \
+            --evidence "$update_evidence" \
+            --repository "$GITHUB_REPOSITORY" \
+            --revision "$revision"
+          cp "$update_evidence" update-candidate-validation.json
+          cat "$update_evidence"
+
+      - name: Upload P4 update candidate evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: p4-update-candidate-evidence-${{ github.sha }}
+          path: update-candidate-validation.json
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Validate PTSIP architecture with exact Product Artifact evidence
         shell: bash
         run: |
