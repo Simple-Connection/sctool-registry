@@ -136,7 +136,7 @@ work_units:
     completion_codes:
       - P5_INSTALL_ACTIVATION_SEPARATION_COMPLETE
   - id: P5-W4
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
       - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
@@ -151,7 +151,7 @@ work_units:
       - VALIDATED_PRODUCT_STAGING_TREE
       - CANDIDATE_IDENTITY_BINDING
     completion_codes:
-      - P5_VERIFIED_CANDIDATE_MATERIALIZATION_PENDING
+      - P5_VERIFIED_CANDIDATE_MATERIALIZATION_COMPLETE
   - id: P5-W5
     status: PENDING
     responsibility_refs:
@@ -319,12 +319,39 @@ evidence:
       boundary_step_conclusion: SUCCESS
       package_independent_boundary_step_conclusion: SUCCESS
       post_boundary_failure: GITHUB_PACKAGES_READ_PACKAGE_403
+  - id: E_P5_W4_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "b0309a198552e50746bc7e76cd349b5e09c3c428"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "dev/2.2.4"
+      verified_candidate_entrypoint: "desktop/src/main/features/mcp/sctool/verified-candidate-install.ts"
+      product_materialization_core: "desktop/src/main/features/mcp/sctool/install-transaction.ts"
+      public_candidate_type: VERIFIED_UPDATE_CANDIDATE
+      public_artifact_type: VERIFIED_ARTIFACT_LEASE
+      output_entrypoint: VERIFIED_CANDIDATE_INSTALL_ENTRYPOINT
+      output_staging: VALIDATED_PRODUCT_STAGING_TREE
+      output_identity: CANDIDATE_IDENTITY_BINDING
+  - id: E_P5_W4_PRODUCT_VALIDATION
+    kind: WORKFLOW_RUN
+    head: "b0309a198552e50746bc7e76cd349b5e09c3c428"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34038114488
+      run_number: 10
+      conclusion: SUCCESS
+      package_independent_boundary_step_conclusion: SUCCESS
+      exact_sdk_identity_step_conclusion: SUCCESS
+      exact_sdk_lock_binding_step_conclusion: SUCCESS
+      exact_dependency_restore_step_conclusion: SUCCESS
+      runtime_sdk_identity_step_conclusion: SUCCESS
+      post_restore_boundary_step_conclusion: SUCCESS
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P5_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P5_W1_GOVERNANCE]}
   - {id: GATE_P5_RESPONSIBILITY_SPLIT, required: true, status: PASS, evidence_refs: [E_P5_W1_EXACT_VALIDATION]}
   - {id: GATE_P5_REGISTRY_SDK_CONSUMPTION, required: true, status: PASS, evidence_refs: [E_P5_W2_PACKAGE_PUBLICATION, E_P5_W2_EXACT_VALIDATION]}
-  - {id: GATE_P5_VERIFIED_CANDIDATE_HANDOFF, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_VERIFIED_CANDIDATE_HANDOFF, required: true, status: PASS, evidence_refs: [E_P5_W4_PRODUCT_IMPLEMENTATION, E_P5_W4_PRODUCT_VALIDATION]}
   - {id: GATE_P5_INSTALL_TRANSACTION_LIFECYCLE, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P5_ATOMIC_INSTALL_COMMIT, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P5_INSTALL_IDEMPOTENCY, required: true, status: PENDING, evidence_refs: []}
