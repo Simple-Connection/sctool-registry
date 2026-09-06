@@ -154,7 +154,7 @@ work_units:
     completion_codes:
       - P5_VERIFIED_CANDIDATE_MATERIALIZATION_COMPLETE
   - id: P5-W5
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
       - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
@@ -163,12 +163,13 @@ work_units:
     input_refs:
       - P5-W4
     output_refs:
+      - SAME_VOLUME_TRANSACTION_ROOT
       - ATOMIC_FINAL_DIRECTORY_PUBLICATION
       - ATOMIC_INSTALL_REGISTRY_WRITE
       - INSTALL_TRANSACTION_JOURNAL
       - CRASH_RECOVERY
     completion_codes:
-      - P5_ATOMIC_INSTALL_COMMIT_PENDING
+      - P5_ATOMIC_INSTALL_COMMIT_COMPLETE
   - id: P5-W6
     status: PENDING
     responsibility_refs:
@@ -347,14 +348,45 @@ evidence:
       exact_dependency_restore_step_conclusion: SUCCESS
       runtime_sdk_identity_step_conclusion: SUCCESS
       post_restore_boundary_step_conclusion: SUCCESS
+  - id: E_P5_W5_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "071193edd4e8eb012ea464a62966cad3cf0a7447"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "dev/2.2.4"
+      structural_validation_head: "cc36f725f2c627e93c6bffcdf3d0d94bcfa8fe9c"
+      startup_recovery_head: "071193edd4e8eb012ea464a62966cad3cf0a7447"
+      transaction_core: "desktop/src/main/features/mcp/sctool/install-transaction.ts"
+      install_registry_store: "desktop/src/main/features/mcp/sctool/store.ts"
+      atomic_json_store: "desktop/src/main/core/persistence/atomic-json-store.ts"
+      startup_projection_boundary: "desktop/src/main/features/mcp/sctool/installer.ts"
+      final_directory_publication: ATOMIC_RENAME
+      existing_final_directory_predelete: FORBIDDEN
+      install_registry_write: ATOMIC
+      journal_markers: PREPARED_FILES_COMMITTED_STATE_COMMITTED
+      startup_crash_recovery: ENABLED
+  - id: E_P5_W5_PRODUCT_VALIDATION
+    kind: WORKFLOW_RUN
+    head: "071193edd4e8eb012ea464a62966cad3cf0a7447"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34038895970
+      run_number: 12
+      conclusion: SUCCESS
+      package_independent_boundary_step_conclusion: SUCCESS
+      exact_sdk_identity_step_conclusion: SUCCESS
+      exact_sdk_lock_binding_step_conclusion: SUCCESS
+      exact_dependency_restore_step_conclusion: SUCCESS
+      runtime_sdk_identity_step_conclusion: SUCCESS
+      post_restore_boundary_step_conclusion: SUCCESS
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P5_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P5_W1_GOVERNANCE]}
   - {id: GATE_P5_RESPONSIBILITY_SPLIT, required: true, status: PASS, evidence_refs: [E_P5_W1_EXACT_VALIDATION]}
   - {id: GATE_P5_REGISTRY_SDK_CONSUMPTION, required: true, status: PASS, evidence_refs: [E_P5_W2_PACKAGE_PUBLICATION, E_P5_W2_EXACT_VALIDATION]}
   - {id: GATE_P5_VERIFIED_CANDIDATE_HANDOFF, required: true, status: PASS, evidence_refs: [E_P5_W4_PRODUCT_IMPLEMENTATION, E_P5_W4_PRODUCT_VALIDATION]}
-  - {id: GATE_P5_INSTALL_TRANSACTION_LIFECYCLE, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P5_ATOMIC_INSTALL_COMMIT, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P5_INSTALL_TRANSACTION_LIFECYCLE, required: true, status: PASS, evidence_refs: [E_P5_W5_PRODUCT_IMPLEMENTATION, E_P5_W5_PRODUCT_VALIDATION]}
+  - {id: GATE_P5_ATOMIC_INSTALL_COMMIT, required: true, status: PASS, evidence_refs: [E_P5_W5_PRODUCT_IMPLEMENTATION, E_P5_W5_PRODUCT_VALIDATION]}
   - {id: GATE_P5_INSTALL_IDEMPOTENCY, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P5_NO_ACTIVATION_SIDE_EFFECT, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P5_FAILURE_RECOVERY, required: true, status: PENDING, evidence_refs: []}
