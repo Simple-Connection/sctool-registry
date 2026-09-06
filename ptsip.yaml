@@ -133,12 +133,15 @@ components:
       - CONFIGURATION
     include:
       - ".github/workflows/publish-authoring-sdks.yml"
+      - "delivery/authoring-sdk-package/**"
     purpose: immutable_github_packages_publication_for_registry_owned_authoring_sdks
     shipped: false
     runtime_required: false
     executable: true
     release_owner: authoring-sdk-package-delivery
     compatibility_owner: registry-contract
+    manifests:
+      - "delivery/authoring-sdk-package/package.json"
     analysis_inputs:
       - "packages/sctool-sdk/**"
       - "packages/repository-tool-sdk/**"

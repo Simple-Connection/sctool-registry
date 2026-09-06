@@ -11,6 +11,7 @@ on:
       - "policy/**"
       - "trust/**"
       - "tools/**"
+      - "delivery/**"
       - "docs/**"
       - "governance/**"
       - "AGENTS.md"
@@ -28,6 +29,7 @@ on:
       - "policy/**"
       - "trust/**"
       - "tools/**"
+      - "delivery/**"
       - "docs/**"
       - "governance/**"
       - "AGENTS.md"
@@ -93,7 +95,7 @@ jobs:
         run: |
           validation="$RUNNER_TEMP/ptsip-validation.json"
           evidence="$RUNNER_TEMP/sctool-registry-product-artifact.json"
-          platform_evidence="$RUNNER_TEMP/sctool-registry-node-platform-evidence.json"
+          dependency_evidence="$RUNNER_TEMP/sctool-registry-dependency-evidence.json"
           revision="$(git rev-parse HEAD)"
           tracked="$(python -c "from ptsip.repository.snapshot import capture_snapshot; print(capture_snapshot('.').tracked_content_fingerprint)")"
 
@@ -116,13 +118,13 @@ jobs:
 
           python docs/governance/generate-node-platform-evidence.py \
             --validation "$validation" \
-            --out "$platform_evidence" \
+            --out "$dependency_evidence" \
             --repository "$GITHUB_REPOSITORY" \
             --revision "$revision"
 
           ptsip conform . \
             --artifact-evidence "$evidence" \
-            --external-evidence "$platform_evidence"
+            --external-evidence "$dependency_evidence"
 
       - name: Validate registry JSON contracts
         run: python tools/validate-registry.py
