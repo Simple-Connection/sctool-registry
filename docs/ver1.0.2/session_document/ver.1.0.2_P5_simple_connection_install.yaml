@@ -120,7 +120,7 @@ work_units:
     completion_codes:
       - P5_GITHUB_PACKAGES_DISTRIBUTION_COMPLETE
   - id: P5-W3
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
       - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
@@ -133,7 +133,7 @@ work_units:
       - LEGACY_LOCAL_FILE_INSTALL_COMPATIBILITY_WRAPPER
       - NO_SELECTION_SIDE_EFFECT
     completion_codes:
-      - P5_INSTALL_ACTIVATION_SEPARATION_PENDING
+      - P5_INSTALL_ACTIVATION_SEPARATION_COMPLETE
   - id: P5-W4
     status: PENDING
     responsibility_refs:
@@ -297,6 +297,27 @@ evidence:
       run_id: 34032333303
       run_number: 88
       conclusion: SUCCESS
+  - id: E_P5_W3_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "d45fce6318b87dc5b0d8cc2ec41c7881f6293882"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "dev/2.2.4"
+      persistent_install_core: "desktop/src/main/features/mcp/sctool/install-transaction.ts"
+      compatibility_wrapper: "desktop/src/main/features/mcp/sctool/installer.ts"
+      output_state: INSTALLED_NOT_ACTIVATED
+  - id: E_P5_W3_PRODUCT_BOUNDARY
+    kind: WORKFLOW_RUN
+    head: "e1c7de1124b1f8c14c3ec0921e96bb77fccc8aa6"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34035360460
+      run_number: 4
+      workflow_conclusion: FAILURE
+      boundary_step: RUN_W3_BOUNDARY_TESTS_BEFORE_PRIVATE_PACKAGE_RESTORE
+      boundary_step_conclusion: SUCCESS
+      package_independent_boundary_step_conclusion: SUCCESS
+      post_boundary_failure: GITHUB_PACKAGES_READ_PACKAGE_403
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P5_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P5_W1_GOVERNANCE]}
