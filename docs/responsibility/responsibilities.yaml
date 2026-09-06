@@ -3,7 +3,6 @@ document_type: responsibility_registry
 natural_language: FORBIDDEN
 responsibilities:
   RESP_SCTOOL_AUTHORING_GUIDANCE:
-        - ADR_AUTHORING_SDK_PREDECESSOR_RETIREMENT
     subject: AUTH_SCTOOL_AUTHORING_SDK
     authority_domain: AUTHORING
     lifecycle_phase: AUTHORING
@@ -22,8 +21,8 @@ responsibilities:
       responsibility_description_id: null
       decision_rationale_ids:
         - ADR_TWO_SDK_BOUNDARY
-  RESP_SCTOOL_MANIFEST_VALIDATION:
         - ADR_AUTHORING_SDK_PREDECESSOR_RETIREMENT
+  RESP_SCTOOL_MANIFEST_VALIDATION:
     subject: AUTH_SCTOOL_AUTHORING_SDK
     authority_domain: AUTHORING
     lifecycle_phase: VALIDATION
@@ -42,8 +41,8 @@ responsibilities:
       responsibility_description_id: null
       decision_rationale_ids:
         - ADR_TWO_SDK_BOUNDARY
-  RESP_SCTOOL_PACKAGE_BUILD:
         - ADR_AUTHORING_SDK_PREDECESSOR_RETIREMENT
+  RESP_SCTOOL_PACKAGE_BUILD:
     subject: AUTH_SCTOOL_AUTHORING_SDK
     authority_domain: AUTHORING
     lifecycle_phase: BUILD
@@ -62,8 +61,8 @@ responsibilities:
       responsibility_description_id: null
       decision_rationale_ids:
         - ADR_TWO_SDK_BOUNDARY
-  RESP_SCTOOL_PACKAGE_TEST:
         - ADR_AUTHORING_SDK_PREDECESSOR_RETIREMENT
+  RESP_SCTOOL_PACKAGE_TEST:
     subject: AUTH_SCTOOL_AUTHORING_SDK
     authority_domain: AUTHORING
     lifecycle_phase: VALIDATION
@@ -82,8 +81,8 @@ responsibilities:
       responsibility_description_id: null
       decision_rationale_ids:
         - ADR_TWO_SDK_BOUNDARY
-  RESP_REPOSITORY_TOOL_AUTHORING_GUIDANCE:
         - ADR_AUTHORING_SDK_PREDECESSOR_RETIREMENT
+  RESP_REPOSITORY_TOOL_AUTHORING_GUIDANCE:
     subject: AUTH_REPOSITORY_TOOL_AUTHORING_SDK
     authority_domain: AUTHORING
     lifecycle_phase: AUTHORING
@@ -102,8 +101,8 @@ responsibilities:
       responsibility_description_id: null
       decision_rationale_ids:
         - ADR_AUTHORING_SDK_REPOSITORY_BOUNDARY
-  RESP_REPOSITORY_TOOL_DESCRIPTOR_VALIDATION:
         - ADR_AUTHORING_SDK_PREDECESSOR_RETIREMENT
+  RESP_REPOSITORY_TOOL_DESCRIPTOR_VALIDATION:
     subject: AUTH_REPOSITORY_TOOL_AUTHORING_SDK
     authority_domain: AUTHORING
     lifecycle_phase: VALIDATION
@@ -122,8 +121,8 @@ responsibilities:
       responsibility_description_id: null
       decision_rationale_ids:
         - ADR_AUTHORING_SDK_REPOSITORY_BOUNDARY
-  RESP_REPOSITORY_TOOL_PACKAGE_BUILD:
         - ADR_AUTHORING_SDK_PREDECESSOR_RETIREMENT
+  RESP_REPOSITORY_TOOL_PACKAGE_BUILD:
     subject: AUTH_REPOSITORY_TOOL_AUTHORING_SDK
     authority_domain: AUTHORING
     lifecycle_phase: BUILD
@@ -142,8 +141,8 @@ responsibilities:
       responsibility_description_id: null
       decision_rationale_ids:
         - ADR_AUTHORING_SDK_REPOSITORY_BOUNDARY
-  RESP_REPOSITORY_TOOL_PACKAGE_TEST:
         - ADR_AUTHORING_SDK_PREDECESSOR_RETIREMENT
+  RESP_REPOSITORY_TOOL_PACKAGE_TEST:
     subject: AUTH_REPOSITORY_TOOL_AUTHORING_SDK
     authority_domain: AUTHORING
     lifecycle_phase: VALIDATION
@@ -162,6 +161,7 @@ responsibilities:
       responsibility_description_id: null
       decision_rationale_ids:
         - ADR_AUTHORING_SDK_REPOSITORY_BOUNDARY
+        - ADR_AUTHORING_SDK_PREDECESSOR_RETIREMENT
   RESP_SCTOOL_AUTHORING_SDK_PACKAGE_PUBLICATION:
     subject: AUTH_AUTHORING_SDK_PACKAGE_DELIVERY
     authority_domain: PACKAGE_PUBLICATION
