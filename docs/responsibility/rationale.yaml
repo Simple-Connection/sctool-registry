@@ -276,3 +276,37 @@ rationales:
       versions to GitHub Packages, verifies remote integrity against the local pack,
       and records revision-bound evidence. Consumer access does not transfer source,
       version, compatibility, or publication authority.
+
+  ADR_AUTHORING_SDK_PREDECESSOR_RETIREMENT:
+    status: ACTIVE
+    applies_to:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+      - RESP_REPOSITORY_TOOL_AUTHORING_GUIDANCE
+      - RESP_REPOSITORY_TOOL_DESCRIPTOR_VALIDATION
+      - RESP_REPOSITORY_TOOL_PACKAGE_BUILD
+      - RESP_REPOSITORY_TOOL_PACKAGE_TEST
+    established_in:
+      version: "1.0.2"
+      session: P6
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - AUTHORITY_TRANSFER
+      - COMPONENT_REMOVAL
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+      - OWNERSHIP_POLICY_CHANGE
+    statement: >-
+      The Simple-Connection/SC_Linked_App predecessor trees program-sdk/sctool-sdk
+      and program-sdk/repository-tool-sdk were physically removed in Product commit
+      37974f7f97cb80a5bac9ee08dbc4b646a8732049 after exact published package
+      consumption was proven. The final Product import cleanup is bound to
+      c0dc7730f8a82f6e766f7dda5fc361e529a5c4fa. Product PTSIP run 34048572473
+      returned CONFORMANT with no blocking gaps, and Windows Product regression run
+      34048572319 passed exact package identity, lock, install, typecheck, build,
+      runtime contract, and file-lock/failure-matrix verification. The legacy
+      Product-local Authoring SDK sources therefore have no remaining source,
+      compatibility, version, publication, or runtime-consumption authority and
+      are retired rather than replacement-pending.
