@@ -1,0 +1,203 @@
+schema_version: "4.0"
+document_type: machine_session
+natural_language: FORBIDDEN
+session:
+  id: P6
+  type: C
+  number: 6
+  approval: APPROVED
+  distribution_contract_version: "1.0.2"
+  branch: "dev/1.0.2"
+  authority_repository: "Simple-Connection/sctool-registry"
+  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
+routing:
+  docs_index: "docs/index.yaml"
+  rules_index: "docs/rules/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  essential_template: "docs/template/session_document_template/session_document_essential.yaml"
+  type_template: "docs/template/session_document_template/session_type_C.yaml"
+heads:
+  start: "1a04236d54552c19da5390cfbfd979f585b6c833"
+  implementation: null
+  exact_validation: null
+responsibility_model:
+  effects:
+    assign: []
+    implement:
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    preserve:
+      - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
+      - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
+      - RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION
+      - RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    defer: []
+    transfer: []
+    retire: []
+    forbid: []
+  description_ids: []
+  rationale_ids:
+    - ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY
+payload:
+  validation:
+    gate_refs:
+      - GATE_P6_RESPONSIBILITY_SPLIT
+      - GATE_P6_ACTIVATION_ROLLBACK_CONTRACT
+      - GATE_P6_ACTIVATION_ATOMICITY
+      - GATE_P6_RUNTIME_RECONCILE
+      - GATE_P6_ROLLBACK
+      - GATE_P6_RENDERER_UI
+      - GATE_P6_FAILURE_RECOVERY
+      - GATE_P6_PRODUCT_REGRESSION
+      - GATE_P6_P5_COMPATIBILITY
+      - GATE_P6_PTSIP_CONFORMANCE
+    evidence_refs:
+      - E_P6_APPROVAL
+  responsibility_description_ids: []
+  decision_rationale_ids:
+    - ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY
+work_units:
+  - id: P6-W1
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    input_refs:
+      - P5-W9
+      - CONTRACT_SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1
+    output_refs:
+      - CONTRACT_SIMPLE_CONNECTION_ACTIVATION_ROLLBACK_V1
+      - EXPLICIT_ACTIVATION_BOUNDARY
+      - EXPLICIT_ROLLBACK_BOUNDARY
+      - RUNTIME_RECONCILE_ORDERING
+    completion_codes:
+      - P6_ACTIVATION_ROLLBACK_RUNTIME_CONTRACT_PENDING
+  - id: P6-W2
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+    input_refs:
+      - P6-W1
+    output_refs:
+      - EXPLICIT_ACTIVATION_ENTRYPOINT
+      - ATOMIC_SELECTED_ENABLED_STATE
+      - ACTIVATION_FAILURE_RESTORE
+    completion_codes:
+      - P6_ACTIVATION_ATOMIC_STATE_PENDING
+  - id: P6-W3
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+    input_refs:
+      - P6-W2
+    output_refs:
+      - EXPLICIT_RUNTIME_RECONCILE_ENTRYPOINT
+      - DESCRIPTOR_RECONCILE
+      - MANAGED_REPO_RESCAN
+      - RECONCILE_FAILURE_RESTORE
+    completion_codes:
+      - P6_RUNTIME_RECONCILE_PENDING
+  - id: P6-W4
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+    input_refs:
+      - P6-W3
+    output_refs:
+      - EXPLICIT_ROLLBACK_ENTRYPOINT
+      - INSTALLED_SIBLING_ROLLBACK
+      - NO_DOWNLOAD_ROLLBACK
+      - ROLLBACK_FAILURE_RESTORE
+    completion_codes:
+      - P6_ROLLBACK_PENDING
+  - id: P6-W5
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    input_refs:
+      - P6-W4
+    output_refs:
+      - ACTIVATION_UI
+      - ROLLBACK_UI
+      - ACTIVE_VERSION_PROJECTION
+      - RUNTIME_RECONCILE_STATUS
+    completion_codes:
+      - P6_RENDERER_UI_PENDING
+  - id: P6-W6
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+    input_refs:
+      - P6-W5
+    output_refs:
+      - FAILURE_MATRIX
+      - WINDOWS_RUNTIME_FILE_LOCK_REGRESSION
+      - PARTIAL_ACTIVATION_VISIBILITY_PROOF
+    completion_codes:
+      - P6_FAILURE_RECOVERY_PENDING
+  - id: P6-W7
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    input_refs:
+      - P6-W6
+    output_refs:
+      - REVISION_BOUND_P6_EVIDENCE
+      - PRODUCT_TYPECHECK_BUILD_PASS
+      - PRODUCT_PTSIP_PASS
+    completion_codes:
+      - P6_PRODUCT_AUTOMATION_EVIDENCE_PENDING
+  - id: P6-W8
+    status: PENDING
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    input_refs:
+      - P6-W7
+    output_refs:
+      - P5_COMPATIBILITY_PASS
+      - REGISTRY_BOUNDARY_PASS
+      - PRODUCT_REGRESSION_PASS
+      - P6_CLOSEOUT_CANDIDATE
+    completion_codes:
+      - P6_CROSS_REPOSITORY_EXACT_CLOSEOUT_PENDING
+evidence:
+  - id: E_P6_APPROVAL
+    kind: USER_APPROVAL
+    head: null
+    refs:
+      approval: APPROVED
+      scope: ACTIVATION_ROLLBACK_RUNTIME_RENDERER_UI
+gates:
+  - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P6_APPROVAL]}
+  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_RESPONSIBILITY_SPLIT, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_ACTIVATION_ROLLBACK_CONTRACT, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_ACTIVATION_ATOMICITY, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_RUNTIME_RECONCILE, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_ROLLBACK, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_RENDERER_UI, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_FAILURE_RECOVERY, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_PRODUCT_REGRESSION, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_P5_COMPATIBILITY, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_PTSIP_CONFORMANCE, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_SDK_BOUNDARY, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_PTSIP_PROFILE, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PENDING, evidence_refs: []}
+state:
+  mode: DERIVED
+  ruleset: SESSION_STATE_V1

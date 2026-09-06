@@ -68,14 +68,16 @@ sessions:
     planning_document: "docs/ver1.0.2/session_document/ver.1.0.2_P5_simple_connection_install_work_plan.yaml"
   - id: P6
     type: C
-    state: NOT_APPROVED
-    approval: REQUIRED
+    state: ACTIVE
+    approval: APPROVED
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_ACTIVATION
       - RESP_SIMPLE_CONNECTION_ROLLBACK
       - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
       - RESP_SIMPLE_CONNECTION_RENDERER_UI
-    document: null
+    document: "docs/ver1.0.2/session_document/ver.1.0.2_P6_simple_connection_activation_runtime.yaml"
+    planning_state: CONCRETIZED
+    planning_document: "docs/ver1.0.2/session_document/ver.1.0.2_P6_simple_connection_activation_runtime_work_plan.yaml"
 migrations:
   machine_routing: COMPLETE
   responsibility_model: COMPLETE
@@ -107,5 +109,5 @@ gates:
   version_completion: BLOCKED
   merge_to_main: BLOCKED
 next:
-  session_id: P6
-  state: NOT_APPROVED
+  session_id: null
+  state: NONE

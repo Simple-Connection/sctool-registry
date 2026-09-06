@@ -442,7 +442,7 @@ responsibilities:
     normative: MUST
     state: ALLOCATED
     scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
-    contract_refs: []
+    contract_refs: [CONTRACT_SIMPLE_CONNECTION_ACTIVATION_ROLLBACK_V1]
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
     interpretation:
       semantic_coverage: COMPLETE
@@ -461,7 +461,7 @@ responsibilities:
     normative: MUST
     state: ALLOCATED
     scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
-    contract_refs: []
+    contract_refs: [CONTRACT_SIMPLE_CONNECTION_ACTIVATION_ROLLBACK_V1]
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
     interpretation:
       semantic_coverage: COMPLETE
@@ -480,7 +480,7 @@ responsibilities:
     normative: MUST
     state: ALLOCATED
     scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
-    contract_refs: []
+    contract_refs: [CONTRACT_SIMPLE_CONNECTION_ACTIVATION_ROLLBACK_V1]
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
     interpretation:
       semantic_coverage: COMPLETE
@@ -499,7 +499,7 @@ responsibilities:
     normative: MUST
     state: ALLOCATED
     scope: {repository_id: SIMPLE_CONNECTION, component_id: COMP_SIMPLE_CONNECTION_DESKTOP, root: "."}
-    contract_refs: []
+    contract_refs: [CONTRACT_SIMPLE_CONNECTION_ACTIVATION_ROLLBACK_V1]
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_SIMPLE_CONNECTION_DESKTOP, predecessor_retirement: NOT_APPLICABLE}
     interpretation:
       semantic_coverage: COMPLETE

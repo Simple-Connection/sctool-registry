@@ -17,12 +17,9 @@ current:
     interpretation_layer: COMPLETE
     governance_layout: COMPLETE
   improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
-  current_session: P5
-  current_session_document: "docs/ver1.0.2/session_document/ver.1.0.2_P5_simple_connection_install.yaml"
-  next_session:
-    id: P6
-    state: NOT_APPROVED
-    document: null
+  current_session: P6
+  current_session_document: "docs/ver1.0.2/session_document/ver.1.0.2_P6_simple_connection_activation_runtime.yaml"
+  next_session: null
 
 versions:
   "1.0.1":
@@ -56,6 +53,7 @@ versions:
       - {id: P3, state: COMPLETE, format: MACHINE_SESSION, document: "docs/ver1.0.2/session_document/ver.1.0.2_P3_registry_client_sdk_release_retrieval.yaml"}
       - {id: P4, state: COMPLETE, format: MACHINE_SESSION, document: "docs/ver1.0.2/session_document/ver.1.0.2_P4_file_backed_verified_candidate.yaml"}
       - {id: P5, state: COMPLETE, format: MACHINE_SESSION, document: "docs/ver1.0.2/session_document/ver.1.0.2_P5_simple_connection_install.yaml"}
+      - {id: P6, state: ACTIVE, format: MACHINE_SESSION, document: "docs/ver1.0.2/session_document/ver.1.0.2_P6_simple_connection_activation_runtime.yaml"}
 
 templates:
   improvement_plan: "docs/template/improvement_plan.yaml"
