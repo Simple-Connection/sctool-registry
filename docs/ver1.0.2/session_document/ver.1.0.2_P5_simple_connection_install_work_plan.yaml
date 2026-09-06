@@ -8,12 +8,13 @@ session:
   branch: "dev/1.0.2"
   governance_repository: "Simple-Connection/sctool-registry"
 implementation:
-  repository: "Kinirin/Simple-Connection"
+  repository: "Simple-Connection/SC_Linked_App"
   branch: "dev/2.2.4"
   ownership_transition:
-    current_owner: Kinirin
+    current_owner: Simple-Connection
     target_owner: Simple-Connection
-    state: PLANNED
+    state: COMPLETE
+    canonical_repository: "Simple-Connection/SC_Linked_App"
     implementation_repository_identity_changes_only_after_transfer: true
 approval:
   planning: APPROVED
@@ -167,9 +168,9 @@ sdk_distribution:
     owner: Simple-Connection
     authority: SDK_SOURCE_AND_PACKAGE_PUBLICATION
   consumer:
-    current_repository: "Kinirin/Simple-Connection"
-    current_owner: Kinirin
-    target_repository_after_ownership_transfer: "Simple-Connection/Simple-Connection"
+    current_repository: "Simple-Connection/SC_Linked_App"
+    current_owner: Simple-Connection
+    target_repository_after_ownership_transfer: "Simple-Connection/SC_Linked_App"
     target_owner: Simple-Connection
     authority: PACKAGE_READ_ONLY
   version_policy:
@@ -199,6 +200,31 @@ sdk_distribution:
     github_release_tgz: OPTIONAL
     github_release_tgz_role: PROVENANCE_OR_RECOVERY_ONLY
     primary_dependency_distribution: GITHUB_PACKAGES
+
+sctool_authoring_sdk_ownership:
+  approval: APPROVED
+  authority_repository: "Simple-Connection/sctool-registry"
+  canonical_source_path: "packages/sctool-sdk"
+  package: "@simple-connection/sctool-sdk"
+  responsibilities:
+    - RESP_SCTOOL_AUTHORING_GUIDANCE
+    - RESP_SCTOOL_MANIFEST_VALIDATION
+    - RESP_SCTOOL_PACKAGE_BUILD
+    - RESP_SCTOOL_PACKAGE_TEST
+  predecessor:
+    repository: "Simple-Connection/SC_Linked_App"
+    path: "program-sdk/sctool-sdk"
+    state: TRANSITIONAL_MIGRATION_SOURCE
+  consumer_boundary:
+    repository: "Simple-Connection/SC_Linked_App"
+    role: LOCATOR_AND_READ_ONLY_CONSUMER
+    source_ownership: FORBIDDEN
+    version_authority: FORBIDDEN
+    compatibility_authority: FORBIDDEN
+    publication_authority: FORBIDDEN
+  physical_migration:
+    state: PENDING
+    rule: AUTHORITY_TRANSFER_PRECEDES_SOURCE_MATERIALIZATION_AND_CONSUMER_REBIND
 
 transaction_model:
   proposed_contract_id: SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1
