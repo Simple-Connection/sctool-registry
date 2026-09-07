@@ -130,19 +130,20 @@ work_units:
     completion_codes:
       - P6_RENDERER_UI_COMPLETE
   - id: P6-W6
-    status: PENDING
+    status: BLOCKED
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_ACTIVATION
       - RESP_SIMPLE_CONNECTION_ROLLBACK
       - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
     input_refs:
       - P6-W5
+      - E_P6_W6_PRODUCT_CHANGE_REQUEST
     output_refs:
       - FAILURE_MATRIX
       - WINDOWS_RUNTIME_FILE_LOCK_REGRESSION
       - PARTIAL_ACTIVATION_VISIBILITY_PROOF
     completion_codes:
-      - P6_FAILURE_RECOVERY_PENDING
+      - P6_FAILURE_RECOVERY_PRODUCT_CHANGE_REQUESTED
   - id: P6-W7
     status: PENDING
     responsibility_refs:
@@ -457,6 +458,58 @@ evidence:
       ptsip_trigger_scope_affected: false
       scope_equivalence_reason: TEST_ONLY_WINDOWS_LOCK_HELPER_SHUTDOWN
 
+  - id: E_P6_W6_PRODUCT_CHANGE_REQUEST
+    kind: EXTERNAL_CHANGE_REQUEST
+    head: "8d9a8a009c4284f8abd03cf7632366b1c44235e7"
+    refs:
+      requesting_repository: "Simple-Connection/sctool-registry"
+      target_repository: "Simple-Connection/SC_Linked_App"
+      target_branch: "main"
+      product_current_head: "8d9a8a009c4284f8abd03cf7632366b1c44235e7"
+      product_verified_w5_code_head: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
+      product_head_delta_scope: DOCUMENTATION_AND_DEVELOPMENT_TOOLING_ONLY
+      direct_product_mutation_by_registry_project: FORBIDDEN
+      product_interaction_mode: CHANGE_REQUEST_ONLY
+      product_evidence_read_mode: READ_ONLY_EXACT_VALIDATION
+      required_product_work_item: P3-W5
+      prerequisite_machine_state_repair: P3-W4_COMPLETED_EVIDENCE_RESTORE
+      required_outputs:
+        - ACTIVATION_ROLLBACK_FAILURE_MATRIX
+        - WINDOWS_RUNTIME_DESCRIPTOR_FILE_LOCK_REGRESSION
+        - PARTIAL_ACTIVATION_VISIBILITY_PROOF
+        - REVISION_BOUND_P6_W6_EVIDENCE
+      required_failure_points:
+        - ACTIVATION_STATE_WRITE_FAILURE
+        - DESCRIPTOR_SNAPSHOT_FAILURE
+        - DESCRIPTOR_WRITE_FAILURE
+        - MANAGED_RESCAN_FAILURE
+        - ROLLBACK_DESCRIPTOR_SNAPSHOT_FAILURE
+        - ROLLBACK_DESCRIPTOR_WRITE_FAILURE
+        - ROLLBACK_MANAGED_RESCAN_FAILURE
+        - WINDOWS_RUNTIME_DESCRIPTOR_FILE_LOCK
+      required_restore_assertions:
+        - PRIOR_SELECTED_VERSION
+        - PRIOR_ENABLED_VERSION
+        - PRIOR_DESCRIPTOR_SNAPSHOT
+        - PRIOR_RUNTIME_RESCAN
+        - INSTALLED_SIBLING_PRESERVATION
+      required_visibility_assertions:
+        - NO_PARTIAL_SELECTED_ENABLED_PROJECTION
+        - NO_PARTIAL_ACTIVE_VERSION_PROJECTION
+        - NO_PARTIAL_RUNTIME_DESCRIPTOR_PROJECTION
+        - POST_FAILURE_LIFECYCLE_PROJECTION_EQUALS_PRIOR_ACTIVE_SNAPSHOT
+      source_change_policy: ONLY_IF_EXECUTABLE_FAILURE_MATRIX_EXPOSES_CONTRACT_VIOLATION
+      install_retrieval_during_recovery: FORBIDDEN
+      rollback_download: FORBIDDEN
+      rollback_reinstall: FORBIDDEN
+      renderer_persistent_mutation: FORBIDDEN
+      authoring_sdk_change: FORBIDDEN
+      registry_client_sdk_authority_expansion: FORBIDDEN
+      expected_test_path: "desktop/tests/mcp/sctool/p6-failure-recovery.test.mjs"
+      expected_ci_path: ".github/workflows/sctool-product-install-regression.yml"
+      expected_evidence_env: P6_W6_EVIDENCE_PATH
+      expected_evidence_format: "simple-connection-p6-failure-recovery/v1"
+
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P6_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P6_W1_GOVERNANCE]}
@@ -466,7 +519,7 @@ gates:
   - {id: GATE_P6_RUNTIME_RECONCILE, required: true, status: PASS, evidence_refs: [E_P6_W3_PRODUCT_IMPLEMENTATION, E_P6_W3_PRODUCT_FOCUSED_VALIDATION, E_P6_W3_PRODUCT_PTSIP]}
   - {id: GATE_P6_ROLLBACK, required: true, status: PASS, evidence_refs: [E_P6_W4_PRODUCT_IMPLEMENTATION, E_P6_W4_PRODUCT_VALIDATION, E_P6_W4_PRODUCT_PTSIP]}
   - {id: GATE_P6_RENDERER_UI, required: true, status: PASS, evidence_refs: [E_P6_W5_PRODUCT_IMPLEMENTATION, E_P6_W5_PRODUCT_VALIDATION, E_P6_W5_PRODUCT_PTSIP]}
-  - {id: GATE_P6_FAILURE_RECOVERY, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_FAILURE_RECOVERY, required: true, status: BLOCKED, evidence_refs: [E_P6_W6_PRODUCT_CHANGE_REQUEST]}
   - {id: GATE_P6_PRODUCT_REGRESSION, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_P5_COMPATIBILITY, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_PTSIP_CONFORMANCE, required: true, status: PENDING, evidence_refs: []}
