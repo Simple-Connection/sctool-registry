@@ -377,20 +377,27 @@ evidence:
 
   - id: E_P6_W5_PRODUCT_IMPLEMENTATION
     kind: COMMIT_SET
-    head: "4c1110ea1e446f304ce0d56b0f0b46325ee61ade"
+    head: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
     refs:
       repository: "Simple-Connection/SC_Linked_App"
-      branch: "dev/2.2.4"
-      lifecycle_projection_core: "b6f466e513cb26e7e1f4cba97caf6167ac49d03a"
-      renderer_panel: "6e581625d9ccfe5db122a23918587aec136b5049"
-      renderer_boundary_tests: "4935fe769e815548195d0a94a3b5dda2f2bbbcf1"
-      renderer_ci: "3c48d3f9bce476a6b05ba8f9f5ad3d4040eff6a7"
-      renderer_scope_closeout: "50e83842b2b5a7519e5fb7cf4b0e4ce419bdf975"
-      windows_lock_helper_stabilization: "5c1ead38bd42231df2d6954e68c7d47b8ff5ec27"
-      final_product_head: "4c1110ea1e446f304ce0d56b0f0b46325ee61ade"
+      branch: "main"
+      rebound_from_branch: "dev/2.2.4"
+      rebound_from_head: "4c1110ea1e446f304ce0d56b0f0b46325ee61ade"
+      lifecycle_projection_core: "f614e368f5b0aa38c2ccdcea8a526c9f65c4a6c8"
+      renderer_panel: "de53e3264587a3cc4809a4bbdbd93160a317752b"
+      lifecycle_projection_types: "55b13c4c6fa6cd49da3cf7219ef88be8c7b3c72b"
+      lifecycle_bridge_contract: "c82dd345487167dd0984cd5be3e3d9fbd0abb456"
+      preload_lifecycle_intents: "b6e240902e588f703f6d282abe1e0d9e88d961ca"
+      lifecycle_ipc_routing: "59aedfbad4ae5ca24cacfb1db8235f7b8e335f8a"
+      lifecycle_service_export: "002e6f2c9a2cbea58408cab723ebe1319c28b1ec"
+      renderer_mount: "fd8b047d525a73677dbab0dc838215230f5cb585"
+      renderer_boundary_tests: "1847712231d5d92932a7f8c8d3717fd00c5c233d"
+      renderer_ci: "aa41723bd6ad4e69a88227f5774facc9e2103c1d"
+      windows_lock_helper_stabilization: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
+      final_product_head: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
       lifecycle_service: "desktop/src/main/features/mcp/sctool/lifecycle-service.ts"
       renderer_component: "desktop/src/renderer/src/components/settings/ScToolLifecyclePanel.tsx"
-      renderer_mount: "desktop/src/renderer/src/components/settings/RepositoryToolsPage.tsx"
+      renderer_mount_path: "desktop/src/renderer/src/components/settings/RepositoryToolsPage.tsx"
       ipc_boundary: "desktop/src/main/features/mcp/sctool/ipc.ts"
       preload_boundary: "desktop/src/preload/index.ts"
       renderer_authority: INTENT_AND_PROJECTION_ONLY
@@ -400,12 +407,15 @@ evidence:
       direct_renderer_registry_mutation: FORBIDDEN
       direct_renderer_descriptor_mutation: FORBIDDEN
       rollback_target_source: INSTALLED_SIBLING_VERSION
+      dev_to_main_w5_content_equivalence: PASS
   - id: E_P6_W5_PRODUCT_VALIDATION
     kind: WORKFLOW_RUN
-    head: "4c1110ea1e446f304ce0d56b0f0b46325ee61ade"
+    head: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
     refs:
       repository: "Simple-Connection/SC_Linked_App"
-      run_id: 34078003149
+      branch: "main"
+      run_id: 34087578417
+      run_number: 26
       conclusion: SUCCESS
       documentation_routing: PASS
       p5_install_boundary_regression: PASS
@@ -413,6 +423,9 @@ evidence:
       p6_w3_runtime_tests: PASS
       p6_w4_rollback_tests: PASS
       p6_w5_renderer_lifecycle_tests: PASS
+      p6_w5_test_count: 4
+      p6_w5_test_pass: 4
+      p6_w5_test_fail: 0
       exact_registry_owned_sdk_identity: PASS
       exact_sdk_lock_binding: PASS
       product_typecheck: PASS
@@ -421,17 +434,29 @@ evidence:
       published_sctool_cli_routing: PASS
       windows_install_failure_matrix: PASS
       windows_lock_helper_shutdown_stabilized: PASS
-      evidence_artifact_id: 10002760441
-      evidence_artifact_name: "sctool-product-install-4c1110ea1e446f304ce0d56b0f0b46325ee61ade"
+      evidence_artifact_id: 10005773379
+      evidence_artifact_name: "sctool-product-install-ca1da17f5de64b2e7ef10f6c55f280104d065f65"
   - id: E_P6_W5_PRODUCT_PTSIP
     kind: EXACT_VALIDATION
-    head: "4c1110ea1e446f304ce0d56b0f0b46325ee61ade"
+    head: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
     refs:
       repository: "Simple-Connection/SC_Linked_App"
-      run_id: 34078003181
+      branch: "main"
+      bound_product_head: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
+      exact_run_head: "aa41723bd6ad4e69a88227f5774facc9e2103c1d"
+      run_id: 34087383930
+      run_number: 203
       conclusion: SUCCESS
       responsibility_map: PASS
       exact_conformance: PASS
+      scope_equivalence: PASS
+      scope_equivalence_base: "aa41723bd6ad4e69a88227f5774facc9e2103c1d"
+      scope_equivalence_head: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
+      scope_equivalence_changed_files:
+        - "desktop/tests/mcp/sctool/p5-install-transaction.test.mjs"
+      ptsip_trigger_scope_affected: false
+      scope_equivalence_reason: TEST_ONLY_WINDOWS_LOCK_HELPER_SHUTDOWN
+
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P6_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P6_W1_GOVERNANCE]}
