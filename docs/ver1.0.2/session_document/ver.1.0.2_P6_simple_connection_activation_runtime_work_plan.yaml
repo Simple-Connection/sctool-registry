@@ -70,7 +70,7 @@ work_units:
       - MANAGED_REPO_RESCAN
       - RECONCILE_FAILURE_RESTORE
   - id: P6-W4
-    state: PLANNED
+    state: COMPLETE
     purpose: PRODUCT_ROLLBACK
     depends_on:
       - P6-W3

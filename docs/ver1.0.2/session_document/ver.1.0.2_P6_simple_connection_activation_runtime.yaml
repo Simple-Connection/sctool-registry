@@ -104,7 +104,7 @@ work_units:
     completion_codes:
       - P6_RUNTIME_RECONCILE_COMPLETE
   - id: P6-W4
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_ROLLBACK
     input_refs:
@@ -115,7 +115,7 @@ work_units:
       - NO_DOWNLOAD_ROLLBACK
       - ROLLBACK_FAILURE_RESTORE
     completion_codes:
-      - P6_ROLLBACK_PENDING
+      - P6_ROLLBACK_COMPLETE
   - id: P6-W5
     status: PENDING
     responsibility_refs:
@@ -318,6 +318,62 @@ evidence:
       conclusion: SUCCESS
       responsibility_map: PASS
       exact_conformance: PASS
+
+  - id: E_P6_W4_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "2339861760bc267737c32caa7c0b234691186133"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "dev/2.2.4"
+      rollback_core: "2f088a990f9bc9a151702b44215c91ec05f5e29d"
+      verification_head: "3ae07ae2141010617d59da9850415991795163d2"
+      product_closeout_head: "1b8dc560f152e92faff23e13dc741d0b591c417a"
+      final_product_head: "2339861760bc267737c32caa7c0b234691186133"
+      rollback_entrypoint: "desktop/src/main/features/mcp/sctool/rollback-service.ts"
+      runtime_reconcile: "desktop/src/main/features/mcp/sctool/runtime-reconcile-service.ts"
+      target_source: INSTALLED_SIBLING_VERSION
+      retrieval: FORBIDDEN
+      reinstall: FORBIDDEN
+      target_must_differ_from_current_active: REQUIRED
+      current_and_target_install_presence: REQUIRED
+      runtime_reconcile_required: true
+      snapshot_failure_persistent_restore: ENABLED
+      installed_sibling_preservation: REQUIRED
+  - id: E_P6_W4_PRODUCT_VALIDATION
+    kind: WORKFLOW_RUN
+    head: "1b8dc560f152e92faff23e13dc741d0b591c417a"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34076020795
+      conclusion: SUCCESS
+      documentation_routing: PASS
+      p5_install_boundary_regression: PASS
+      p6_w2_activation_tests: PASS
+      p6_w3_runtime_tests: PASS
+      p6_w4_rollback_tests: PASS
+      p6_w4_test_count: 4
+      p6_w4_test_pass: 4
+      p6_w4_test_fail: 0
+      exact_registry_owned_sdk_identity: PASS
+      exact_sdk_lock_binding: PASS
+      product_typecheck: PASS
+      product_build: PASS
+      registry_owned_sdk_runtime_contracts: PASS
+      published_sctool_cli_routing: PASS
+      windows_install_failure_matrix: PASS
+      evidence_artifact_id: 10002103292
+      evidence_artifact_name: "sctool-product-install-1b8dc560f152e92faff23e13dc741d0b591c417a"
+      prior_package_access_blocker: RESOLVED
+  - id: E_P6_W4_PRODUCT_PTSIP
+    kind: EXACT_VALIDATION
+    head: "2339861760bc267737c32caa7c0b234691186133"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34076125956
+      conclusion: SUCCESS
+      responsibility_map: PASS
+      exact_conformance: PASS
+      versioned_session_trigger: "docs/v2.2/**"
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P6_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P6_W1_GOVERNANCE]}
@@ -325,7 +381,7 @@ gates:
   - {id: GATE_P6_ACTIVATION_ROLLBACK_CONTRACT, required: true, status: PASS, evidence_refs: [E_P6_W1_CONTRACT, E_P6_W1_EXACT_VALIDATION]}
   - {id: GATE_P6_ACTIVATION_ATOMICITY, required: true, status: PASS, evidence_refs: [E_P6_W2_PRODUCT_IMPLEMENTATION, E_P6_W2_PRODUCT_VALIDATION, E_P6_W2_PRODUCT_PTSIP]}
   - {id: GATE_P6_RUNTIME_RECONCILE, required: true, status: PASS, evidence_refs: [E_P6_W3_PRODUCT_IMPLEMENTATION, E_P6_W3_PRODUCT_FOCUSED_VALIDATION, E_P6_W3_PRODUCT_PTSIP]}
-  - {id: GATE_P6_ROLLBACK, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_ROLLBACK, required: true, status: PASS, evidence_refs: [E_P6_W4_PRODUCT_IMPLEMENTATION, E_P6_W4_PRODUCT_VALIDATION, E_P6_W4_PRODUCT_PTSIP]}
   - {id: GATE_P6_RENDERER_UI, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_FAILURE_RECOVERY, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_PRODUCT_REGRESSION, required: true, status: PENDING, evidence_refs: []}
