@@ -50,6 +50,45 @@ rollback:
     compound_commit: ATOMIC_OR_RESTORE_CURRENT_ACTIVE_SNAPSHOT
   runtime_reconcile: REQUIRED
   output_state: ROLLED_BACK_ACTIVE
+failure_recovery:
+  responsibility:
+    - RESP_SIMPLE_CONNECTION_ACTIVATION
+    - RESP_SIMPLE_CONNECTION_ROLLBACK
+    - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+  required_failure_points:
+    - ACTIVATION_STATE_WRITE_FAILURE
+    - DESCRIPTOR_SNAPSHOT_FAILURE
+    - DESCRIPTOR_WRITE_FAILURE
+    - MANAGED_REPOSITORY_RESCAN_FAILURE
+    - ROLLBACK_DESCRIPTOR_SNAPSHOT_FAILURE
+    - ROLLBACK_DESCRIPTOR_WRITE_FAILURE
+    - ROLLBACK_MANAGED_REPOSITORY_RESCAN_FAILURE
+    - WINDOWS_RUNTIME_DESCRIPTOR_FILE_LOCK
+  transaction_visibility:
+    in_flight_projection: PRIOR_COMMITTED_ACTIVE_SNAPSHOT_ONLY
+    partial_target_projection: FORBIDDEN
+    partial_runtime_drift_projection: FORBIDDEN
+    post_failure_projection: PRIOR_COMMITTED_ACTIVE_SNAPSHOT
+    concurrent_same_tool_lifecycle_intent: SERIALIZE_OR_REJECT
+  restore_requirements:
+    selected_version: PRIOR_SELECTED_VERSION
+    enabled_version: PRIOR_ENABLED_VERSION
+    descriptor: PRIOR_DESCRIPTOR_SNAPSHOT
+    runtime: RESTORED_PRIOR_DESCRIPTOR_RESCAN
+    installed_siblings: PRESERVE
+  windows_runtime_descriptor_lock:
+    target: REPO_LOCAL_DESCRIPTOR
+    replacement_denial: REQUIRED_TEST
+    download: FORBIDDEN
+    reinstall: FORBIDDEN
+    expected_persistent_state: PRIOR_ACTIVE_SNAPSHOT
+    expected_descriptor_state: PRIOR_DESCRIPTOR_SNAPSHOT
+    expected_projection: PRIOR_COMMITTED_ACTIVE_SNAPSHOT
+  evidence:
+    executable_failure_matrix: REQUIRED
+    windows_runtime_file_lock_regression: REQUIRED
+    partial_activation_visibility_proof: REQUIRED
+    revision_bound_product_artifact: REQUIRED
 renderer_ui:
   responsibility: RESP_SIMPLE_CONNECTION_RENDERER_UI
   authority: INTENT_AND_PROJECTION_ONLY
