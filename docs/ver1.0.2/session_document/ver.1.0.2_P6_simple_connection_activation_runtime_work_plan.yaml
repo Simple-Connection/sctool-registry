@@ -10,7 +10,7 @@ session:
   governance_repository: "Simple-Connection/sctool-registry"
 implementation:
   repository: "Simple-Connection/SC_Linked_App"
-  branch: "dev/2.2.4"
+  branch: "main"
 approval:
   planning: APPROVED
   implementation: APPROVED
