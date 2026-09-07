@@ -117,7 +117,7 @@ work_units:
     completion_codes:
       - P6_ROLLBACK_COMPLETE
   - id: P6-W5
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_RENDERER_UI
     input_refs:
@@ -128,7 +128,7 @@ work_units:
       - ACTIVE_VERSION_PROJECTION
       - RUNTIME_RECONCILE_STATUS
     completion_codes:
-      - P6_RENDERER_UI_PENDING
+      - P6_RENDERER_UI_COMPLETE
   - id: P6-W6
     status: PENDING
     responsibility_refs:
@@ -374,6 +374,64 @@ evidence:
       responsibility_map: PASS
       exact_conformance: PASS
       versioned_session_trigger: "docs/v2.2/**"
+
+  - id: E_P6_W5_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "4c1110ea1e446f304ce0d56b0f0b46325ee61ade"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "dev/2.2.4"
+      lifecycle_projection_core: "b6f466e513cb26e7e1f4cba97caf6167ac49d03a"
+      renderer_panel: "6e581625d9ccfe5db122a23918587aec136b5049"
+      renderer_boundary_tests: "4935fe769e815548195d0a94a3b5dda2f2bbbcf1"
+      renderer_ci: "3c48d3f9bce476a6b05ba8f9f5ad3d4040eff6a7"
+      renderer_scope_closeout: "50e83842b2b5a7519e5fb7cf4b0e4ce419bdf975"
+      windows_lock_helper_stabilization: "5c1ead38bd42231df2d6954e68c7d47b8ff5ec27"
+      final_product_head: "4c1110ea1e446f304ce0d56b0f0b46325ee61ade"
+      lifecycle_service: "desktop/src/main/features/mcp/sctool/lifecycle-service.ts"
+      renderer_component: "desktop/src/renderer/src/components/settings/ScToolLifecyclePanel.tsx"
+      renderer_mount: "desktop/src/renderer/src/components/settings/RepositoryToolsPage.tsx"
+      ipc_boundary: "desktop/src/main/features/mcp/sctool/ipc.ts"
+      preload_boundary: "desktop/src/preload/index.ts"
+      renderer_authority: INTENT_AND_PROJECTION_ONLY
+      active_version_projection_owner: MAIN_PROCESS
+      runtime_reconcile_status_owner: MAIN_PROCESS
+      direct_renderer_activation_state_mutation: FORBIDDEN
+      direct_renderer_registry_mutation: FORBIDDEN
+      direct_renderer_descriptor_mutation: FORBIDDEN
+      rollback_target_source: INSTALLED_SIBLING_VERSION
+  - id: E_P6_W5_PRODUCT_VALIDATION
+    kind: WORKFLOW_RUN
+    head: "4c1110ea1e446f304ce0d56b0f0b46325ee61ade"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34078003149
+      conclusion: SUCCESS
+      documentation_routing: PASS
+      p5_install_boundary_regression: PASS
+      p6_w2_activation_tests: PASS
+      p6_w3_runtime_tests: PASS
+      p6_w4_rollback_tests: PASS
+      p6_w5_renderer_lifecycle_tests: PASS
+      exact_registry_owned_sdk_identity: PASS
+      exact_sdk_lock_binding: PASS
+      product_typecheck: PASS
+      product_build: PASS
+      registry_owned_sdk_runtime_contracts: PASS
+      published_sctool_cli_routing: PASS
+      windows_install_failure_matrix: PASS
+      windows_lock_helper_shutdown_stabilized: PASS
+      evidence_artifact_id: 10002760441
+      evidence_artifact_name: "sctool-product-install-4c1110ea1e446f304ce0d56b0f0b46325ee61ade"
+  - id: E_P6_W5_PRODUCT_PTSIP
+    kind: EXACT_VALIDATION
+    head: "4c1110ea1e446f304ce0d56b0f0b46325ee61ade"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34078003181
+      conclusion: SUCCESS
+      responsibility_map: PASS
+      exact_conformance: PASS
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P6_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P6_W1_GOVERNANCE]}
@@ -382,7 +440,7 @@ gates:
   - {id: GATE_P6_ACTIVATION_ATOMICITY, required: true, status: PASS, evidence_refs: [E_P6_W2_PRODUCT_IMPLEMENTATION, E_P6_W2_PRODUCT_VALIDATION, E_P6_W2_PRODUCT_PTSIP]}
   - {id: GATE_P6_RUNTIME_RECONCILE, required: true, status: PASS, evidence_refs: [E_P6_W3_PRODUCT_IMPLEMENTATION, E_P6_W3_PRODUCT_FOCUSED_VALIDATION, E_P6_W3_PRODUCT_PTSIP]}
   - {id: GATE_P6_ROLLBACK, required: true, status: PASS, evidence_refs: [E_P6_W4_PRODUCT_IMPLEMENTATION, E_P6_W4_PRODUCT_VALIDATION, E_P6_W4_PRODUCT_PTSIP]}
-  - {id: GATE_P6_RENDERER_UI, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_RENDERER_UI, required: true, status: PASS, evidence_refs: [E_P6_W5_PRODUCT_IMPLEMENTATION, E_P6_W5_PRODUCT_VALIDATION, E_P6_W5_PRODUCT_PTSIP]}
   - {id: GATE_P6_FAILURE_RECOVERY, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_PRODUCT_REGRESSION, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_P5_COMPATIBILITY, required: true, status: PENDING, evidence_refs: []}

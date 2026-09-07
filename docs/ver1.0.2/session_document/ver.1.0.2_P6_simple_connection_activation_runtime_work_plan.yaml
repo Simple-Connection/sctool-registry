@@ -80,7 +80,7 @@ work_units:
       - NO_DOWNLOAD_ROLLBACK
       - ROLLBACK_FAILURE_RESTORE
   - id: P6-W5
-    state: PLANNED
+    state: COMPLETE
     purpose: PRODUCT_RENDERER_UI
     depends_on:
       - P6-W4
