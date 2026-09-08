@@ -1,0 +1,101 @@
+name: Route Registry Client SDK issues
+
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+      - edited
+      - closed
+  push:
+    branches:
+      - "dev/**"
+    paths-ignore:
+      - ".github/registry-sdk-issue-queue.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: read
+
+concurrency:
+  group: registry-sdk-issue-routing
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: >-
+      github.event_name != 'issues' ||
+      contains(github.event.issue.body || '', '<!-- sctool-registry-sdk-report:v1')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout routing implementation
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Fetch version development branches
+        run: git fetch --prune origin "+refs/heads/dev/*:refs/remotes/origin/dev/*"
+
+      - name: Resolve issue target branch
+        id: route
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/issue-routing/registry_issue_intake.py route --repository "$GITHUB_REPOSITORY" > route.json
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          route = json.loads(Path("route.json").read_text(encoding="utf-8"))
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"mode={route['mode']}\n")
+              output.write(f"target_branch={route.get('target_branch') or ''}\n")
+              output.write(f"target_version={route.get('target_version') or ''}\n")
+          print(json.dumps(route, indent=2))
+          PY
+
+      - name: Checkout active version branch
+        if: steps.route.outputs.mode == 'CURRENT_VERSION'
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.route.outputs.target_branch }}
+          fetch-depth: 0
+
+      - name: Synchronize open SDK reports into version queue
+        if: steps.route.outputs.mode == 'CURRENT_VERSION'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python tools/issue-routing/registry_issue_intake.py sync
+          --repository "$GITHUB_REPOSITORY"
+          --branch "${{ steps.route.outputs.target_branch }}"
+          --write .github/registry-sdk-issue-queue.json
+
+      - name: Commit queue projection to active version branch
+        if: steps.route.outputs.mode == 'CURRENT_VERSION'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- .github/registry-sdk-issue-queue.json; then
+            echo "Registry SDK issue queue is already synchronized."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/registry-sdk-issue-queue.json
+          git commit -m "governance: sync Registry SDK issue queue"
+          git push origin "HEAD:${{ steps.route.outputs.target_branch }}"
+
+      - name: Preserve next-version queue in GitHub Issues
+        if: steps.route.outputs.mode == 'NEXT_VERSION_QUEUE'
+        run: echo "No active dev/<semver> branch. Open Registry SDK reports remain queued for the next version branch."
+
+      - name: Fail on ambiguous active version branches
+        if: steps.route.outputs.mode == 'ROUTING_BLOCKED'
+        run: |
+          echo "Multiple active Registry development branches were detected; routing is blocked."
+          exit 1
