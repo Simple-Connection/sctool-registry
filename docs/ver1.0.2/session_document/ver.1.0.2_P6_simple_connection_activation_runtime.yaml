@@ -146,7 +146,7 @@ work_units:
     completion_codes:
       - P6_FAILURE_RECOVERY_COMPLETE
   - id: P6-W7
-    status: BLOCKED
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_ACTIVATION
       - RESP_SIMPLE_CONNECTION_ROLLBACK
@@ -160,7 +160,7 @@ work_units:
       - PRODUCT_TYPECHECK_BUILD_PASS
       - PRODUCT_PTSIP_PASS
     completion_codes:
-      - P6_PRODUCT_CLOSEOUT_REQUESTED
+      - P6_PRODUCT_AUTOMATION_EVIDENCE_COMPLETE
   - id: P6-W8
     status: PENDING
     responsibility_refs:
@@ -694,6 +694,91 @@ evidence:
       release_declaration: OUT_OF_SCOPE
       p6_w8_cross_repository_closeout: NOT_INCLUDED
 
+  - id: E_P6_W7_PRODUCT_CLOSEOUT
+    kind: COMMIT_SET
+    head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      baseline_head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+      p3_w6_completed_commit: "ddea5cbf90755b800a26caa493364d2176f40a2f"
+      p3_session_completed_commit: "f255ff32d40132a1760acdfe6c150d13cb066568"
+      final_product_head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+      product_source_change: NONE
+      baseline_to_final_net_scope: PRODUCT_MACHINE_DOCUMENTATION_ONLY
+      final_changed_files:
+        - "docs/v2.2/v2.2.4/2.2.4_improvement_plan.yaml"
+        - "docs/v2.2/v2.2.4/session_document/P3_plan.yaml"
+        - "docs/v2.2/v2.2.4/session_document/index.yaml"
+      p3_w6_state: COMPLETED
+      p3_session_state: COMPLETED
+      p3_verification_state: PASSED
+      p3_completion_state: COMPLETED
+      p3_session_index_state: COMPLETED
+      improvement_plan_p3_state: COMPLETED
+      release_declaration: OUT_OF_SCOPE
+
+  - id: E_P6_W7_PRODUCT_REGRESSION
+    kind: WORKFLOW_RUN
+    head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      event: WORKFLOW_DISPATCH
+      run_id: 34182735131
+      run_number: 39
+      conclusion: SUCCESS
+      documentation_routing: PASS
+      p5_install_boundary_regression: PASS
+      p6_w2_activation_tests: PASS
+      p6_w3_runtime_tests: PASS
+      p6_w4_rollback_tests: PASS
+      p6_w5_renderer_lifecycle_tests: PASS
+      p6_w6_failure_recovery_matrix: PASS
+      p6_w6_test_count: 11
+      p6_w6_test_pass: 11
+      p6_w6_test_fail: 0
+      p6_w6_revision_bound_evidence: PASS
+      exact_registry_owned_sdk_identity: PASS
+      exact_sdk_lock_binding: PASS
+      product_typecheck: PASS
+      product_build: PASS
+      registry_owned_sdk_runtime_contracts: PASS
+      published_sctool_cli_routing: PASS
+      windows_failure_file_lock_regression: PASS
+      evidence_artifact_id: 10039496745
+      evidence_artifact_name: "sctool-product-install-2e458a734c2bf8076abb763f315db82f43ea54d8"
+      evidence_artifact_expired: false
+
+  - id: E_P6_W7_PRODUCT_PTSIP
+    kind: EXACT_VALIDATION
+    head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      event: WORKFLOW_DISPATCH
+      run_id: 34182736423
+      run_number: 214
+      conclusion: SUCCESS
+      machine_documentation_state: PASS
+      ptsip_environment: PASS
+      responsibility_map: PASS
+      exact_conformance: PASS
+
+  - id: E_P6_W7_PRODUCT_DOCUMENTATION_AUTOMATION
+    kind: WORKFLOW_RUN
+    head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      event: WORKFLOW_DISPATCH
+      run_id: 34182737826
+      run_number: 8
+      conclusion: SUCCESS
+      documentation_automation: PASS
+      p3_w6_state: COMPLETED
+      p3_session_state: COMPLETED
+
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P6_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P6_W1_GOVERNANCE]}
@@ -704,9 +789,9 @@ gates:
   - {id: GATE_P6_ROLLBACK, required: true, status: PASS, evidence_refs: [E_P6_W4_PRODUCT_IMPLEMENTATION, E_P6_W4_PRODUCT_VALIDATION, E_P6_W4_PRODUCT_PTSIP]}
   - {id: GATE_P6_RENDERER_UI, required: true, status: PASS, evidence_refs: [E_P6_W5_PRODUCT_IMPLEMENTATION, E_P6_W5_PRODUCT_VALIDATION, E_P6_W5_PRODUCT_PTSIP]}
   - {id: GATE_P6_FAILURE_RECOVERY, required: true, status: PASS, evidence_refs: [E_P6_W6_PRODUCT_IMPLEMENTATION, E_P6_W6_PRODUCT_VALIDATION, E_P6_W6_PRODUCT_PTSIP, E_P6_W6_PRODUCT_DOCUMENTATION_AUTOMATION]}
-  - {id: GATE_P6_PRODUCT_REGRESSION, required: true, status: BLOCKED, evidence_refs: [E_P6_W7_PRODUCT_CLOSEOUT_REQUEST]}
+  - {id: GATE_P6_PRODUCT_REGRESSION, required: true, status: PASS, evidence_refs: [E_P6_W7_PRODUCT_CLOSEOUT, E_P6_W7_PRODUCT_REGRESSION, E_P6_W7_PRODUCT_DOCUMENTATION_AUTOMATION]}
   - {id: GATE_P6_P5_COMPATIBILITY, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P6_PTSIP_CONFORMANCE, required: true, status: BLOCKED, evidence_refs: [E_P6_W7_PRODUCT_CLOSEOUT_REQUEST]}
+  - {id: GATE_P6_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P6_W7_PRODUCT_PTSIP]}
   - {id: GATE_SDK_BOUNDARY, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_PTSIP_PROFILE, required: true, status: PENDING, evidence_refs: []}
