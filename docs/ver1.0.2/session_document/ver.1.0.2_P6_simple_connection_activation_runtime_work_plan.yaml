@@ -1,0 +1,144 @@
+schema_version: "1.0"
+document_type: session_work_plan
+template_id: session_work_plan_v1
+natural_language: FORBIDDEN
+session:
+  id: P6
+  type: C
+  distribution_contract_version: "1.0.2"
+  branch: "dev/1.0.2"
+  governance_repository: "Simple-Connection/sctool-registry"
+implementation:
+  repository: "Simple-Connection/SC_Linked_App"
+  branch: "main"
+approval:
+  planning: APPROVED
+  implementation: APPROVED
+baseline:
+  registry_head: "1a04236d54552c19da5390cfbfd979f585b6c833"
+  product_head: "aea7144a8dc30beb9a790f5759ef1f9fbf085062"
+  previous_session: P5
+  previous_output_state: INSTALLED_NOT_ACTIVATED
+boundary:
+  registry_client_sdk:
+    state: PRESERVE
+    authority_expansion: FORBIDDEN
+  product:
+    owns:
+      - ACTIVATION
+      - ROLLBACK
+      - RUNTIME_RECONCILE
+      - RENDERER_UI
+    direct_mutation_by_registry_project: FORBIDDEN
+    execution_mode: CHANGE_REQUEST_TO_PRODUCT_OWNER
+    evidence_mode: READ_ONLY_EXACT_VALIDATION
+  authoring_sdk:
+    state: PRESERVE
+responsibility_migration:
+  source:
+    id: RESP_SIMPLE_CONNECTION_ACTIVATION
+  proposed: []
+preconditions:
+  - P5_COMPLETE
+  - P5_CLOSEOUT_CANDIDATE
+  - VERIFIED_INSTALL_STATE_AVAILABLE
+work_units:
+  - id: P6-W1
+    state: COMPLETE
+    purpose: ACTIVATION_ROLLBACK_RUNTIME_CONTRACT
+    depends_on:
+      - P5-W9
+    outputs:
+      - CONTRACT_SIMPLE_CONNECTION_ACTIVATION_ROLLBACK_V1
+      - EXPLICIT_ACTIVATION_BOUNDARY
+      - EXPLICIT_ROLLBACK_BOUNDARY
+      - RUNTIME_RECONCILE_ORDERING
+  - id: P6-W2
+    state: COMPLETE
+    purpose: PRODUCT_ACTIVATION_ATOMIC_STATE
+    depends_on:
+      - P6-W1
+    outputs:
+      - EXPLICIT_ACTIVATION_ENTRYPOINT
+      - ATOMIC_SELECTED_ENABLED_STATE
+      - ACTIVATION_FAILURE_RESTORE
+  - id: P6-W3
+    state: COMPLETE
+    purpose: PRODUCT_RUNTIME_RECONCILE
+    depends_on:
+      - P6-W2
+    outputs:
+      - EXPLICIT_RUNTIME_RECONCILE_ENTRYPOINT
+      - DESCRIPTOR_RECONCILE
+      - MANAGED_REPO_RESCAN
+      - RECONCILE_FAILURE_RESTORE
+  - id: P6-W4
+    state: COMPLETE
+    purpose: PRODUCT_ROLLBACK
+    depends_on:
+      - P6-W3
+    outputs:
+      - EXPLICIT_ROLLBACK_ENTRYPOINT
+      - INSTALLED_SIBLING_ROLLBACK
+      - NO_DOWNLOAD_ROLLBACK
+      - ROLLBACK_FAILURE_RESTORE
+  - id: P6-W5
+    state: COMPLETE
+    purpose: PRODUCT_RENDERER_UI
+    depends_on:
+      - P6-W4
+    outputs:
+      - ACTIVATION_UI
+      - ROLLBACK_UI
+      - ACTIVE_VERSION_PROJECTION
+      - RUNTIME_RECONCILE_STATUS
+  - id: P6-W6
+    state: COMPLETE
+    purpose: ACTIVATION_ROLLBACK_FAILURE_RECOVERY
+    depends_on:
+      - P6-W5
+    outputs:
+      - PRODUCT_CHANGE_REQUEST_HANDOFF
+      - FAILURE_MATRIX
+      - WINDOWS_RUNTIME_FILE_LOCK_REGRESSION
+      - PARTIAL_ACTIVATION_VISIBILITY_PROOF
+  - id: P6-W7
+    state: COMPLETE
+    purpose: PRODUCT_AUTOMATION_EVIDENCE
+    depends_on:
+      - P6-W6
+    outputs:
+      - PRODUCT_CLOSEOUT_CHANGE_REQUEST
+      - REVISION_BOUND_P6_EVIDENCE
+      - PRODUCT_TYPECHECK_BUILD_PASS
+      - PRODUCT_PTSIP_PASS
+  - id: P6-W8
+    state: COMPLETE
+    purpose: CROSS_REPOSITORY_EXACT_CLOSEOUT
+    depends_on:
+      - P6-W7
+    outputs:
+      - P5_COMPATIBILITY_PASS
+      - REGISTRY_BOUNDARY_PASS
+      - PRODUCT_REGRESSION_PASS
+      - P6_CLOSEOUT_CANDIDATE
+proposed_gates:
+  - GATE_P6_RESPONSIBILITY_SPLIT
+  - GATE_P6_ACTIVATION_ROLLBACK_CONTRACT
+  - GATE_P6_ACTIVATION_ATOMICITY
+  - GATE_P6_RUNTIME_RECONCILE
+  - GATE_P6_ROLLBACK
+  - GATE_P6_RENDERER_UI
+  - GATE_P6_FAILURE_RECOVERY
+  - GATE_P6_PRODUCT_REGRESSION
+  - GATE_P6_P5_COMPATIBILITY
+  - GATE_P6_PTSIP_CONFORMANCE
+forbidden_effects:
+  - DIRECT_MUTATION_SIMPLE_CONNECTION_PRODUCT_REPOSITORY
+  - MODIFY_REGISTRY_CLIENT_SDK_FOR_PRODUCT_LOCAL_STATE
+  - DUPLICATE_UPDATE_CANDIDATE_DECISION_IN_PRODUCT
+  - ACTIVATE_DURING_INSTALL
+  - ROLLBACK_BY_DOWNLOAD
+  - ROLLBACK_BY_REINSTALL
+  - DIRECT_RENDERER_STATE_MUTATION
+  - DELETE_INSTALLED_SIBLING_FOR_SELECTION

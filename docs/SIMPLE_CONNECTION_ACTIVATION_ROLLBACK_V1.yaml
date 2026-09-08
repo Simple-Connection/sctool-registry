@@ -1,0 +1,125 @@
+schema_version: "1.0"
+document_type: simple_connection_activation_rollback_contract
+natural_language: FORBIDDEN
+contract_id: SIMPLE_CONNECTION_ACTIVATION_ROLLBACK_V1
+authority: AUTH_SIMPLE_CONNECTION_DESKTOP
+input_boundary:
+  required_install_state: INSTALLED_NOT_ACTIVATED
+  source_contract: CONTRACT_SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1
+  package_presence: REQUIRED
+  registry_update_redecision: FORBIDDEN
+activation:
+  responsibility: RESP_SIMPLE_CONNECTION_ACTIVATION
+  intent:
+    required_fields:
+      - packageId
+      - version
+    authority: EXPLICIT_PRODUCT_INTENT
+  preconditions:
+    - TARGET_VERSION_INSTALLED
+    - TARGET_RECORD_CONSISTENT_WITH_INSTALL_DIRECTORY
+  persistent_state:
+    selected_version: TARGET_VERSION
+    enabled_versions: EXACTLY_TARGET_VERSION
+    sibling_versions: PRESERVE_INSTALLED_DISABLE_RUNTIME
+    compound_commit: ATOMIC_OR_ROLLBACK_TO_PRIOR_SNAPSHOT
+  output_state: ACTIVATED
+runtime_reconcile:
+  responsibility: RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+  ordering:
+    - DURABLE_ACTIVATION_STATE
+    - REPO_LOCAL_DESCRIPTOR_RECONCILE
+    - MANAGED_REPOSITORY_RESCAN
+  target_descriptor: SELECTED_ENABLED_VERSION_ONLY
+  failure:
+    policy: RESTORE_PRIOR_PERSISTENT_AND_RUNTIME_SNAPSHOT
+    partial_activation_visibility: FORBIDDEN
+rollback:
+  responsibility: RESP_SIMPLE_CONNECTION_ROLLBACK
+  target:
+    source: INSTALLED_SIBLING_VERSION
+    retrieval: FORBIDDEN
+    reinstall: FORBIDDEN
+  preconditions:
+    - TARGET_VERSION_INSTALLED
+    - TARGET_VERSION_DIFFERS_FROM_CURRENT_SELECTED
+  persistent_state:
+    selected_version: ROLLBACK_TARGET
+    enabled_versions: EXACTLY_ROLLBACK_TARGET
+    sibling_versions: PRESERVE
+    compound_commit: ATOMIC_OR_RESTORE_CURRENT_ACTIVE_SNAPSHOT
+  runtime_reconcile: REQUIRED
+  output_state: ROLLED_BACK_ACTIVE
+failure_recovery:
+  responsibility:
+    - RESP_SIMPLE_CONNECTION_ACTIVATION
+    - RESP_SIMPLE_CONNECTION_ROLLBACK
+    - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+  required_failure_points:
+    - ACTIVATION_STATE_WRITE_FAILURE
+    - DESCRIPTOR_SNAPSHOT_FAILURE
+    - DESCRIPTOR_WRITE_FAILURE
+    - MANAGED_REPOSITORY_RESCAN_FAILURE
+    - ROLLBACK_DESCRIPTOR_SNAPSHOT_FAILURE
+    - ROLLBACK_DESCRIPTOR_WRITE_FAILURE
+    - ROLLBACK_MANAGED_REPOSITORY_RESCAN_FAILURE
+    - WINDOWS_RUNTIME_DESCRIPTOR_FILE_LOCK
+  transaction_visibility:
+    in_flight_projection: PRIOR_COMMITTED_ACTIVE_SNAPSHOT_ONLY
+    partial_target_projection: FORBIDDEN
+    partial_runtime_drift_projection: FORBIDDEN
+    post_failure_projection: PRIOR_COMMITTED_ACTIVE_SNAPSHOT
+    concurrent_same_tool_lifecycle_intent: SERIALIZE_OR_REJECT
+  restore_requirements:
+    selected_version: PRIOR_SELECTED_VERSION
+    enabled_version: PRIOR_ENABLED_VERSION
+    descriptor: PRIOR_DESCRIPTOR_SNAPSHOT
+    runtime: RESTORED_PRIOR_DESCRIPTOR_RESCAN
+    installed_siblings: PRESERVE
+  windows_runtime_descriptor_lock:
+    target: REPO_LOCAL_DESCRIPTOR
+    replacement_denial: REQUIRED_TEST
+    download: FORBIDDEN
+    reinstall: FORBIDDEN
+    expected_persistent_state: PRIOR_ACTIVE_SNAPSHOT
+    expected_descriptor_state: PRIOR_DESCRIPTOR_SNAPSHOT
+    expected_projection: PRIOR_COMMITTED_ACTIVE_SNAPSHOT
+  evidence:
+    executable_failure_matrix: REQUIRED
+    windows_runtime_file_lock_regression: REQUIRED
+    partial_activation_visibility_proof: REQUIRED
+    revision_bound_product_artifact: REQUIRED
+renderer_ui:
+  responsibility: RESP_SIMPLE_CONNECTION_RENDERER_UI
+  authority: INTENT_AND_PROJECTION_ONLY
+  allowed_actions:
+    - ACTIVATE_INSTALLED_VERSION
+    - ROLLBACK_TO_INSTALLED_VERSION
+    - DISABLE_LOGICAL_TOOL
+    - REFRESH_RUNTIME_STATE
+  forbidden_effects:
+    - DIRECT_SELECTED_VERSION_FILE_MUTATION
+    - DIRECT_INSTALL_REGISTRY_MUTATION
+    - DIRECT_REPO_LOCAL_DESCRIPTOR_MUTATION
+    - REGISTRY_UPDATE_CANDIDATE_REDECISION
+observability:
+  required_projection_fields:
+    - packageId
+    - installedVersions
+    - selectedVersion
+    - activeVersion
+    - logicalEnabled
+    - runtimeReconcileState
+  rollback_target_visibility: REQUIRED
+compatibility:
+  install_contract_output_preserved: INSTALLED_NOT_ACTIVATED
+  registry_client_sdk_authority_expansion: FORBIDDEN
+  authoring_sdk_authority_expansion: FORBIDDEN
+forbidden_effects:
+  - DELETE_ROLLBACK_TARGET_BEFORE_COMMIT
+  - DOWNLOAD_DURING_ROLLBACK
+  - REINSTALL_DURING_ROLLBACK
+  - ACTIVATE_UNINSTALLED_VERSION
+  - MULTIPLE_ENABLED_VERSIONS
+  - PARTIAL_SELECTED_ENABLED_STATE
+  - PARTIAL_RUNTIME_DESCRIPTOR_STATE

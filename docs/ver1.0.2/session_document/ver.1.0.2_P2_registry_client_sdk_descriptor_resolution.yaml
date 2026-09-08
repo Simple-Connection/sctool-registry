@@ -1,0 +1,171 @@
+schema_version: "4.0"
+document_type: machine_session
+natural_language: FORBIDDEN
+session:
+  id: P2
+  type: B
+  number: 2
+  approval: APPROVED
+  distribution_contract_version: "1.0.2"
+  branch: "dev/1.0.2"
+  authority_repository: "Simple-Connection/sctool-registry"
+  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
+routing:
+  docs_index: "docs/index.yaml"
+  rules_index: "docs/rules/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  essential_template: "docs/template/session_document_template/session_document_essential.yaml"
+  type_template: "docs/template/session_document_template/session_type_B.yaml"
+heads:
+  start: "efc9314be1ab2d20b71cb10ef7fb02a94328b2d5"
+  implementation: "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
+  exact_validation: "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
+responsibility_model:
+  effects:
+    assign: []
+    implement:
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    preserve:
+      - RESP_REGISTRY_ACCESS
+    defer:
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+      - RESP_SIMPLE_CONNECTION_INSTALL
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    transfer: []
+    retire: []
+    forbid:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+  description_ids: []
+  rationale_ids:
+    - ADR_TWO_SDK_BOUNDARY
+    - ADR_REGISTRY_DESCRIPTOR_RESOLUTION_BOUNDARY
+    - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
+payload:
+  implementation:
+    responsibility_refs:
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    contract_refs:
+      - CONTRACT_REGISTRY_V2
+      - CONTRACT_ARTIFACT_DELIVERY_V1
+      - CONTRACT_PACKAGE_SCHEMA_V2
+      - CONTRACT_REGISTRY_POLICY
+    path_allow:
+      - "packages/registry-client-sdk/**"
+    path_deny:
+      - "program-sdk/**"
+  responsibility_description_ids: []
+  decision_rationale_ids:
+    - ADR_TWO_SDK_BOUNDARY
+    - ADR_REGISTRY_DESCRIPTOR_RESOLUTION_BOUNDARY
+    - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
+work_units:
+  - id: W1
+    status: COMPLETE
+    responsibility_refs: [RESP_REGISTRY_DESCRIPTOR_CONSUMPTION]
+    input_refs: [CONTRACT_REGISTRY_V2, CONTRACT_PACKAGE_SCHEMA_V2]
+    output_refs: ["packages/registry-client-sdk/src/package-descriptor.mjs"]
+    completion_codes: [DESCRIPTOR_MODEL_IMPLEMENTED]
+  - id: W2
+    status: COMPLETE
+    responsibility_refs: [RESP_REGISTRY_DESCRIPTOR_CONSUMPTION]
+    input_refs: [CONTRACT_PACKAGE_SCHEMA_V2]
+    output_refs: ["packages/registry-client-sdk/tests/package-descriptor.test.mjs"]
+    completion_codes: [DESCRIPTOR_VALIDATION_IMPLEMENTED]
+  - id: W3
+    status: COMPLETE
+    responsibility_refs: [RESP_REGISTRY_CHANNEL_RESOLUTION, RESP_REGISTRY_VERSION_RESOLUTION]
+    input_refs: [CONTRACT_REGISTRY_V2]
+    output_refs: ["packages/registry-client-sdk/src/resolution.mjs"]
+    completion_codes: [CHANNEL_VERSION_RESOLUTION_IMPLEMENTED]
+  - id: W4
+    status: COMPLETE
+    responsibility_refs: [RESP_REGISTRY_TARGET_RESOLUTION]
+    input_refs: [CONTRACT_ARTIFACT_DELIVERY_V1]
+    output_refs: ["packages/registry-client-sdk/src/resolution.mjs"]
+    completion_codes: [TARGET_RESOLUTION_IMPLEMENTED]
+  - id: W5
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    input_refs: [COMP_REGISTRY_CLIENT_SDK]
+    output_refs:
+      - "packages/registry-client-sdk/src/index.mjs"
+      - "packages/registry-client-sdk/src/index.d.mts"
+    completion_codes: [PUBLIC_SURFACE_EXPORTED]
+  - id: W6
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    input_refs:
+      - GATE_PACKAGE_DESCRIPTOR_REGRESSION
+      - GATE_RESOLUTION_REGRESSION
+      - GATE_PTSIP_CONFORMANCE
+    output_refs: [E_P2_EXACT_VALIDATION]
+    completion_codes: [EXACT_VALIDATION_COMPLETE]
+evidence:
+  - id: E_P2_APPROVAL
+    kind: USER_APPROVAL
+    head: null
+    refs: {approval: APPROVED}
+  - id: E_P2_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
+    refs:
+      sdk_boundary_cases: 8
+      registry_access_cases: 11
+      package_descriptor_cases: 21
+      resolution_cases: 20
+      registry_json: PASS
+      ptsip_tool: "0.3.7"
+      ptsip_profile: PASS
+      ptsip_conformance: CONFORMANT
+      blocking_gap_count: 0
+      non_blocking_gap_count: 0
+      audit: PASS
+      production_trust: INACTIVE
+  - id: E_P2_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
+    refs:
+      implementation_head: "1b544eb300e4a67b711f2baad9c40b37ae62e3c2"
+      validation_fixes:
+        - "de8a4fefc70b0475a57d7c66745dbeca21c86928"
+        - "e89b278eb92b9c8eda519c6daff6f67b43cbd400"
+gates:
+  - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P2_APPROVAL]}
+  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P2_IMPLEMENTATION]}
+  - {id: GATE_SDK_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_REGISTRY_ACCESS_REGRESSION, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_PACKAGE_DESCRIPTOR_REGRESSION, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_RESOLUTION_REGRESSION, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_REGISTRY_JSON, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_PROFILE, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_PRODUCTION_TRUST_INACTIVE, required: true, status: PASS, evidence_refs: [E_P2_EXACT_VALIDATION]}
+  - {id: GATE_NO_LIVE_DELIVERY_P2, required: true, status: PASS, evidence_refs: [E_P2_IMPLEMENTATION]}
+blockers: []
+state:
+  mode: DERIVED
+  ruleset: SESSION_STATE_V1

@@ -1,0 +1,14 @@
+schema_version: "3.0"
+document_type: session_type_template
+template_id: session_type_A_v3
+session_type: A
+semantic: DECISION
+natural_language: REFERENCE_ONLY
+payload:
+  authority_changes:
+    assign: []
+    transfer: []
+    preserve: []
+    forbid: []
+  responsibility_description_ids: []
+  decision_rationale_ids: []

@@ -1,0 +1,27 @@
+schema_version: "2.0"
+document_type: governance_rules_index
+natural_language: FORBIDDEN
+migration_ids:
+  - machine_routing
+  - responsibility_model
+  - interpretation_layer
+  - governance_layout
+routes:
+  session_state: "docs/rules/session-state.yaml"
+layout:
+  docs_index: "docs/index.yaml"
+  rules_root: "docs/rules"
+  template_root: "docs/template"
+  responsibility_root: "docs/responsibility"
+  version_root_pattern: "docs/ver{version}"
+  tooling_root: "docs/governance"
+  forbidden_paths:
+    - "docs/governance/index.yaml"
+    - "docs/governance/rules"
+    - "docs/governance/template"
+    - "docs/governance/responsibility"
+    - "docs/governance/versions"
+tooling:
+  entrypoint: "docs/governance/validate.py"
+  requirements: "docs/governance/requirements.txt"
+  package_root: "docs/governance/validation"

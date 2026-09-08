@@ -21,6 +21,60 @@ components:
     release_owner: registry
     compatibility_owner: registry
 
+  - id: registry-client-sdk
+    classification: PRODUCT
+    roles:
+      - IMPLEMENTATION
+    include:
+      - "packages/registry-client-sdk/**"
+    purpose: simple_connection_runtime_registry_metadata_access_delivery_and_integrity_client_sdk
+    shipped: true
+    runtime_required: true
+    executable: true
+    release_owner: registry-client-sdk
+    compatibility_owner: registry-contract
+    manifests:
+      - "packages/registry-client-sdk/package.json"
+    analysis_inputs:
+      - "schemas/package.schema.json"
+      - "policy/registry-policy.json"
+      - "docs/REGISTRY_CONTRACT_V2.md"
+      - "docs/REGISTRY_ACCESS_V1.md"
+      - "docs/ARTIFACT_DELIVERY_V1.md"
+      - "docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml"
+      - "docs/UPDATE_CANDIDATE_V1.yaml"
+      - "docs/SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1.yaml"
+
+  - id: sctool-authoring-sdk
+    classification: PRODUCT
+    roles:
+      - IMPLEMENTATION
+    include:
+      - "packages/sctool-sdk/**"
+    purpose: sctool_authoring_validation_build_test_and_packaging_sdk
+    shipped: true
+    runtime_required: false
+    executable: true
+    release_owner: sctool-authoring-sdk
+    compatibility_owner: sctool-authoring-sdk
+    manifests:
+      - "packages/sctool-sdk/package.json"
+
+  - id: repository-tool-authoring-sdk
+    classification: PRODUCT
+    roles:
+      - IMPLEMENTATION
+    include:
+      - "packages/repository-tool-sdk/**"
+    purpose: repository_tool_descriptor_validation_scaffold_and_authoring_sdk
+    shipped: true
+    runtime_required: false
+    executable: true
+    release_owner: repository-tool-authoring-sdk
+    compatibility_owner: repository-tool-authoring-sdk
+    manifests:
+      - "packages/repository-tool-sdk/package.json"
+
   - id: registry-contracts
     classification: NEUTRAL_CONTRACT
     roles:
@@ -34,6 +88,12 @@ components:
       - "docs/REGISTRY_CONTRACT_V2.md"
       - "docs/REGISTRY_ACCESS_V1.md"
       - "docs/ARTIFACT_DELIVERY_V1.md"
+      - "docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml"
+      - "docs/UPDATE_CANDIDATE_V1.yaml"
+      - "docs/SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1.yaml"
+      - "docs/SIMPLE_CONNECTION_ACTIVATION_ROLLBACK_V1.yaml"
+      - "docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml"
+      - "docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml"
       - "docs/PAGES_DISTRIBUTION_V1.md"
       - "trust/**"
     purpose: canonical_registry_submission_distribution_trust_integrity_and_admission_contracts
@@ -43,6 +103,50 @@ components:
     release_owner: registry-contract
     compatibility_owner: registry-contract
 
+  - id: registry-sdk-package-delivery
+    classification: DELIVERY
+    roles:
+      - AUTOMATION
+      - VERIFICATION
+      - CONFIGURATION
+    include:
+      - ".github/workflows/publish-registry-client-sdk.yml"
+      - "delivery/registry-client-sdk-package/**"
+    purpose: versioned_registry_client_sdk_github_packages_publication_and_integrity_binding
+    shipped: false
+    runtime_required: false
+    executable: true
+    release_owner: registry-sdk-package-delivery
+    compatibility_owner: registry-contract
+    manifests:
+      - "delivery/registry-client-sdk-package/package.json"
+    analysis_inputs:
+      - "packages/registry-client-sdk/package.json"
+      - "packages/registry-client-sdk/src/**"
+      - "docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml"
+
+  - id: authoring-sdk-package-delivery
+    classification: DELIVERY
+    roles:
+      - AUTOMATION
+      - VERIFICATION
+      - CONFIGURATION
+    include:
+      - ".github/workflows/publish-authoring-sdks.yml"
+      - "delivery/authoring-sdk-package/**"
+    purpose: immutable_github_packages_publication_for_registry_owned_authoring_sdks
+    shipped: false
+    runtime_required: false
+    executable: true
+    release_owner: authoring-sdk-package-delivery
+    compatibility_owner: registry-contract
+    manifests:
+      - "delivery/authoring-sdk-package/package.json"
+    analysis_inputs:
+      - "packages/sctool-sdk/**"
+      - "packages/repository-tool-sdk/**"
+      - "docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml"
+
   - id: registry-pages-delivery
     classification: DELIVERY
     roles:
@@ -50,7 +154,8 @@ components:
       - VERIFICATION
       - CONFIGURATION
     include:
-      - ".github/workflows/*.yml"
+      - ".github/workflows/pages.yml"
+      - ".github/workflows/sign-trust.yml"
       - "tools/**"
     purpose: signed_registry_snapshot_assembly_root_trust_signing_verification_key_bootstrap_and_github_pages_publication
     shipped: false
@@ -91,24 +196,74 @@ components:
       - CONFIGURATION
       - GOVERNANCE
       - DOCUMENTATION
+      - IMPLEMENTATION
+      - VERIFICATION
+      - AUTOMATION
     include:
       - "ptsip.yaml"
       - "AGENTS.md"
+      - ".github/workflows/governance.yml"
+      - ".github/workflows/registry-sdk-issue-routing.yml"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/registry-sdk-issue-queue.json"
+      - "tools/issue-routing/**"
+      - "docs/index.yaml"
+      - "docs/rules/**"
+      - "docs/template/**"
+      - "docs/responsibility/**"
+      - "docs/governance/**"
       - "docs/ver*/**"
       - ".gitignore"
       - ".vscode/settings.json"
-    purpose: repository_architecture_declaration_version_session_planning_and_coding_agent_operating_governance
+    purpose: repository_architecture_declaration_flat_machine_governance_and_validation_engine
     shipped: false
     runtime_required: false
-    executable: false
+    executable: true
     release_owner: development-tooling
     compatibility_owner: development-tooling
+    manifests:
+      - "docs/governance/requirements.txt"
 
 relationships:
   - id: registry-contracts-specify-catalog
     from: registry-contracts
     to: registry-catalog
     type: SPECIFIES
+
+  - id: registry-contracts-specify-client-sdk
+    from: registry-contracts
+    to: registry-client-sdk
+    type: SPECIFIES
+
+  - id: registry-client-sdk-reads-catalog
+    from: registry-client-sdk
+    to: registry-catalog
+    type: READS
+
+  - id: registry-contracts-specify-sdk-package-delivery
+    from: registry-contracts
+    to: registry-sdk-package-delivery
+    type: SPECIFIES
+
+  - id: registry-sdk-package-delivery-publishes-client-sdk
+    from: registry-sdk-package-delivery
+    to: registry-client-sdk
+    type: PUBLISHES
+
+  - id: registry-contracts-specify-authoring-sdk-package-delivery
+    from: registry-contracts
+    to: authoring-sdk-package-delivery
+    type: SPECIFIES
+
+  - id: authoring-sdk-package-delivery-publishes-sctool-sdk
+    from: authoring-sdk-package-delivery
+    to: sctool-authoring-sdk
+    type: PUBLISHES
+
+  - id: authoring-sdk-package-delivery-publishes-repository-tool-sdk
+    from: authoring-sdk-package-delivery
+    to: repository-tool-authoring-sdk
+    type: PUBLISHES
 
   - id: registry-contracts-specify-pages-delivery
     from: registry-contracts
@@ -135,14 +290,49 @@ relationships:
     to: registry-contracts
     type: DOCUMENTS
 
+  - id: product-documentation-documents-sctool-authoring-sdk
+    from: product-documentation
+    to: sctool-authoring-sdk
+    type: DOCUMENTS
+
+  - id: product-documentation-documents-repository-tool-authoring-sdk
+    from: product-documentation
+    to: repository-tool-authoring-sdk
+    type: DOCUMENTS
+
   - id: repository-governance-governs-catalog
     from: repository-governance
     to: registry-catalog
     type: GOVERNS
 
+  - id: repository-governance-governs-client-sdk
+    from: repository-governance
+    to: registry-client-sdk
+    type: GOVERNS
+
+  - id: repository-governance-governs-sctool-authoring-sdk
+    from: repository-governance
+    to: sctool-authoring-sdk
+    type: GOVERNS
+
+  - id: repository-governance-governs-repository-tool-authoring-sdk
+    from: repository-governance
+    to: repository-tool-authoring-sdk
+    type: GOVERNS
+
+  - id: repository-governance-governs-authoring-sdk-package-delivery
+    from: repository-governance
+    to: authoring-sdk-package-delivery
+    type: GOVERNS
+
   - id: repository-governance-governs-contracts
     from: repository-governance
     to: registry-contracts
+    type: GOVERNS
+
+  - id: repository-governance-governs-sdk-package-delivery
+    from: repository-governance
+    to: registry-sdk-package-delivery
     type: GOVERNS
 
   - id: repository-governance-governs-pages-delivery

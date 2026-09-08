@@ -1,0 +1,8 @@
+{
+  "name": "@simple-connection/registry-client-sdk-package-delivery",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Independent dependency manifest for Registry Client SDK GitHub Packages delivery automation.",
+  "type": "module",
+  "dependencies": {}
+}

@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kswdeveloper.cloud/schemas/sctool/v1/host-capabilities.schema.json",
+  "title": "SCTool Host Capabilities v1",
+  "description": "Declares the boundary between an SCTool package entry transport and the client-facing transport exposed by its host.",
+  "type": "object",
+  "required": ["schemaVersion", "host", "packageEntry", "clientExposure", "bridge"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "host": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "packageEntry": {
+      "type": "object",
+      "required": ["transport"],
+      "properties": {
+        "transport": { "const": "stdio" }
+      },
+      "additionalProperties": false
+    },
+    "clientExposure": {
+      "type": "object",
+      "required": [
+        "transport",
+        "bind",
+        "pathPattern",
+        "methods",
+        "authentication",
+        "session",
+        "protocol"
+      ],
+      "properties": {
+        "transport": { "const": "streamable-http" },
+        "bind": { "const": "127.0.0.1" },
+        "pathPattern": { "type": "string", "minLength": 1, "pattern": "^/" },
+        "methods": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": { "enum": ["POST", "GET", "DELETE"] }
+        },
+        "authentication": {
+          "type": "object",
+          "required": ["type", "required"],
+          "properties": {
+            "type": { "const": "bearer" },
+            "required": { "const": true }
+          },
+          "additionalProperties": false
+        },
+        "session": {
+          "type": "object",
+          "required": ["header", "lifecycle"],
+          "properties": {
+            "header": { "const": "Mcp-Session-Id" },
+            "lifecycle": { "const": "host-managed" }
+          },
+          "additionalProperties": false
+        },
+        "protocol": {
+          "type": "object",
+          "required": ["baseline", "discoverProbe"],
+          "properties": {
+            "baseline": { "const": "2025-11-25" },
+            "discoverProbe": {
+              "type": "object",
+              "required": ["method", "behavior"],
+              "properties": {
+                "method": { "const": "server/discover" },
+                "behavior": { "const": "method-not-found" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "bridge": {
+      "type": "object",
+      "required": ["mode", "clientTransport", "packageTransport"],
+      "properties": {
+        "mode": { "const": "host-managed" },
+        "clientTransport": { "const": "streamable-http" },
+        "packageTransport": { "const": "stdio" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,12 @@
+schema_version: "3.0"
+document_type: session_type_template
+template_id: session_type_C_v3
+session_type: C
+semantic: VALIDATION_CLOSEOUT
+natural_language: REFERENCE_ONLY
+payload:
+  validation:
+    gate_refs: []
+    evidence_refs: []
+  responsibility_description_ids: []
+  decision_rationale_ids: []

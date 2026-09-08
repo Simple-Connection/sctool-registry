@@ -1,0 +1,130 @@
+name: Publish Authoring SDK Packages
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "dev/1.0.2"
+    paths:
+      - "packages/sctool-sdk/**"
+      - "packages/repository-tool-sdk/**"
+      - "docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml"
+      - ".github/workflows/publish-authoring-sdks.yml"
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: authoring-sdk-packages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Configure Node and GitHub Packages
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@simple-connection"
+
+      - name: Validate SCTool Authoring SDK
+        run: |
+          npm --prefix packages/sctool-sdk ci --ignore-scripts
+          npm --prefix packages/sctool-sdk run typecheck
+          npm --prefix packages/sctool-sdk run build
+          npm --prefix packages/sctool-sdk run test:localization
+          npm --prefix packages/sctool-sdk run test:host-capabilities
+          node --check packages/sctool-sdk/cli/sctool.mjs
+
+      - name: Validate Repository Tool Authoring SDK
+        run: |
+          npm --prefix packages/repository-tool-sdk ci --ignore-scripts
+          npm --prefix packages/repository-tool-sdk run typecheck
+          npm --prefix packages/repository-tool-sdk run test:contract
+
+      - name: Publish or verify immutable Authoring SDK packages
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          publish_one() {
+            package_dir="$1"
+            evidence_name="$2"
+            pushd "$package_dir" >/dev/null
+
+            name="$(node -p "require('./package.json').name")"
+            version="$(node -p "require('./package.json').version")"
+            pack_json="$RUNNER_TEMP/${evidence_name}-pack.json"
+            evidence="$RUNNER_TEMP/${evidence_name}-evidence.json"
+
+            npm pack --json > "$pack_json"
+            tarball="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(d[0].filename)" "$pack_json")"
+            local_integrity="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(d[0].integrity)" "$pack_json")"
+            local_shasum="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(d[0].shasum)" "$pack_json")"
+            local_sha256="$(sha256sum "$tarball" | awk '{print $1}')"
+
+            set +e
+            remote_json="$(npm view "$name@$version" --json --registry=https://npm.pkg.github.com 2>/dev/null)"
+            view_status=$?
+            set -e
+
+            if [[ $view_status -eq 0 && -n "$remote_json" ]]; then
+              remote_integrity="$(node -e "const d=JSON.parse(process.argv[1]);process.stdout.write(d.dist?.integrity||'')" "$remote_json")"
+              if [[ "$remote_integrity" != "$local_integrity" ]]; then
+                echo "Existing package integrity does not match canonical source: $name@$version" >&2
+                exit 1
+              fi
+              publish_status="EXISTING_VERIFIED"
+            else
+              npm publish "$tarball" --registry=https://npm.pkg.github.com --access restricted
+              publish_status="PUBLISHED"
+            fi
+
+            remote_json=""
+            for attempt in 1 2 3 4 5; do
+              set +e
+              remote_json="$(npm view "$name@$version" --json --registry=https://npm.pkg.github.com 2>/dev/null)"
+              status=$?
+              set -e
+              if [[ $status -eq 0 && -n "$remote_json" ]]; then break; fi
+              sleep 2
+            done
+            if [[ -z "$remote_json" ]]; then
+              echo "Unable to resolve published package: $name@$version" >&2
+              exit 1
+            fi
+
+            remote_integrity="$(node -e "const d=JSON.parse(process.argv[1]);process.stdout.write(d.dist?.integrity||'')" "$remote_json")"
+            remote_tarball="$(node -e "const d=JSON.parse(process.argv[1]);process.stdout.write(d.dist?.tarball||'')" "$remote_json")"
+            if [[ "$remote_integrity" != "$local_integrity" ]]; then
+              echo "Remote integrity mismatch after publication: $name@$version" >&2
+              exit 1
+            fi
+
+            SOURCE_REPOSITORY="$GITHUB_REPOSITORY" SOURCE_REVISION="$GITHUB_SHA" PACKAGE_NAME="$name" PACKAGE_VERSION="$version" LOCAL_INTEGRITY="$local_integrity" REMOTE_INTEGRITY="$remote_integrity" REMOTE_TARBALL="$remote_tarball" LOCAL_SHASUM="$local_shasum" LOCAL_SHA256="$local_sha256" PUBLISH_STATUS="$publish_status" EVIDENCE_PATH="$evidence" node -e 'const fs=require("fs");const e={format:"authoring-sdk-package-evidence/v1",package:{name:process.env.PACKAGE_NAME,version:process.env.PACKAGE_VERSION,registry:"https://npm.pkg.github.com",tarball:process.env.REMOTE_TARBALL},source:{repository:process.env.SOURCE_REPOSITORY,revision:process.env.SOURCE_REVISION},integrity:{npm:process.env.LOCAL_INTEGRITY,remoteNpm:process.env.REMOTE_INTEGRITY,sha1:process.env.LOCAL_SHASUM,sha256:process.env.LOCAL_SHA256},publication:{status:process.env.PUBLISH_STATUS,immutableVersionVerified:true}};fs.writeFileSync(process.env.EVIDENCE_PATH,JSON.stringify(e,null,2)+"\\n")'
+            cat "$evidence"
+            popd >/dev/null
+          }
+
+          publish_one "packages/sctool-sdk" "sctool-sdk-package"
+          publish_one "packages/repository-tool-sdk" "repository-tool-sdk-package"
+
+      - name: Upload Authoring SDK package evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: authoring-sdk-package-evidence-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/sctool-sdk-package-evidence.json
+            ${{ runner.temp }}/repository-tool-sdk-package-evidence.json
+          if-no-files-found: error
+          retention-days: 30

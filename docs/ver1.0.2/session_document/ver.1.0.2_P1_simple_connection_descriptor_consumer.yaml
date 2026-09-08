@@ -1,0 +1,150 @@
+schema_version: "4.0"
+document_type: machine_session
+natural_language: FORBIDDEN
+session:
+  id: P1
+  type: A
+  number: 1
+  approval: APPROVED
+  distribution_contract_version: "1.0.2"
+  branch: "dev/1.0.2"
+  authority_repository: "Simple-Connection/sctool-registry"
+  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
+routing:
+  docs_index: "docs/index.yaml"
+  rules_index: "docs/rules/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  essential_template: "docs/template/session_document_template/session_document_essential.yaml"
+  type_template: "docs/template/session_document_template/session_type_A.yaml"
+heads:
+  start: null
+  implementation: "e3b0c14d6dd79dc7711bc1cda604eb2895905a4f"
+  exact_validation: "e3b0c14d6dd79dc7711bc1cda604eb2895905a4f"
+responsibility_model:
+  effects:
+    assign:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+      - RESP_REGISTRY_ACCESS
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+      - RESP_SIMPLE_CONNECTION_INSTALL
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    implement:
+      - RESP_REGISTRY_ACCESS
+    preserve:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+      - RESP_SIMPLE_CONNECTION_INSTALL
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    defer:
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    transfer:
+      - RESP_REGISTRY_ACCESS
+    retire: []
+    forbid: []
+  description_ids: []
+  rationale_ids:
+    - ADR_TWO_SDK_BOUNDARY
+    - ADR_REGISTRY_ACCESS_AUTHORITY_TRANSFER
+    - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
+    - ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY
+payload:
+  authority_changes:
+    assign:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_REGISTRY_ACCESS
+    transfer:
+      - RESP_REGISTRY_ACCESS
+    preserve:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    forbid: []
+  responsibility_description_ids: []
+  decision_rationale_ids:
+    - ADR_TWO_SDK_BOUNDARY
+    - ADR_REGISTRY_ACCESS_AUTHORITY_TRANSFER
+    - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
+    - ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY
+work_units:
+  - id: W1
+    status: COMPLETE
+    responsibility_refs: [RESP_SCTOOL_AUTHORING_GUIDANCE, RESP_REGISTRY_ACCESS]
+    input_refs: [CONTRACT_REGISTRY_V2, CONTRACT_REGISTRY_ACCESS_V1, CONTRACT_ARTIFACT_DELIVERY_V1]
+    output_refs: [RESP_REGISTRY_ACCESS]
+    completion_codes: [TWO_SDK_MODEL_SELECTED, REGISTRY_ACCESS_OWNER_CORRECTED]
+  - id: W2
+    status: COMPLETE
+    responsibility_refs: [RESP_REGISTRY_ACCESS]
+    input_refs: [COMP_REGISTRY_CLIENT_SDK]
+    output_refs: ["packages/registry-client-sdk"]
+    completion_codes: [REGISTRY_CLIENT_SDK_BOUNDARY_ESTABLISHED]
+  - id: W3
+    status: COMPLETE
+    responsibility_refs: [RESP_REGISTRY_ACCESS]
+    input_refs: [CONTRACT_REGISTRY_ACCESS_V1]
+    output_refs: ["packages/registry-client-sdk/src/registry-access.mjs"]
+    completion_codes: [REGISTRY_ACCESS_MIGRATED]
+evidence:
+  - id: E_P1_APPROVAL
+    kind: USER_APPROVAL
+    head: null
+    refs: {approval: APPROVED}
+  - id: E_P1_WORKFLOW_21
+    kind: WORKFLOW_RUN
+    head: "41021bdfd08995c60d906316e2f056458cbb3f60"
+    refs: {run_id: 33614205637, run_number: 21, conclusion: SUCCESS}
+  - id: E_P1_WORKFLOW_22
+    kind: WORKFLOW_RUN
+    head: "e3b0c14d6dd79dc7711bc1cda604eb2895905a4f"
+    refs: {run_id: 33614696061, run_number: 22, conclusion: SUCCESS}
+  - id: E_P1_ARCHITECTURE
+    kind: COMMIT_SET
+    head: "e3b0c14d6dd79dc7711bc1cda604eb2895905a4f"
+    refs:
+      commits:
+        - "b888f3a9460c54ff7c41e716c8b96fe0fc23144c"
+        - "1a3f57d74a2a4047e8495707f239cf2917a0ba79"
+        - "4d7da1c9f8c6387d60e88ba453d7de4717c7ba35"
+        - "e3e62e800edd9b2d73c1febde52e4cfd78299ed4"
+        - "41021bdfd08995c60d906316e2f056458cbb3f60"
+        - "e3b0c14d6dd79dc7711bc1cda604eb2895905a4f"
+gates:
+  - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P1_APPROVAL]}
+  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P1_ARCHITECTURE]}
+  - {id: GATE_SDK_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P1_WORKFLOW_21]}
+  - {id: GATE_REGISTRY_ACCESS_REGRESSION, required: true, status: PASS, evidence_refs: [E_P1_WORKFLOW_22]}
+  - {id: GATE_REGISTRY_JSON, required: true, status: PASS, evidence_refs: [E_P1_WORKFLOW_22]}
+  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P1_WORKFLOW_22]}
+  - {id: GATE_PRODUCTION_TRUST_INACTIVE, required: true, status: PASS, evidence_refs: [E_P1_WORKFLOW_22]}
+blockers: []
+state:
+  mode: DERIVED
+  ruleset: SESSION_STATE_V1

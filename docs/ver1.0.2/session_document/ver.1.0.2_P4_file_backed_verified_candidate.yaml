@@ -1,0 +1,367 @@
+schema_version: "4.0"
+document_type: machine_session
+natural_language: FORBIDDEN
+session:
+  id: P4
+  type: B
+  number: 4
+  approval: APPROVED
+  distribution_contract_version: "1.0.2"
+  branch: "dev/1.0.2"
+  authority_repository: "Simple-Connection/sctool-registry"
+  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
+routing:
+  docs_index: "docs/index.yaml"
+  rules_index: "docs/rules/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  essential_template: "docs/template/session_document_template/session_document_essential.yaml"
+  type_template: "docs/template/session_document_template/session_type_B.yaml"
+heads:
+  start: "357498290d4b2c49a321893405e7e59606c1fd0d"
+  implementation: "329272875e8ce80b0ea90c8895594a549c0850b0"
+  exact_validation: "0cfaa288dc3ffc6e9dc2bd80ea9484caff0f64ef"
+responsibility_model:
+  effects:
+    assign:
+      - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
+    implement:
+      - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    preserve:
+      - RESP_REGISTRY_ACCESS
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+    defer:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    transfer: []
+    retire: []
+    forbid:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+  description_ids: []
+  rationale_ids:
+    - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
+    - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
+    - ADR_REGISTRY_UPDATE_CANDIDATE_RESOLUTION_BOUNDARY
+payload:
+  implementation:
+    responsibility_refs:
+      - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    contract_refs:
+      - CONTRACT_ARTIFACT_DELIVERY_V1
+      - CONTRACT_PACKAGE_SCHEMA_V2
+      - CONTRACT_STAGED_ARTIFACT_LIFECYCLE_V1
+      - CONTRACT_UPDATE_CANDIDATE_V1
+    path_allow:
+      - "packages/registry-client-sdk/**"
+      - "docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml"
+      - "docs/UPDATE_CANDIDATE_V1.yaml"
+      - "docs/rules/**"
+      - "docs/responsibility/**"
+      - "docs/governance/**"
+      - "ptsip.yaml"
+      - ".github/workflows/pages.yml"
+    path_deny:
+      - "program-sdk/**"
+      - "Kinirin/Simple-Connection/**"
+  responsibility_description_ids: []
+  decision_rationale_ids:
+    - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
+    - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
+    - ADR_REGISTRY_UPDATE_CANDIDATE_RESOLUTION_BOUNDARY
+work_units:
+  - id: W1
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    input_refs:
+      - CONTRACT_ARTIFACT_DELIVERY_V1
+      - CONTRACT_PACKAGE_SCHEMA_V2
+    output_refs:
+      - CONTRACT_STAGED_ARTIFACT_LIFECYCLE_V1
+      - CONTRACT_UPDATE_CANDIDATE_V1
+    completion_codes:
+      - P4_AUTHORITY_CONTRACTS_COMPLETE
+  - id: W2
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
+    input_refs:
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ACCESS
+    output_refs:
+      - "packages/registry-client-sdk/src/artifact-delivery.mjs"
+    completion_codes:
+      - STREAMING_RETRIEVAL_COMPLETE
+  - id: W3
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
+    input_refs:
+      - CONTRACT_STAGED_ARTIFACT_LIFECYCLE_V1
+    output_refs:
+      - "packages/registry-client-sdk/src/artifact-staging.mjs"
+    completion_codes:
+      - EPHEMERAL_STAGING_COMPLETE
+  - id: W4
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+    input_refs:
+      - CONTRACT_ARTIFACT_DELIVERY_V1
+      - CONTRACT_STAGED_ARTIFACT_LIFECYCLE_V1
+    output_refs:
+      - "packages/registry-client-sdk/src/artifact-integrity.mjs"
+    completion_codes:
+      - STREAMING_INTEGRITY_COMPLETE
+  - id: W5
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
+    input_refs:
+      - CONTRACT_STAGED_ARTIFACT_LIFECYCLE_V1
+    output_refs:
+      - "packages/registry-client-sdk/src/verified-artifact.mjs"
+    completion_codes:
+      - VERIFIED_READ_LEASE_COMPLETE
+  - id: W6
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    input_refs:
+      - CONTRACT_UPDATE_CANDIDATE_V1
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
+    output_refs:
+      - "packages/registry-client-sdk/src/update-candidate.mjs"
+    completion_codes:
+      - UPDATE_CANDIDATE_RESOLUTION_CORRECTION_COMPLETE
+  - id: W7
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    input_refs:
+      - GATE_ARTIFACT_DELIVERY_REGRESSION
+      - GATE_STAGING_LIFECYCLE_REGRESSION
+      - GATE_ARTIFACT_INTEGRITY_REGRESSION
+      - GATE_VERIFIED_ARTIFACT_ACCESS_REGRESSION
+      - GATE_UPDATE_CANDIDATE_REGRESSION
+    output_refs:
+      - E_P4_CORRECTION_EXACT_VALIDATION
+    completion_codes:
+      - P4_EXACT_VALIDATION_COMPLETE
+  - id: W8
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    input_refs:
+      - CONTRACT_UPDATE_CANDIDATE_V1
+      - GATE_UPDATE_OBSERVATION_CONTRACT
+      - GATE_UPDATE_VERSION_PRECEDENCE
+      - GATE_UPDATE_ELIGIBILITY_RESOLUTION
+      - GATE_UPDATE_NO_RETRIEVAL_WHEN_INELIGIBLE
+      - GATE_UPDATE_RETRIEVAL_WHEN_ELIGIBLE
+      - GATE_UPDATE_CANDIDATE_BOUNDARY
+      - GATE_UPDATE_CANDIDATE_REGRESSION
+    output_refs:
+      - E_P4_UPDATE_AUTOMATION_EXACT_VALIDATION
+    completion_codes:
+      - P4_UPDATE_AUTOMATION_MIGRATION_COMPLETE
+evidence:
+  - id: E_P4_APPROVAL
+    kind: USER_APPROVAL
+    head: null
+    refs:
+      approval: APPROVED
+  - id: E_P4_REOPEN_APPROVAL
+    kind: USER_APPROVAL
+    head: null
+    refs:
+      approval: APPROVED
+      scope: UPDATE_CANDIDATE_RESOLUTION_CORRECTION
+  - id: E_P4_AUTOMATION_MIGRATION_APPROVAL
+    kind: USER_APPROVAL
+    head: null
+    refs:
+      approval: APPROVED
+      scope: UPDATE_CANDIDATE_AUTOMATION_MIGRATION
+  - id: E_P4_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "25bedebd8f30b26b38533298eed6381b705028ea"
+    refs:
+      materialization_head: "e4c8895e56073b38123c2c6c0114fc6f3ec319e2"
+      implementation_head: "25bedebd8f30b26b38533298eed6381b705028ea"
+  - id: E_P4_GOVERNANCE
+    kind: WORKFLOW_RUN
+    head: "7f34fbc655073ca84f78f31f9c313e5f203e72c7"
+    refs:
+      run_id: 33987313792
+      run_number: 44
+      conclusion: SUCCESS
+  - id: E_P4_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "7f34fbc655073ca84f78f31f9c313e5f203e72c7"
+    refs:
+      run_id: 33987313734
+      run_number: 67
+      conclusion: SUCCESS
+      sdk_boundary_cases: 10
+      registry_access_cases: 11
+      package_descriptor_cases: 21
+      resolution_cases: 20
+      artifact_delivery_cases: 29
+      artifact_staging_cases: 11
+      artifact_integrity_cases: 18
+      verified_artifact_access_cases: 8
+      update_candidate_cases: 20
+      node_platform_evidence_edges: 31
+      registry_json: PASS
+      ptsip_tool: "0.3.7"
+      ptsip_profile: PASS
+      ptsip_conformance: CONFORMANT
+      blocking_gap_count: 0
+      non_blocking_gap_count: 0
+      audit: PASS
+      production_trust: INACTIVE
+  - id: E_P4_CORRECTION_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "e27ecd7f98749512cfb932d4cea6ddd4a15f8d03"
+    refs:
+      reopen_head: "0bbb9100f3840b16773ae239724584f4b0ab297e"
+      implementation_head: "e27ecd7f98749512cfb932d4cea6ddd4a15f8d03"
+  - id: E_P4_CORRECTION_GOVERNANCE
+    kind: WORKFLOW_RUN
+    head: "d464afa364ebb8d0a80dfac874b59249fdd5d067"
+    refs:
+      run_id: 34021785544
+      run_number: 47
+      conclusion: SUCCESS
+  - id: E_P4_CORRECTION_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "d464afa364ebb8d0a80dfac874b59249fdd5d067"
+    refs:
+      run_id: 34021785512
+      run_number: 71
+      conclusion: SUCCESS
+      sdk_boundary_cases: 10
+      registry_access_cases: 11
+      package_descriptor_cases: 21
+      resolution_cases: 20
+      artifact_delivery_cases: 29
+      artifact_staging_cases: 11
+      artifact_integrity_cases: 18
+      verified_artifact_access_cases: 8
+      update_candidate_cases: 49
+      node_platform_evidence_edges: 31
+      registry_json: PASS
+      ptsip_tool: "0.3.7"
+      ptsip_profile: PASS
+      ptsip_conformance: CONFORMANT
+      blocking_gap_count: 0
+      non_blocking_gap_count: 0
+      audit: PASS
+      production_trust: INACTIVE
+  - id: E_P4_UPDATE_AUTOMATION_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "329272875e8ce80b0ea90c8895594a549c0850b0"
+    refs:
+      migration_materialization_head: "c0197aae4f2f1fbb73b1c9587cb0a113faa3c63a"
+      implementation_head: "329272875e8ce80b0ea90c8895594a549c0850b0"
+  - id: E_P4_UPDATE_AUTOMATION_GOVERNANCE
+    kind: WORKFLOW_RUN
+    head: "0cfaa288dc3ffc6e9dc2bd80ea9484caff0f64ef"
+    refs:
+      run_id: 34026178339
+      run_number: 51
+      conclusion: SUCCESS
+  - id: E_P4_UPDATE_AUTOMATION_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "0cfaa288dc3ffc6e9dc2bd80ea9484caff0f64ef"
+    refs:
+      run_id: 34026178338
+      run_number: 75
+      conclusion: SUCCESS
+      evidence_format: "update-candidate-validation/v1"
+      evidence_artifact_id: 9987120543
+      evidence_artifact_name: "p4-update-candidate-evidence-0cfaa288dc3ffc6e9dc2bd80ea9484caff0f64ef"
+      evidence_artifact_digest: "sha256:4953f9b09fb70a19f2e7f7532eec92d693bfce60b5f3418d113d00c1436f9725"
+      update_observation_cases: 8
+      update_version_precedence_cases: 12
+      update_eligibility_cases: 9
+      update_no_retrieval_cases: 11
+      update_eligible_retrieval_cases: 4
+      update_candidate_boundary_cases: 27
+      update_automation_total_cases: 71
+      required_check_count: 6
+      required_resolution_state_count: 3
+      current_text_requests: 0
+      current_asset_streams: 0
+      downgrade_text_requests: 0
+      downgrade_asset_streams: 0
+      invalid_observation_text_requests: 0
+      invalid_observation_asset_streams: 0
+      eligible_release_queries: 1
+      eligible_asset_streams: 1
+      node_platform_evidence_edges: 32
+      registry_json: PASS
+      ptsip_tool: "0.3.7"
+      ptsip_profile: PASS
+      ptsip_conformance: CONFORMANT
+      blocking_gap_count: 0
+      non_blocking_gap_count: 0
+      audit: PASS
+      production_trust: INACTIVE
+gates:
+  - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P4_APPROVAL]}
+  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_GOVERNANCE]}
+  - {id: GATE_SDK_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_REGISTRY_ACCESS_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_PACKAGE_DESCRIPTOR_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_RESOLUTION_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_ARTIFACT_DELIVERY_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_STAGING_LIFECYCLE_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_ARTIFACT_INTEGRITY_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_VERIFIED_ARTIFACT_ACCESS_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PASS, evidence_refs: [E_P4_UPDATE_AUTOMATION_EXACT_VALIDATION]}
+  - {id: GATE_UPDATE_OBSERVATION_CONTRACT, required: true, status: PASS, evidence_refs: [E_P4_UPDATE_AUTOMATION_EXACT_VALIDATION]}
+  - {id: GATE_UPDATE_VERSION_PRECEDENCE, required: true, status: PASS, evidence_refs: [E_P4_UPDATE_AUTOMATION_EXACT_VALIDATION]}
+  - {id: GATE_UPDATE_ELIGIBILITY_RESOLUTION, required: true, status: PASS, evidence_refs: [E_P4_UPDATE_AUTOMATION_EXACT_VALIDATION]}
+  - {id: GATE_UPDATE_NO_RETRIEVAL_WHEN_INELIGIBLE, required: true, status: PASS, evidence_refs: [E_P4_UPDATE_AUTOMATION_EXACT_VALIDATION]}
+  - {id: GATE_UPDATE_RETRIEVAL_WHEN_ELIGIBLE, required: true, status: PASS, evidence_refs: [E_P4_UPDATE_AUTOMATION_EXACT_VALIDATION]}
+  - {id: GATE_UPDATE_CANDIDATE_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P4_UPDATE_AUTOMATION_EXACT_VALIDATION]}
+  - {id: GATE_REGISTRY_JSON, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_PROFILE, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+  - {id: GATE_PRODUCTION_TRUST_INACTIVE, required: true, status: PASS, evidence_refs: [E_P4_CORRECTION_EXACT_VALIDATION]}
+blockers: []
+state:
+  mode: DERIVED
+  ruleset: SESSION_STATE_V1

@@ -1,0 +1,278 @@
+schema_version: "1.0"
+document_type: responsibility_rationale_registry
+natural_language: RATIONALE_ONLY
+
+rationales:
+  ADR_TWO_SDK_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+      - RESP_REGISTRY_ACCESS
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    established_in:
+      version: "1.0.2"
+      session: P1
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - AUTHORITY_TRANSFER
+      - RESPONSIBILITY_DIMENSION_CHANGE
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+    statement: >-
+      SCTool authoring and Registry consumption remain different package and lifecycle
+      boundaries even when both SDKs are owned by Simple-Connection/sctool-registry.
+      packages/sctool-sdk owns developer and coding-agent authoring, manifest validation,
+      build, test, version compatibility, and publication integration. packages/registry-client-sdk
+      separately owns runtime Registry consumption. Simple-Connection/SC_Linked_App is a
+      read-only consumer and locator surface for the Authoring SDK and must not become
+      its source, version, compatibility, or publication authority.
+
+  ADR_REGISTRY_ACCESS_AUTHORITY_TRANSFER:
+    status: ACTIVE
+    applies_to:
+      - RESP_REGISTRY_ACCESS
+    established_in:
+      version: "1.0.2"
+      session: P1
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - AUTHORITY_TRANSFER
+      - COMPONENT_REMOVAL
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+    statement: >-
+      Registry Access authority moved to the Registry Client SDK even though a
+      historical duplicate implementation may remain in Simple-Connection/SC_Linked_App
+      during migration. Physical presence of the predecessor code does not retain
+      authority ownership. Removal is deferred until replacement consumption is proven
+      in a separately approved integration session.
+
+  ADR_REGISTRY_DESCRIPTOR_RESOLUTION_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    established_in:
+      version: "1.0.2"
+      session: P2
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - CONTRACT_CHANGE
+      - RESPONSIBILITY_DIMENSION_CHANGE
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+    statement: >-
+      Descriptor parsing and deterministic channel, version, and target resolution are
+      separated from live delivery backend access. P2 validates and preserves delivery
+      metadata without resolving a GitHub Release or retrieving artifact bytes, keeping
+      live backend lookup and retrieval outside the P2 implementation boundary.
+
+  ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+      - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    established_in:
+      version: "1.0.2"
+      session: P1
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - CONTRACT_CHANGE
+      - AUTHORITY_TRANSFER
+      - RESPONSIBILITY_DIMENSION_CHANGE
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+    statement: >-
+      Registry delivery responsibility extends through exact delivery locator
+      resolution, authenticated retrieval, content integrity verification, and
+      normalized verified update-candidate production. It stops before Simple
+      Connection local installation, activation, rollback, runtime reconciliation,
+      or renderer policy.
+
+  ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_SIMPLE_CONNECTION_INSTALL
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    established_in:
+      version: "1.0.2"
+      session: P1
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - AUTHORITY_TRANSFER
+      - COMPONENT_REMOVAL
+      - RESPONSIBILITY_DIMENSION_CHANGE
+      - LIFECYCLE_CHANGE
+    statement: >-
+      Local installation state, active-version choice, rollback, runtime reconcile
+      policy, and renderer behavior depend on Simple Connection product state and
+      therefore remain outside Registry Client SDK authority. The Registry Client SDK
+      may provide a verified update candidate but must not decide or mutate those local
+      product states.
+
+  ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    established_in:
+      version: "1.0.2"
+      session: P4
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - CONTRACT_CHANGE
+      - RESPONSIBILITY_DIMENSION_CHANGE
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+      - LIFECYCLE_CHANGE
+    statement: >-
+      Registry Client SDK owns only ephemeral file-backed staging needed to retrieve,
+      verify, and expose an immutable read capability for a Registry artifact. Staging
+      paths are SDK-internal, failed or partial resources are disposed, and verified
+      access is read-only. Persistent product-owned installation state begins only
+      after a verified update candidate crosses into Simple Connection authority.
+
+  ADR_REGISTRY_UPDATE_CANDIDATE_RESOLUTION_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    established_in:
+      version: "1.0.2"
+      session: P4
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - CONTRACT_CHANGE
+      - RESPONSIBILITY_DIMENSION_CHANGE
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+      - LIFECYCLE_CHANGE
+      - OWNERSHIP_POLICY_CHANGE
+    statement: >-
+      Simple Connection remains authoritative for installed-version state while
+      Registry Client SDK may consume an authority-tagged installed-version
+      observation as read-only input. Registry Client SDK compares that observation
+      with the resolved Registry version using deterministic semantic-version
+      precedence. Only a resolved newer version is eligible for artifact retrieval
+      and verified update-candidate production. Equal precedence and resolved older
+      versions do not retrieve an artifact. Registry Client SDK does not decide
+      installation, choose an install path, or mutate persistent product state.
+
+  ADR_SIMPLE_CONNECTION_INSTALL_TRANSACTION_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
+      - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
+      - RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION
+      - RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT
+    established_in:
+      version: "1.0.2"
+      session: P5
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - CONTRACT_CHANGE
+      - RESPONSIBILITY_DIMENSION_CHANGE
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+      - LIFECYCLE_CHANGE
+      - OWNERSHIP_POLICY_CHANGE
+    statement: >-
+      Simple Connection accepts a verified Registry update candidate into an explicit
+      install intent, owns the product-local install transaction lifecycle, materializes
+      only the verified artifact lease into a validated product staging tree, and
+      atomically commits persistent installation state. Installation does not select or
+      activate the new version, mutate repo-local runtime descriptors, reconcile runtime
+      state, perform rollback, or decide renderer behavior. Existing sibling versions
+      remain preserved and failed or crashed transactions must not become visible as
+      installed state.
+
+  ADR_REGISTRY_CLIENT_SDK_PACKAGE_DISTRIBUTION_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION
+    established_in:
+      version: "1.0.2"
+      session: P5
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - CONTRACT_CHANGE
+      - AUTHORITY_TRANSFER
+      - RESPONSIBILITY_DIMENSION_CHANGE
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+      - OWNERSHIP_POLICY_CHANGE
+    statement: >-
+      Registry Client SDK package publication is a delivery automation authority
+      separate from runtime Registry consumption. The delivery workflow publishes an
+      exact versioned package to GitHub Packages, binds the package to the canonical
+      Registry source revision and local pack integrity, and may reuse an existing
+      immutable version only when remote integrity equals the locally produced package.
+      Product consumers receive read-only package access and must pin an exact version;
+      package publication does not transfer Registry SDK ownership to the consumer.
+
+  ADR_AUTHORING_SDK_REPOSITORY_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_REPOSITORY_TOOL_AUTHORING_GUIDANCE
+      - RESP_REPOSITORY_TOOL_DESCRIPTOR_VALIDATION
+      - RESP_REPOSITORY_TOOL_PACKAGE_BUILD
+      - RESP_REPOSITORY_TOOL_PACKAGE_TEST
+    established_in:
+      version: "1.0.2"
+      session: P6
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - AUTHORITY_TRANSFER
+      - COMPONENT_REMOVAL
+      - RESPONSIBILITY_DIMENSION_CHANGE
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+    statement: >-
+      Repository Tool authoring is a package authoring and compatibility responsibility,
+      not Simple Connection host-runtime state. packages/repository-tool-sdk owns the
+      descriptor schema, semantic validation, identity, scaffold builder, CLI, version
+      compatibility, and package tests. Simple-Connection/SC_Linked_App consumes the
+      published package and retains host projection, runtime registration, enablement,
+      process lifecycle, and renderer responsibilities.
+
+  ADR_AUTHORING_SDK_PACKAGE_DISTRIBUTION_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_SCTOOL_AUTHORING_SDK_PACKAGE_PUBLICATION
+      - RESP_REPOSITORY_TOOL_SDK_PACKAGE_PUBLICATION
+    established_in:
+      version: "1.0.2"
+      session: P6
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - CONTRACT_CHANGE
+      - AUTHORITY_TRANSFER
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+      - OWNERSHIP_POLICY_CHANGE
+    statement: >-
+      Registry-owned Authoring SDK package publication is a Delivery responsibility
+      separate from SDK source authority and Product consumption. The publication
+      workflow builds and tests each canonical package, publishes immutable exact
+      versions to GitHub Packages, verifies remote integrity against the local pack,
+      and records revision-bound evidence. Consumer access does not transfer source,
+      version, compatibility, or publication authority.

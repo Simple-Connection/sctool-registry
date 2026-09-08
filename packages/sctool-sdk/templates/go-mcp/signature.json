@@ -1,0 +1,9 @@
+{
+  "type": "ed25519",
+  "publisher": "ERSTEQ",
+  "keyId": "ersteq-sctool-release-2026",
+  "signedFiles": "checksums.sha256",
+  "signature": null,
+  "status": "unsigned-placeholder",
+  "note": "Reserved for future release signing. Do not treat this package as cryptographically signed."
+}

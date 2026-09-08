@@ -1,0 +1,14 @@
+schema_version: "3.0"
+document_type: session_type_template
+template_id: session_type_B_v3
+session_type: B
+semantic: IMPLEMENTATION
+natural_language: REFERENCE_ONLY
+payload:
+  implementation:
+    responsibility_refs: []
+    contract_refs: []
+    path_allow: []
+    path_deny: []
+  responsibility_description_ids: []
+  decision_rationale_ids: []

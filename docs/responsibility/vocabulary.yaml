@@ -1,0 +1,165 @@
+schema_version: "2.0"
+document_type: responsibility_vocabulary
+natural_language: FORBIDDEN
+dimensions:
+  authority_domain:
+    - AUTHORING
+    - REGISTRY_METADATA
+    - REGISTRY_ACCESS
+    - ARTIFACT_DELIVERY
+    - ARTIFACT_INTEGRITY
+    - ARTIFACT_STAGING
+    - VERIFIED_ARTIFACT_ACCESS
+    - UPDATE_CANDIDATE
+    - LOCAL_INSTALLATION
+    - ACTIVATION
+    - ROLLBACK
+    - RUNTIME_RECONCILIATION
+    - RENDERER_UI
+    - PACKAGE_PUBLICATION
+    - TRUST
+  lifecycle_phase:
+    - AUTHORING
+    - BUILD
+    - VALIDATION
+    - PACKAGING
+    - PUBLICATION
+    - DISCOVERY
+    - RESOLUTION
+    - AUTHORIZATION
+    - RETRIEVAL
+    - VERIFICATION
+    - INSTALLATION
+    - ACTIVATION
+    - EXECUTION
+    - ROLLBACK
+    - RETIREMENT
+  operation:
+    - DEFINE
+    - AUTHOR
+    - BUILD
+    - TEST
+    - VALIDATE
+    - PARSE
+    - CONSUME
+    - RESOLVE
+    - AUTHORIZE
+    - LOCATE
+    - RETRIEVE
+    - CONTROL_LIFECYCLE
+    - WRITE
+    - EXPOSE_READ
+    - VERIFY
+    - NORMALIZE
+    - PUBLISH
+    - INSTALL
+    - COMMIT
+    - MATERIALIZE
+    - DECIDE
+    - ACTIVATE
+    - ROLLBACK
+    - RECONCILE
+    - RENDER
+    - REMOVE
+    - MIGRATE
+    - SIGN
+  object_class:
+    - AUTHORING_GUIDANCE
+    - MANIFEST
+    - PACKAGE
+    - PACKAGE_DESCRIPTOR
+    - REGISTRY_METADATA
+    - REGISTRY_IDENTITY
+    - ARTIFACT_LOCATOR
+    - ARTIFACT
+    - ARTIFACT_CONTENT
+    - STAGING_RESOURCE
+    - STAGED_ARTIFACT
+    - VERIFIED_ARTIFACT
+    - INTEGRITY_METADATA
+    - UPDATE_CANDIDATE
+    - LOCAL_INSTALL_STATE
+    - INSTALLED_PACKAGE_TREE
+    - INSTALL_TRANSACTION
+    - INSTALL_INTENT
+    - ACTIVE_VERSION
+    - RUNTIME_STATE
+    - RENDERER_UI
+    - TRUST_ROOT
+    - SIGNATURE
+  object_subtype:
+    - SCTOOL
+    - SCTOOL_PACKAGE
+    - REPOSITORY_TOOL
+    - REPOSITORY_TOOL_PACKAGE
+    - AUTHORING_SDK_PACKAGE
+    - REGISTRY_CLIENT_SDK_PACKAGE
+    - PACKAGE_DESCRIPTOR_V2
+    - CHANNEL
+    - VERSION
+    - TARGET
+    - GITHUB_RELEASE_ASSET
+    - REGISTRY_ACCESS_V1
+    - SHA256_SIZE_FILENAME
+    - EPHEMERAL_FILE
+    - READ_ONLY_LEASE
+    - SIMPLE_CONNECTION
+    - NONE
+  relation:
+    - OWNS
+    - SPECIFIES
+    - CONSUMES
+    - PRODUCES
+    - READS
+    - WRITES
+    - PUBLISHES
+    - AUTHORIZES
+    - VERIFIES
+    - INTEGRATES
+    - GOVERNS
+    - DEPENDS_ON
+    - REPLACES
+  ownership:
+    - PRIMARY
+    - SECONDARY
+    - DELEGATED
+    - NONE
+  normative:
+    - MUST
+    - MAY
+    - MUST_NOT
+  transfer_state:
+    - NONE
+    - PLANNED
+    - IN_PROGRESS
+    - MIGRATED
+    - RETIREMENT_PENDING
+    - RETIRED
+  retirement_state:
+    - NOT_APPLICABLE
+    - PENDING_REPLACEMENT
+    - REPLACEMENT_PROVEN
+    - RETIRED
+  responsibility_state:
+    - ALLOCATED
+    - DEPRECATED
+    - RETIRED
+  semantic_coverage:
+    - COMPLETE
+    - PARTIAL
+  rationale_status:
+    - ACTIVE
+    - SUPERSEDED
+    - RETIRED
+  description_status:
+    - ACTIVE
+    - SUPERSEDED
+    - RETIRED
+  review_trigger:
+    - AUTHORITY_TRANSFER
+    - COMPONENT_REMOVAL
+    - RESPONSIBILITY_DIMENSION_CHANGE
+    - CONTRACT_CHANGE
+    - LIFECYCLE_CHANGE
+    - OWNERSHIP_POLICY_CHANGE
+    - IMPLEMENTATION_BOUNDARY_CHANGE

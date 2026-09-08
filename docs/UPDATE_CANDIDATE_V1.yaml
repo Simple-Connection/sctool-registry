@@ -1,0 +1,92 @@
+schema_version: "1.1"
+document_type: update_candidate_contract
+natural_language: FORBIDDEN
+contract_id: UPDATE_CANDIDATE_V1
+candidate_type: VERIFIED_UPDATE_CANDIDATE
+installation_observation:
+  type: CONSUMER_INSTALLATION_OBSERVATION
+  authority: AUTH_SIMPLE_CONNECTION_DESKTOP
+  access: READ_ONLY
+  required_fields:
+    - authority
+    - packageId
+    - targetKey
+    - installedVersion
+  additional_fields: FORBIDDEN
+  installed_version_role: INPUT_ONLY
+version_precedence:
+  grammar: PACKAGE_SCHEMA_V2_SEMVER
+  build_metadata: IGNORED
+  prerelease: SEMVER_PRECEDENCE
+  numeric_prerelease: INTEGER_VALUE
+resolution:
+  states:
+    UPDATE_AVAILABLE:
+      relation: RESOLVED_NEWER
+      artifact_retrieval: REQUIRED
+      candidate: VERIFIED_UPDATE_CANDIDATE
+    CURRENT:
+      relation: EQUAL_PRECEDENCE
+      artifact_retrieval: FORBIDDEN
+      candidate: null
+    DOWNGRADE_NOT_CANDIDATE:
+      relation: RESOLVED_OLDER
+      artifact_retrieval: FORBIDDEN
+      candidate: null
+required_fields:
+  - packageId
+  - channel
+  - version
+  - targetKey
+  - target
+  - content
+  - delivery
+  - publishedAt
+  - contract
+  - artifact
+channel_semantics: PROVENANCE_NULLABLE
+artifact:
+  type: VERIFIED_ARTIFACT_LEASE
+  required_operations:
+    - OPEN_READ_STREAM
+    - DISPOSE
+  raw_path: FORBIDDEN
+  write_access: FORBIDDEN
+  disposed_access: FORBIDDEN
+forbidden_fields:
+  - githubIdentity
+  - githubToken
+  - credentialPath
+  - installedVersion
+  - isUpdateAvailable
+  - shouldInstall
+  - shouldActivate
+  - installPath
+  - rollbackTarget
+  - runtimeState
+  - rendererState
+  - persistentInstallState
+identity_fields:
+  - packageId
+  - version
+  - targetKey
+delivery_provenance_fields:
+  - type
+  - repository
+  - assetId
+  - expectedTag
+automation_validation:
+  evidence_format: "update-candidate-validation/v1"
+  revision_binding: REQUIRED
+  required_checks:
+    - GATE_UPDATE_OBSERVATION_CONTRACT
+    - GATE_UPDATE_VERSION_PRECEDENCE
+    - GATE_UPDATE_ELIGIBILITY_RESOLUTION
+    - GATE_UPDATE_NO_RETRIEVAL_WHEN_INELIGIBLE
+    - GATE_UPDATE_RETRIEVAL_WHEN_ELIGIBLE
+    - GATE_UPDATE_CANDIDATE_BOUNDARY
+  required_resolution_states:
+    - UPDATE_AVAILABLE
+    - CURRENT
+    - DOWNGRADE_NOT_CANDIDATE
+  aggregate_gate: GATE_UPDATE_CANDIDATE_REGRESSION

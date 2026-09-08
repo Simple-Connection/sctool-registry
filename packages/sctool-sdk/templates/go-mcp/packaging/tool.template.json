@@ -1,0 +1,38 @@
+{
+  "$schema": "https://kswdeveloper.cloud/schemas/sctool/v1/tool.schema.json",
+  "schemaVersion": 1,
+  "package": {
+    "id": "__PACKAGE_ID__",
+    "name": "__DISPLAY_NAME__",
+    "version": "${version}",
+    "publisher": "ERSTEQ",
+    "description": "Go-based MCP tool package.",
+    "homepage": "https://kswdeveloper.cloud"
+  },
+  "platform": { "os": "win32", "arch": "x64" },
+  "entry": {
+    "type": "mcp-server",
+    "transport": "stdio",
+    "command": "bin/win-x64/__COMMAND_NAME__.exe",
+    "args": [],
+    "cwd": "."
+  },
+  "environment": { "variables": [] },
+  "tools": [
+    {
+      "name": "health",
+      "kind": "read",
+      "description": "Return the SCTool process health status.",
+      "inputSchema": "schemas/read/health.schema.json"
+    }
+  ],
+  "policy": {
+    "permissions": "policy/permissions.json",
+    "risk": "policy/tool-risk.json"
+  },
+  "integrity": {
+    "checksums": "checksums.sha256",
+    "signature": "signature.json"
+  },
+  "readme": "README_TOOL.md"
+}

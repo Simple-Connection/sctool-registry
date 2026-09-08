@@ -1,0 +1,174 @@
+schema_version: "4.0"
+document_type: machine_session
+natural_language: FORBIDDEN
+session:
+  id: P3
+  type: B
+  number: 3
+  approval: APPROVED
+  distribution_contract_version: "1.0.2"
+  branch: "dev/1.0.2"
+  authority_repository: "Simple-Connection/sctool-registry"
+  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
+routing:
+  docs_index: "docs/index.yaml"
+  rules_index: "docs/rules/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  essential_template: "docs/template/session_document_template/session_document_essential.yaml"
+  type_template: "docs/template/session_document_template/session_type_B.yaml"
+heads:
+  start: "e70e7e97e8130670b835f61a5c2e1619f9882877"
+  implementation: "060f3cdc4e8656e3ebc73bf941e90469057d3b0b"
+  exact_validation: "588c1d22012f7447a8753611a69f6abf8aabd9a7"
+responsibility_model:
+  effects:
+    assign: []
+    implement:
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+    preserve:
+      - RESP_REGISTRY_ACCESS
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    defer:
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+      - RESP_SIMPLE_CONNECTION_INSTALL
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    transfer: []
+    retire: []
+    forbid:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+  description_ids: []
+  rationale_ids:
+    - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
+payload:
+  implementation:
+    responsibility_refs:
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+    contract_refs:
+      - CONTRACT_ARTIFACT_DELIVERY_V1
+      - CONTRACT_REGISTRY_ACCESS_V1
+      - CONTRACT_REGISTRY_POLICY
+    path_allow:
+      - "packages/registry-client-sdk/**"
+    path_deny:
+      - "program-sdk/**"
+  responsibility_description_ids: []
+  decision_rationale_ids:
+    - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
+work_units:
+  - id: W1
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+    input_refs:
+      - CONTRACT_ARTIFACT_DELIVERY_V1
+      - CONTRACT_REGISTRY_ACCESS_V1
+      - CONTRACT_REGISTRY_POLICY
+    output_refs:
+      - "packages/registry-client-sdk/src/artifact-delivery.mjs"
+    completion_codes:
+      - EXACT_RELEASE_ASSET_RESOLUTION_IMPLEMENTED
+  - id: W2
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+    input_refs:
+      - RESP_REGISTRY_ACCESS
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+    output_refs:
+      - "packages/registry-client-sdk/src/artifact-delivery.mjs"
+    completion_codes:
+      - AUTHENTICATED_ASSET_RETRIEVAL_IMPLEMENTED
+  - id: W3
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+    input_refs:
+      - GATE_SDK_BOUNDARY
+      - GATE_REGISTRY_ACCESS_REGRESSION
+      - GATE_RESOLUTION_REGRESSION
+    output_refs:
+      - "packages/registry-client-sdk/tests/artifact-delivery.test.mjs"
+    completion_codes:
+      - P3_REGRESSION_COVERAGE_COMPLETE
+  - id: W4
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+    input_refs:
+      - GATE_REQUIRED_OUTPUTS
+      - GATE_PTSIP_CONFORMANCE
+      - GATE_REGISTRY_JSON
+    output_refs:
+      - E_P3_EXACT_VALIDATION
+    completion_codes:
+      - EXACT_VALIDATION_COMPLETE
+evidence:
+  - id: E_P3_APPROVAL
+    kind: USER_APPROVAL
+    head: null
+    refs:
+      approval: APPROVED
+  - id: E_P3_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "060f3cdc4e8656e3ebc73bf941e90469057d3b0b"
+    refs:
+      materialization_head: "4155f0b81b6d48e5ea44acf7fc3eb56d23792918"
+      implementation_head: "060f3cdc4e8656e3ebc73bf941e90469057d3b0b"
+  - id: E_P3_GOVERNANCE
+    kind: WORKFLOW_RUN
+    head: "588c1d22012f7447a8753611a69f6abf8aabd9a7"
+    refs:
+      run_id: 33972588730
+      run_number: 38
+      conclusion: SUCCESS
+  - id: E_P3_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "588c1d22012f7447a8753611a69f6abf8aabd9a7"
+    refs:
+      run_id: 33972588752
+      run_number: 59
+      conclusion: SUCCESS
+      sdk_boundary_cases: 8
+      registry_access_cases: 11
+      package_descriptor_cases: 21
+      resolution_cases: 20
+      artifact_delivery_cases: 24
+      registry_json: PASS
+      ptsip_tool: "0.3.7"
+      ptsip_profile: PASS
+      ptsip_conformance: CONFORMANT
+      blocking_gap_count: 0
+      non_blocking_gap_count: 0
+      audit: PASS
+      production_trust: INACTIVE
+gates:
+  - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P3_APPROVAL]}
+  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P3_GOVERNANCE]}
+  - {id: GATE_SDK_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
+  - {id: GATE_REGISTRY_ACCESS_REGRESSION, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
+  - {id: GATE_PACKAGE_DESCRIPTOR_REGRESSION, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
+  - {id: GATE_RESOLUTION_REGRESSION, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
+  - {id: GATE_REQUIRED_OUTPUTS, required: true, status: PASS, evidence_refs: [E_P3_IMPLEMENTATION]}
+  - {id: GATE_REGISTRY_JSON, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_PROFILE, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
+  - {id: GATE_PRODUCTION_TRUST_INACTIVE, required: true, status: PASS, evidence_refs: [E_P3_EXACT_VALIDATION]}
+blockers: []
+state:
+  mode: DERIVED
+  ruleset: SESSION_STATE_V1

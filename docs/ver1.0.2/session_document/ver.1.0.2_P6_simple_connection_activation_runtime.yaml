@@ -1,0 +1,898 @@
+schema_version: "4.0"
+document_type: machine_session
+natural_language: FORBIDDEN
+session:
+  id: P6
+  type: C
+  number: 6
+  approval: APPROVED
+  distribution_contract_version: "1.0.2"
+  branch: "dev/1.0.2"
+  authority_repository: "Simple-Connection/sctool-registry"
+  improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
+routing:
+  docs_index: "docs/index.yaml"
+  rules_index: "docs/rules/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  essential_template: "docs/template/session_document_template/session_document_essential.yaml"
+  type_template: "docs/template/session_document_template/session_type_C.yaml"
+heads:
+  start: "1a04236d54552c19da5390cfbfd979f585b6c833"
+  implementation: "aa8e17c5f9e42bb55d04acd3d743138efd4bcdab"
+  exact_validation: "85b3c515335713fd95e960dd6097ecd8b3ded286"
+responsibility_model:
+  effects:
+    assign: []
+    implement:
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    preserve:
+      - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
+      - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
+      - RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION
+      - RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    defer: []
+    transfer: []
+    retire: []
+    forbid: []
+  description_ids: []
+  rationale_ids:
+    - ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY
+payload:
+  validation:
+    gate_refs:
+      - GATE_P6_RESPONSIBILITY_SPLIT
+      - GATE_P6_ACTIVATION_ROLLBACK_CONTRACT
+      - GATE_P6_ACTIVATION_ATOMICITY
+      - GATE_P6_RUNTIME_RECONCILE
+      - GATE_P6_ROLLBACK
+      - GATE_P6_RENDERER_UI
+      - GATE_P6_FAILURE_RECOVERY
+      - GATE_P6_PRODUCT_REGRESSION
+      - GATE_P6_P5_COMPATIBILITY
+      - GATE_P6_PTSIP_CONFORMANCE
+    evidence_refs:
+      - E_P6_APPROVAL
+  responsibility_description_ids: []
+  decision_rationale_ids:
+    - ADR_SIMPLE_CONNECTION_LOCAL_RUNTIME_BOUNDARY
+work_units:
+  - id: P6-W1
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    input_refs:
+      - P5-W9
+      - CONTRACT_SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1
+    output_refs:
+      - CONTRACT_SIMPLE_CONNECTION_ACTIVATION_ROLLBACK_V1
+      - EXPLICIT_ACTIVATION_BOUNDARY
+      - EXPLICIT_ROLLBACK_BOUNDARY
+      - RUNTIME_RECONCILE_ORDERING
+    completion_codes:
+      - P6_ACTIVATION_ROLLBACK_RUNTIME_CONTRACT_COMPLETE
+  - id: P6-W2
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+    input_refs:
+      - P6-W1
+    output_refs:
+      - EXPLICIT_ACTIVATION_ENTRYPOINT
+      - ATOMIC_SELECTED_ENABLED_STATE
+      - ACTIVATION_FAILURE_RESTORE
+    completion_codes:
+      - P6_ACTIVATION_ATOMIC_STATE_COMPLETE
+  - id: P6-W3
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+    input_refs:
+      - P6-W2
+    output_refs:
+      - EXPLICIT_RUNTIME_RECONCILE_ENTRYPOINT
+      - DESCRIPTOR_RECONCILE
+      - MANAGED_REPO_RESCAN
+      - RECONCILE_FAILURE_RESTORE
+    completion_codes:
+      - P6_RUNTIME_RECONCILE_COMPLETE
+  - id: P6-W4
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+    input_refs:
+      - P6-W3
+    output_refs:
+      - EXPLICIT_ROLLBACK_ENTRYPOINT
+      - INSTALLED_SIBLING_ROLLBACK
+      - NO_DOWNLOAD_ROLLBACK
+      - ROLLBACK_FAILURE_RESTORE
+    completion_codes:
+      - P6_ROLLBACK_COMPLETE
+  - id: P6-W5
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    input_refs:
+      - P6-W4
+    output_refs:
+      - ACTIVATION_UI
+      - ROLLBACK_UI
+      - ACTIVE_VERSION_PROJECTION
+      - RUNTIME_RECONCILE_STATUS
+    completion_codes:
+      - P6_RENDERER_UI_COMPLETE
+  - id: P6-W6
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+    input_refs:
+      - P6-W5
+      - E_P6_W6_PRODUCT_CHANGE_REQUEST
+      - E_P6_W6_PRODUCT_TEST_PARSE_BLOCKER
+    output_refs:
+      - FAILURE_MATRIX
+      - WINDOWS_RUNTIME_FILE_LOCK_REGRESSION
+      - PARTIAL_ACTIVATION_VISIBILITY_PROOF
+    completion_codes:
+      - P6_FAILURE_RECOVERY_COMPLETE
+  - id: P6-W7
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    input_refs:
+      - P6-W6
+      - E_P6_W7_PRODUCT_CLOSEOUT_REQUEST
+    output_refs:
+      - REVISION_BOUND_P6_EVIDENCE
+      - PRODUCT_TYPECHECK_BUILD_PASS
+      - PRODUCT_PTSIP_PASS
+    completion_codes:
+      - P6_PRODUCT_AUTOMATION_EVIDENCE_COMPLETE
+  - id: P6-W8
+    status: COMPLETE
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    input_refs:
+      - P6-W7
+    output_refs:
+      - P5_COMPATIBILITY_PASS
+      - REGISTRY_BOUNDARY_PASS
+      - PRODUCT_REGRESSION_PASS
+      - P6_CLOSEOUT_CANDIDATE
+    completion_codes:
+      - P6_CROSS_REPOSITORY_EXACT_CLOSEOUT_COMPLETE
+evidence:
+  - id: E_P6_APPROVAL
+    kind: USER_APPROVAL
+    head: null
+    refs:
+      approval: APPROVED
+      scope: ACTIVATION_ROLLBACK_RUNTIME_RENDERER_UI
+  - id: E_P6_W1_CONTRACT
+    kind: COMMIT_SET
+    head: "aa8e17c5f9e42bb55d04acd3d743138efd4bcdab"
+    refs:
+      materialization_head: "428e77c75504ef3f459b6a1d3a9feab123e6c5b4"
+      ptsip_partition_head: "aa8e17c5f9e42bb55d04acd3d743138efd4bcdab"
+      contract: "docs/SIMPLE_CONNECTION_ACTIVATION_ROLLBACK_V1.yaml"
+      product_repository: "Simple-Connection/SC_Linked_App"
+      product_branch: "dev/2.2.4"
+      install_input_state: INSTALLED_NOT_ACTIVATED
+      activation_compound_commit: ATOMIC_OR_ROLLBACK_TO_PRIOR_SNAPSHOT
+      rollback_retrieval: FORBIDDEN
+      runtime_failure_policy: RESTORE_PRIOR_PERSISTENT_AND_RUNTIME_SNAPSHOT
+      renderer_authority: INTENT_AND_PROJECTION_ONLY
+  - id: E_P6_W1_GOVERNANCE
+    kind: WORKFLOW_RUN
+    head: "aa8e17c5f9e42bb55d04acd3d743138efd4bcdab"
+    refs:
+      run_id: 34042516844
+      run_number: 81
+      conclusion: SUCCESS
+  - id: E_P6_W1_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "aa8e17c5f9e42bb55d04acd3d743138efd4bcdab"
+    refs:
+      run_id: 34042516828
+      run_number: 107
+      conclusion: SUCCESS
+      sdk_boundary: PASS
+      p4_update_candidate_regression: PASS
+      ptsip_architecture: PASS
+      registry_json: PASS
+  - id: E_P6_W2_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "ab57d217c8b3e0e27c01633c25b6c97b9291a897"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "dev/2.2.4"
+      product_session_start: "752b11ddb1183d2805596885db4083c5bcfa6dd8"
+      activation_core: "a8b16405b1feec43627e209f73f4f4d1c679dbc1"
+      activation_validation: "9d730bc1262790735de6040225566f3f819d9507"
+      exact_validation_head: "ab57d217c8b3e0e27c01633c25b6c97b9291a897"
+      product_session_w1_closeout: "b37ad703f400b51cbaf819eafc82d2699aec78a0"
+      activation_store: "desktop/src/main/features/mcp/sctool/activation-store.ts"
+      activation_entrypoint: "desktop/src/main/features/mcp/sctool/activation-service.ts"
+      authoritative_state: "settings/activation-state.json"
+      compound_state_fields:
+        - selectedVersion
+        - enabledVersion
+      runtime_descriptor_mutation: FORBIDDEN
+      runtime_rescan: FORBIDDEN
+      missing_install_directory: FAIL_BEFORE_COMMIT
+      write_failure: PRESERVE_PRIOR_ACTIVATION_STATE
+  - id: E_P6_W2_PRODUCT_VALIDATION
+    kind: WORKFLOW_RUN
+    head: "ab57d217c8b3e0e27c01633c25b6c97b9291a897"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34044232805
+      run_number: 2
+      conclusion: SUCCESS
+      documentation_routing: PASS
+      p5_install_boundary_regression: PASS
+      p6_w2_activation_tests: PASS
+      p6_w2_test_count: 2
+      p6_w2_test_pass: 2
+      p6_w2_test_fail: 0
+      exact_registry_client_sdk_restore: PASS
+      product_typecheck: PASS
+      product_build: PASS
+      windows_install_failure_matrix: PASS
+      evidence_artifact_id: 9992629844
+      evidence_artifact_name: "sctool-product-install-ab57d217c8b3e0e27c01633c25b6c97b9291a897"
+  - id: E_P6_W2_PRODUCT_PTSIP
+    kind: EXACT_VALIDATION
+    head: "ab57d217c8b3e0e27c01633c25b6c97b9291a897"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34044232794
+      run_number: 167
+      conclusion: SUCCESS
+      responsibility_map: PASS
+      exact_conformance: PASS
+  - id: E_P6_W3_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "f4c6e431604fe9e745cbf0e83910a4b6ad999327"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "dev/2.2.4"
+      product_session_start: "f91606f67f2dcefb046f00ebae7453a891d09d6f"
+      runtime_reconcile_core: "45ce856066f61f0c16decb19a9f48ced123f197e"
+      runtime_reconcile_validation: "70d4a839aa0e86ee4289458ad5eee1cf12f4ad16"
+      exact_validation_head: "f4c6e431604fe9e745cbf0e83910a4b6ad999327"
+      product_session_w2_closeout: "4f70be2ed690cc260d392d4f2f59618cf3e03ee7"
+      runtime_entrypoint: "desktop/src/main/features/mcp/sctool/runtime-reconcile-service.ts"
+      descriptor_boundary: "desktop/src/main/features/mcp/sctool/managed-repo.ts"
+      descriptor_write: ATOMIC_JSON_REPLACE
+      descriptor_preimage: SNAPSHOT_BEFORE_MUTATION
+      ordering:
+        - DURABLE_ACTIVATION_STATE
+        - REPO_LOCAL_DESCRIPTOR_RECONCILE
+        - MANAGED_REPOSITORY_RESCAN
+      rescan_failure: FAIL_CLOSED
+      failure_restore_order:
+        - PRIOR_PERSISTENT_ACTIVATION
+        - PRIOR_DESCRIPTOR_SNAPSHOT
+        - RESTORED_RUNTIME_RESCAN
+  - id: E_P6_W3_PRODUCT_FOCUSED_VALIDATION
+    kind: WORKFLOW_STEP_EVIDENCE
+    head: "f4c6e431604fe9e745cbf0e83910a4b6ad999327"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34046370096
+      run_number: 8
+      run_conclusion: FAILURE
+      documentation_routing: PASS
+      p5_boundary_regression: PASS
+      p6_w2_activation_tests: PASS
+      p6_w3_runtime_tests: PASS
+      p6_w3_test_count: 3
+      p6_w3_test_pass: 3
+      p6_w3_test_fail: 0
+      evidence_artifact_id: 9993251619
+      failure_scope: OUT_OF_SCOPE_AUTHORING_SDK_PACKAGE_ACCESS
+      failing_step: RESOLVE_EXACT_REGISTRY_OWNED_SDK_PACKAGE_IDENTITIES
+      failing_package: "@simple-connection/sctool-sdk@0.1.0"
+      failing_error: PERMISSION_DENIED_READ_PACKAGE
+  - id: E_P6_W3_PRODUCT_PTSIP
+    kind: EXACT_VALIDATION
+    head: "f4c6e431604fe9e745cbf0e83910a4b6ad999327"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34046370124
+      run_number: 171
+      conclusion: SUCCESS
+      responsibility_map: PASS
+      exact_conformance: PASS
+
+  - id: E_P6_W4_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "2339861760bc267737c32caa7c0b234691186133"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "dev/2.2.4"
+      rollback_core: "2f088a990f9bc9a151702b44215c91ec05f5e29d"
+      verification_head: "3ae07ae2141010617d59da9850415991795163d2"
+      product_closeout_head: "1b8dc560f152e92faff23e13dc741d0b591c417a"
+      final_product_head: "2339861760bc267737c32caa7c0b234691186133"
+      rollback_entrypoint: "desktop/src/main/features/mcp/sctool/rollback-service.ts"
+      runtime_reconcile: "desktop/src/main/features/mcp/sctool/runtime-reconcile-service.ts"
+      target_source: INSTALLED_SIBLING_VERSION
+      retrieval: FORBIDDEN
+      reinstall: FORBIDDEN
+      target_must_differ_from_current_active: REQUIRED
+      current_and_target_install_presence: REQUIRED
+      runtime_reconcile_required: true
+      snapshot_failure_persistent_restore: ENABLED
+      installed_sibling_preservation: REQUIRED
+  - id: E_P6_W4_PRODUCT_VALIDATION
+    kind: WORKFLOW_RUN
+    head: "1b8dc560f152e92faff23e13dc741d0b591c417a"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34076020795
+      conclusion: SUCCESS
+      documentation_routing: PASS
+      p5_install_boundary_regression: PASS
+      p6_w2_activation_tests: PASS
+      p6_w3_runtime_tests: PASS
+      p6_w4_rollback_tests: PASS
+      p6_w4_test_count: 4
+      p6_w4_test_pass: 4
+      p6_w4_test_fail: 0
+      exact_registry_owned_sdk_identity: PASS
+      exact_sdk_lock_binding: PASS
+      product_typecheck: PASS
+      product_build: PASS
+      registry_owned_sdk_runtime_contracts: PASS
+      published_sctool_cli_routing: PASS
+      windows_install_failure_matrix: PASS
+      evidence_artifact_id: 10002103292
+      evidence_artifact_name: "sctool-product-install-1b8dc560f152e92faff23e13dc741d0b591c417a"
+      prior_package_access_blocker: RESOLVED
+  - id: E_P6_W4_PRODUCT_PTSIP
+    kind: EXACT_VALIDATION
+    head: "2339861760bc267737c32caa7c0b234691186133"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      run_id: 34076125956
+      conclusion: SUCCESS
+      responsibility_map: PASS
+      exact_conformance: PASS
+      versioned_session_trigger: "docs/v2.2/**"
+
+  - id: E_P6_W5_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      rebound_from_branch: "dev/2.2.4"
+      rebound_from_head: "4c1110ea1e446f304ce0d56b0f0b46325ee61ade"
+      lifecycle_projection_core: "f614e368f5b0aa38c2ccdcea8a526c9f65c4a6c8"
+      renderer_panel: "de53e3264587a3cc4809a4bbdbd93160a317752b"
+      lifecycle_projection_types: "55b13c4c6fa6cd49da3cf7219ef88be8c7b3c72b"
+      lifecycle_bridge_contract: "c82dd345487167dd0984cd5be3e3d9fbd0abb456"
+      preload_lifecycle_intents: "b6e240902e588f703f6d282abe1e0d9e88d961ca"
+      lifecycle_ipc_routing: "59aedfbad4ae5ca24cacfb1db8235f7b8e335f8a"
+      lifecycle_service_export: "002e6f2c9a2cbea58408cab723ebe1319c28b1ec"
+      renderer_mount: "fd8b047d525a73677dbab0dc838215230f5cb585"
+      renderer_boundary_tests: "1847712231d5d92932a7f8c8d3717fd00c5c233d"
+      renderer_ci: "aa41723bd6ad4e69a88227f5774facc9e2103c1d"
+      windows_lock_helper_stabilization: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
+      final_product_head: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
+      lifecycle_service: "desktop/src/main/features/mcp/sctool/lifecycle-service.ts"
+      renderer_component: "desktop/src/renderer/src/components/settings/ScToolLifecyclePanel.tsx"
+      renderer_mount_path: "desktop/src/renderer/src/components/settings/RepositoryToolsPage.tsx"
+      ipc_boundary: "desktop/src/main/features/mcp/sctool/ipc.ts"
+      preload_boundary: "desktop/src/preload/index.ts"
+      renderer_authority: INTENT_AND_PROJECTION_ONLY
+      active_version_projection_owner: MAIN_PROCESS
+      runtime_reconcile_status_owner: MAIN_PROCESS
+      direct_renderer_activation_state_mutation: FORBIDDEN
+      direct_renderer_registry_mutation: FORBIDDEN
+      direct_renderer_descriptor_mutation: FORBIDDEN
+      rollback_target_source: INSTALLED_SIBLING_VERSION
+      dev_to_main_w5_content_equivalence: PASS
+  - id: E_P6_W5_PRODUCT_VALIDATION
+    kind: WORKFLOW_RUN
+    head: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      run_id: 34087578417
+      run_number: 26
+      conclusion: SUCCESS
+      documentation_routing: PASS
+      p5_install_boundary_regression: PASS
+      p6_w2_activation_tests: PASS
+      p6_w3_runtime_tests: PASS
+      p6_w4_rollback_tests: PASS
+      p6_w5_renderer_lifecycle_tests: PASS
+      p6_w5_test_count: 4
+      p6_w5_test_pass: 4
+      p6_w5_test_fail: 0
+      exact_registry_owned_sdk_identity: PASS
+      exact_sdk_lock_binding: PASS
+      product_typecheck: PASS
+      product_build: PASS
+      registry_owned_sdk_runtime_contracts: PASS
+      published_sctool_cli_routing: PASS
+      windows_install_failure_matrix: PASS
+      windows_lock_helper_shutdown_stabilized: PASS
+      evidence_artifact_id: 10005773379
+      evidence_artifact_name: "sctool-product-install-ca1da17f5de64b2e7ef10f6c55f280104d065f65"
+  - id: E_P6_W5_PRODUCT_PTSIP
+    kind: EXACT_VALIDATION
+    head: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      bound_product_head: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
+      exact_run_head: "aa41723bd6ad4e69a88227f5774facc9e2103c1d"
+      run_id: 34087383930
+      run_number: 203
+      conclusion: SUCCESS
+      responsibility_map: PASS
+      exact_conformance: PASS
+      scope_equivalence: PASS
+      scope_equivalence_base: "aa41723bd6ad4e69a88227f5774facc9e2103c1d"
+      scope_equivalence_head: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
+      scope_equivalence_changed_files:
+        - "desktop/tests/mcp/sctool/p5-install-transaction.test.mjs"
+      ptsip_trigger_scope_affected: false
+      scope_equivalence_reason: TEST_ONLY_WINDOWS_LOCK_HELPER_SHUTDOWN
+
+  - id: E_P6_W6_PRODUCT_CHANGE_REQUEST
+    kind: EXTERNAL_CHANGE_REQUEST
+    head: "8d9a8a009c4284f8abd03cf7632366b1c44235e7"
+    refs:
+      requesting_repository: "Simple-Connection/sctool-registry"
+      target_repository: "Simple-Connection/SC_Linked_App"
+      target_branch: "main"
+      product_current_head: "8d9a8a009c4284f8abd03cf7632366b1c44235e7"
+      product_verified_w5_code_head: "ca1da17f5de64b2e7ef10f6c55f280104d065f65"
+      product_head_delta_scope: DOCUMENTATION_AND_DEVELOPMENT_TOOLING_ONLY
+      direct_product_mutation_by_registry_project: FORBIDDEN
+      product_interaction_mode: CHANGE_REQUEST_ONLY
+      product_evidence_read_mode: READ_ONLY_EXACT_VALIDATION
+      required_product_work_item: P3-W5
+      prerequisite_machine_state_repair: P3-W4_COMPLETED_EVIDENCE_RESTORE
+      required_outputs:
+        - ACTIVATION_ROLLBACK_FAILURE_MATRIX
+        - WINDOWS_RUNTIME_DESCRIPTOR_FILE_LOCK_REGRESSION
+        - PARTIAL_ACTIVATION_VISIBILITY_PROOF
+        - REVISION_BOUND_P6_W6_EVIDENCE
+      required_failure_points:
+        - ACTIVATION_STATE_WRITE_FAILURE
+        - DESCRIPTOR_SNAPSHOT_FAILURE
+        - DESCRIPTOR_WRITE_FAILURE
+        - MANAGED_RESCAN_FAILURE
+        - ROLLBACK_DESCRIPTOR_SNAPSHOT_FAILURE
+        - ROLLBACK_DESCRIPTOR_WRITE_FAILURE
+        - ROLLBACK_MANAGED_RESCAN_FAILURE
+        - WINDOWS_RUNTIME_DESCRIPTOR_FILE_LOCK
+      required_restore_assertions:
+        - PRIOR_SELECTED_VERSION
+        - PRIOR_ENABLED_VERSION
+        - PRIOR_DESCRIPTOR_SNAPSHOT
+        - PRIOR_RUNTIME_RESCAN
+        - INSTALLED_SIBLING_PRESERVATION
+      required_visibility_assertions:
+        - NO_PARTIAL_SELECTED_ENABLED_PROJECTION
+        - NO_PARTIAL_ACTIVE_VERSION_PROJECTION
+        - NO_PARTIAL_RUNTIME_DESCRIPTOR_PROJECTION
+        - POST_FAILURE_LIFECYCLE_PROJECTION_EQUALS_PRIOR_ACTIVE_SNAPSHOT
+      source_change_policy: ONLY_IF_EXECUTABLE_FAILURE_MATRIX_EXPOSES_CONTRACT_VIOLATION
+      install_retrieval_during_recovery: FORBIDDEN
+      rollback_download: FORBIDDEN
+      rollback_reinstall: FORBIDDEN
+      renderer_persistent_mutation: FORBIDDEN
+      authoring_sdk_change: FORBIDDEN
+      registry_client_sdk_authority_expansion: FORBIDDEN
+      expected_test_path: "desktop/tests/mcp/sctool/p6-failure-recovery.test.mjs"
+      expected_ci_path: ".github/workflows/sctool-product-install-regression.yml"
+      expected_evidence_env: P6_W6_EVIDENCE_PATH
+      expected_evidence_format: "simple-connection-p6-failure-recovery/v1"
+
+  - id: E_P6_W6_PRODUCT_TEST_PARSE_BLOCKER
+    kind: WORKFLOW_RUN_FAILURE
+    head: "64df5327fc5c4b8e209b3e08d24dc35084c5be97"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      product_p3_w4_state: COMPLETED
+      product_p3_w5_state: IN_PROGRESS
+      run_id: 34108750383
+      run_number: 34
+      conclusion: FAILURE
+      failed_step: RUN_P6_W6_ACTIVATION_ROLLBACK_FAILURE_RECOVERY_MATRIX
+      failure_phase: JAVASCRIPT_PARSE
+      test_path: "desktop/tests/mcp/sctool/p6-failure-recovery.test.mjs"
+      failure_line: 327
+      error: UNEXPECTED_TOKEN_CLOSE_PAREN
+      w6_matrix_executed: false
+      runtime_assertions_executed: false
+      w6_pass_fail_determinable: false
+      w6_evidence_generated: false
+      artifact_id: 10013465482
+      artifact_name: "sctool-product-install-64df5327fc5c4b8e209b3e08d24dc35084c5be97"
+      artifact_uploaded_file_count: 4
+      w6_evidence_present_in_artifact: false
+      downstream_product_typecheck: SKIPPED
+      downstream_product_build: SKIPPED
+      downstream_windows_regression: SKIPPED
+      correction_scope: TEST_SYNTAX_BEFORE_RUNTIME_DIAGNOSIS
+      required_next_action: FIX_TEST_SYNTAX_AND_RERUN_SAME_W6_MATRIX
+      product_source_contract_violation_confirmed: false
+      registry_direct_product_mutation: FORBIDDEN
+
+  - id: E_P6_W6_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      failure_matrix_test: "8a7e65d921a327912bde8cc1196e568f881e2087"
+      failure_recovery_source_fix: "a6ad25a2c03139700ffa9b114508da21c78dab2d"
+      initial_ci_evidence_guard: "64df5327fc5c4b8e209b3e08d24dc35084c5be97"
+      syntax_fix: "6e0e846821db155900815e5020183388b91a71b3"
+      rollback_test_hook_fix: "421d1461d977d33a0a191eb9088309dd90e18864"
+      evidence_env_path_fix: "72960e2611d1eb4b1ab8c1dfc5dc03cb2349258f"
+      product_machine_closeout: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+      final_product_head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+      source_fix_after_parse_blocker_revision: NONE
+      product_source_fix_required_by_w6_matrix: true
+      lifecycle_projection_fix:
+        path: "desktop/src/main/features/mcp/sctool/lifecycle-service.ts"
+        strategy: PRIOR_COMMITTED_PROJECTION_DURING_IN_FLIGHT_MUTATION
+        same_package_mutation_policy: SERIALIZED
+      runtime_restore_fix:
+        path: "desktop/src/main/features/mcp/sctool/runtime-reconcile-service.ts"
+        untouched_locked_descriptor_snapshot: RESTORE_COMPLETE_WITHOUT_REWRITE
+      failure_matrix_path: "desktop/tests/mcp/sctool/p6-failure-recovery.test.mjs"
+      evidence_format: "simple-connection-p6-failure-recovery/v1"
+      contract: SIMPLE_CONNECTION_ACTIVATION_ROLLBACK_V1
+      renderer_persistent_mutation: FORBIDDEN
+      rollback_download: FORBIDDEN
+      rollback_reinstall: FORBIDDEN
+
+  - id: E_P6_W6_PRODUCT_VALIDATION
+    kind: WORKFLOW_RUN
+    head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      run_id: 34177651302
+      run_number: 38
+      conclusion: SUCCESS
+      documentation_routing: PASS
+      p5_install_boundary_regression: PASS
+      p6_w2_activation_tests: PASS
+      p6_w3_runtime_tests: PASS
+      p6_w4_rollback_tests: PASS
+      p6_w5_renderer_lifecycle_tests: PASS
+      p6_w6_failure_recovery_matrix: PASS
+      p6_w6_test_count: 11
+      p6_w6_test_pass: 11
+      p6_w6_test_fail: 0
+      p6_w6_revision_bound_evidence: PASS
+      activation_failure_restore: PASS
+      rollback_failure_restore: PASS
+      windows_runtime_descriptor_file_lock: PASS
+      in_flight_projection_prior_snapshot_only: PASS
+      post_failure_projection_prior_snapshot: PASS
+      no_partial_selected_enabled_projection: PASS
+      no_partial_runtime_descriptor_projection: PASS
+      installed_siblings_preserved: PASS
+      no_download_recovery: PASS
+      no_reinstall_recovery: PASS
+      exact_registry_owned_sdk_identity: PASS
+      exact_sdk_lock_binding: PASS
+      product_typecheck: PASS
+      product_build: PASS
+      registry_owned_sdk_runtime_contracts: PASS
+      published_sctool_cli_routing: PASS
+      windows_install_failure_matrix: PASS
+      evidence_artifact_id: 10037847858
+      evidence_artifact_name: "sctool-product-install-1ac20b8c7edd0a31745d65487202c62ab001de51"
+      w6_evidence_present: true
+
+  - id: E_P6_W6_PRODUCT_PTSIP
+    kind: EXACT_VALIDATION
+    head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      run_id: 34177651322
+      run_number: 212
+      conclusion: SUCCESS
+      responsibility_map: PASS
+      exact_conformance: PASS
+      machine_documentation: PASS
+
+  - id: E_P6_W6_PRODUCT_DOCUMENTATION_AUTOMATION
+    kind: WORKFLOW_RUN
+    head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      run_id: 34177651319
+      run_number: 6
+      conclusion: SUCCESS
+      p3_w5_state: COMPLETED
+      p3_w6_state: PLANNED
+
+  - id: E_P6_W7_PRODUCT_CLOSEOUT_REQUEST
+    kind: EXTERNAL_CHANGE_REQUEST
+    head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+    refs:
+      requesting_repository: "Simple-Connection/sctool-registry"
+      target_repository: "Simple-Connection/SC_Linked_App"
+      target_branch: "main"
+      product_current_head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+      product_p3_w5_state: COMPLETED
+      product_p3_w6_state: PLANNED
+      direct_product_mutation_by_registry_project: FORBIDDEN
+      product_interaction_mode: CHANGE_REQUEST_ONLY
+      product_evidence_read_mode: READ_ONLY_EXACT_VALIDATION
+      required_product_work_item: P3-W6
+      work_item_code: PRODUCT_CLOSEOUT
+      source_change_policy: NO_PRODUCT_SOURCE_CHANGE_EXPECTED
+      baseline_product_regression_run_id: 34177651302
+      baseline_product_regression_run_number: 38
+      baseline_product_regression_conclusion: SUCCESS
+      baseline_ptsip_run_id: 34177651322
+      baseline_ptsip_run_number: 212
+      baseline_ptsip_conclusion: SUCCESS
+      baseline_documentation_run_id: 34177651319
+      baseline_documentation_run_number: 6
+      baseline_documentation_conclusion: SUCCESS
+      required_machine_transitions:
+        - P3_W6_COMPLETED
+        - P3_VERIFICATION_PASSED
+        - P3_COMPLETION_P3_W6_COMPLETED
+        - P3_SESSION_COMPLETED
+        - P3_SESSION_INDEX_COMPLETED
+      native_session_closeout: DOCS_SESSION_COMPLETE
+      final_closeout_revision_requirement: EXACT
+      product_regression_final_head: REQUIRED
+      product_ptsip_final_head: REQUIRED
+      documentation_automation_final_head: REQUIRED
+      product_regression_trigger_for_docs_only_closeout: WORKFLOW_DISPATCH_REQUIRED
+      ptsip_trigger_for_docs_only_closeout: WORKFLOW_DISPATCH_REQUIRED
+      documentation_trigger_for_docs_only_closeout: AUTOMATIC
+      required_final_outputs:
+        - FINAL_PRODUCT_MAIN_HEAD
+        - PRODUCT_LIFECYCLE_REGRESSION_SUCCESS
+        - REVISION_BOUND_P6_W2_W3_W4_W5_W6_EVIDENCE
+        - PRODUCT_TYPECHECK_PASS
+        - PRODUCT_BUILD_PASS
+        - EXACT_REGISTRY_OWNED_SDK_IDENTITY_PASS
+        - EXACT_SDK_LOCK_BINDING_PASS
+        - WINDOWS_FAILURE_FILE_LOCK_PASS
+        - PTSIP_RESPONSIBILITY_MAP_PASS
+        - PTSIP_EXACT_CONFORMANCE_PASS
+        - DOCUMENTATION_AUTOMATION_PASS
+      release_declaration: OUT_OF_SCOPE
+      p6_w8_cross_repository_closeout: NOT_INCLUDED
+
+  - id: E_P6_W7_PRODUCT_CLOSEOUT
+    kind: COMMIT_SET
+    head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      baseline_head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+      p3_w6_completed_commit: "ddea5cbf90755b800a26caa493364d2176f40a2f"
+      p3_session_completed_commit: "f255ff32d40132a1760acdfe6c150d13cb066568"
+      final_product_head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+      product_source_change: NONE
+      baseline_to_final_net_scope: PRODUCT_MACHINE_DOCUMENTATION_ONLY
+      final_changed_files:
+        - "docs/v2.2/v2.2.4/2.2.4_improvement_plan.yaml"
+        - "docs/v2.2/v2.2.4/session_document/P3_plan.yaml"
+        - "docs/v2.2/v2.2.4/session_document/index.yaml"
+      p3_w6_state: COMPLETED
+      p3_session_state: COMPLETED
+      p3_verification_state: PASSED
+      p3_completion_state: COMPLETED
+      p3_session_index_state: COMPLETED
+      improvement_plan_p3_state: COMPLETED
+      release_declaration: OUT_OF_SCOPE
+
+  - id: E_P6_W7_PRODUCT_REGRESSION
+    kind: WORKFLOW_RUN
+    head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      event: WORKFLOW_DISPATCH
+      run_id: 34182735131
+      run_number: 39
+      conclusion: SUCCESS
+      documentation_routing: PASS
+      p5_install_boundary_regression: PASS
+      p6_w2_activation_tests: PASS
+      p6_w3_runtime_tests: PASS
+      p6_w4_rollback_tests: PASS
+      p6_w5_renderer_lifecycle_tests: PASS
+      p6_w6_failure_recovery_matrix: PASS
+      p6_w6_test_count: 11
+      p6_w6_test_pass: 11
+      p6_w6_test_fail: 0
+      p6_w6_revision_bound_evidence: PASS
+      exact_registry_owned_sdk_identity: PASS
+      exact_sdk_lock_binding: PASS
+      product_typecheck: PASS
+      product_build: PASS
+      registry_owned_sdk_runtime_contracts: PASS
+      published_sctool_cli_routing: PASS
+      windows_failure_file_lock_regression: PASS
+      evidence_artifact_id: 10039496745
+      evidence_artifact_name: "sctool-product-install-2e458a734c2bf8076abb763f315db82f43ea54d8"
+      evidence_artifact_expired: false
+
+  - id: E_P6_W7_PRODUCT_PTSIP
+    kind: EXACT_VALIDATION
+    head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      event: WORKFLOW_DISPATCH
+      run_id: 34182736423
+      run_number: 214
+      conclusion: SUCCESS
+      machine_documentation_state: PASS
+      ptsip_environment: PASS
+      responsibility_map: PASS
+      exact_conformance: PASS
+
+  - id: E_P6_W7_PRODUCT_DOCUMENTATION_AUTOMATION
+    kind: WORKFLOW_RUN
+    head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      event: WORKFLOW_DISPATCH
+      run_id: 34182737826
+      run_number: 8
+      conclusion: SUCCESS
+      documentation_automation: PASS
+      p3_w6_state: COMPLETED
+      p3_session_state: COMPLETED
+
+  - id: E_P6_W8_P5_COMPATIBILITY
+    kind: EXACT_VALIDATION
+    head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      product_head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+      product_regression_run_id: 34182735131
+      product_regression_run_number: 39
+      product_regression_conclusion: SUCCESS
+      p5_install_boundary_regression: PASS
+      windows_failure_file_lock_regression: PASS
+      p6_w2_activation: PASS
+      p6_w3_runtime_reconcile: PASS
+      p6_w4_rollback: PASS
+      p6_w5_renderer_lifecycle: PASS
+      p6_w6_failure_recovery: PASS
+      p6_w6_test_count: 11
+      p6_w6_test_pass: 11
+      p6_w6_test_fail: 0
+      evidence_artifact_id: 10039496745
+      evidence_artifact_name: "sctool-product-install-2e458a734c2bf8076abb763f315db82f43ea54d8"
+
+  - id: E_P6_W8_REGISTRY_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "b72a6e39826b6ca7e9d3f491e5ffc37fe620908b"
+    refs:
+      repository: "Simple-Connection/sctool-registry"
+      branch: "dev/1.0.2"
+      registry_head: "b72a6e39826b6ca7e9d3f491e5ffc37fe620908b"
+      build_run_id: 34197474380
+      build_conclusion: SUCCESS
+      governance_run_id: 34197474410
+      governance_conclusion: SUCCESS
+      registry_client_sdk_boundary: PASS
+      update_candidate_regression: PASS
+      ptsip_architecture_exact_artifact: PASS
+      registry_json_contracts: PASS
+      machine_development_documentation: PASS
+      ptsip_profile_ownership_partition: PASS
+      update_candidate_evidence_artifact_id: 10044451162
+      update_candidate_evidence_artifact_name: "p4-update-candidate-evidence-b72a6e39826b6ca7e9d3f491e5ffc37fe620908b"
+
+  - id: E_P6_W8_CROSS_REPOSITORY_EXACT
+    kind: CROSS_REPOSITORY_EXACT_VALIDATION
+    head: "b72a6e39826b6ca7e9d3f491e5ffc37fe620908b"
+    refs:
+      registry_repository: "Simple-Connection/sctool-registry"
+      registry_branch: "dev/1.0.2"
+      registry_head: "b72a6e39826b6ca7e9d3f491e5ffc37fe620908b"
+      product_repository: "Simple-Connection/SC_Linked_App"
+      product_branch: "main"
+      product_head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+      product_regression_run_id: 34182735131
+      product_ptsip_run_id: 34182736423
+      product_documentation_run_id: 34182737826
+      registry_build_run_id: 34197474380
+      registry_governance_run_id: 34197474410
+      p5_compatibility: PASS
+      registry_sdk_boundary: PASS
+      update_candidate_regression: PASS
+      product_regression: PASS
+      product_ptsip_responsibility_map: PASS
+      product_ptsip_exact_conformance: PASS
+      registry_ptsip_profile: PASS
+      registry_ptsip_architecture: PASS
+      authoring_sdk_authority: REGISTRY_ONLY
+      product_authoring_sdk_predecessor_tree: FORBIDDEN
+      product_direct_mutation_by_registry_project: FORBIDDEN
+      release_declaration: OUT_OF_SCOPE
+      closeout_state: P6_CLOSEOUT_CANDIDATE
+
+  - id: E_P6_W8_REGISTRY_CLOSEOUT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "85b3c515335713fd95e960dd6097ecd8b3ded286"
+    refs:
+      repository: "Simple-Connection/sctool-registry"
+      branch: "dev/1.0.2"
+      registry_closeout_head: "85b3c515335713fd95e960dd6097ecd8b3ded286"
+      governance_run_id: 34201003764
+      governance_conclusion: SUCCESS
+      build_run_id: 34201003666
+      build_conclusion: SUCCESS
+      machine_development_documentation: PASS
+      ptsip_profile_ownership_partition: PASS
+      registry_client_sdk_boundary: PASS
+      update_candidate_regression: PASS
+      ptsip_architecture_exact_artifact: PASS
+      registry_json_contracts: PASS
+      update_candidate_evidence_artifact_id: 10045792810
+      update_candidate_evidence_artifact_name: "p4-update-candidate-evidence-85b3c515335713fd95e960dd6097ecd8b3ded286"
+      product_exact_head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+      product_regression_run_id: 34182735131
+      product_ptsip_run_id: 34182736423
+      product_documentation_run_id: 34182737826
+      cross_repository_closeout: PASS
+
+gates:
+  - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P6_APPROVAL]}
+  - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P6_W1_GOVERNANCE]}
+  - {id: GATE_P6_RESPONSIBILITY_SPLIT, required: true, status: PASS, evidence_refs: [E_P6_W1_CONTRACT, E_P6_W1_GOVERNANCE]}
+  - {id: GATE_P6_ACTIVATION_ROLLBACK_CONTRACT, required: true, status: PASS, evidence_refs: [E_P6_W1_CONTRACT, E_P6_W1_EXACT_VALIDATION]}
+  - {id: GATE_P6_ACTIVATION_ATOMICITY, required: true, status: PASS, evidence_refs: [E_P6_W2_PRODUCT_IMPLEMENTATION, E_P6_W2_PRODUCT_VALIDATION, E_P6_W2_PRODUCT_PTSIP]}
+  - {id: GATE_P6_RUNTIME_RECONCILE, required: true, status: PASS, evidence_refs: [E_P6_W3_PRODUCT_IMPLEMENTATION, E_P6_W3_PRODUCT_FOCUSED_VALIDATION, E_P6_W3_PRODUCT_PTSIP]}
+  - {id: GATE_P6_ROLLBACK, required: true, status: PASS, evidence_refs: [E_P6_W4_PRODUCT_IMPLEMENTATION, E_P6_W4_PRODUCT_VALIDATION, E_P6_W4_PRODUCT_PTSIP]}
+  - {id: GATE_P6_RENDERER_UI, required: true, status: PASS, evidence_refs: [E_P6_W5_PRODUCT_IMPLEMENTATION, E_P6_W5_PRODUCT_VALIDATION, E_P6_W5_PRODUCT_PTSIP]}
+  - {id: GATE_P6_FAILURE_RECOVERY, required: true, status: PASS, evidence_refs: [E_P6_W6_PRODUCT_IMPLEMENTATION, E_P6_W6_PRODUCT_VALIDATION, E_P6_W6_PRODUCT_PTSIP, E_P6_W6_PRODUCT_DOCUMENTATION_AUTOMATION]}
+  - {id: GATE_P6_PRODUCT_REGRESSION, required: true, status: PASS, evidence_refs: [E_P6_W7_PRODUCT_CLOSEOUT, E_P6_W7_PRODUCT_REGRESSION, E_P6_W7_PRODUCT_DOCUMENTATION_AUTOMATION]}
+  - {id: GATE_P6_P5_COMPATIBILITY, required: true, status: PASS, evidence_refs: [E_P6_W8_P5_COMPATIBILITY]}
+  - {id: GATE_P6_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P6_W7_PRODUCT_PTSIP]}
+  - {id: GATE_SDK_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_CLOSEOUT_VALIDATION, E_P6_W7_PRODUCT_REGRESSION]}
+  - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_CLOSEOUT_VALIDATION]}
+  - {id: GATE_PTSIP_PROFILE, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_CLOSEOUT_VALIDATION]}
+  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_CLOSEOUT_VALIDATION, E_P6_W7_PRODUCT_PTSIP, E_P6_W8_CROSS_REPOSITORY_EXACT]}
+state:
+  mode: DERIVED
+  ruleset: SESSION_STATE_V1

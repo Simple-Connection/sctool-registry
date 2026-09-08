@@ -1,0 +1,415 @@
+schema_version: "1.0"
+document_type: session_work_plan
+natural_language: FORBIDDEN
+session:
+  id: P5
+  type: B
+  distribution_contract_version: "1.0.2"
+  branch: "dev/1.0.2"
+  governance_repository: "Simple-Connection/sctool-registry"
+implementation:
+  repository: "Simple-Connection/SC_Linked_App"
+  branch: "dev/2.2.4"
+  ownership_transition:
+    current_owner: Simple-Connection
+    target_owner: Simple-Connection
+    state: COMPLETE
+    canonical_repository: "Simple-Connection/SC_Linked_App"
+    implementation_repository_identity_changes_only_after_transfer: true
+approval:
+  planning: APPROVED
+  implementation: APPROVED
+  implementation_materialization: ALLOWED
+baseline:
+  registry_head: "2bb760a31015780fb29f9b1ef7a1860a559e4dd4"
+  registry_input_contract: CONTRACT_UPDATE_CANDIDATE_V1
+  registry_input_state: UPDATE_AVAILABLE
+  registry_candidate_type: VERIFIED_UPDATE_CANDIDATE
+  registry_artifact_access: VERIFIED_ARTIFACT_LEASE
+  product_observations:
+    - id: PRODUCT_INSTALLER_COUPLED
+      path: "desktop/src/main/features/mcp/sctool/installer.ts"
+      observed:
+        - EXTRACTS_LOCAL_ARCHIVE
+        - VALIDATES_MANIFEST
+        - VERIFIES_INTERNAL_CHECKSUMS
+        - DELETES_EXISTING_INSTALL_DIRECTORY
+        - COPIES_TO_PERSISTENT_INSTALL_DIRECTORY
+        - UPSERTS_INSTALL_REGISTRY
+        - SELECTS_INCOMING_VERSION
+        - RECONCILES_RUNTIME_DESCRIPTOR
+        - RESCANS_MANAGED_REPOSITORY
+    - id: PRODUCT_INSTALL_REGISTRY_NON_ATOMIC
+      path: "desktop/src/main/features/mcp/sctool/store.ts"
+      observed:
+        - REGISTRY_JSON_WRITE_USES_WRITE_FILE_SYNC
+        - INSTALL_RECORD_CONTAINS_ENABLED_FIELD
+    - id: PRODUCT_SELECTION_SEPARATE_STORE
+      path: "desktop/src/main/features/mcp/sctool/selection-store.ts"
+      observed:
+        - SELECTED_VERSION_HAS_SEPARATE_ATOMIC_STORE
+        - ACTIVATION_SELECTION_IS_PRODUCT_STATE
+    - id: PRODUCT_VERSIONED_INSTALL_ROOT
+      path: "desktop/src/main/features/mcp/sctool/paths.ts"
+      observed:
+        - INSTALL_ROOT_PACKAGES_ID_VERSION
+        - SELECTED_VERSION_STORE_SEPARATE_FROM_PACKAGE_TREE
+    - id: REGISTRY_SDK_NOT_CONSUMED_BY_PRODUCT
+      path: "desktop/package.json"
+      observed:
+        - REGISTRY_CLIENT_SDK_DEPENDENCY_ABSENT
+        - REGISTRY_CLIENT_SDK_CURRENTLY_PRIVATE
+boundary:
+  input:
+    contract: CONTRACT_UPDATE_CANDIDATE_V1
+    resolution_state: UPDATE_AVAILABLE
+    candidate_type: VERIFIED_UPDATE_CANDIDATE
+    artifact_access: VERIFIED_ARTIFACT_LEASE
+  output:
+    state: INSTALLED_NOT_ACTIVATED
+    persistent_owner: AUTH_SIMPLE_CONNECTION_DESKTOP
+    package_identity:
+      - packageId
+      - version
+    persistent_artifacts:
+      - VERSIONED_INSTALL_DIRECTORY
+      - INSTALLED_PACKAGE_RECORD
+  install_semantics:
+    initial_install: DEFERRED_SEPARATE_DECISION
+    update_install: IN_SCOPE
+    side_by_side_versions: PRESERVE
+    new_update_enabled_compatibility_value: false
+    selected_version_mutation: FORBIDDEN
+    runtime_descriptor_mutation: FORBIDDEN
+    runtime_rescan: FORBIDDEN
+    activation: FORBIDDEN
+    rollback: FORBIDDEN
+    renderer_ui: FORBIDDEN
+  handoff_invariants:
+    - VERIFIED_ARTIFACT_LEASE_ONLY
+    - RAW_REGISTRY_STAGING_PATH_FORBIDDEN
+    - CONTENT_FILENAME_NOT_FILESYSTEM_AUTHORITY
+    - EXTRACTED_MANIFEST_PACKAGE_ID_EQUALS_CANDIDATE_PACKAGE_ID
+    - EXTRACTED_MANIFEST_VERSION_EQUALS_CANDIDATE_VERSION
+    - INTERNAL_PACKAGE_CHECKSUMS_PASS
+    - CANDIDATE_LEASE_DISPOSED_ON_ALL_TERMINAL_PATHS
+  persistence_invariants:
+    - PRODUCT_CONTROLLED_TRANSACTION_ROOT
+    - SAME_FILESYSTEM_AS_FINAL_INSTALL_ROOT
+    - EXISTING_FINAL_DIRECTORY_NEVER_PREDELETED
+    - FINAL_DIRECTORY_PUBLISHED_BY_RENAME
+    - INSTALL_REGISTRY_WRITTEN_ATOMICALLY
+    - PARTIAL_TRANSACTION_NOT_VISIBLE_AS_INSTALLED
+    - FAILURE_CLEANUP_REQUIRED
+    - CRASH_RECOVERY_DETERMINISTIC
+    - SAME_ID_VERSION_REINSTALL_IDEMPOTENT_OR_CONFLICT
+    - EXISTING_SIBLING_VERSIONS_PRESERVED
+responsibility_migration:
+  approval: APPROVED
+  option: R1
+  source:
+    id: RESP_SIMPLE_CONNECTION_INSTALL
+    state: CURRENT_BROAD_RESPONSIBILITY
+    action_before_implementation: DECOMPOSE
+  approved:
+    - id: RESP_SIMPLE_CONNECTION_INSTALL_INTENT
+      subject: AUTH_SIMPLE_CONNECTION_DESKTOP
+      authority_domain: LOCAL_INSTALLATION
+      lifecycle_phase: INSTALLATION
+      operation: DECIDE
+      object_class: INSTALL_INTENT
+      relation: PRODUCES
+      boundary: ELIGIBLE_CANDIDATE_TO_EXPLICIT_INSTALL_INTENT
+    - id: RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
+      subject: AUTH_SIMPLE_CONNECTION_DESKTOP
+      authority_domain: LOCAL_INSTALLATION
+      lifecycle_phase: INSTALLATION
+      operation: CONTROL_LIFECYCLE
+      object_class: INSTALL_TRANSACTION
+      relation: OWNS
+      boundary: CREATE_ABORT_RECOVER_COMPLETE_INSTALL_TRANSACTION
+    - id: RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION
+      subject: AUTH_SIMPLE_CONNECTION_DESKTOP
+      authority_domain: LOCAL_INSTALLATION
+      lifecycle_phase: INSTALLATION
+      operation: MATERIALIZE
+      object_class: INSTALLED_PACKAGE_TREE
+      relation: PRODUCES
+      boundary: VERIFIED_ARTIFACT_STREAM_TO_VALIDATED_PRODUCT_STAGING_TREE
+    - id: RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT
+      subject: AUTH_SIMPLE_CONNECTION_DESKTOP
+      authority_domain: LOCAL_INSTALLATION
+      lifecycle_phase: INSTALLATION
+      operation: COMMIT
+      object_class: LOCAL_INSTALL_STATE
+      relation: OWNS
+      boundary: VALIDATED_STAGING_TREE_TO_ATOMIC_PERSISTENT_INSTALL_STATE
+  vocabulary_changes_required:
+    operation:
+      - DECIDE
+      - MATERIALIZE
+      - COMMIT
+    object_class:
+      - INSTALL_INTENT
+      - INSTALL_TRANSACTION
+      - INSTALLED_PACKAGE_TREE
+  migration_target:
+    source_responsibility: RESP_SIMPLE_CONNECTION_INSTALL
+    target_state_after_proof: RETIRED_OR_COMPATIBILITY_ALIAS
+    approval_required: P5_IMPLEMENTATION_APPROVAL
+sdk_distribution:
+  option: S1
+  mechanism: GITHUB_PACKAGES
+  registry: "https://npm.pkg.github.com"
+  package: "@simple-connection/sctool-registry-client-sdk"
+  visibility: PRIVATE
+  producer:
+    repository: "Simple-Connection/sctool-registry"
+    owner: Simple-Connection
+    authority: SDK_SOURCE_AND_PACKAGE_PUBLICATION
+  consumer:
+    current_repository: "Simple-Connection/SC_Linked_App"
+    current_owner: Simple-Connection
+    target_repository_after_ownership_transfer: "Simple-Connection/SC_Linked_App"
+    target_owner: Simple-Connection
+    authority: PACKAGE_READ_ONLY
+  version_policy:
+    dependency_range: EXACT
+    caret: FORBIDDEN
+    tilde: FORBIDDEN
+    lockfile: REQUIRED
+    mutable_tags_as_build_authority: FORBIDDEN
+  publish_policy:
+    source_revision_binding: REQUIRED
+    package_version_unique: REQUIRED
+    package_integrity_evidence: REQUIRED
+    package_provenance_evidence: REQUIRED
+    publish_from_ci: REQUIRED
+  authentication:
+    ci_preference:
+      - PACKAGE_REPOSITORY_ACCESS_WITH_GITHUB_TOKEN
+      - READ_PACKAGES_CREDENTIAL_FALLBACK
+    local_development:
+      source_controlled_token: FORBIDDEN
+      environment_or_user_config_credential: REQUIRED
+  ownership_transition:
+    package_scope_stable: "@simple-connection"
+    package_identity_changes_on_consumer_transfer: false
+    consumer_access_revalidation_after_transfer: REQUIRED
+  archival:
+    github_release_tgz: OPTIONAL
+    github_release_tgz_role: PROVENANCE_OR_RECOVERY_ONLY
+    primary_dependency_distribution: GITHUB_PACKAGES
+
+sctool_authoring_sdk_ownership:
+  approval: APPROVED
+  authority_repository: "Simple-Connection/sctool-registry"
+  canonical_source_path: "packages/sctool-sdk"
+  package: "@simple-connection/sctool-sdk"
+  responsibilities:
+    - RESP_SCTOOL_AUTHORING_GUIDANCE
+    - RESP_SCTOOL_MANIFEST_VALIDATION
+    - RESP_SCTOOL_PACKAGE_BUILD
+    - RESP_SCTOOL_PACKAGE_TEST
+  predecessor:
+    repository: "Simple-Connection/SC_Linked_App"
+    path: "program-sdk/sctool-sdk"
+    state: TRANSITIONAL_MIGRATION_SOURCE
+  consumer_boundary:
+    repository: "Simple-Connection/SC_Linked_App"
+    role: LOCATOR_AND_READ_ONLY_CONSUMER
+    source_ownership: FORBIDDEN
+    version_authority: FORBIDDEN
+    compatibility_authority: FORBIDDEN
+    publication_authority: FORBIDDEN
+  physical_migration:
+    state: PENDING
+    rule: AUTHORITY_TRANSFER_PRECEDES_SOURCE_MATERIALIZATION_AND_CONSUMER_REBIND
+
+transaction_model:
+  proposed_contract_id: SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1
+  states:
+    - INTENT_ACCEPTED
+    - MATERIALIZING
+    - VALIDATED
+    - COMMITTING
+    - INSTALLED
+    - ABORTED
+  terminal_states:
+    - INSTALLED
+    - ABORTED
+  transitions:
+    - {from: INTENT_ACCEPTED, to: MATERIALIZING, owner: RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE}
+    - {from: MATERIALIZING, to: VALIDATED, owner: RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION}
+    - {from: VALIDATED, to: COMMITTING, owner: RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT}
+    - {from: COMMITTING, to: INSTALLED, owner: RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT}
+  failure_transition:
+    to: ABORTED
+    owner: RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
+  recovery:
+    persistent_journal: REQUIRED
+    markers:
+      - PREPARED
+      - FILES_COMMITTED
+      - STATE_COMMITTED
+    policy: DETERMINISTIC_FORWARD_OR_ROLLBACK
+preconditions:
+  - id: P5_PRECONDITION_P4
+    state: SATISFIED
+    requirement: P4_VERIFIED_UPDATE_CANDIDATE_COMPLETE
+  - id: P5_PRECONDITION_LOCAL_VALIDATION
+    state: SATISFIED
+    requirement: P4_WINDOWS_LOCAL_REGRESSION_PASS
+  - id: P5_PRECONDITION_SDK_CONSUMPTION
+    state: SATISFIED
+    requirement: APPROVED_REGISTRY_CLIENT_SDK_CONSUMPTION_MECHANISM
+    selected: GITHUB_PACKAGES
+    forbidden:
+      - COPY_REGISTRY_CLIENT_SDK_SOURCE_INTO_PRODUCT
+      - DUPLICATE_REGISTRY_UPDATE_CANDIDATE_LOGIC_IN_PRODUCT
+      - PRODUCT_OWNERSHIP_OF_REGISTRY_SDK
+  - id: P5_PRECONDITION_RESPONSIBILITY_SPLIT
+    state: SATISFIED
+    requirement: APPROVE_P5_RESPONSIBILITY_MIGRATION
+    selected: R1
+work_units:
+  - id: P5-W1
+    state: PLANNED
+    purpose: FINALIZE_INSTALL_AUTHORITY_AND_TRANSACTION_CONTRACT
+    depends_on: []
+    outputs:
+      - RESPONSIBILITY_SPLIT_APPROVAL
+      - SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1
+      - P5_GATE_REGISTRY
+  - id: P5-W2
+    state: PLANNED
+    purpose: MATERIALIZE_GITHUB_PACKAGES_SDK_DISTRIBUTION
+    depends_on:
+      - P5_PRECONDITION_SDK_CONSUMPTION
+    outputs:
+      - GITHUB_PACKAGES_PUBLISH_WORKFLOW
+      - PRODUCT_NPM_SCOPE_CONFIGURATION
+      - EXACT_SDK_VERSION_PIN
+      - PACKAGE_LOCK_IDENTITY
+      - PACKAGE_PROVENANCE_EVIDENCE
+  - id: P5-W3
+    state: PLANNED
+    purpose: SEPARATE_INSTALL_FROM_ACTIVATION_RUNTIME
+    depends_on:
+      - P5-W1
+    outputs:
+      - PERSISTENT_INSTALL_CORE
+      - LEGACY_LOCAL_FILE_INSTALL_COMPATIBILITY_WRAPPER
+      - NO_SELECTION_SIDE_EFFECT
+  - id: P5-W4
+    state: PLANNED
+    purpose: VERIFIED_CANDIDATE_PRODUCT_MATERIALIZATION
+    depends_on:
+      - P5-W2
+      - P5-W3
+    outputs:
+      - VERIFIED_CANDIDATE_INSTALL_ENTRYPOINT
+      - PRODUCT_TRANSACTION_ARCHIVE
+      - VALIDATED_PRODUCT_STAGING_TREE
+      - CANDIDATE_IDENTITY_BINDING
+  - id: P5-W5
+    state: PLANNED
+    purpose: ATOMIC_PERSISTENT_INSTALL_COMMIT
+    depends_on:
+      - P5-W4
+    outputs:
+      - SAME_VOLUME_TRANSACTION_ROOT
+      - ATOMIC_FINAL_DIRECTORY_PUBLICATION
+      - ATOMIC_INSTALL_REGISTRY_WRITE
+      - INSTALL_TRANSACTION_JOURNAL
+      - CRASH_RECOVERY
+  - id: P5-W6
+    state: PLANNED
+    purpose: INSTALL_IDEMPOTENCY_AND_CONFLICT_POLICY
+    depends_on:
+      - P5-W5
+    outputs:
+      - ALREADY_INSTALLED_NOOP
+      - SAME_ID_VERSION_CONFLICT_FAILURE
+      - SIBLING_VERSION_PRESERVATION
+  - id: P5-W7
+    state: PLANNED
+    purpose: ENFORCE_NO_ACTIVATION_SIDE_EFFECT
+    depends_on:
+      - P5-W3
+      - P5-W5
+    outputs:
+      - SELECTED_VERSION_UNCHANGED
+      - EXISTING_ENABLED_SIBLING_UNCHANGED
+      - NEW_UPDATE_COMPATIBILITY_ENABLED_FALSE
+      - REPO_LOCAL_DESCRIPTOR_UNCHANGED
+      - RUNTIME_RESCAN_NOT_CALLED
+  - id: P5-W8
+    state: PLANNED
+    purpose: INSTALL_AUTOMATION_EVIDENCE
+    depends_on:
+      - P5-W4
+      - P5-W5
+      - P5-W6
+      - P5-W7
+    outputs:
+      - REVISION_BOUND_INSTALL_EVIDENCE
+      - FAILURE_MATRIX
+      - WINDOWS_FILE_LOCK_REGRESSION
+  - id: P5-W9
+    state: PLANNED
+    purpose: CROSS_REPOSITORY_EXACT_VALIDATION
+    depends_on:
+      - P5-W8
+    outputs:
+      - REGISTRY_P4_REGRESSION_PASS
+      - SIMPLE_CONNECTION_PRODUCT_REGRESSION_PASS
+      - PTSIP_EXACT_PASS
+      - P5_CLOSEOUT_CANDIDATE
+proposed_gates:
+  - GATE_P5_RESPONSIBILITY_SPLIT
+  - GATE_P5_REGISTRY_SDK_CONSUMPTION
+  - GATE_P5_VERIFIED_CANDIDATE_HANDOFF
+  - GATE_P5_INSTALL_TRANSACTION_LIFECYCLE
+  - GATE_P5_ATOMIC_INSTALL_COMMIT
+  - GATE_P5_INSTALL_IDEMPOTENCY
+  - GATE_P5_NO_ACTIVATION_SIDE_EFFECT
+  - GATE_P5_FAILURE_RECOVERY
+  - GATE_P5_WINDOWS_INSTALL_REGRESSION
+  - GATE_P5_PRODUCT_REGRESSION
+  - GATE_P5_P4_COMPATIBILITY
+  - GATE_P5_PTSIP_CONFORMANCE
+automated_validation_plan:
+  evidence_format: "simple-connection-install-validation/v1"
+  required_scenarios:
+    - VERIFIED_CANDIDATE_INSTALL_SUCCESS
+    - CURRENT_OR_DOWNGRADE_NEVER_REACHES_P5
+    - MANIFEST_PACKAGE_ID_MISMATCH_FAILS
+    - MANIFEST_VERSION_MISMATCH_FAILS
+    - INTERNAL_CHECKSUM_FAILURE_ABORTS
+    - STREAM_FAILURE_ABORTS
+    - EXTRACTION_FAILURE_ABORTS
+    - EXISTING_FINAL_DIRECTORY_NOT_DELETED
+    - SAME_ID_VERSION_IDEMPOTENT_NOOP
+    - SAME_ID_VERSION_CONFLICT_FAILS
+    - REGISTRY_WRITE_FAILURE_RECOVERS
+    - PROCESS_CRASH_AFTER_FILES_COMMITTED_RECOVERS
+    - CANDIDATE_LEASE_DISPOSED_SUCCESS
+    - CANDIDATE_LEASE_DISPOSED_FAILURE
+    - SELECTED_VERSION_UNCHANGED
+    - ENABLED_SIBLING_UNCHANGED
+    - REPO_LOCAL_DESCRIPTOR_UNCHANGED
+    - RUNTIME_RESCAN_ZERO_CALLS
+    - SIBLING_VERSIONS_PRESERVED
+    - WINDOWS_ACTIVE_FILE_HANDLE_BEHAVIOR_DEFINED
+forbidden_effects:
+  - MODIFY_KINIRIN_SIMPLE_CONNECTION_DURING_PLANNING
+  - START_P5_IMPLEMENTATION_WITHOUT_EXPLICIT_APPROVAL
+  - ACTIVATE_INSTALLED_UPDATE
+  - CHANGE_SELECTED_VERSION
+  - RECONCILE_RUNTIME
+  - WRITE_REPO_LOCAL_DESCRIPTOR
+  - IMPLEMENT_ROLLBACK
+  - MODIFY_RENDERER_UI
+  - COPY_REGISTRY_SDK_SOURCE_INTO_PRODUCT
+  - DUPLICATE_P4_UPDATE_DECISION_IN_PRODUCT

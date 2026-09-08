@@ -11,11 +11,16 @@ on:
       - "policy/**"
       - "trust/**"
       - "tools/**"
+      - "delivery/**"
+      - "docs/**"
+      - "governance/**"
+      - "AGENTS.md"
       - "ptsip.yaml"
       - ".github/workflows/*.yml"
   push:
     branches:
       - main
+      - "dev/**"
     paths:
       - "registry.json"
       - "packages/**"
@@ -24,6 +29,10 @@ on:
       - "policy/**"
       - "trust/**"
       - "tools/**"
+      - "delivery/**"
+      - "docs/**"
+      - "governance/**"
+      - "AGENTS.md"
       - "ptsip.yaml"
       - ".github/workflows/*.yml"
 
@@ -53,15 +62,47 @@ jobs:
           python -m pip install "PTSIP==0.3.7"
           python -m pip install -r tools/requirements.txt
 
+      - name: Validate Registry Client SDK boundary
+        run: npm --prefix packages/registry-client-sdk test
+
+      - name: Validate P4 update candidate automation
+        shell: bash
+        run: |
+          update_evidence="$RUNNER_TEMP/update-candidate-validation.json"
+          revision="$(git rev-parse HEAD)"
+          node packages/registry-client-sdk/tests/generate-update-candidate-evidence.mjs \
+            --out "$update_evidence" \
+            --repository "$GITHUB_REPOSITORY" \
+            --revision "$revision"
+          python tools/validate-update-candidate-evidence.py \
+            --contract docs/UPDATE_CANDIDATE_V1.yaml \
+            --evidence "$update_evidence" \
+            --repository "$GITHUB_REPOSITORY" \
+            --revision "$revision"
+          cp "$update_evidence" update-candidate-validation.json
+          cat "$update_evidence"
+
+      - name: Upload P4 update candidate evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: p4-update-candidate-evidence-${{ github.sha }}
+          path: update-candidate-validation.json
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Validate PTSIP architecture with exact Product Artifact evidence
         shell: bash
         run: |
           validation="$RUNNER_TEMP/ptsip-validation.json"
           evidence="$RUNNER_TEMP/sctool-registry-product-artifact.json"
+          dependency_evidence="$RUNNER_TEMP/sctool-registry-dependency-evidence.json"
           revision="$(git rev-parse HEAD)"
           tracked="$(python -c "from ptsip.repository.snapshot import capture_snapshot; print(capture_snapshot('.').tracked_content_fingerprint)")"
 
-          ptsip validate . --json > "$validation"
+          if ! ptsip validate . --json > "$validation"; then
+            cat "$validation"
+            exit 1
+          fi
           python tools/generate-ptsip-artifact-evidence.py \
             --validation "$validation" \
             --out "$evidence" \
@@ -69,10 +110,21 @@ jobs:
             --revision "$revision" \
             --tracked-content-sha256 "$tracked" \
             --component registry-catalog \
+            --component registry-client-sdk \
+            --component sctool-authoring-sdk \
+            --component repository-tool-authoring-sdk \
             --component registry-contracts \
             --component product-documentation
 
-          ptsip conform . --artifact-evidence "$evidence"
+          python docs/governance/generate-node-platform-evidence.py \
+            --validation "$validation" \
+            --out "$dependency_evidence" \
+            --repository "$GITHUB_REPOSITORY" \
+            --revision "$revision"
+
+          ptsip conform . \
+            --artifact-evidence "$evidence" \
+            --external-evidence "$dependency_evidence"
 
       - name: Validate registry JSON contracts
         run: python tools/validate-registry.py

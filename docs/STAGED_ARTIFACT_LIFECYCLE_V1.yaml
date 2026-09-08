@@ -1,0 +1,39 @@
+schema_version: "1.0"
+document_type: staged_artifact_lifecycle_contract
+natural_language: FORBIDDEN
+contract_id: STAGED_ARTIFACT_LIFECYCLE_V1
+initial_state: ALLOCATED
+states:
+  - ALLOCATED
+  - WRITING
+  - STAGED
+  - VERIFIED
+  - RELEASED
+  - DISPOSED
+terminal_states:
+  - DISPOSED
+transitions:
+  - {id: T_ALLOCATE_WRITE, from: ALLOCATED, to: WRITING, owner: RESP_REGISTRY_ARTIFACT_STAGING_WRITE, operation: OPEN_WRITE}
+  - {id: T_WRITE_STAGED, from: WRITING, to: STAGED, owner: RESP_REGISTRY_ARTIFACT_STAGING_WRITE, operation: COMPLETE_WRITE}
+  - {id: T_STAGED_VERIFIED, from: STAGED, to: VERIFIED, owner: RESP_REGISTRY_ARTIFACT_INTEGRITY, operation: VERIFY}
+  - {id: T_VERIFIED_RELEASED, from: VERIFIED, to: RELEASED, owner: RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS, operation: EXPOSE_READ}
+  - {id: T_ALLOCATED_DISPOSED, from: ALLOCATED, to: DISPOSED, owner: RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE, operation: DISPOSE}
+  - {id: T_WRITING_DISPOSED, from: WRITING, to: DISPOSED, owner: RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE, operation: DISPOSE}
+  - {id: T_STAGED_DISPOSED, from: STAGED, to: DISPOSED, owner: RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE, operation: DISPOSE}
+  - {id: T_VERIFIED_DISPOSED, from: VERIFIED, to: DISPOSED, owner: RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE, operation: DISPOSE}
+  - {id: T_RELEASED_DISPOSED, from: RELEASED, to: DISPOSED, owner: RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE, operation: DISPOSE}
+invariants:
+  staging_storage: OS_TEMPORARY
+  path_authority: SDK_INTERNAL
+  content_filename_as_path: FORBIDDEN
+  raw_path_public_exposure: FORBIDDEN
+  consumer_write_access: FORBIDDEN
+  partial_consumer_access: FORBIDDEN
+  verified_consumer_access: READ_ONLY_STREAM
+  oversized_stream: ABORT_AND_DISPOSE
+  failed_transport: DISPOSE
+  failed_write: DISPOSE
+  failed_integrity: DISPOSE
+  dispose_idempotent: REQUIRED
+  dispose_with_active_reader: FORBIDDEN
+  crash_orphan_recovery: OS_TEMP_POLICY

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "projectRoot": "__DESTINATION__",
+  "package": {
+    "id": "__PACKAGE_ID__",
+    "target": "win-x64",
+    "outputDirectory": ".sctool/dist/packages/__PACKAGE_ID__",
+    "workDirectory": ".sctool/dist/work/__PACKAGE_ID__/${version}/win-x64",
+    "manifestTemplate": "${projectRoot}/packaging/tool.template.json"
+  },
+  "build": {
+    "adapter": "go",
+    "workingDirectory": "${projectRoot}",
+    "outputPath": ".sctool/dist/work/__PACKAGE_ID__/${version}/win-x64/bin/__COMMAND_NAME__.exe",
+    "entryPackage": "./cmd/__COMMAND_NAME__",
+    "trimpath": true,
+    "formatPaths": ["cmd", "internal"],
+    "testPackages": ["-v", "-timeout=120s", "./..."],
+    "ldflags": ["-s", "-w"],
+    "versionVariables": {
+      "__MODULE_PATH__/internal/version.Version": "${version}",
+      "__MODULE_PATH__/internal/version.Commit": "${gitCommit}",
+      "__MODULE_PATH__/internal/version.BuildDate": "${buildDate}"
+    }
+  },
+  "bundle": {
+    "entryCommand": "bin/win-x64/__COMMAND_NAME__.exe",
+    "assets": [
+      {
+        "source": ".sctool/dist/work/__PACKAGE_ID__/${version}/win-x64/bin/__COMMAND_NAME__.exe",
+        "destination": "bin/win-x64/__COMMAND_NAME__.exe"
+      },
+      { "source": "${projectRoot}/schemas", "destination": "schemas" },
+      { "source": "${projectRoot}/policy", "destination": "policy" },
+      { "source": "${projectRoot}/README_TOOL.md", "destination": "README_TOOL.md" },
+      { "source": "${projectRoot}/signature.json", "destination": "signature.json" }
+    ]
+  },
+  "verification": {
+    "versionArgs": ["--version"],
+    "mcpStdio": true,
+    "secretScan": true,
+    "timeoutSeconds": 20,
+    "environment": {}
+  }
+}

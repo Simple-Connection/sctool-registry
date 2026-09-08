@@ -1,0 +1,5 @@
+schema_version: "2.0"
+document_type: responsibility_description_registry
+natural_language: DESCRIPTION_ONLY
+semantic_role: UNMODELED_AUTHORITY_SEMANTIC
+descriptions: {}

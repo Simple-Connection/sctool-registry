@@ -1,0 +1,83 @@
+schema_version: "1.0"
+document_type: simple_connection_install_transaction_contract
+natural_language: FORBIDDEN
+contract_id: SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1
+authority: AUTH_SIMPLE_CONNECTION_DESKTOP
+input:
+  resolution_state: UPDATE_AVAILABLE
+  candidate_type: VERIFIED_UPDATE_CANDIDATE
+  artifact_type: VERIFIED_ARTIFACT_LEASE
+  raw_registry_staging_path: FORBIDDEN
+install_intent:
+  responsibility: RESP_SIMPLE_CONNECTION_INSTALL_INTENT
+  required_binding:
+    - packageId
+    - version
+  decision_scope: START_PERSISTENT_INSTALL_TRANSACTION
+  update_eligibility_redecision: FORBIDDEN
+transaction:
+  responsibility: RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
+  states:
+    - INTENT_ACCEPTED
+    - MATERIALIZING
+    - VALIDATED
+    - COMMITTING
+    - INSTALLED
+    - ABORTED
+  initial_state: INTENT_ACCEPTED
+  terminal_states:
+    - INSTALLED
+    - ABORTED
+  transitions:
+    - {id: T1, from: INTENT_ACCEPTED, to: MATERIALIZING, owner: RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE}
+    - {id: T2, from: MATERIALIZING, to: VALIDATED, owner: RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION}
+    - {id: T3, from: VALIDATED, to: COMMITTING, owner: RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT}
+    - {id: T4, from: COMMITTING, to: INSTALLED, owner: RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT}
+  failure:
+    from_non_terminal: ANY
+    to: ABORTED
+    owner: RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
+materialization:
+  responsibility: RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION
+  source: VERIFIED_ARTIFACT_LEASE
+  product_staging: REQUIRED
+  same_filesystem_as_final_install: REQUIRED
+  validations:
+    - ARCHIVE_EXTRACTION
+    - MANIFEST_VALIDATION
+    - CANDIDATE_PACKAGE_ID_BINDING
+    - CANDIDATE_VERSION_BINDING
+    - INTERNAL_PACKAGE_CHECKSUMS
+  candidate_lease_disposal: ALL_TERMINAL_PATHS
+commit:
+  responsibility: RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT
+  final_directory_publication: ATOMIC_RENAME
+  existing_final_directory_predelete: FORBIDDEN
+  install_registry_write: ATOMIC
+  partial_state_visibility: FORBIDDEN
+  sibling_versions: PRESERVE
+  same_id_version:
+    identical: IDEMPOTENT_NOOP
+    conflicting: FAIL_CLOSED
+recovery:
+  persistent_journal: REQUIRED
+  markers:
+    - PREPARED
+    - FILES_COMMITTED
+    - STATE_COMMITTED
+  policy: DETERMINISTIC_FORWARD_OR_ROLLBACK
+output:
+  state: INSTALLED_NOT_ACTIVATED
+  persistent_artifacts:
+    - VERSIONED_INSTALL_DIRECTORY
+    - INSTALLED_PACKAGE_RECORD
+forbidden_effects:
+  - SELECTED_VERSION_MUTATION
+  - ACTIVATION
+  - RUNTIME_DESCRIPTOR_MUTATION
+  - RUNTIME_RESCAN
+  - ROLLBACK
+  - RENDERER_UI_MUTATION
+  - REGISTRY_UPDATE_ELIGIBILITY_REDECISION
+initial_install:
+  state: OUT_OF_SCOPE

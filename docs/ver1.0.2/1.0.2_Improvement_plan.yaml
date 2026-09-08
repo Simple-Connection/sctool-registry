@@ -1,0 +1,113 @@
+schema_version: "4.0"
+document_type: improvement_plan
+template_id: improvement_plan_v4
+natural_language: FORBIDDEN
+version:
+  distribution_contract_version: "1.0.2"
+  branch: "dev/1.0.2"
+  state: COMPLETE
+  baseline_main: "c3e881742177aec3eae71d2c336801b6b52c74e5"
+  previous_distribution_contract_version: "1.0.1"
+routing:
+  docs_index: "docs/index.yaml"
+  rules_index: "docs/rules/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  session_document_root: "docs/ver1.0.2/session_document"
+sessions:
+  - id: P1
+    type: A
+    state: COMPLETE
+    approval: APPROVED
+    responsibility_refs:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_REGISTRY_ACCESS
+      - RESP_SIMPLE_CONNECTION_INSTALL
+    document: "docs/ver1.0.2/session_document/ver.1.0.2_P1_simple_connection_descriptor_consumer.yaml"
+  - id: P2
+    type: B
+    state: COMPLETE
+    approval: APPROVED
+    responsibility_refs:
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    document: "docs/ver1.0.2/session_document/ver.1.0.2_P2_registry_client_sdk_descriptor_resolution.yaml"
+  - id: P3
+    type: B
+    state: COMPLETE
+    approval: APPROVED
+    responsibility_refs:
+      - RESP_REGISTRY_RELEASE_RESOLUTION
+      - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+    document: "docs/ver1.0.2/session_document/ver.1.0.2_P3_registry_client_sdk_release_retrieval.yaml"
+  - id: P4
+    type: B
+    state: COMPLETE
+    approval: APPROVED
+    responsibility_refs:
+      - RESP_REGISTRY_STAGING_RESOURCE_LIFECYCLE
+      - RESP_REGISTRY_ARTIFACT_STAGING_WRITE
+      - RESP_REGISTRY_ARTIFACT_INTEGRITY
+      - RESP_REGISTRY_VERIFIED_ARTIFACT_ACCESS
+      - RESP_REGISTRY_UPDATE_CANDIDATE
+    document: "docs/ver1.0.2/session_document/ver.1.0.2_P4_file_backed_verified_candidate.yaml"
+  - id: P5
+    type: B
+    state: COMPLETE
+    approval: APPROVED
+    responsibility_refs:
+      - RESP_REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION
+      - RESP_SIMPLE_CONNECTION_INSTALL_INTENT
+      - RESP_SIMPLE_CONNECTION_INSTALL_TRANSACTION_LIFECYCLE
+      - RESP_SIMPLE_CONNECTION_PACKAGE_MATERIALIZATION
+      - RESP_SIMPLE_CONNECTION_INSTALL_STATE_COMMIT
+    document: "docs/ver1.0.2/session_document/ver.1.0.2_P5_simple_connection_install.yaml"
+    planning_state: CONCRETIZED
+    planning_document: "docs/ver1.0.2/session_document/ver.1.0.2_P5_simple_connection_install_work_plan.yaml"
+  - id: P6
+    type: C
+    state: COMPLETE
+    approval: APPROVED
+    responsibility_refs:
+      - RESP_SIMPLE_CONNECTION_ACTIVATION
+      - RESP_SIMPLE_CONNECTION_ROLLBACK
+      - RESP_SIMPLE_CONNECTION_RUNTIME_RECONCILE
+      - RESP_SIMPLE_CONNECTION_RENDERER_UI
+    document: "docs/ver1.0.2/session_document/ver.1.0.2_P6_simple_connection_activation_runtime.yaml"
+    planning_state: CONCRETIZED
+    planning_document: "docs/ver1.0.2/session_document/ver.1.0.2_P6_simple_connection_activation_runtime_work_plan.yaml"
+migrations:
+  machine_routing: COMPLETE
+  responsibility_model: COMPLETE
+  interpretation_layer: COMPLETE
+  governance_layout: COMPLETE
+validation:
+  evidence_head: "0cfaa288dc3ffc6e9dc2bd80ea9484caff0f64ef"
+  development_docs: PASS
+  interpretation_layer: PASS
+  registry_json: PASS
+  ptsip_profile: PASS
+  ptsip_conformance: PASS
+  automation:
+    governance_run_id: 34026178339
+    exact_registry_run_id: 34026178338
+    update_candidate_evidence_artifact_id: 9987120543
+
+gates:
+  approved_sessions: PASS
+  machine_document_routing: PASS
+  responsibility_model_validation: PASS
+  interpretation_layer_validation: PASS
+  governance_layout_validation: PASS
+  development_docs_validation: PASS
+  registry_validation: PASS
+  ptsip_profile_validation: PASS
+  ptsip_conformance: PASS
+  external_integration: PASS
+  version_completion: PASS
+  merge_to_main: APPROVED
+next:
+  session_id: null
+  state: NONE
