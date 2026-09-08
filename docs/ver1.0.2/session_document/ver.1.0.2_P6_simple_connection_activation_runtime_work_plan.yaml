@@ -93,7 +93,7 @@ work_units:
       - ACTIVE_VERSION_PROJECTION
       - RUNTIME_RECONCILE_STATUS
   - id: P6-W6
-    state: BLOCKED
+    state: COMPLETE
     purpose: ACTIVATION_ROLLBACK_FAILURE_RECOVERY
     depends_on:
       - P6-W5
