@@ -20,7 +20,7 @@ routing:
 heads:
   start: "1a04236d54552c19da5390cfbfd979f585b6c833"
   implementation: "aa8e17c5f9e42bb55d04acd3d743138efd4bcdab"
-  exact_validation: null
+  exact_validation: "b72a6e39826b6ca7e9d3f491e5ffc37fe620908b"
 responsibility_model:
   effects:
     assign: []
@@ -162,7 +162,7 @@ work_units:
     completion_codes:
       - P6_PRODUCT_AUTOMATION_EVIDENCE_COMPLETE
   - id: P6-W8
-    status: PENDING
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_ACTIVATION
       - RESP_SIMPLE_CONNECTION_ROLLBACK
@@ -176,7 +176,7 @@ work_units:
       - PRODUCT_REGRESSION_PASS
       - P6_CLOSEOUT_CANDIDATE
     completion_codes:
-      - P6_CROSS_REPOSITORY_EXACT_CLOSEOUT_PENDING
+      - P6_CROSS_REPOSITORY_EXACT_CLOSEOUT_COMPLETE
 evidence:
   - id: E_P6_APPROVAL
     kind: USER_APPROVAL
@@ -779,6 +779,78 @@ evidence:
       p3_w6_state: COMPLETED
       p3_session_state: COMPLETED
 
+  - id: E_P6_W8_P5_COMPATIBILITY
+    kind: EXACT_VALIDATION
+    head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      product_head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+      product_regression_run_id: 34182735131
+      product_regression_run_number: 39
+      product_regression_conclusion: SUCCESS
+      p5_install_boundary_regression: PASS
+      windows_failure_file_lock_regression: PASS
+      p6_w2_activation: PASS
+      p6_w3_runtime_reconcile: PASS
+      p6_w4_rollback: PASS
+      p6_w5_renderer_lifecycle: PASS
+      p6_w6_failure_recovery: PASS
+      p6_w6_test_count: 11
+      p6_w6_test_pass: 11
+      p6_w6_test_fail: 0
+      evidence_artifact_id: 10039496745
+      evidence_artifact_name: "sctool-product-install-2e458a734c2bf8076abb763f315db82f43ea54d8"
+
+  - id: E_P6_W8_REGISTRY_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "b72a6e39826b6ca7e9d3f491e5ffc37fe620908b"
+    refs:
+      repository: "Simple-Connection/sctool-registry"
+      branch: "dev/1.0.2"
+      registry_head: "b72a6e39826b6ca7e9d3f491e5ffc37fe620908b"
+      build_run_id: 34197474380
+      build_conclusion: SUCCESS
+      governance_run_id: 34197474410
+      governance_conclusion: SUCCESS
+      registry_client_sdk_boundary: PASS
+      update_candidate_regression: PASS
+      ptsip_architecture_exact_artifact: PASS
+      registry_json_contracts: PASS
+      machine_development_documentation: PASS
+      ptsip_profile_ownership_partition: PASS
+      update_candidate_evidence_artifact_id: 10044451162
+      update_candidate_evidence_artifact_name: "p4-update-candidate-evidence-b72a6e39826b6ca7e9d3f491e5ffc37fe620908b"
+
+  - id: E_P6_W8_CROSS_REPOSITORY_EXACT
+    kind: CROSS_REPOSITORY_EXACT_VALIDATION
+    head: "b72a6e39826b6ca7e9d3f491e5ffc37fe620908b"
+    refs:
+      registry_repository: "Simple-Connection/sctool-registry"
+      registry_branch: "dev/1.0.2"
+      registry_head: "b72a6e39826b6ca7e9d3f491e5ffc37fe620908b"
+      product_repository: "Simple-Connection/SC_Linked_App"
+      product_branch: "main"
+      product_head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+      product_regression_run_id: 34182735131
+      product_ptsip_run_id: 34182736423
+      product_documentation_run_id: 34182737826
+      registry_build_run_id: 34197474380
+      registry_governance_run_id: 34197474410
+      p5_compatibility: PASS
+      registry_sdk_boundary: PASS
+      update_candidate_regression: PASS
+      product_regression: PASS
+      product_ptsip_responsibility_map: PASS
+      product_ptsip_exact_conformance: PASS
+      registry_ptsip_profile: PASS
+      registry_ptsip_architecture: PASS
+      authoring_sdk_authority: REGISTRY_ONLY
+      product_authoring_sdk_predecessor_tree: FORBIDDEN
+      product_direct_mutation_by_registry_project: FORBIDDEN
+      release_declaration: OUT_OF_SCOPE
+      closeout_state: P6_CLOSEOUT_CANDIDATE
+
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P6_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P6_W1_GOVERNANCE]}
@@ -790,12 +862,12 @@ gates:
   - {id: GATE_P6_RENDERER_UI, required: true, status: PASS, evidence_refs: [E_P6_W5_PRODUCT_IMPLEMENTATION, E_P6_W5_PRODUCT_VALIDATION, E_P6_W5_PRODUCT_PTSIP]}
   - {id: GATE_P6_FAILURE_RECOVERY, required: true, status: PASS, evidence_refs: [E_P6_W6_PRODUCT_IMPLEMENTATION, E_P6_W6_PRODUCT_VALIDATION, E_P6_W6_PRODUCT_PTSIP, E_P6_W6_PRODUCT_DOCUMENTATION_AUTOMATION]}
   - {id: GATE_P6_PRODUCT_REGRESSION, required: true, status: PASS, evidence_refs: [E_P6_W7_PRODUCT_CLOSEOUT, E_P6_W7_PRODUCT_REGRESSION, E_P6_W7_PRODUCT_DOCUMENTATION_AUTOMATION]}
-  - {id: GATE_P6_P5_COMPATIBILITY, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_P5_COMPATIBILITY, required: true, status: PASS, evidence_refs: [E_P6_W8_P5_COMPATIBILITY]}
   - {id: GATE_P6_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P6_W7_PRODUCT_PTSIP]}
-  - {id: GATE_SDK_BOUNDARY, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PTSIP_PROFILE, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_SDK_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_EXACT_VALIDATION, E_P6_W7_PRODUCT_REGRESSION]}
+  - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_PROFILE, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_EXACT_VALIDATION]}
+  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_EXACT_VALIDATION, E_P6_W7_PRODUCT_PTSIP, E_P6_W8_CROSS_REPOSITORY_EXACT]}
 state:
   mode: DERIVED
   ruleset: SESSION_STATE_V1
