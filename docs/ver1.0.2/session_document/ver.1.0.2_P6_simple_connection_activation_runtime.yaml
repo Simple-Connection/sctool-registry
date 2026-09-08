@@ -146,7 +146,7 @@ work_units:
     completion_codes:
       - P6_FAILURE_RECOVERY_COMPLETE
   - id: P6-W7
-    status: PENDING
+    status: BLOCKED
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_ACTIVATION
       - RESP_SIMPLE_CONNECTION_ROLLBACK
@@ -154,12 +154,13 @@ work_units:
       - RESP_SIMPLE_CONNECTION_RENDERER_UI
     input_refs:
       - P6-W6
+      - E_P6_W7_PRODUCT_CLOSEOUT_REQUEST
     output_refs:
       - REVISION_BOUND_P6_EVIDENCE
       - PRODUCT_TYPECHECK_BUILD_PASS
       - PRODUCT_PTSIP_PASS
     completion_codes:
-      - P6_PRODUCT_AUTOMATION_EVIDENCE_PENDING
+      - P6_PRODUCT_CLOSEOUT_REQUESTED
   - id: P6-W8
     status: PENDING
     responsibility_refs:
@@ -639,6 +640,60 @@ evidence:
       p3_w5_state: COMPLETED
       p3_w6_state: PLANNED
 
+  - id: E_P6_W7_PRODUCT_CLOSEOUT_REQUEST
+    kind: EXTERNAL_CHANGE_REQUEST
+    head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+    refs:
+      requesting_repository: "Simple-Connection/sctool-registry"
+      target_repository: "Simple-Connection/SC_Linked_App"
+      target_branch: "main"
+      product_current_head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+      product_p3_w5_state: COMPLETED
+      product_p3_w6_state: PLANNED
+      direct_product_mutation_by_registry_project: FORBIDDEN
+      product_interaction_mode: CHANGE_REQUEST_ONLY
+      product_evidence_read_mode: READ_ONLY_EXACT_VALIDATION
+      required_product_work_item: P3-W6
+      work_item_code: PRODUCT_CLOSEOUT
+      source_change_policy: NO_PRODUCT_SOURCE_CHANGE_EXPECTED
+      baseline_product_regression_run_id: 34177651302
+      baseline_product_regression_run_number: 38
+      baseline_product_regression_conclusion: SUCCESS
+      baseline_ptsip_run_id: 34177651322
+      baseline_ptsip_run_number: 212
+      baseline_ptsip_conclusion: SUCCESS
+      baseline_documentation_run_id: 34177651319
+      baseline_documentation_run_number: 6
+      baseline_documentation_conclusion: SUCCESS
+      required_machine_transitions:
+        - P3_W6_COMPLETED
+        - P3_VERIFICATION_PASSED
+        - P3_COMPLETION_P3_W6_COMPLETED
+        - P3_SESSION_COMPLETED
+        - P3_SESSION_INDEX_COMPLETED
+      native_session_closeout_command: "npm run docs:session:complete"
+      final_closeout_revision_requirement: EXACT
+      product_regression_final_head: REQUIRED
+      product_ptsip_final_head: REQUIRED
+      documentation_automation_final_head: REQUIRED
+      product_regression_trigger_for_docs_only_closeout: WORKFLOW_DISPATCH_REQUIRED
+      ptsip_trigger_for_docs_only_closeout: WORKFLOW_DISPATCH_REQUIRED
+      documentation_trigger_for_docs_only_closeout: AUTOMATIC
+      required_final_outputs:
+        - FINAL_PRODUCT_MAIN_HEAD
+        - PRODUCT_LIFECYCLE_REGRESSION_SUCCESS
+        - REVISION_BOUND_P6_W2_W3_W4_W5_W6_EVIDENCE
+        - PRODUCT_TYPECHECK_PASS
+        - PRODUCT_BUILD_PASS
+        - EXACT_REGISTRY_OWNED_SDK_IDENTITY_PASS
+        - EXACT_SDK_LOCK_BINDING_PASS
+        - WINDOWS_FAILURE_FILE_LOCK_PASS
+        - PTSIP_RESPONSIBILITY_MAP_PASS
+        - PTSIP_EXACT_CONFORMANCE_PASS
+        - DOCUMENTATION_AUTOMATION_PASS
+      release_declaration: OUT_OF_SCOPE
+      p6_w8_cross_repository_closeout: NOT_INCLUDED
+
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P6_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P6_W1_GOVERNANCE]}
@@ -649,9 +704,9 @@ gates:
   - {id: GATE_P6_ROLLBACK, required: true, status: PASS, evidence_refs: [E_P6_W4_PRODUCT_IMPLEMENTATION, E_P6_W4_PRODUCT_VALIDATION, E_P6_W4_PRODUCT_PTSIP]}
   - {id: GATE_P6_RENDERER_UI, required: true, status: PASS, evidence_refs: [E_P6_W5_PRODUCT_IMPLEMENTATION, E_P6_W5_PRODUCT_VALIDATION, E_P6_W5_PRODUCT_PTSIP]}
   - {id: GATE_P6_FAILURE_RECOVERY, required: true, status: PASS, evidence_refs: [E_P6_W6_PRODUCT_IMPLEMENTATION, E_P6_W6_PRODUCT_VALIDATION, E_P6_W6_PRODUCT_PTSIP, E_P6_W6_PRODUCT_DOCUMENTATION_AUTOMATION]}
-  - {id: GATE_P6_PRODUCT_REGRESSION, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_PRODUCT_REGRESSION, required: true, status: BLOCKED, evidence_refs: [E_P6_W7_PRODUCT_CLOSEOUT_REQUEST]}
   - {id: GATE_P6_P5_COMPATIBILITY, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P6_PTSIP_CONFORMANCE, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P6_PTSIP_CONFORMANCE, required: true, status: BLOCKED, evidence_refs: [E_P6_W7_PRODUCT_CLOSEOUT_REQUEST]}
   - {id: GATE_SDK_BOUNDARY, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_PTSIP_PROFILE, required: true, status: PENDING, evidence_refs: []}
