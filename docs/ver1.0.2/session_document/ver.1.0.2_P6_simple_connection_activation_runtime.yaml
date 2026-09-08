@@ -130,7 +130,7 @@ work_units:
     completion_codes:
       - P6_RENDERER_UI_COMPLETE
   - id: P6-W6
-    status: BLOCKED
+    status: COMPLETE
     responsibility_refs:
       - RESP_SIMPLE_CONNECTION_ACTIVATION
       - RESP_SIMPLE_CONNECTION_ROLLBACK
@@ -144,7 +144,7 @@ work_units:
       - WINDOWS_RUNTIME_FILE_LOCK_REGRESSION
       - PARTIAL_ACTIVATION_VISIBILITY_PROOF
     completion_codes:
-      - P6_FAILURE_RECOVERY_PRODUCT_TEST_PARSE_BLOCKED
+      - P6_FAILURE_RECOVERY_COMPLETE
   - id: P6-W7
     status: PENDING
     responsibility_refs:
@@ -543,6 +543,102 @@ evidence:
       product_source_contract_violation_confirmed: false
       registry_direct_product_mutation: FORBIDDEN
 
+  - id: E_P6_W6_PRODUCT_IMPLEMENTATION
+    kind: COMMIT_SET
+    head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      failure_matrix_test: "8a7e65d921a327912bde8cc1196e568f881e2087"
+      failure_recovery_source_fix: "a6ad25a2c03139700ffa9b114508da21c78dab2d"
+      initial_ci_evidence_guard: "64df5327fc5c4b8e209b3e08d24dc35084c5be97"
+      syntax_fix: "6e0e846821db155900815e5020183388b91a71b3"
+      rollback_test_hook_fix: "421d1461d977d33a0a191eb9088309dd90e18864"
+      evidence_env_path_fix: "72960e2611d1eb4b1ab8c1dfc5dc03cb2349258f"
+      product_machine_closeout: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+      final_product_head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+      source_fix_after_parse_blocker_revision: NONE
+      product_source_fix_required_by_w6_matrix: true
+      lifecycle_projection_fix:
+        path: "desktop/src/main/features/mcp/sctool/lifecycle-service.ts"
+        strategy: PRIOR_COMMITTED_PROJECTION_DURING_IN_FLIGHT_MUTATION
+        same_package_mutation_policy: SERIALIZED
+      runtime_restore_fix:
+        path: "desktop/src/main/features/mcp/sctool/runtime-reconcile-service.ts"
+        untouched_locked_descriptor_snapshot: RESTORE_COMPLETE_WITHOUT_REWRITE
+      failure_matrix_path: "desktop/tests/mcp/sctool/p6-failure-recovery.test.mjs"
+      evidence_format: "simple-connection-p6-failure-recovery/v1"
+      contract: SIMPLE_CONNECTION_ACTIVATION_ROLLBACK_V1
+      renderer_persistent_mutation: FORBIDDEN
+      rollback_download: FORBIDDEN
+      rollback_reinstall: FORBIDDEN
+
+  - id: E_P6_W6_PRODUCT_VALIDATION
+    kind: WORKFLOW_RUN
+    head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      run_id: 34177651302
+      run_number: 38
+      conclusion: SUCCESS
+      documentation_routing: PASS
+      p5_install_boundary_regression: PASS
+      p6_w2_activation_tests: PASS
+      p6_w3_runtime_tests: PASS
+      p6_w4_rollback_tests: PASS
+      p6_w5_renderer_lifecycle_tests: PASS
+      p6_w6_failure_recovery_matrix: PASS
+      p6_w6_test_count: 11
+      p6_w6_test_pass: 11
+      p6_w6_test_fail: 0
+      p6_w6_revision_bound_evidence: PASS
+      activation_failure_restore: PASS
+      rollback_failure_restore: PASS
+      windows_runtime_descriptor_file_lock: PASS
+      in_flight_projection_prior_snapshot_only: PASS
+      post_failure_projection_prior_snapshot: PASS
+      no_partial_selected_enabled_projection: PASS
+      no_partial_runtime_descriptor_projection: PASS
+      installed_siblings_preserved: PASS
+      no_download_recovery: PASS
+      no_reinstall_recovery: PASS
+      exact_registry_owned_sdk_identity: PASS
+      exact_sdk_lock_binding: PASS
+      product_typecheck: PASS
+      product_build: PASS
+      registry_owned_sdk_runtime_contracts: PASS
+      published_sctool_cli_routing: PASS
+      windows_install_failure_matrix: PASS
+      evidence_artifact_id: 10037847858
+      evidence_artifact_name: "sctool-product-install-1ac20b8c7edd0a31745d65487202c62ab001de51"
+      w6_evidence_present: true
+
+  - id: E_P6_W6_PRODUCT_PTSIP
+    kind: EXACT_VALIDATION
+    head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      run_id: 34177651322
+      run_number: 212
+      conclusion: SUCCESS
+      responsibility_map: PASS
+      exact_conformance: PASS
+      machine_documentation: PASS
+
+  - id: E_P6_W6_PRODUCT_DOCUMENTATION_AUTOMATION
+    kind: WORKFLOW_RUN
+    head: "1ac20b8c7edd0a31745d65487202c62ab001de51"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      run_id: 34177651319
+      run_number: 6
+      conclusion: SUCCESS
+      p3_w5_state: COMPLETED
+      p3_w6_state: PLANNED
+
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P6_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P6_W1_GOVERNANCE]}
@@ -552,7 +648,7 @@ gates:
   - {id: GATE_P6_RUNTIME_RECONCILE, required: true, status: PASS, evidence_refs: [E_P6_W3_PRODUCT_IMPLEMENTATION, E_P6_W3_PRODUCT_FOCUSED_VALIDATION, E_P6_W3_PRODUCT_PTSIP]}
   - {id: GATE_P6_ROLLBACK, required: true, status: PASS, evidence_refs: [E_P6_W4_PRODUCT_IMPLEMENTATION, E_P6_W4_PRODUCT_VALIDATION, E_P6_W4_PRODUCT_PTSIP]}
   - {id: GATE_P6_RENDERER_UI, required: true, status: PASS, evidence_refs: [E_P6_W5_PRODUCT_IMPLEMENTATION, E_P6_W5_PRODUCT_VALIDATION, E_P6_W5_PRODUCT_PTSIP]}
-  - {id: GATE_P6_FAILURE_RECOVERY, required: true, status: BLOCKED, evidence_refs: [E_P6_W6_PRODUCT_CHANGE_REQUEST, E_P6_W6_PRODUCT_TEST_PARSE_BLOCKER]}
+  - {id: GATE_P6_FAILURE_RECOVERY, required: true, status: PASS, evidence_refs: [E_P6_W6_PRODUCT_IMPLEMENTATION, E_P6_W6_PRODUCT_VALIDATION, E_P6_W6_PRODUCT_PTSIP, E_P6_W6_PRODUCT_DOCUMENTATION_AUTOMATION]}
   - {id: GATE_P6_PRODUCT_REGRESSION, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_P5_COMPATIBILITY, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_PTSIP_CONFORMANCE, required: true, status: PENDING, evidence_refs: []}
