@@ -113,7 +113,7 @@ work_units:
       - PRODUCT_TYPECHECK_BUILD_PASS
       - PRODUCT_PTSIP_PASS
   - id: P6-W8
-    state: PLANNED
+    state: COMPLETE
     purpose: CROSS_REPOSITORY_EXACT_CLOSEOUT
     depends_on:
       - P6-W7
