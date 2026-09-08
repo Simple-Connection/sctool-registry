@@ -287,6 +287,34 @@ It must not own Simple Connection local installation state, active-version selec
 
 Registry Client SDK publication is separately governed by its approved Delivery workflow. Authoring SDK publication is governed by `.github/workflows/publish-authoring-sdks.yml` and `docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml`.
 
+## Registry Client SDK issue routing
+
+Registry-owned consumer failures discovered in `Simple-Connection/SC_Linked_App` must be reported to `Simple-Connection/sctool-registry` Issues. Do not open those failures in `Simple-Connection/SC_Linked_App` Issues merely because the failure was observed there.
+
+The canonical coding-agent report entrypoint in the consumer repository is:
+
+```text
+npm run registry:sdk:report -- --kind <KIND> --summary "<SUMMARY>" [--severity <SEVERITY>] [--command "<COMMAND>"] [--log "<PATH>"]
+```
+
+The reporter target repository is fixed to `Simple-Connection/sctool-registry`. It records a machine report ID, consumer branch/head, Registry Client SDK package/version, evidence references, and a routing hint. It must not upload log contents automatically.
+
+Registry issue routing uses GitHub Issues as the source of truth and `.github/registry-sdk-issue-queue.json` only as the active-version projection. A `dev/<semver>` branch is route-active only when all of the following hold:
+
+1. its `docs/index.yaml -> current.branch` equals that branch;
+2. its current version state is non-terminal;
+3. the branch has commits not yet merged into `main`.
+
+Exactly one route-active version receives the issue in its tracked queue. If no version branch is route-active, the issue remains an uncommitted next-version queue item and is absorbed when the next `dev/**` branch becomes active and receives a push. Multiple route-active version branches are a fail-closed routing error.
+
+The queue is not an implementation approval and must not cause GitHub Actions to synthesize product or SDK patches. A coding agent selects the highest-priority queued issue with:
+
+```text
+python tools/issue-routing/registry_issue_intake.py next
+```
+
+Then it patches the owning Registry surface on the routed version branch under the normal session/responsibility/PTSIP rules. Closing the GitHub issue removes it from the next queue synchronization.
+
 ## Authoring SDK boundary
 
 Canonical source paths:

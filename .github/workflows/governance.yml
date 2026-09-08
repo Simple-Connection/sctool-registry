@@ -13,6 +13,10 @@ on:
       - "delivery/**"
       - ".github/workflows/publish-authoring-sdks.yml"
       - ".github/workflows/governance.yml"
+      - ".github/workflows/registry-sdk-issue-routing.yml"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/registry-sdk-issue-queue.json"
+      - "tools/issue-routing/**"
       - ".github/workflows/pages.yml"
   push:
     branches:
@@ -27,6 +31,10 @@ on:
       - "delivery/**"
       - ".github/workflows/publish-authoring-sdks.yml"
       - ".github/workflows/governance.yml"
+      - ".github/workflows/registry-sdk-issue-routing.yml"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/registry-sdk-issue-queue.json"
+      - "tools/issue-routing/**"
       - ".github/workflows/pages.yml"
 
 permissions:
@@ -49,6 +57,9 @@ jobs:
 
       - name: Test session-state synchronization tooling
         run: python docs/governance/test-session-state-sync.py
+
+      - name: Test Registry SDK issue routing tooling
+        run: python -m unittest discover -s tools/issue-routing/tests -v
 
       - name: Validate machine development documentation
         run: python docs/governance/validate.py --root .
