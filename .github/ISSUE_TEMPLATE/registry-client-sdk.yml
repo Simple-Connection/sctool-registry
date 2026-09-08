@@ -1,0 +1,60 @@
+name: Registry Client SDK consumer issue
+description: Report a Registry Client SDK defect or contract/integration failure owned by sctool-registry.
+title: "[Registry Client SDK] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form only for Registry Client SDK ownership. SC_Linked_App product/runtime/UI defects belong to the consumer repository.
+        Coding agents in SC_Linked_App should normally use `npm run registry:sdk:report -- ...` so routing metadata is generated automatically.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - SDK_ERROR
+        - CONTRACT_MISMATCH
+        - PACKAGE_ACCESS
+        - REGRESSION
+        - INTEGRATION_BLOCKER
+        - OTHER
+    validations:
+      required: true
+  - type: input
+    id: source_repository
+    attributes:
+      label: Source repository
+      value: Simple-Connection/SC_Linked_App
+    validations:
+      required: true
+  - type: input
+    id: source_head
+    attributes:
+      label: Source commit SHA
+      placeholder: 40-character Git commit SHA
+    validations:
+      required: true
+  - type: input
+    id: sdk_version
+    attributes:
+      label: Registry Client SDK version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Reproduction / evidence
+      description: Include the exact command and sanitized log location or error signature. Do not paste credentials or tokens.
