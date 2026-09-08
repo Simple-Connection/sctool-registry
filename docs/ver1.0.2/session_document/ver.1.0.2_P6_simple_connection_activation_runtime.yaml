@@ -671,7 +671,7 @@ evidence:
         - P3_COMPLETION_P3_W6_COMPLETED
         - P3_SESSION_COMPLETED
         - P3_SESSION_INDEX_COMPLETED
-      native_session_closeout_command: "npm run docs:session:complete"
+      native_session_closeout: DOCS_SESSION_COMPLETE
       final_closeout_revision_requirement: EXACT
       product_regression_final_head: REQUIRED
       product_ptsip_final_head: REQUIRED
