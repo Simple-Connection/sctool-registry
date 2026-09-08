@@ -103,7 +103,7 @@ work_units:
       - WINDOWS_RUNTIME_FILE_LOCK_REGRESSION
       - PARTIAL_ACTIVATION_VISIBILITY_PROOF
   - id: P6-W7
-    state: BLOCKED
+    state: COMPLETE
     purpose: PRODUCT_AUTOMATION_EVIDENCE
     depends_on:
       - P6-W6
