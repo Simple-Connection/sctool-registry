@@ -10,15 +10,15 @@ responsibility_index: "docs/responsibility/index.yaml"
 current:
   distribution_contract_version: "1.0.2"
   branch: "dev/1.0.2"
-  state: IN_PROGRESS_ACTIVE_SESSION
+  state: COMPLETE
   migrations:
     machine_routing: COMPLETE
     responsibility_model: COMPLETE
     interpretation_layer: COMPLETE
     governance_layout: COMPLETE
   improvement_plan: "docs/ver1.0.2/1.0.2_Improvement_plan.yaml"
-  current_session: P6
-  current_session_document: "docs/ver1.0.2/session_document/ver.1.0.2_P6_simple_connection_activation_runtime.yaml"
+  current_session: null
+  current_session_document: null
   next_session: null
 
 versions:
@@ -35,7 +35,7 @@ versions:
       - {id: P2, state: COMPLETE, format: LEGACY_BUILD_SESSION, document: "docs/ver1.0.1/session_document/ver.1.0.1_P2_artifact_delivery_descriptor_schema_boundary.yaml"}
 
   "1.0.2":
-    state: IN_PROGRESS_ACTIVE_SESSION
+    state: COMPLETE
     branch: "dev/1.0.2"
     source_format: MACHINE
     migrations:
