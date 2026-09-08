@@ -20,7 +20,7 @@ routing:
 heads:
   start: "1a04236d54552c19da5390cfbfd979f585b6c833"
   implementation: "aa8e17c5f9e42bb55d04acd3d743138efd4bcdab"
-  exact_validation: "b72a6e39826b6ca7e9d3f491e5ffc37fe620908b"
+  exact_validation: "85b3c515335713fd95e960dd6097ecd8b3ded286"
 responsibility_model:
   effects:
     assign: []
@@ -851,6 +851,31 @@ evidence:
       release_declaration: OUT_OF_SCOPE
       closeout_state: P6_CLOSEOUT_CANDIDATE
 
+  - id: E_P6_W8_REGISTRY_CLOSEOUT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "85b3c515335713fd95e960dd6097ecd8b3ded286"
+    refs:
+      repository: "Simple-Connection/sctool-registry"
+      branch: "dev/1.0.2"
+      registry_closeout_head: "85b3c515335713fd95e960dd6097ecd8b3ded286"
+      governance_run_id: 34201003764
+      governance_conclusion: SUCCESS
+      build_run_id: 34201003666
+      build_conclusion: SUCCESS
+      machine_development_documentation: PASS
+      ptsip_profile_ownership_partition: PASS
+      registry_client_sdk_boundary: PASS
+      update_candidate_regression: PASS
+      ptsip_architecture_exact_artifact: PASS
+      registry_json_contracts: PASS
+      update_candidate_evidence_artifact_id: 10045792810
+      update_candidate_evidence_artifact_name: "p4-update-candidate-evidence-85b3c515335713fd95e960dd6097ecd8b3ded286"
+      product_exact_head: "2e458a734c2bf8076abb763f315db82f43ea54d8"
+      product_regression_run_id: 34182735131
+      product_ptsip_run_id: 34182736423
+      product_documentation_run_id: 34182737826
+      cross_repository_closeout: PASS
+
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P6_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P6_W1_GOVERNANCE]}
@@ -864,10 +889,10 @@ gates:
   - {id: GATE_P6_PRODUCT_REGRESSION, required: true, status: PASS, evidence_refs: [E_P6_W7_PRODUCT_CLOSEOUT, E_P6_W7_PRODUCT_REGRESSION, E_P6_W7_PRODUCT_DOCUMENTATION_AUTOMATION]}
   - {id: GATE_P6_P5_COMPATIBILITY, required: true, status: PASS, evidence_refs: [E_P6_W8_P5_COMPATIBILITY]}
   - {id: GATE_P6_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P6_W7_PRODUCT_PTSIP]}
-  - {id: GATE_SDK_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_EXACT_VALIDATION, E_P6_W7_PRODUCT_REGRESSION]}
-  - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_EXACT_VALIDATION]}
-  - {id: GATE_PTSIP_PROFILE, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_EXACT_VALIDATION]}
-  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_EXACT_VALIDATION, E_P6_W7_PRODUCT_PTSIP, E_P6_W8_CROSS_REPOSITORY_EXACT]}
+  - {id: GATE_SDK_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_CLOSEOUT_VALIDATION, E_P6_W7_PRODUCT_REGRESSION]}
+  - {id: GATE_UPDATE_CANDIDATE_REGRESSION, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_CLOSEOUT_VALIDATION]}
+  - {id: GATE_PTSIP_PROFILE, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_CLOSEOUT_VALIDATION]}
+  - {id: GATE_PTSIP_CONFORMANCE, required: true, status: PASS, evidence_refs: [E_P6_W8_REGISTRY_CLOSEOUT_VALIDATION, E_P6_W7_PRODUCT_PTSIP, E_P6_W8_CROSS_REPOSITORY_EXACT]}
 state:
   mode: DERIVED
   ruleset: SESSION_STATE_V1
