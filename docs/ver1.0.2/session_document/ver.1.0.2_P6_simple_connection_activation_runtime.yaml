@@ -138,12 +138,13 @@ work_units:
     input_refs:
       - P6-W5
       - E_P6_W6_PRODUCT_CHANGE_REQUEST
+      - E_P6_W6_PRODUCT_TEST_PARSE_BLOCKER
     output_refs:
       - FAILURE_MATRIX
       - WINDOWS_RUNTIME_FILE_LOCK_REGRESSION
       - PARTIAL_ACTIVATION_VISIBILITY_PROOF
     completion_codes:
-      - P6_FAILURE_RECOVERY_PRODUCT_CHANGE_REQUESTED
+      - P6_FAILURE_RECOVERY_PRODUCT_TEST_PARSE_BLOCKED
   - id: P6-W7
     status: PENDING
     responsibility_refs:
@@ -510,6 +511,38 @@ evidence:
       expected_evidence_env: P6_W6_EVIDENCE_PATH
       expected_evidence_format: "simple-connection-p6-failure-recovery/v1"
 
+  - id: E_P6_W6_PRODUCT_TEST_PARSE_BLOCKER
+    kind: WORKFLOW_RUN_FAILURE
+    head: "64df5327fc5c4b8e209b3e08d24dc35084c5be97"
+    refs:
+      repository: "Simple-Connection/SC_Linked_App"
+      branch: "main"
+      product_p3_w4_state: COMPLETED
+      product_p3_w5_state: IN_PROGRESS
+      run_id: 34108750383
+      run_number: 34
+      conclusion: FAILURE
+      failed_step: RUN_P6_W6_ACTIVATION_ROLLBACK_FAILURE_RECOVERY_MATRIX
+      failure_phase: JAVASCRIPT_PARSE
+      test_path: "desktop/tests/mcp/sctool/p6-failure-recovery.test.mjs"
+      failure_line: 327
+      error: UNEXPECTED_TOKEN_CLOSE_PAREN
+      w6_matrix_executed: false
+      runtime_assertions_executed: false
+      w6_pass_fail_determinable: false
+      w6_evidence_generated: false
+      artifact_id: 10013465482
+      artifact_name: "sctool-product-install-64df5327fc5c4b8e209b3e08d24dc35084c5be97"
+      artifact_uploaded_file_count: 4
+      w6_evidence_present_in_artifact: false
+      downstream_product_typecheck: SKIPPED
+      downstream_product_build: SKIPPED
+      downstream_windows_regression: SKIPPED
+      correction_scope: TEST_SYNTAX_BEFORE_RUNTIME_DIAGNOSIS
+      required_next_action: FIX_TEST_SYNTAX_AND_RERUN_SAME_W6_MATRIX
+      product_source_contract_violation_confirmed: false
+      registry_direct_product_mutation: FORBIDDEN
+
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P6_APPROVAL]}
   - {id: GATE_RESPONSIBILITY_REGISTRY_VALID, required: true, status: PASS, evidence_refs: [E_P6_W1_GOVERNANCE]}
@@ -519,7 +552,7 @@ gates:
   - {id: GATE_P6_RUNTIME_RECONCILE, required: true, status: PASS, evidence_refs: [E_P6_W3_PRODUCT_IMPLEMENTATION, E_P6_W3_PRODUCT_FOCUSED_VALIDATION, E_P6_W3_PRODUCT_PTSIP]}
   - {id: GATE_P6_ROLLBACK, required: true, status: PASS, evidence_refs: [E_P6_W4_PRODUCT_IMPLEMENTATION, E_P6_W4_PRODUCT_VALIDATION, E_P6_W4_PRODUCT_PTSIP]}
   - {id: GATE_P6_RENDERER_UI, required: true, status: PASS, evidence_refs: [E_P6_W5_PRODUCT_IMPLEMENTATION, E_P6_W5_PRODUCT_VALIDATION, E_P6_W5_PRODUCT_PTSIP]}
-  - {id: GATE_P6_FAILURE_RECOVERY, required: true, status: BLOCKED, evidence_refs: [E_P6_W6_PRODUCT_CHANGE_REQUEST]}
+  - {id: GATE_P6_FAILURE_RECOVERY, required: true, status: BLOCKED, evidence_refs: [E_P6_W6_PRODUCT_CHANGE_REQUEST, E_P6_W6_PRODUCT_TEST_PARSE_BLOCKER]}
   - {id: GATE_P6_PRODUCT_REGRESSION, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_P5_COMPATIBILITY, required: true, status: PENDING, evidence_refs: []}
   - {id: GATE_P6_PTSIP_CONFORMANCE, required: true, status: PENDING, evidence_refs: []}
