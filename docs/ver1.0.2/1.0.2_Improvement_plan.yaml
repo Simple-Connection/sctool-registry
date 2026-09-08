@@ -5,7 +5,7 @@ natural_language: FORBIDDEN
 version:
   distribution_contract_version: "1.0.2"
   branch: "dev/1.0.2"
-  state: IN_PROGRESS_ACTIVE_SESSION
+  state: COMPLETE
   baseline_main: "c3e881742177aec3eae71d2c336801b6b52c74e5"
   previous_distribution_contract_version: "1.0.1"
 routing:
@@ -105,9 +105,9 @@ gates:
   registry_validation: PASS
   ptsip_profile_validation: PASS
   ptsip_conformance: PASS
-  external_integration: PENDING
-  version_completion: BLOCKED
-  merge_to_main: BLOCKED
+  external_integration: PASS
+  version_completion: PASS
+  merge_to_main: APPROVED
 next:
   session_id: null
   state: NONE
