@@ -54,13 +54,17 @@ jobs:
           "%SCTOOL_PYTHON%" -m pip install --disable-pip-version-check "PTSIP==0.3.7"
 
       - name: Test session state synchronization
-        run: "%SCTOOL_PYTHON%" docs/governance/test-session-state-sync.py
+        run: |
+          "%SCTOOL_PYTHON%" docs/governance/test-session-state-sync.py
 
       - name: Test source task binding
-        run: "%SCTOOL_PYTHON%" docs/governance/test-task-contract.py
+        run: |
+          "%SCTOOL_PYTHON%" docs/governance/test-task-contract.py
 
       - name: Validate machine development documentation
-        run: "%SCTOOL_PYTHON%" docs/governance/validate.py --root .
+        run: |
+          "%SCTOOL_PYTHON%" docs/governance/validate.py --root .
 
       - name: Validate PTSIP profile
-        run: "%SCTOOL_PYTHON%" -m ptsip validate .
+        run: |
+          "%SCTOOL_PYTHON%" -m ptsip validate .
