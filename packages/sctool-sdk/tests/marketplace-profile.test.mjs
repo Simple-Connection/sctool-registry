@@ -68,7 +68,7 @@ test("optional sections present pass", () => {
     ...validProfile(),
     changelog: "1.2.3 changes",
     dependencies: "No external runtime dependencies",
-    extensionPack: "No extension pack",
+    extension_pack: "No extension pack",
   };
   assert.deepEqual(validateMarketplaceProfile(profile, marketContext), []);
 });
