@@ -1,0 +1,151 @@
+schema_version: "4.0"
+document_type: machine_session
+natural_language: FORBIDDEN
+session:
+  id: P2
+  type: B
+  number: 2
+  approval: APPROVED
+  distribution_contract_version: "1.0.3"
+  branch: "dev/1.0.3"
+  authority_repository: "Simple-Connection/sctool-registry"
+  improvement_plan: "docs/ver1.0.3/1.0.3_Improvement_plan.yaml"
+routing:
+  docs_index: "docs/index.yaml"
+  rules_index: "docs/rules/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  essential_template: "docs/template/session_document_template/session_document_essential.yaml"
+  type_template: "docs/template/session_document_template/session_type_B.yaml"
+heads:
+  start: "8a75e757d97afc2cf3aa62d5aefb0ff8957f39cd"
+  implementation: null
+  exact_validation: null
+responsibility_model:
+  effects:
+    assign: []
+    implement:
+      - RESP_REGISTRY_ACCESS
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    preserve: []
+    defer: []
+    transfer: []
+    retire: []
+    forbid: []
+  description_ids: []
+  rationale_ids:
+    - ADR_TWO_SDK_BOUNDARY
+    - ADR_REGISTRY_DESCRIPTOR_RESOLUTION_BOUNDARY
+payload:
+  implementation:
+    responsibility_refs:
+      - RESP_REGISTRY_ACCESS
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    contract_refs: []
+    path_allow:
+      - "packages/registry-client-sdk/**"
+      - "schemas/package.schema.json"
+      - "tools/validate-registry.py"
+      - ".github/workflows/registry-client-sdk-regression.yml"
+      - "ptsip.yaml"
+      - "docs/ver1.0.3/evidence/**"
+    path_deny:
+      - "packages/sctool-sdk/src/**"
+      - "packages/repository-tool-sdk/**"
+      - "program-sdk/**"
+      - "Simple-Connection/SC_Linked_App/**"
+  responsibility_description_ids: []
+  decision_rationale_ids:
+    - ADR_TWO_SDK_BOUNDARY
+    - ADR_REGISTRY_DESCRIPTOR_RESOLUTION_BOUNDARY
+work_units:
+  - id: P2-W1
+    status: ACTIVE
+    responsibility_refs: [RESP_REGISTRY_DESCRIPTOR_CONSUMPTION]
+    input_refs: [P2_WORK_PLAN]
+    output_refs: ["packages/registry-client-sdk/src/discovery.mjs", "packages/registry-client-sdk/src/discovery.d.mts"]
+    completion_codes: []
+  - id: P2-W2
+    status: PENDING
+    responsibility_refs: [RESP_REGISTRY_ACCESS]
+    input_refs: [P2-W1]
+    output_refs: ["packages/registry-client-sdk/src/discovery.mjs"]
+    completion_codes: []
+  - id: P2-W3
+    status: PENDING
+    responsibility_refs: [RESP_REGISTRY_ACCESS]
+    input_refs: [P2-W2]
+    output_refs: ["packages/registry-client-sdk/src/discovery.mjs"]
+    completion_codes: []
+  - id: P2-W4
+    status: PENDING
+    responsibility_refs: [RESP_REGISTRY_CHANNEL_RESOLUTION, RESP_REGISTRY_VERSION_RESOLUTION, RESP_REGISTRY_TARGET_RESOLUTION]
+    input_refs: [P2-W3]
+    output_refs: ["packages/registry-client-sdk/src/discovery.mjs"]
+    completion_codes: []
+  - id: P2-W5
+    status: PENDING
+    responsibility_refs: [RESP_REGISTRY_DESCRIPTOR_CONSUMPTION]
+    input_refs: [P2-W4]
+    output_refs: ["schemas/package.schema.json", "tools/validate-registry.py", "packages/registry-client-sdk/src/discovery.mjs"]
+    completion_codes: []
+  - id: P2-W6
+    status: PENDING
+    responsibility_refs: [RESP_REGISTRY_DESCRIPTOR_CONSUMPTION]
+    input_refs: [P2-W5]
+    output_refs: ["packages/registry-client-sdk/package.json", "packages/registry-client-sdk/tests/discovery.test.mjs", "packages/registry-client-sdk/tests/package-contract.test.mjs"]
+    completion_codes: []
+  - id: P2-W7
+    status: PENDING
+    responsibility_refs: [RESP_REGISTRY_DESCRIPTOR_CONSUMPTION]
+    input_refs: [P2-W6]
+    output_refs: [E_P2_CROSS_REPOSITORY_HANDOFF]
+    completion_codes: []
+evidence:
+  - id: E_P2_APPROVAL
+    kind: USER_APPROVAL
+    head: "8a75e757d97afc2cf3aa62d5aefb0ff8957f39cd"
+    refs:
+      implementation: APPROVED
+  - id: E_P2_PREFLIGHT
+    kind: EXACT_VALIDATION
+    head: "8a75e757d97afc2cf3aa62d5aefb0ff8957f39cd"
+    refs:
+      repository: "Simple-Connection/sctool-registry"
+      branch: "dev/1.0.3"
+      package_path: "packages/registry-client-sdk"
+      package_name: "@simple-connection/sctool-registry-client-sdk"
+      version_before: "0.1.0"
+      version_target: "0.2.0"
+      p1_complete: PASS
+      pages_contract_present: PASS
+      registry_head_schema_present: PASS
+      snapshot_schema_present: PASS
+      trust_schema_present: PASS
+      production_trust_activation: OPTIONAL
+      authority_boundary: PASS
+gates:
+  - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P2_APPROVAL]}
+  - {id: GATE_P2_DISCOVERY_CONTRACT, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P2_REGISTRY_HEAD_VERIFICATION, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P2_ROOT_DISTRIBUTION_SIGNATURE, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P2_IMMUTABLE_SNAPSHOT, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P2_ANTI_ROLLBACK, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P2_VERIFIED_CATALOG, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P2_STABLE_RELEASE_RESOLUTION, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P2_MARKETPLACE_PROFILE_PROJECTION, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P2_DISTRIBUTION_INACTIVE_FAIL_CLOSED, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P2_REGISTRY_CLIENT_PUBLIC_EXPORTS, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P2_REGISTRY_CLIENT_REGRESSION, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P2_REGISTRY_CLIENT_PACKAGE, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P2_CROSS_REPOSITORY_HANDOFF, required: true, status: PENDING, evidence_refs: []}
+blockers: []
+state:
+  mode: DERIVED
+  ruleset: SESSION_STATE_V1
