@@ -1,0 +1,147 @@
+schema_version: "4.0"
+document_type: machine_session
+natural_language: FORBIDDEN
+session:
+  id: P1
+  type: B
+  number: 1
+  approval: APPROVED
+  distribution_contract_version: "1.0.3"
+  branch: "dev/1.0.3"
+  authority_repository: "Simple-Connection/sctool-registry"
+  improvement_plan: "docs/ver1.0.3/1.0.3_Improvement_plan.yaml"
+routing:
+  docs_index: "docs/index.yaml"
+  rules_index: "docs/rules/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  essential_template: "docs/template/session_document_template/session_document_essential.yaml"
+  type_template: "docs/template/session_document_template/session_type_B.yaml"
+heads:
+  start: "cd2951673c4073bfb28f4bcc130e6218042e4d20"
+  implementation: null
+  exact_validation: null
+responsibility_model:
+  effects:
+    assign: []
+    implement:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+    preserve: []
+    defer:
+      - RESP_REGISTRY_ACCESS
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    transfer: []
+    retire: []
+    forbid:
+      - RESP_REPOSITORY_TOOL_AUTHORING_GUIDANCE
+      - RESP_REPOSITORY_TOOL_DESCRIPTOR_VALIDATION
+  description_ids: []
+  rationale_ids:
+    - ADR_TWO_SDK_BOUNDARY
+payload:
+  implementation:
+    responsibility_refs:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+    contract_refs: []
+    path_allow:
+      - "packages/sctool-sdk/**"
+    path_deny:
+      - "packages/registry-client-sdk/**"
+      - "packages/repository-tool-sdk/**"
+      - "program-sdk/**"
+  responsibility_description_ids: []
+  decision_rationale_ids:
+    - ADR_TWO_SDK_BOUNDARY
+work_units:
+  - id: P1-W1
+    status: ACTIVE
+    responsibility_refs: [RESP_SCTOOL_MANIFEST_VALIDATION]
+    input_refs: [P1_SOURCE_TASK]
+    output_refs:
+      - "packages/sctool-sdk/schemas/marketplace-profile.schema.json"
+      - "packages/sctool-sdk/src/marketplace-profile.ts"
+      - "packages/sctool-sdk/templates/marketplace-profile.json"
+    completion_codes: []
+  - id: P1-W2
+    status: PENDING
+    responsibility_refs: [RESP_SCTOOL_MANIFEST_VALIDATION]
+    input_refs: [P1-W1]
+    output_refs: ["packages/sctool-sdk/src/marketplace-profile.ts"]
+    completion_codes: []
+  - id: P1-W3
+    status: PENDING
+    responsibility_refs: [RESP_SCTOOL_MANIFEST_VALIDATION]
+    input_refs: [P1-W2]
+    output_refs: ["packages/sctool-sdk/src/marketplace-profile.ts"]
+    completion_codes: []
+  - id: P1-W4
+    status: PENDING
+    responsibility_refs: [RESP_SCTOOL_AUTHORING_GUIDANCE]
+    input_refs: [P1-W1, P1-W2, P1-W3]
+    output_refs:
+      - "packages/sctool-sdk/src/index.ts"
+      - "packages/sctool-sdk/package.json"
+    completion_codes: []
+  - id: P1-W5
+    status: PENDING
+    responsibility_refs: [RESP_SCTOOL_PACKAGE_TEST]
+    input_refs: [P1-W4]
+    output_refs: ["packages/sctool-sdk/tests/marketplace-profile.test.mjs"]
+    completion_codes: []
+  - id: P1-W6
+    status: PENDING
+    responsibility_refs: [RESP_SCTOOL_PACKAGE_BUILD, RESP_SCTOOL_PACKAGE_TEST]
+    input_refs: [P1-W5]
+    output_refs: [E_P1_EXACT_VALIDATION]
+    completion_codes: []
+  - id: P1-W7
+    status: PENDING
+    responsibility_refs: [RESP_SCTOOL_AUTHORING_GUIDANCE]
+    input_refs: [P1-W6]
+    output_refs: [E_P1_CROSS_REPOSITORY_HANDOFF]
+    completion_codes: []
+evidence:
+  - id: E_P1_APPROVAL
+    kind: USER_APPROVAL
+    head: "cd2951673c4073bfb28f4bcc130e6218042e4d20"
+    refs:
+      implementation: APPROVED
+  - id: E_P1_PREFLIGHT
+    kind: EXACT_VALIDATION
+    head: "cd2951673c4073bfb28f4bcc130e6218042e4d20"
+    refs:
+      repository: "Simple-Connection/sctool-registry"
+      branch: "dev/1.0.3"
+      package_path: "packages/sctool-sdk"
+      package_name: "@simple-connection/sctool-sdk"
+      version_before: "0.1.0"
+      version_target: "0.2.0"
+      committed_tree: PASS
+      authority_boundary: PASS
+gates:
+  - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P1_APPROVAL]}
+  - {id: GATE_P1_SCTOOL_SDK_PREFLIGHT, required: true, status: PASS, evidence_refs: [E_P1_PREFLIGHT]}
+  - {id: GATE_P1_MARKETPLACE_PROFILE_CONTRACT, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P1_MARKETPLACE_PROFILE_REQUIRED_SECTIONS, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P1_MARKETPLACE_PROFILE_OPTIONALITY, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P1_MARKETPLACE_PROFILE_BINDING, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P1_MARKETPLACE_PROFILE_DIAGNOSTICS, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P1_MARKETPLACE_PROFILE_SECRET_EXCLUSION, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P1_MARKETPLACE_PROFILE_PUBLIC_EXPORTS, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P1_SCTOOL_SDK_REGRESSION, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P1_SCTOOL_SDK_PACKAGE, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P1_MARKETPLACE_AUTHORITY_BOUNDARY, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P1_CROSS_REPOSITORY_HANDOFF, required: true, status: PENDING, evidence_refs: []}
+blockers: []
+state:
+  mode: DERIVED
+  ruleset: SESSION_STATE_V1
