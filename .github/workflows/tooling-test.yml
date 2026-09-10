@@ -51,6 +51,8 @@ jobs:
             if errorlevel 1 exit /b 1
             "%PY_EXE%" "%GET_PIP%" --disable-pip-version-check
             if errorlevel 1 exit /b 1
+            "%PY_EXE%" "%GET_PIP%" --disable-pip-version-check
+            if errorlevel 1 exit /b 1
           )
           "%PY_EXE%" --version
           if errorlevel 1 exit /b 1
@@ -69,6 +71,11 @@ jobs:
       - name: Test source task binding
         run: |
           "%SCTOOL_PYTHON%" docs/governance/test-task-contract.py
+
+      - name: Verify committed session routing projection
+        run: |
+          "%SCTOOL_PYTHON%" docs/governance/validate.py --root . --sync-session-states
+          git diff --exit-code -- docs/index.yaml docs/ver1.0.3/1.0.3_Improvement_plan.yaml
 
       - name: Validate machine development documentation
         run: |
