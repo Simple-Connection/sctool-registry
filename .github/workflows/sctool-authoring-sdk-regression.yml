@@ -1,0 +1,59 @@
+name: SCTool Authoring SDK Regression
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "dev/1.0.3"
+    paths:
+      - "packages/sctool-sdk/**"
+      - ".github/workflows/sctool-authoring-sdk-regression.yml"
+  pull_request:
+    paths:
+      - "packages/sctool-sdk/**"
+      - ".github/workflows/sctool-authoring-sdk-regression.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sctool-authoring-sdk-regression-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: cmd
+
+jobs:
+  validate:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Install SCTool Authoring SDK dependencies
+        run: npm --prefix packages/sctool-sdk ci --ignore-scripts
+
+      - name: Typecheck SCTool Authoring SDK
+        run: npm --prefix packages/sctool-sdk run typecheck
+
+      - name: Build SCTool Authoring SDK
+        run: npm --prefix packages/sctool-sdk run build
+
+      - name: Run existing localization regression
+        run: npm --prefix packages/sctool-sdk run test:localization
+
+      - name: Run existing host capabilities regression
+        run: npm --prefix packages/sctool-sdk run test:host-capabilities
+
+      - name: Run Marketplace profile regression
+        run: npm --prefix packages/sctool-sdk run test:marketplace-profile
+
+      - name: Validate public exports and package pack
+        run: npm --prefix packages/sctool-sdk run test:package-contract
+
+      - name: Validate SCTool CLI syntax
+        run: node --check packages/sctool-sdk/cli/sctool.mjs
