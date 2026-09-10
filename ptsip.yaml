@@ -205,6 +205,7 @@ components:
       - ".github/workflows/governance.yml"
       - ".github/workflows/tooling-test.yml"
       - ".github/workflows/registry-sdk-issue-routing.yml"
+      - ".github/workflows/sctool-authoring-sdk-regression.yml"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/registry-sdk-issue-queue.json"
       - "tools/issue-routing/**"
