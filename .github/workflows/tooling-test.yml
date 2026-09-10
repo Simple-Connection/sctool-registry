@@ -34,21 +34,17 @@ jobs:
 
       - name: Install governance dependencies
         run: |
-          where python
-          where py
-          py -0p
-          where uv || echo UV_NOT_FOUND
-          py -3 -m pip install -r docs/governance/requirements.txt
-          py -3 -m pip install "PTSIP==0.3.7"
+          py -3.12 -m pip install -r docs/governance/requirements.txt
+          py -3.12 -m pip install "PTSIP==0.3.7"
 
       - name: Test session state synchronization
-        run: py -3 docs/governance/test-session-state-sync.py
+        run: py -3.12 docs/governance/test-session-state-sync.py
 
       - name: Test source task binding
-        run: py -3 docs/governance/test-task-contract.py
+        run: py -3.12 docs/governance/test-task-contract.py
 
       - name: Validate machine development documentation
-        run: py -3 docs/governance/validate.py --root .
+        run: py -3.12 docs/governance/validate.py --root .
 
       - name: Validate PTSIP profile
-        run: py -3 -m ptsip validate .
+        run: py -3.12 -m ptsip validate .
