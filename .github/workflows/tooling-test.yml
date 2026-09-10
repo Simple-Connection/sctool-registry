@@ -15,6 +15,10 @@ on:
       - "ptsip.yaml"
       - ".github/workflows/tooling-test.yml"
 
+defaults:
+  run:
+    shell: cmd
+
 permissions:
   contents: read
 
