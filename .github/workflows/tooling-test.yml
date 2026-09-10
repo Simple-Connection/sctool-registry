@@ -32,19 +32,35 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
+      - name: Bootstrap isolated Python
+        run: |
+          set "PY_VERSION=3.12.10"
+          set "PY_HOME=%LOCALAPPDATA%\SimpleConnection\gha-python-%PY_VERSION%"
+          set "PY_EXE=%PY_HOME%\python.exe"
+          set "PY_INSTALLER=%RUNNER_TEMP%\python-%PY_VERSION%-amd64.exe"
+          if not exist "%PY_EXE%" (
+            curl.exe --fail --location --retry 3 --output "%PY_INSTALLER%" "https://www.python.org/ftp/python/%PY_VERSION%/python-%PY_VERSION%-amd64.exe"
+            if errorlevel 1 exit /b 1
+            start "" /wait "%PY_INSTALLER%" /quiet InstallAllUsers=0 TargetDir="%PY_HOME%" Include_pip=1 Include_launcher=0 PrependPath=0 Shortcuts=0 Include_test=0 Include_doc=0
+            if errorlevel 1 exit /b 1
+          )
+          "%PY_EXE%" --version
+          if errorlevel 1 exit /b 1
+          echo SCTOOL_PYTHON=%PY_EXE%>>"%GITHUB_ENV%"
+
       - name: Install governance dependencies
         run: |
-          py -3.12 -m pip install -r docs/governance/requirements.txt
-          py -3.12 -m pip install "PTSIP==0.3.7"
+          "%SCTOOL_PYTHON%" -m pip install --disable-pip-version-check -r docs/governance/requirements.txt
+          "%SCTOOL_PYTHON%" -m pip install --disable-pip-version-check "PTSIP==0.3.7"
 
       - name: Test session state synchronization
-        run: py -3.12 docs/governance/test-session-state-sync.py
+        run: "%SCTOOL_PYTHON%" docs/governance/test-session-state-sync.py
 
       - name: Test source task binding
-        run: py -3.12 docs/governance/test-task-contract.py
+        run: "%SCTOOL_PYTHON%" docs/governance/test-task-contract.py
 
       - name: Validate machine development documentation
-        run: py -3.12 docs/governance/validate.py --root .
+        run: "%SCTOOL_PYTHON%" docs/governance/validate.py --root .
 
       - name: Validate PTSIP profile
-        run: py -3.12 -m ptsip validate .
+        run: "%SCTOOL_PYTHON%" -m ptsip validate .
