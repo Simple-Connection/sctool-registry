@@ -21,7 +21,7 @@ export interface ScToolMarketplaceProfileV1 {
   features: string;
   changelog?: string;
   dependencies?: string;
-  extensionPack?: string;
+  extension_pack?: string;
 }
 
 export interface ScToolMarketplaceProfileValidationContext {
