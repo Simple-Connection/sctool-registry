@@ -13,6 +13,7 @@ on:
       - "tools/build-pages.mjs"
       - "tools/validate-registry.py"
       - "docs/governance/p2-closeout.py"
+      - "docs/ver1.0.3/evidence/P2_product_handoff_observation.yaml"
       - ".github/workflows/registry-client-sdk-regression.yml"
   pull_request:
     paths:
@@ -23,6 +24,7 @@ on:
       - "tools/build-pages.mjs"
       - "tools/validate-registry.py"
       - "docs/governance/p2-closeout.py"
+      - "docs/ver1.0.3/evidence/P2_product_handoff_observation.yaml"
       - ".github/workflows/registry-client-sdk-regression.yml"
 
 permissions:
@@ -72,10 +74,37 @@ jobs:
           python -m pip install -r docs/governance/requirements.txt
           python -m pip install "PTSIP==0.3.7"
 
+      - name: Validate immutable Product handoff observation
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          import yaml
+          from pathlib import Path
+
+          path = Path("docs/ver1.0.3/evidence/P2_product_handoff_observation.yaml")
+          data = yaml.safe_load(path.read_text(encoding="utf-8"))
+          obs = data["observation"]
+          assert data["document_type"] == "cross_repository_observation"
+          assert obs["repository"] == "Simple-Connection/SC_Linked_App"
+          assert obs["branch"] == "dev/2.2.4"
+          assert obs["access"] == "READ_ONLY"
+          assert obs["mutation"] == "FORBIDDEN"
+          sha = str(obs["observed_sha"]).lower()
+          assert re.fullmatch(r"[0-9a-f]{40}", sha)
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as output:
+              output.write(f"PRODUCT_HANDOFF_SHA={sha}\n")
+          print(f"Product handoff observation: {sha}")
+          PY
+
       - name: Generate exact P2 closeout and handoff
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: python docs/governance/p2-closeout.py --phase p2 --candidate-sha "$GITHUB_SHA" --regression-run-id "$GITHUB_RUN_ID"
+        run: >-
+          python docs/governance/p2-closeout.py --phase p2
+          --candidate-sha "$GITHUB_SHA"
+          --regression-run-id "$GITHUB_RUN_ID"
+          --product-sha "$PRODUCT_HANDOFF_SHA"
 
       - name: Validate generated P2 machine closeout
         run: |
