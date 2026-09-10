@@ -23,7 +23,7 @@ export type RegistryDiscoveryErrorCode = (typeof REGISTRY_DISCOVERY_ERROR_CODES)
 
 export declare class RegistryDiscoveryError extends Error {
   readonly code: RegistryDiscoveryErrorCode;
-  constructor(code: RegistryDiscoveryErrorCode, message: string, options?: ErrorOptions);
+  constructor(code: RegistryDiscoveryErrorCode, message: string, options?: { readonly cause?: unknown });
 }
 
 export interface RegistryMarketplaceProfileV1 {
@@ -91,8 +91,8 @@ export interface VerifiedRegistrySnapshot {
     readonly commit: string;
   };
   readonly registrySha256: string;
-  readonly packages: Readonly<Record<string, any>>;
-  readonly publishers: Readonly<Record<string, any>>;
+  readonly packages: Readonly<Record<string, unknown>>;
+  readonly publishers: Readonly<Record<string, unknown>>;
   readonly marketplaceProfiles?: Readonly<Record<string, RegistryMarketplaceProfileV1 | unknown>>;
 }
 
@@ -106,6 +106,15 @@ export interface RegistryAntiRollbackStore {
   load(): Promise<RegistryAntiRollbackState | null>;
   save(state: RegistryAntiRollbackState): Promise<void>;
 }
+
+export interface RegistryFetchResponse {
+  readonly status: number;
+  readonly ok: boolean;
+  json(): Promise<unknown>;
+  arrayBuffer(): Promise<ArrayBuffer>;
+}
+
+export type RegistryFetch = (input: unknown) => Promise<RegistryFetchResponse>;
 
 export interface VerifiedRegistryDiscoverySuccess {
   readonly ok: true;
@@ -132,24 +141,24 @@ export interface VerifiedRegistryDiscoveryFailure {
 export type VerifiedRegistryDiscoveryResult = VerifiedRegistryDiscoverySuccess | VerifiedRegistryDiscoveryFailure;
 
 export interface RegistryDiscoveryOptions {
-  readonly baseUrl: string | URL;
+  readonly baseUrl: string;
   readonly trustedRootKeys: Readonly<Record<string, string>> | ReadonlyMap<string, string>;
   readonly antiRollbackStore: RegistryAntiRollbackStore;
-  readonly fetchImpl?: typeof fetch;
+  readonly fetchImpl?: RegistryFetch;
   readonly now?: Date | string;
 }
 
 export interface VerifiedRegistryReleaseView {
   readonly channel: string;
   readonly version: string;
-  readonly release: any;
+  readonly release: unknown;
 }
 
 export interface VerifiedRegistryPackageView {
   readonly id: string;
   readonly publisher: string;
-  readonly source: any | null;
-  readonly descriptor: any;
+  readonly source: unknown | null;
+  readonly descriptor: unknown;
   readonly defaultRelease: VerifiedRegistryReleaseView | null;
   readonly stableRelease: VerifiedRegistryReleaseView | null;
   readonly marketplaceProfile: RegistryMarketplaceProfileV1 | null;
@@ -164,7 +173,7 @@ export declare function verifyRegistryTrustEnvelope(
 ): VerifiedRegistryTrust;
 
 export declare function verifyRegistryHeadEnvelope(head: unknown, verifiedTrust: VerifiedRegistryTrust): VerifiedRegistryHead;
-export declare function verifyRegistrySnapshotBytes(bytes: ArrayBuffer | ArrayBufferView | Buffer, verifiedHead: VerifiedRegistryHead): VerifiedRegistrySnapshot;
+export declare function verifyRegistrySnapshotBytes(bytes: ArrayBuffer | Uint8Array, verifiedHead: VerifiedRegistryHead): VerifiedRegistrySnapshot;
 export declare function createMemoryAntiRollbackStore(initialState?: RegistryAntiRollbackState | null): RegistryAntiRollbackStore;
 export declare function createFileAntiRollbackStore(filePath: string): RegistryAntiRollbackStore;
 export declare function acceptRegistrySequence(store: RegistryAntiRollbackStore, state: Pick<RegistryAntiRollbackState, "sequence" | "revision">): Promise<RegistryAntiRollbackState>;
