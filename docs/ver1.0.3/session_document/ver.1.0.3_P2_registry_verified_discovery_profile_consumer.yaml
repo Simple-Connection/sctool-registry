@@ -38,6 +38,7 @@ responsibility_model:
   description_ids: []
   rationale_ids:
     - ADR_TWO_SDK_BOUNDARY
+    - ADR_REGISTRY_ACCESS_AUTHORITY_TRANSFER
     - ADR_REGISTRY_DESCRIPTOR_RESOLUTION_BOUNDARY
 payload:
   implementation:
@@ -50,9 +51,13 @@ payload:
     contract_refs: []
     path_allow:
       - "packages/registry-client-sdk/**"
-      - "schemas/package.schema.json"
+      - "registry.json"
+      - "schemas/registry.schema.json"
+      - "schemas/registry-snapshot.schema.json"
       - "tools/validate-registry.py"
+      - "tools/build-pages.mjs"
       - ".github/workflows/registry-client-sdk-regression.yml"
+      - ".github/workflows/governance.yml"
       - "ptsip.yaml"
       - "docs/ver1.0.3/evidence/**"
     path_deny:
@@ -63,6 +68,7 @@ payload:
   responsibility_description_ids: []
   decision_rationale_ids:
     - ADR_TWO_SDK_BOUNDARY
+    - ADR_REGISTRY_ACCESS_AUTHORITY_TRANSFER
     - ADR_REGISTRY_DESCRIPTOR_RESOLUTION_BOUNDARY
 work_units:
   - id: P2-W1
@@ -93,7 +99,13 @@ work_units:
     status: PENDING
     responsibility_refs: [RESP_REGISTRY_DESCRIPTOR_CONSUMPTION]
     input_refs: [P2-W4]
-    output_refs: ["schemas/package.schema.json", "tools/validate-registry.py", "packages/registry-client-sdk/src/discovery.mjs"]
+    output_refs:
+      - "registry.json"
+      - "schemas/registry.schema.json"
+      - "schemas/registry-snapshot.schema.json"
+      - "tools/validate-registry.py"
+      - "tools/build-pages.mjs"
+      - "packages/registry-client-sdk/src/discovery.mjs"
     completion_codes: []
   - id: P2-W6
     status: PENDING
