@@ -14,8 +14,8 @@ implementation:
   package_path: "packages/sctool-sdk"
 approval:
   planning: APPROVED
-  implementation: REQUIRED
-  implementation_materialization: FORBIDDEN_BEFORE_APPROVAL
+  implementation: APPROVED
+  implementation_materialization: ALLOWED_AFTER_APPROVAL
 source_task:
   schema: sc_task/v1
   id: sctool-sdk-1.0.3-marketplace-profile
@@ -85,7 +85,7 @@ preconditions:
   - MARKETPLACE_ADMISSION_AUTHORITY_REMAINS_REGISTRY
 work_units:
   - id: P1-W1
-    state: PLANNED
+    state: COMPLETE
     purpose: MARKETPLACE_PROFILE_CONTRACT
     depends_on: []
     outputs:
@@ -97,7 +97,7 @@ work_units:
       - scope.add:marketplace_profile_types
       - scope.add:marketplace_profile_template_or_scaffold
   - id: P1-W2
-    state: PLANNED
+    state: COMPLETE
     purpose: MARKETPLACE_PROFILE_PREVALIDATION
     depends_on:
       - P1-W1
@@ -120,7 +120,7 @@ work_units:
       - scope.forbid:publish_without_user_approval
       - scope.forbid:main_merge_without_user_approval
   - id: P1-W3
-    state: PLANNED
+    state: COMPLETE
     purpose: STRUCTURED_VALIDATION_DIAGNOSTICS
     depends_on:
       - P1-W2
@@ -139,7 +139,7 @@ work_units:
       - tests.required:diagnostic_has_sdk_version
       - tests.required:diagnostic_excludes_secrets
   - id: P1-W4
-    state: PLANNED
+    state: COMPLETE
     purpose: PROFILE_PUBLIC_EXPORTS
     depends_on:
       - P1-W1
@@ -154,7 +154,7 @@ work_units:
     task_refs:
       - tests.required:public_exports_resolve
   - id: P1-W5
-    state: PLANNED
+    state: COMPLETE
     purpose: MARKETPLACE_PROFILE_BEHAVIOR_TESTS
     depends_on:
       - P1-W4
@@ -178,7 +178,7 @@ work_units:
       - tests.required:marketplace_flow_profile_required
       - tests.required:existing_0.1.0_behavior_regression_pass
   - id: P1-W6
-    state: PLANNED
+    state: COMPLETE
     purpose: SDK_PACKAGE_EXACT_VERIFICATION
     depends_on:
       - P1-W5
@@ -201,7 +201,7 @@ work_units:
       - verification.must_pass:package_pack_check
       - verification.must_pass:repository_governance_checks_if_configured
   - id: P1-W7
-    state: PLANNED
+    state: COMPLETE
     purpose: CROSS_REPOSITORY_EXACT_HANDOFF
     depends_on:
       - P1-W6
