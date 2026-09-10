@@ -27,6 +27,27 @@ sessions:
     document: null
     planning_state: CONCRETIZED
     planning_document: "docs/ver1.0.3/session_document/ver.1.0.3_P1_sctool_sdk_marketplace_profile_work_plan.yaml"
+  - id: P2
+    type: B
+    state: NOT_APPROVED
+    approval: REQUIRED
+    responsibility_refs:
+      - RESP_REGISTRY_ACCESS
+      - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+      - RESP_REGISTRY_CHANNEL_RESOLUTION
+      - RESP_REGISTRY_VERSION_RESOLUTION
+      - RESP_REGISTRY_TARGET_RESOLUTION
+    document: null
+    planning_state: CONCRETIZED
+    planning_document: "docs/ver1.0.3/session_document/ver.1.0.3_P2_registry_verified_discovery_profile_consumer_work_plan.yaml"
+  - id: P3
+    type: B
+    state: NOT_APPROVED
+    approval: REQUIRED
+    responsibility_refs: []
+    document: null
+    planning_state: CONCRETIZED
+    planning_document: "docs/ver1.0.3/session_document/ver.1.0.3_P3_product_package_report_routing_work_plan.yaml"
 migrations:
   machine_routing: COMPLETE
   responsibility_model: COMPLETE
