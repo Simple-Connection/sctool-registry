@@ -11,10 +11,11 @@ session:
 implementation:
   repository: "Simple-Connection/sctool-registry"
   branch: "dev/1.0.3"
+  package_path: "packages/registry-client-sdk"
 approval:
   planning: APPROVED
-  implementation: REQUIRED
-  implementation_materialization: FORBIDDEN_BEFORE_APPROVAL
+  implementation: APPROVED
+  implementation_materialization: ALLOWED_AFTER_APPROVAL
 origin:
   issue_repository: "Simple-Connection/sctool-registry"
   issue_number: 8
@@ -26,7 +27,8 @@ baseline:
   component: COMP_REGISTRY_CLIENT_SDK
   package: "@simple-connection/sctool-registry-client-sdk"
   package_version: "0.1.0"
-  branch_head_at_planning: "6f3df1f8d91aae193f43c4d2b8afe397a58dec5f"
+  target_package_version: "0.2.0"
+  branch_head_at_approval: "8a75e757d97afc2cf3aa62d5aefb0ff8957f39cd"
   existing_public_surfaces:
     - REGISTRY_ACCESS
     - PACKAGE_DESCRIPTOR
@@ -57,6 +59,7 @@ boundary:
     - DISTRIBUTION_INACTIVE_FAIL_CLOSED
     - PUBLIC_DISCOVERY_EXPORTS
     - REVISION_BOUND_DISCOVERY_EVIDENCE
+    - MARKETPLACE_PROFILE_CARRIER_IN_PACKAGE_DESCRIPTOR
   preserve:
     - REGISTRY_ACCESS_V1
     - PACKAGE_DESCRIPTOR_V2
@@ -94,6 +97,7 @@ responsibility_migration:
 preconditions:
   - P1_MARKETPLACE_PROFILE_CONTRACT_COMPLETE
   - REGISTRY_CLIENT_SDK_BASELINE_0_1_0
+  - REGISTRY_CLIENT_SDK_TARGET_0_2_0
   - PAGES_DISTRIBUTION_CONTRACT_PRESENT
   - REGISTRY_HEAD_SCHEMA_PRESENT
   - REGISTRY_SNAPSHOT_SCHEMA_PRESENT
@@ -113,8 +117,7 @@ work_units:
   - id: P2-W2
     state: PLANNED
     purpose: REGISTRY_HEAD_AND_SIGNATURE_VERIFICATION
-    depends_on:
-      - P2-W1
+    depends_on: [P2-W1]
     outputs:
       - REGISTRY_HEAD_FETCH
       - REGISTRY_HEAD_SCHEMA_VERIFY
@@ -125,8 +128,7 @@ work_units:
   - id: P2-W3
     state: PLANNED
     purpose: IMMUTABLE_SNAPSHOT_AND_ANTI_ROLLBACK
-    depends_on:
-      - P2-W2
+    depends_on: [P2-W2]
     outputs:
       - SNAPSHOT_FETCH
       - SNAPSHOT_DIGEST_VERIFY
@@ -137,8 +139,7 @@ work_units:
   - id: P2-W4
     state: PLANNED
     purpose: VERIFIED_CATALOG_DISCOVERY
-    depends_on:
-      - P2-W3
+    depends_on: [P2-W3]
     outputs:
       - PACKAGE_ENUMERATION
       - PACKAGE_SEARCH
@@ -148,9 +149,9 @@ work_units:
   - id: P2-W5
     state: PLANNED
     purpose: MARKETPLACE_PROFILE_VERIFIED_PROJECTION
-    depends_on:
-      - P2-W4
+    depends_on: [P2-W4]
     outputs:
+      - MARKETPLACE_PROFILE_CARRIER
       - DETAILS_PROJECTION
       - FEATURES_PROJECTION
       - CHANGELOG_OPTIONAL_PROJECTION
@@ -161,8 +162,7 @@ work_units:
   - id: P2-W6
     state: PLANNED
     purpose: REGISTRY_CLIENT_PUBLIC_EXPORTS_AND_REGRESSION
-    depends_on:
-      - P2-W5
+    depends_on: [P2-W5]
     outputs:
       - DISCOVERY_PUBLIC_EXPORT
       - DISCOVERY_TYPE_EXPORT
@@ -175,8 +175,7 @@ work_units:
   - id: P2-W7
     state: PLANNED
     purpose: CROSS_REPOSITORY_DISCOVERY_HANDOFF
-    depends_on:
-      - P2-W6
+    depends_on: [P2-W6]
     outputs:
       - FINAL_REGISTRY_SHA
       - EXACT_REGISTRY_CLIENT_SDK_VERSION
