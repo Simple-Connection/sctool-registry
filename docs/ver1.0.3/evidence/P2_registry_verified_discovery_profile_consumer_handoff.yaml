@@ -1,0 +1,70 @@
+schema_version: '1.0'
+document_type: cross_repository_handoff
+natural_language: FORBIDDEN
+handoff:
+  id: P2_REGISTRY_VERIFIED_DISCOVERY_PROFILE_CONSUMER_HANDOFF
+  source_repository: Simple-Connection/sctool-registry
+  source_branch: dev/1.0.3
+  source_package_path: packages/registry-client-sdk
+  implementation_sha: 42bce673ea66c3706c5647f75981be73acfd0a04
+  exact_validation_sha: 42bce673ea66c3706c5647f75981be73acfd0a04
+  distribution_contract_version: 1.0.3
+  version_before: 0.1.0
+  version_after: 0.2.0
+  consumer_repository: Simple-Connection/SC_Linked_App
+  consumer_branch: dev/2.2.4
+  consumer_observed_sha: e56cfe76ebcc1f6c41a0789910e7a5c580a439b1
+  consumer_session: P4
+  consumer_work_item: P4-W3
+contract:
+  discovery_contract: registry-discovery-v1
+  public_export: '@simple-connection/sctool-registry-client-sdk/discovery'
+  anti_rollback_schema: sctool-registry-anti-rollback/v1
+  distribution_inactive_code: REGISTRY_DISTRIBUTION_INACTIVE
+  marketplace_profile_carrier: SIGNED_SNAPSHOT_MARKETPLACE_PROFILES
+  root_signature_verification: REGISTRY_OWNED
+  distribution_signature_verification: REGISTRY_OWNED
+  snapshot_integrity_verification: REGISTRY_OWNED
+  anti_rollback_state: REGISTRY_OWNED
+  marketplace_authoring_validator: NOT_DUPLICATED
+  product_raw_github_discovery: FORBIDDEN
+  product_unverified_pages_discovery: FORBIDDEN
+exports:
+- '@simple-connection/sctool-registry-client-sdk'
+- '@simple-connection/sctool-registry-client-sdk/discovery'
+verification:
+  registry_client_sdk_regression:
+    run_id: 34470754489
+    conclusion: SUCCESS
+    full_regression: PASS
+    discovery_tests: PASS
+    package_contract: PASS
+    package_pack_dry_run: PASS
+  registry_governance:
+    run_id: 34470754496
+    conclusion: SUCCESS
+  registry_pages_build:
+    run_id: 34470754379
+    conclusion: SUCCESS
+    ptsip_profile: PASS
+    ptsip_conformance: PASS
+    production_trust_deploy: SKIPPED_INACTIVE
+publication:
+  package_publish: NOT_PERFORMED
+  production_trust: INACTIVE
+  pages_production_distribution: INACTIVE
+  reason: SEPARATE_USER_APPROVAL_REQUIRED
+consumer_change_request:
+  consume_exact_sdk_version: 0.2.0
+  consume_verified_discovery_surface: true
+  renderer_main_preload_projection_only: true
+  registry_signature_validation_in_product: FORBIDDEN
+  registry_anti_rollback_in_product: FORBIDDEN
+  raw_repository_discovery_in_product: FORBIDDEN
+  package_publication_required_before_normal_published_package_consumption: true
+  product_direct_mutation_by_registry_session: FORBIDDEN
+completion:
+  verified_discovery: COMPLETE
+  signed_snapshot_profile_projection: COMPLETE
+  exact_handoff: COMPLETE
+  package_publication: OUT_OF_SCOPE_UNTIL_APPROVED
