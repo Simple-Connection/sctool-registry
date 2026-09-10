@@ -19,8 +19,8 @@ routing:
   type_template: docs/template/session_document_template/session_type_B.yaml
 heads:
   start: 6614eb3444337e0eb1dbace904b139ecad93fa75
-  implementation: null
-  exact_validation: null
+  implementation: 881dc9e3c9cc36270c468b61db96772c43b80f7b
+  exact_validation: 881dc9e3c9cc36270c468b61db96772c43b80f7b
 responsibility_model:
   effects:
     assign: []
@@ -54,54 +54,62 @@ payload:
   decision_rationale_ids: []
 work_units:
 - id: P3-W1
-  status: ACTIVE
+  status: COMPLETE
   responsibility_refs: []
   input_refs:
   - P3_WORK_PLAN
   output_refs:
-  - PRODUCT_REPORT_SCHEMA_V1
-  - PRODUCT_REPORT_MARKER_V1
-  completion_codes: []
+  - tools/issue-routing/product-report.schema.json
+  - .github/ISSUE_TEMPLATE/product-package-report.md
+  completion_codes:
+  - P3_PRODUCT_REPORT_CONTRACT_COMPLETE
 - id: P3-W2
-  status: PENDING
+  status: COMPLETE
   responsibility_refs: []
   input_refs:
   - P3-W1
   output_refs:
-  - PRODUCT_REPORT_PARSE_VALIDATE
-  completion_codes: []
+  - tools/issue-routing/registry_issue_intake.py
+  completion_codes:
+  - P3_PRODUCT_REPORT_INTAKE_PARSER_COMPLETE
 - id: P3-W3
-  status: PENDING
+  status: COMPLETE
   responsibility_refs: []
   input_refs:
   - P3-W2
   output_refs:
-  - PRODUCT_REPORT_SANITIZE
-  completion_codes: []
+  - tools/issue-routing/registry_issue_intake.py
+  completion_codes:
+  - P3_PRODUCT_REPORT_SANITIZATION_COMPLETE
 - id: P3-W4
-  status: PENDING
+  status: COMPLETE
   responsibility_refs: []
   input_refs:
   - P3-W3
   output_refs:
-  - PRODUCT_REPORT_ACTIVE_VERSION_ROUTE
-  completion_codes: []
+  - tools/issue-routing/registry_issue_intake.py
+  - .github/workflows/registry-sdk-issue-routing.yml
+  completion_codes:
+  - P3_PRODUCT_REPORT_ACTIVE_VERSION_ROUTING_COMPLETE
 - id: P3-W5
-  status: PENDING
+  status: COMPLETE
   responsibility_refs: []
   input_refs:
   - P3-W4
   output_refs:
-  - PRODUCT_REPORT_QUEUE_REGRESSION
-  completion_codes: []
+  - tools/issue-routing/tests/test_registry_issue_intake.py
+  - .github/registry-sdk-issue-queue.json
+  completion_codes:
+  - P3_PRODUCT_REPORT_QUEUE_REGRESSION_COMPLETE
 - id: P3-W6
-  status: PENDING
+  status: COMPLETE
   responsibility_refs: []
   input_refs:
   - P3-W5
   output_refs:
   - E_P3_CROSS_REPOSITORY_HANDOFF
-  completion_codes: []
+  completion_codes:
+  - P3_CROSS_REPOSITORY_PRODUCT_REPORT_HANDOFF_COMPLETE
 evidence:
 - id: E_P3_APPROVAL
   kind: USER_APPROVAL
@@ -120,6 +128,48 @@ evidence:
     existing_sdk_report_schema: sctool-registry-sdk-report/v1
     product_report_schema_target: sctool-registry-product-report/v1
     product_direct_mutation: FORBIDDEN
+- id: E_P3_IMPLEMENTATION
+  kind: EXACT_VALIDATION
+  head: 881dc9e3c9cc36270c468b61db96772c43b80f7b
+  refs:
+    product_report_schema: sctool-registry-product-report/v1
+    product_report_marker: sctool-registry-product-report:v1
+    schema_file: tools/issue-routing/product-report.schema.json
+    marker_template: .github/ISSUE_TEMPLATE/product-package-report.md
+    parser: tools/issue-routing/registry_issue_intake.py
+    routing_workflow: .github/workflows/registry-sdk-issue-routing.yml
+    sdk_report_schema_preserved: sctool-registry-sdk-report/v1
+    queue_schema_preserved: sctool-registry-sdk-issue-queue/v1
+    queue_discriminator: report_kind
+    product_fingerprint_authority: PRODUCT
+    product_issue_reuse_authority: PRODUCT
+    product_local_ledger_authority: PRODUCT
+- id: E_P3_EXACT_VALIDATION
+  kind: EXACT_VALIDATION
+  head: 881dc9e3c9cc36270c468b61db96772c43b80f7b
+  refs:
+    governance_run_id: 34480481034
+    governance: PASS
+    issue_routing_tests: 14/14_PASS
+    development_governance: PASS
+    ptsip_profile: PASS
+    ptsip_warnings: NONE
+    routing_run_id: 34480481128
+    routing: PASS
+    route_mode: CURRENT_VERSION
+    target_branch: dev/1.0.3
+    target_version: 1.0.3
+    queue_sync: PASS
+- id: E_P3_CROSS_REPOSITORY_HANDOFF
+  kind: CROSS_REPOSITORY_EXACT_HANDOFF
+  head: 630510d425d4aafa76ed19d913720ffb16164373
+  refs:
+    handoff_document: docs/ver1.0.3/evidence/P3_product_package_report_routing_handoff.yaml
+    product_repository: Simple-Connection/SC_Linked_App
+    product_branch: dev/2.2.4
+    product_observed_sha: e56cfe76ebcc1f6c41a0789910e7a5c580a439b1
+    product_direct_mutation: FORBIDDEN
+    registry_schema_duplication_in_product: FORBIDDEN
 gates:
 - id: GATE_SESSION_APPROVAL
   required: true
@@ -128,32 +178,44 @@ gates:
   - E_P3_APPROVAL
 - id: GATE_P3_PRODUCT_REPORT_SCHEMA
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs:
+  - E_P3_IMPLEMENTATION
+  - E_P3_EXACT_VALIDATION
 - id: GATE_P3_PRODUCT_REPORT_MARKER
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs:
+  - E_P3_IMPLEMENTATION
+  - E_P3_EXACT_VALIDATION
 - id: GATE_P3_REPORT_SANITIZATION
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs:
+  - E_P3_IMPLEMENTATION
+  - E_P3_EXACT_VALIDATION
 - id: GATE_P3_SDK_REPORT_COMPATIBILITY
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs:
+  - E_P3_IMPLEMENTATION
+  - E_P3_EXACT_VALIDATION
 - id: GATE_P3_ACTIVE_BRANCH_ROUTING
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs:
+  - E_P3_EXACT_VALIDATION
 - id: GATE_P3_ISSUE_QUEUE_REGRESSION
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs:
+  - E_P3_IMPLEMENTATION
+  - E_P3_EXACT_VALIDATION
 - id: GATE_P3_CROSS_REPOSITORY_HANDOFF
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs:
+  - E_P3_CROSS_REPOSITORY_HANDOFF
 blockers: []
 state:
   mode: DERIVED
