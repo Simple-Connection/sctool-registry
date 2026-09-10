@@ -5,7 +5,7 @@ natural_language: FORBIDDEN
 version:
   distribution_contract_version: "1.0.3"
   branch: "dev/1.0.3"
-  state: IN_PROGRESS_ACTIVE_SESSION
+  state: ACTIVE
   baseline_main: "f12ac6dd604c0bcbbc8f6cb282f22d41631201fb"
   previous_distribution_contract_version: "1.0.2"
 routing:
@@ -17,7 +17,7 @@ routing:
 sessions:
   - id: P1
     type: B
-    state: ACTIVE
+    state: COMPLETE
     approval: APPROVED
     responsibility_refs:
       - RESP_SCTOOL_AUTHORING_GUIDANCE
@@ -74,5 +74,5 @@ gates:
   version_completion: PENDING
   merge_to_main: BLOCKED
 next:
-  session_id: P1
-  state: ACTIVE
+  session_id: P2
+  state: NOT_APPROVED
