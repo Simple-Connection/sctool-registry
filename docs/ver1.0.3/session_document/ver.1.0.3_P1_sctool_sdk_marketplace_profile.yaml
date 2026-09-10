@@ -19,8 +19,8 @@ routing:
   type_template: "docs/template/session_document_template/session_type_B.yaml"
 heads:
   start: "cd2951673c4073bfb28f4bcc130e6218042e4d20"
-  implementation: null
-  exact_validation: null
+  implementation: "ecec8a3e41bf26912ef511d52c3e0a82be95631a"
+  exact_validation: "ecec8a3e41bf26912ef511d52c3e0a82be95631a"
 responsibility_model:
   effects:
     assign: []
@@ -54,6 +54,8 @@ payload:
     contract_refs: []
     path_allow:
       - "packages/sctool-sdk/**"
+      - ".github/workflows/sctool-authoring-sdk-regression.yml"
+      - "ptsip.yaml"
     path_deny:
       - "packages/registry-client-sdk/**"
       - "packages/repository-tool-sdk/**"
@@ -63,52 +65,55 @@ payload:
     - ADR_TWO_SDK_BOUNDARY
 work_units:
   - id: P1-W1
-    status: ACTIVE
+    status: COMPLETE
     responsibility_refs: [RESP_SCTOOL_MANIFEST_VALIDATION]
     input_refs: [P1_SOURCE_TASK]
     output_refs:
       - "packages/sctool-sdk/schemas/marketplace-profile.schema.json"
       - "packages/sctool-sdk/src/marketplace-profile.ts"
       - "packages/sctool-sdk/templates/marketplace-profile.json"
-    completion_codes: []
+    completion_codes: [P1_MARKETPLACE_PROFILE_CONTRACT_COMPLETE]
   - id: P1-W2
-    status: PENDING
+    status: COMPLETE
     responsibility_refs: [RESP_SCTOOL_MANIFEST_VALIDATION]
     input_refs: [P1-W1]
     output_refs: ["packages/sctool-sdk/src/marketplace-profile.ts"]
-    completion_codes: []
+    completion_codes: [P1_MARKETPLACE_PROFILE_PREVALIDATION_COMPLETE]
   - id: P1-W3
-    status: PENDING
+    status: COMPLETE
     responsibility_refs: [RESP_SCTOOL_MANIFEST_VALIDATION]
     input_refs: [P1-W2]
     output_refs: ["packages/sctool-sdk/src/marketplace-profile.ts"]
-    completion_codes: []
+    completion_codes: [P1_MARKETPLACE_PROFILE_DIAGNOSTICS_COMPLETE]
   - id: P1-W4
-    status: PENDING
+    status: COMPLETE
     responsibility_refs: [RESP_SCTOOL_AUTHORING_GUIDANCE]
     input_refs: [P1-W1, P1-W2, P1-W3]
     output_refs:
-      - "packages/sctool-sdk/src/index.ts"
       - "packages/sctool-sdk/package.json"
-    completion_codes: []
+      - "packages/sctool-sdk/schemas/marketplace-profile.schema.json"
+      - "packages/sctool-sdk/templates/marketplace-profile.json"
+    completion_codes: [P1_MARKETPLACE_PROFILE_PUBLIC_EXPORTS_COMPLETE]
   - id: P1-W5
-    status: PENDING
+    status: COMPLETE
     responsibility_refs: [RESP_SCTOOL_PACKAGE_TEST]
     input_refs: [P1-W4]
-    output_refs: ["packages/sctool-sdk/tests/marketplace-profile.test.mjs"]
-    completion_codes: []
+    output_refs:
+      - "packages/sctool-sdk/tests/marketplace-profile.test.mjs"
+      - "packages/sctool-sdk/tests/package-contract.test.mjs"
+    completion_codes: [P1_MARKETPLACE_PROFILE_BEHAVIOR_TESTS_COMPLETE]
   - id: P1-W6
-    status: PENDING
+    status: COMPLETE
     responsibility_refs: [RESP_SCTOOL_PACKAGE_BUILD, RESP_SCTOOL_PACKAGE_TEST]
     input_refs: [P1-W5]
     output_refs: [E_P1_EXACT_VALIDATION]
-    completion_codes: []
+    completion_codes: [P1_SDK_PACKAGE_EXACT_VERIFICATION_COMPLETE]
   - id: P1-W7
-    status: PENDING
+    status: COMPLETE
     responsibility_refs: [RESP_SCTOOL_AUTHORING_GUIDANCE]
     input_refs: [P1-W6]
     output_refs: [E_P1_CROSS_REPOSITORY_HANDOFF]
-    completion_codes: []
+    completion_codes: [P1_CROSS_REPOSITORY_EXACT_HANDOFF_COMPLETE]
 evidence:
   - id: E_P1_APPROVAL
     kind: USER_APPROVAL
@@ -127,20 +132,75 @@ evidence:
       version_target: "0.2.0"
       committed_tree: PASS
       authority_boundary: PASS
+  - id: E_P1_PROFILE_IMPLEMENTATION
+    kind: EXACT_VALIDATION
+    head: "ecec8a3e41bf26912ef511d52c3e0a82be95631a"
+    refs:
+      sdk_version: "0.2.0"
+      schema_version: 1
+      diagnostic_schema: "sctool-marketplace-profile-validation/v1"
+      details_required_nonblank: PASS
+      features_required_nonblank: PASS
+      optional_sections: [changelog, dependencies, extension_pack]
+      personal_github_profile_optional: PASS
+      local_profile_optional: PASS
+      marketplace_submission_profile_required: PASS
+      binding_artifact: ".sctool"
+      binding_rule: EMBEDDED_OR_EXACTLY_BOUND
+      registry_admission_authority: PRESERVED
+      raw_secret_projection: FORBIDDEN
+      publication: NOT_PERFORMED
+  - id: E_P1_EXACT_VALIDATION
+    kind: EXACT_VALIDATION
+    head: "ecec8a3e41bf26912ef511d52c3e0a82be95631a"
+    refs:
+      sdk_regression_run_id: 34457847965
+      sdk_regression_conclusion: SUCCESS
+      install: PASS
+      typecheck: PASS
+      build: PASS
+      localization_cases: 7
+      localization_fail: 0
+      host_capabilities_cases: 7
+      host_capabilities_fail: 0
+      marketplace_profile_cases: 15
+      marketplace_profile_fail: 0
+      public_exports: PASS
+      package_pack_dry_run: PASS
+      cli_syntax: PASS
+      registry_governance_run_id: 34458082494
+      registry_governance: PASS
+      registry_validation_run_id: 34458082495
+      registry_validation: PASS
+      registry_pages_build_run_id: 34458082497
+      ptsip_exact_architecture: PASS
+      registry_pages_build: PASS
+  - id: E_P1_CROSS_REPOSITORY_HANDOFF
+    kind: CROSS_REPOSITORY_EXACT_HANDOFF
+    head: "2cb477a64d5414646d72bd0f2b09d11dc3b0e46e"
+    refs:
+      handoff_document: "docs/ver1.0.3/evidence/P1_sctool_sdk_marketplace_profile_handoff.yaml"
+      product_repository: "Simple-Connection/SC_Linked_App"
+      product_branch: "dev/2.2.4"
+      product_observed_sha: "e56cfe76ebcc1f6c41a0789910e7a5c580a439b1"
+      authoritative_sdk_version: "0.2.0"
+      product_reference_update_required: true
+      product_direct_mutation: FORBIDDEN
+      product_p4_w3_discovery_dependency: REGISTRY_P2
 gates:
   - {id: GATE_SESSION_APPROVAL, required: true, status: PASS, evidence_refs: [E_P1_APPROVAL]}
   - {id: GATE_P1_SCTOOL_SDK_PREFLIGHT, required: true, status: PASS, evidence_refs: [E_P1_PREFLIGHT]}
-  - {id: GATE_P1_MARKETPLACE_PROFILE_CONTRACT, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P1_MARKETPLACE_PROFILE_REQUIRED_SECTIONS, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P1_MARKETPLACE_PROFILE_OPTIONALITY, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P1_MARKETPLACE_PROFILE_BINDING, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P1_MARKETPLACE_PROFILE_DIAGNOSTICS, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P1_MARKETPLACE_PROFILE_SECRET_EXCLUSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P1_MARKETPLACE_PROFILE_PUBLIC_EXPORTS, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P1_SCTOOL_SDK_REGRESSION, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P1_SCTOOL_SDK_PACKAGE, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P1_MARKETPLACE_AUTHORITY_BOUNDARY, required: true, status: PENDING, evidence_refs: []}
-  - {id: GATE_P1_CROSS_REPOSITORY_HANDOFF, required: true, status: PENDING, evidence_refs: []}
+  - {id: GATE_P1_MARKETPLACE_PROFILE_CONTRACT, required: true, status: PASS, evidence_refs: [E_P1_PROFILE_IMPLEMENTATION]}
+  - {id: GATE_P1_MARKETPLACE_PROFILE_REQUIRED_SECTIONS, required: true, status: PASS, evidence_refs: [E_P1_PROFILE_IMPLEMENTATION, E_P1_EXACT_VALIDATION]}
+  - {id: GATE_P1_MARKETPLACE_PROFILE_OPTIONALITY, required: true, status: PASS, evidence_refs: [E_P1_PROFILE_IMPLEMENTATION, E_P1_EXACT_VALIDATION]}
+  - {id: GATE_P1_MARKETPLACE_PROFILE_BINDING, required: true, status: PASS, evidence_refs: [E_P1_PROFILE_IMPLEMENTATION]}
+  - {id: GATE_P1_MARKETPLACE_PROFILE_DIAGNOSTICS, required: true, status: PASS, evidence_refs: [E_P1_PROFILE_IMPLEMENTATION, E_P1_EXACT_VALIDATION]}
+  - {id: GATE_P1_MARKETPLACE_PROFILE_SECRET_EXCLUSION, required: true, status: PASS, evidence_refs: [E_P1_EXACT_VALIDATION]}
+  - {id: GATE_P1_MARKETPLACE_PROFILE_PUBLIC_EXPORTS, required: true, status: PASS, evidence_refs: [E_P1_EXACT_VALIDATION]}
+  - {id: GATE_P1_SCTOOL_SDK_REGRESSION, required: true, status: PASS, evidence_refs: [E_P1_EXACT_VALIDATION]}
+  - {id: GATE_P1_SCTOOL_SDK_PACKAGE, required: true, status: PASS, evidence_refs: [E_P1_EXACT_VALIDATION]}
+  - {id: GATE_P1_MARKETPLACE_AUTHORITY_BOUNDARY, required: true, status: PASS, evidence_refs: [E_P1_PROFILE_IMPLEMENTATION, E_P1_EXACT_VALIDATION]}
+  - {id: GATE_P1_CROSS_REPOSITORY_HANDOFF, required: true, status: PASS, evidence_refs: [E_P1_CROSS_REPOSITORY_HANDOFF]}
 blockers: []
 state:
   mode: DERIVED
