@@ -49,8 +49,8 @@ jobs:
 
       - name: Install closeout validation dependencies
         run: |
-          python -m pip install -r docs/governance/requirements.txt
-          python -m pip install "PTSIP==0.3.7"
+          py -3 --version
+          py -3 -m pip install -r docs/governance/requirements.txt
 
       - name: Validate Registry Client SDK syntax
         run: node --check packages/registry-client-sdk/src/discovery.mjs
@@ -66,13 +66,11 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/dev/1.0.3'
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: python docs/governance/p2-closeout.py --phase p2 --candidate-sha %GITHUB_SHA% --regression-run-id %GITHUB_RUN_ID%
+        run: py -3 docs/governance/p2-closeout.py --phase p2 --candidate-sha %GITHUB_SHA% --regression-run-id %GITHUB_RUN_ID%
 
       - name: Validate generated P2 machine closeout
         if: github.event_name == 'push' && github.ref == 'refs/heads/dev/1.0.3'
-        run: |
-          python docs/governance/validate.py --root .
-          ptsip validate .
+        run: py -3 docs/governance/validate.py --root .
 
       - name: Commit local P2 closeout
         if: github.event_name == 'push' && github.ref == 'refs/heads/dev/1.0.3'
@@ -87,20 +85,16 @@ jobs:
 
       - name: Validate exact P2 closeout revision
         if: github.event_name == 'push' && github.ref == 'refs/heads/dev/1.0.3'
-        run: |
-          python docs/governance/validate.py --root .
-          ptsip validate .
+        run: py -3 docs/governance/validate.py --root .
 
       - name: Materialize approved P3 start
         if: github.event_name == 'push' && github.ref == 'refs/heads/dev/1.0.3'
         shell: pwsh
-        run: python docs/governance/p2-closeout.py --phase p3 --p2-closeout-sha $env:P2_CLOSEOUT_SHA
+        run: py -3 docs/governance/p2-closeout.py --phase p3 --p2-closeout-sha $env:P2_CLOSEOUT_SHA
 
       - name: Validate generated P3 machine session
         if: github.event_name == 'push' && github.ref == 'refs/heads/dev/1.0.3'
-        run: |
-          python docs/governance/validate.py --root .
-          ptsip validate .
+        run: py -3 docs/governance/validate.py --root .
 
       - name: Commit local P3 start
         if: github.event_name == 'push' && github.ref == 'refs/heads/dev/1.0.3'
@@ -113,9 +107,7 @@ jobs:
 
       - name: Validate exact P3 start revision
         if: github.event_name == 'push' && github.ref == 'refs/heads/dev/1.0.3'
-        run: |
-          python docs/governance/validate.py --root .
-          ptsip validate .
+        run: py -3 docs/governance/validate.py --root .
 
       - name: Push atomic P2 closeout and P3 start
         if: github.event_name == 'push' && github.ref == 'refs/heads/dev/1.0.3'
