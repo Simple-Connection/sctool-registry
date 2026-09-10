@@ -132,6 +132,12 @@ jobs:
           python docs/governance/validate.py --root .
           ptsip validate .
 
+      - name: Clean generated validation cache
+        run: |
+          git diff --exit-code
+          git diff --cached --exit-code
+          git clean -fdx
+
       - name: Materialize approved P3 start
         run: python docs/governance/p2-closeout.py --phase p3 --p2-closeout-sha "$P2_CLOSEOUT_SHA"
 
