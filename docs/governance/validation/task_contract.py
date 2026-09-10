@@ -10,7 +10,8 @@ if TYPE_CHECKING:
     from .context import ValidationContext
 
 _SUPPORTED_SCHEMA = "sc_task/v1"
-_SUPPORTED_ALGORITHM = "SHA256"\n_SUPPORTED_CANONICALIZATION = "UTF8_LF"
+_SUPPORTED_ALGORITHM = "SHA256"
+_SUPPORTED_CANONICALIZATION = "UTF8_LF"
 _COVERAGE_PATHS = {
     "scope.add",
     "scope.preserve",
