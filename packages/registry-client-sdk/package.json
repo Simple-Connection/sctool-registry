@@ -1,7 +1,7 @@
 {
   "name": "@simple-connection/sctool-registry-client-sdk",
-  "version": "0.1.0",
-  "description": "Registry Client SDK used by Simple Connection to consume SCTool Registry metadata, access, delivery, and verified update candidates.",
+  "version": "0.2.0",
+  "description": "Registry Client SDK used by Simple Connection to consume SCTool Registry metadata, verified discovery, access, delivery, and verified update candidates.",
   "type": "module",
   "private": false,
   "exports": {
@@ -28,6 +28,10 @@
     "./update-candidate": {
       "types": "./src/update-candidate.d.mts",
       "import": "./src/update-candidate.mjs"
+    },
+    "./discovery": {
+      "types": "./src/discovery.d.mts",
+      "import": "./src/discovery.mjs"
     }
   },
   "files": [
@@ -35,13 +39,15 @@
     "README.md"
   ],
   "scripts": {
+    "test:discovery": "node ./tests/discovery.test.mjs",
+    "test:package": "node ./tests/package-contract.test.mjs",
     "test:update:observation": "node ./tests/update-observation.test.mjs",
     "test:update:precedence": "node ./tests/update-version-precedence.test.mjs",
     "test:update:eligibility": "node ./tests/update-eligibility.test.mjs",
     "test:update:retrieval-gate": "node ./tests/update-retrieval-gate.test.mjs",
     "test:update:candidate-boundary": "node ./tests/update-candidate-boundary.test.mjs",
     "test:update": "npm run test:update:observation && npm run test:update:precedence && npm run test:update:eligibility && npm run test:update:retrieval-gate && npm run test:update:candidate-boundary",
-    "test": "node ./tests/boundary.test.mjs && node ./tests/registry-access.test.mjs && node ./tests/package-descriptor.test.mjs && node ./tests/resolution.test.mjs && node ./tests/artifact-delivery.test.mjs && node ./tests/artifact-staging.test.mjs && node ./tests/artifact-integrity.test.mjs && node ./tests/verified-artifact.test.mjs && npm run test:update"
+    "test": "node ./tests/boundary.test.mjs && node ./tests/registry-access.test.mjs && node ./tests/package-descriptor.test.mjs && node ./tests/resolution.test.mjs && node ./tests/artifact-delivery.test.mjs && node ./tests/artifact-staging.test.mjs && node ./tests/artifact-integrity.test.mjs && node ./tests/verified-artifact.test.mjs && npm run test:update && npm run test:discovery && npm run test:package"
   },
   "engines": {
     "node": ">=20"
