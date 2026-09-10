@@ -69,7 +69,7 @@ gates:
   development_docs_validation: PENDING
   registry_validation: PENDING
   ptsip_profile_validation: PENDING
-  ptsip_conformance_validation: PENDING
+  ptsip_conformance: PENDING
   external_integration: PENDING
   version_completion: PENDING
   merge_to_main: BLOCKED
