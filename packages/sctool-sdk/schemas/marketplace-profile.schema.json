@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://simple-connection.github.io/sctool-registry/schemas/marketplace-profile.schema.json",
+  "title": "SCTool Marketplace Profile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "details", "features"],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "details": {
+      "type": "string",
+      "minLength": 1
+    },
+    "features": {
+      "type": "string",
+      "minLength": 1
+    },
+    "changelog": {
+      "type": "string"
+    },
+    "dependencies": {
+      "type": "string"
+    },
+    "extensionPack": {
+      "type": "string"
+    }
+  }
+}
