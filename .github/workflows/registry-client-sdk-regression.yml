@@ -1,0 +1,54 @@
+name: Registry Client SDK Regression
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "dev/1.0.3"
+    paths:
+      - "packages/registry-client-sdk/**"
+      - "schemas/registry.schema.json"
+      - "schemas/registry-snapshot.schema.json"
+      - "registry.json"
+      - "tools/build-pages.mjs"
+      - "tools/validate-registry.py"
+      - ".github/workflows/registry-client-sdk-regression.yml"
+  pull_request:
+    paths:
+      - "packages/registry-client-sdk/**"
+      - "schemas/registry.schema.json"
+      - "schemas/registry-snapshot.schema.json"
+      - "registry.json"
+      - "tools/build-pages.mjs"
+      - "tools/validate-registry.py"
+      - ".github/workflows/registry-client-sdk-regression.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: registry-client-sdk-regression-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: cmd
+
+jobs:
+  validate:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Validate Registry Client SDK syntax
+        run: node --check packages/registry-client-sdk/src/discovery.mjs
+
+      - name: Run complete Registry Client SDK regression
+        run: npm --prefix packages/registry-client-sdk test
+
+      - name: Verify Registry Client SDK package pack
+        run: npm --prefix packages/registry-client-sdk pack --dry-run --json
