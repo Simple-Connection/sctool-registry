@@ -22,6 +22,9 @@ current:
   next_session:
     id: P2
     state: NOT_APPROVED
+    document: null
+    planning_state: CONCRETIZED
+    planning_document: "docs/ver1.0.3/session_document/ver.1.0.3_P2_registry_verified_discovery_profile_consumer_work_plan.yaml"
 
 versions:
   "1.0.1":
