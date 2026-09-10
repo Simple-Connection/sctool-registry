@@ -16,8 +16,8 @@ current:
     interpretation_layer: COMPLETE
     governance_layout: COMPLETE
   improvement_plan: docs/ver1.0.3/1.0.3_Improvement_plan.yaml
-  current_session: null
-  current_session_document: null
+  current_session: P3
+  current_session_document: docs/ver1.0.3/session_document/ver.1.0.3_P3_product_package_report_routing.yaml
   next_session: null
 versions:
   1.0.1:
@@ -102,9 +102,9 @@ versions:
       planning_state: CONCRETIZED
       planning_document: docs/ver1.0.3/session_document/ver.1.0.3_P2_registry_verified_discovery_profile_consumer_work_plan.yaml
     - id: P3
-      state: NOT_APPROVED
+      state: ACTIVE
       format: MACHINE_SESSION
-      document: null
+      document: docs/ver1.0.3/session_document/ver.1.0.3_P3_product_package_report_routing.yaml
       planning_state: CONCRETIZED
       planning_document: docs/ver1.0.3/session_document/ver.1.0.3_P3_product_package_report_routing_work_plan.yaml
 templates:

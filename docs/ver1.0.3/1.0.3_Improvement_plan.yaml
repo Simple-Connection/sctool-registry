@@ -42,10 +42,10 @@ sessions:
   planning_document: docs/ver1.0.3/session_document/ver.1.0.3_P2_registry_verified_discovery_profile_consumer_work_plan.yaml
 - id: P3
   type: B
-  state: NOT_APPROVED
-  approval: REQUIRED
+  state: ACTIVE
+  approval: APPROVED
   responsibility_refs: []
-  document: null
+  document: docs/ver1.0.3/session_document/ver.1.0.3_P3_product_package_report_routing.yaml
   planning_state: CONCRETIZED
   planning_document: docs/ver1.0.3/session_document/ver.1.0.3_P3_product_package_report_routing_work_plan.yaml
 migrations:
@@ -74,5 +74,5 @@ gates:
   version_completion: PENDING
   merge_to_main: BLOCKED
 next:
-  session_id: P3
-  state: NOT_APPROVED
+  session_id: null
+  state: NONE

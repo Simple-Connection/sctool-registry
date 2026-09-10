@@ -1,0 +1,160 @@
+schema_version: '4.0'
+document_type: machine_session
+natural_language: FORBIDDEN
+session:
+  id: P3
+  type: B
+  number: 3
+  approval: APPROVED
+  distribution_contract_version: 1.0.3
+  branch: dev/1.0.3
+  authority_repository: Simple-Connection/sctool-registry
+  improvement_plan: docs/ver1.0.3/1.0.3_Improvement_plan.yaml
+routing:
+  docs_index: docs/index.yaml
+  rules_index: docs/rules/index.yaml
+  template_index: docs/template/index.yaml
+  responsibility_index: docs/responsibility/index.yaml
+  essential_template: docs/template/session_document_template/session_document_essential.yaml
+  type_template: docs/template/session_document_template/session_type_B.yaml
+heads:
+  start: 6614eb3444337e0eb1dbace904b139ecad93fa75
+  implementation: null
+  exact_validation: null
+responsibility_model:
+  effects:
+    assign: []
+    implement: []
+    preserve: []
+    defer: []
+    transfer: []
+    retire: []
+    forbid: []
+  description_ids: []
+  rationale_ids: []
+payload:
+  implementation:
+    responsibility_refs: []
+    contract_refs: []
+    path_allow:
+    - .github/ISSUE_TEMPLATE/**
+    - .github/registry-sdk-issue-queue.json
+    - .github/workflows/registry-sdk-issue-routing.yml
+    - tools/issue-routing/**
+    - docs/ver1.0.3/evidence/**
+    - docs/ver1.0.3/session_document/ver.1.0.3_P3_product_package_report_routing*.yaml
+    - docs/ver1.0.3/1.0.3_Improvement_plan.yaml
+    - docs/index.yaml
+    path_deny:
+    - packages/registry-client-sdk/**
+    - packages/sctool-sdk/**
+    - packages/repository-tool-sdk/**
+    - Simple-Connection/SC_Linked_App/**
+  responsibility_description_ids: []
+  decision_rationale_ids: []
+work_units:
+- id: P3-W1
+  status: ACTIVE
+  responsibility_refs: []
+  input_refs:
+  - P3_WORK_PLAN
+  output_refs:
+  - PRODUCT_REPORT_SCHEMA_V1
+  - PRODUCT_REPORT_MARKER_V1
+  completion_codes: []
+- id: P3-W2
+  status: PENDING
+  responsibility_refs: []
+  input_refs:
+  - P3-W1
+  output_refs:
+  - PRODUCT_REPORT_PARSE_VALIDATE
+  completion_codes: []
+- id: P3-W3
+  status: PENDING
+  responsibility_refs: []
+  input_refs:
+  - P3-W2
+  output_refs:
+  - PRODUCT_REPORT_SANITIZE
+  completion_codes: []
+- id: P3-W4
+  status: PENDING
+  responsibility_refs: []
+  input_refs:
+  - P3-W3
+  output_refs:
+  - PRODUCT_REPORT_ACTIVE_VERSION_ROUTE
+  completion_codes: []
+- id: P3-W5
+  status: PENDING
+  responsibility_refs: []
+  input_refs:
+  - P3-W4
+  output_refs:
+  - PRODUCT_REPORT_QUEUE_REGRESSION
+  completion_codes: []
+- id: P3-W6
+  status: PENDING
+  responsibility_refs: []
+  input_refs:
+  - P3-W5
+  output_refs:
+  - E_P3_CROSS_REPOSITORY_HANDOFF
+  completion_codes: []
+evidence:
+- id: E_P3_APPROVAL
+  kind: USER_APPROVAL
+  head: 6614eb3444337e0eb1dbace904b139ecad93fa75
+  refs:
+    implementation: APPROVED
+    approval_scope: P3_START
+    p2_precondition: COMPLETE
+- id: E_P3_PREFLIGHT
+  kind: EXACT_VALIDATION
+  head: 6614eb3444337e0eb1dbace904b139ecad93fa75
+  refs:
+    repository: Simple-Connection/sctool-registry
+    branch: dev/1.0.3
+    p2_complete: PASS
+    existing_sdk_report_schema: sctool-registry-sdk-report/v1
+    product_report_schema_target: sctool-registry-product-report/v1
+    product_direct_mutation: FORBIDDEN
+gates:
+- id: GATE_SESSION_APPROVAL
+  required: true
+  status: PASS
+  evidence_refs:
+  - E_P3_APPROVAL
+- id: GATE_P3_PRODUCT_REPORT_SCHEMA
+  required: true
+  status: PENDING
+  evidence_refs: []
+- id: GATE_P3_PRODUCT_REPORT_MARKER
+  required: true
+  status: PENDING
+  evidence_refs: []
+- id: GATE_P3_REPORT_SANITIZATION
+  required: true
+  status: PENDING
+  evidence_refs: []
+- id: GATE_P3_SDK_REPORT_COMPATIBILITY
+  required: true
+  status: PENDING
+  evidence_refs: []
+- id: GATE_P3_ACTIVE_BRANCH_ROUTING
+  required: true
+  status: PENDING
+  evidence_refs: []
+- id: GATE_P3_ISSUE_QUEUE_REGRESSION
+  required: true
+  status: PENDING
+  evidence_refs: []
+- id: GATE_P3_CROSS_REPOSITORY_HANDOFF
+  required: true
+  status: PENDING
+  evidence_refs: []
+blockers: []
+state:
+  mode: DERIVED
+  ruleset: SESSION_STATE_V1
