@@ -5,6 +5,10 @@ import argparse
 import sys
 from pathlib import Path
 
+GOVERNANCE_ROOT = Path(__file__).resolve().parent
+if str(GOVERNANCE_ROOT) not in sys.path:
+    sys.path.insert(0, str(GOVERNANCE_ROOT))
+
 from validation.common import ValidationError
 from validation.context import load_context
 from validation.session_state_sync import synchronize_session_states, write_yaml_documents_atomically
