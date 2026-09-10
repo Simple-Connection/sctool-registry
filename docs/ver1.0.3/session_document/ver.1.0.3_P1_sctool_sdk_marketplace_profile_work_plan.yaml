@@ -19,8 +19,10 @@ source_task:
   schema: sc_task/v1
   id: sctool-sdk-1.0.3-marketplace-profile
   document: "docs/ver1.0.3/source/sctool-sdk-1.0.3-task.yaml"
-  binding: SHA256
-  sha256: "25b24f0c2eb54c0c09cb347dd145c57357f5708c8a97bc06679065267e5ae27b"
+  digest:
+    algorithm: SHA256
+    canonicalization: UTF8_LF
+    value: "25b24f0c2eb54c0c09cb347dd145c57357f5708c8a97bc06679065267e5ae27b"
 task_contract:
   coverage:
     - scope.add

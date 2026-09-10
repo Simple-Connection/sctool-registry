@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from .context import ValidationContext
 
 _SUPPORTED_SCHEMA = "sc_task/v1"
-_SUPPORTED_BINDING = "SHA256"
+_SUPPORTED_ALGORITHM = "SHA256"\n_SUPPORTED_CANONICALIZATION = "UTF8_LF"
 _COVERAGE_PATHS = {
     "scope.add",
     "scope.preserve",
@@ -68,14 +68,28 @@ def validate_bound_task(
         return
 
     raw = task_path.read_bytes()
-    actual_sha256 = hashlib.sha256(raw).hexdigest()
+    try:
+        canonical = raw.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+    except UnicodeDecodeError:
+        errors.append(f"TASK_UTF8:{session_id}:{document}")
+        return
+    actual_sha256 = hashlib.sha256(canonical).hexdigest()
+    digest = binding.get("digest")
+    need(isinstance(digest, dict), f"TASK_DIGEST:{session_id}", errors)
+    if not isinstance(digest, dict):
+        return
     need(
-        binding.get("binding") == _SUPPORTED_BINDING,
-        f"TASK_BINDING_MODE:{session_id}:{binding.get('binding')}",
+        digest.get("algorithm") == _SUPPORTED_ALGORITHM,
+        f"TASK_DIGEST_ALGORITHM:{session_id}:{digest.get('algorithm')}",
         errors,
     )
     need(
-        binding.get("sha256") == actual_sha256,
+        digest.get("canonicalization") == _SUPPORTED_CANONICALIZATION,
+        f"TASK_DIGEST_CANONICALIZATION:{session_id}:{digest.get('canonicalization')}",
+        errors,
+    )
+    need(
+        digest.get("value") == actual_sha256,
         f"TASK_SHA256:{session_id}:{actual_sha256}",
         errors,
     )

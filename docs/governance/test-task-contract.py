@@ -68,8 +68,13 @@ class TaskContractTests(unittest.TestCase):
         )
 
     def test_source_task_hash_is_exact(self):
-        expected = hashlib.sha256(TASK_PATH.read_bytes()).hexdigest()
-        self.assertEqual(self.plan["source_task"]["sha256"], expected)
+        raw = TASK_PATH.read_bytes()
+        canonical = raw.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+        expected = hashlib.sha256(canonical).hexdigest()
+        digest = self.plan["source_task"]["digest"]
+        self.assertEqual(digest["algorithm"], "SHA256")
+        self.assertEqual(digest["canonicalization"], "UTF8_LF")
+        self.assertEqual(digest["value"], expected)
 
 
 if __name__ == "__main__":

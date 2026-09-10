@@ -1,4 +1,4 @@
-schema_version: "1.1"
+schema_version: "1.2"
 document_type: session_work_plan_template
 template_id: session_work_plan_v1
 natural_language: FORBIDDEN
@@ -19,8 +19,10 @@ source_task:
   schema: "<TASK_SCHEMA>"
   id: "<TASK_ID>"
   document: "<PATH>"
-  binding: SHA256
-  sha256: "<SHA256>"
+  digest:
+    algorithm: SHA256
+    canonicalization: UTF8_LF
+    value: "<SHA256>"
 task_contract:
   coverage: []
 baseline: {}
