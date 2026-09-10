@@ -1,10 +1,8 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { createRequire } from "node:module";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const require = createRequire(import.meta.url);
 const packageRoot = new URL("../", import.meta.url);
 
 async function readJson(path) {
@@ -33,22 +31,26 @@ test("package metadata exposes Marketplace profile authoring surface", async () 
   );
 
   assert.match(
-    require.resolve("@simple-connection/sctool-sdk/marketplace-profile"),
+    import.meta.resolve("@simple-connection/sctool-sdk/marketplace-profile"),
     /dist[\\/]marketplace-profile\.js$/,
   );
   assert.match(
-    require.resolve("@simple-connection/sctool-sdk/marketplace-profile-schema"),
+    import.meta.resolve("@simple-connection/sctool-sdk/marketplace-profile-schema"),
     /schemas[\\/]marketplace-profile\.schema\.json$/,
   );
   assert.match(
-    require.resolve("@simple-connection/sctool-sdk/marketplace-profile-template"),
+    import.meta.resolve("@simple-connection/sctool-sdk/marketplace-profile-template"),
     /templates[\\/]marketplace-profile\.json$/,
   );
 });
 
 test("npm pack dry-run contains Marketplace profile public artifacts", () => {
-  const npm = process.platform === "win32" ? "npm.cmd" : "npm";
-  const result = spawnSync(npm, ["pack", "--dry-run", "--json"], {
+  const windows = process.platform === "win32";
+  const command = windows ? (process.env.ComSpec ?? "cmd.exe") : "npm";
+  const args = windows
+    ? ["/d", "/s", "/c", "npm pack --dry-run --json"]
+    : ["pack", "--dry-run", "--json"];
+  const result = spawnSync(command, args, {
     cwd: packageRoot,
     encoding: "utf8",
     windowsHide: true,
