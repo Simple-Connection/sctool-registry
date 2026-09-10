@@ -48,13 +48,13 @@ class TaskContractTests(unittest.TestCase):
 
     def test_repository_drift_is_rejected(self):
         plan = copy.deepcopy(self.plan)
-        plan["implementation"]["repository"] = "Simple-Connection/sctool-registry"
+        plan["implementation"]["repository"] = "Simple-Connection/SC_Linked_App"
         errors = self._validate(plan)
         self.assertIn("TASK_REPOSITORY:P1", errors)
 
     def test_version_drift_is_rejected(self):
         plan = copy.deepcopy(self.plan)
-        plan["baseline"]["target_version"] = "1.0.4"
+        plan["baseline"]["target_version"] = "0.2.1"
         errors = self._validate(plan)
         self.assertIn("TASK_VERSION_TO:P1", errors)
 
