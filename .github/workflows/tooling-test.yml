@@ -1,0 +1,46 @@
+name: Tooling test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "dev/**"
+    paths:
+      - "docs/**"
+      - "ptsip.yaml"
+      - ".github/workflows/tooling-test.yml"
+  pull_request:
+    paths:
+      - "docs/**"
+      - "ptsip.yaml"
+      - ".github/workflows/tooling-test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  governance:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Install governance dependencies
+        run: |
+          python -m pip install -r docs/governance/requirements.txt
+          python -m pip install "PTSIP==0.3.7"
+
+      - name: Test session state synchronization
+        run: python docs/governance/test-session-state-sync.py
+
+      - name: Test source task binding
+        run: python docs/governance/test-task-contract.py
+
+      - name: Validate machine development documentation
+        run: python docs/governance/validate.py --root .
+
+      - name: Validate PTSIP profile
+        run: ptsip validate .

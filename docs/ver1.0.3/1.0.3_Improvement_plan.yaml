@@ -1,0 +1,57 @@
+schema_version: "4.0"
+document_type: improvement_plan
+template_id: improvement_plan_v4
+natural_language: FORBIDDEN
+version:
+  distribution_contract_version: "1.0.3"
+  branch: "dev/1.0.3"
+  state: ACTIVE
+  baseline_main: "f12ac6dd604c0bcbbc8f6cb282f22d41631201fb"
+  previous_distribution_contract_version: "1.0.2"
+routing:
+  docs_index: "docs/index.yaml"
+  rules_index: "docs/rules/index.yaml"
+  template_index: "docs/template/index.yaml"
+  responsibility_index: "docs/responsibility/index.yaml"
+  session_document_root: "docs/ver1.0.3/session_document"
+sessions:
+  - id: P1
+    type: B
+    state: NOT_APPROVED
+    approval: REQUIRED
+    responsibility_refs:
+      - RESP_SCTOOL_AUTHORING_GUIDANCE
+      - RESP_SCTOOL_MANIFEST_VALIDATION
+      - RESP_SCTOOL_PACKAGE_BUILD
+      - RESP_SCTOOL_PACKAGE_TEST
+    document: null
+    planning_state: CONCRETIZED
+    planning_document: "docs/ver1.0.3/session_document/ver.1.0.3_P1_sctool_sdk_marketplace_profile_work_plan.yaml"
+migrations:
+  machine_routing: COMPLETE
+  responsibility_model: COMPLETE
+  interpretation_layer: COMPLETE
+  governance_layout: COMPLETE
+validation:
+  evidence_head: null
+  development_docs: PENDING
+  interpretation_layer: PENDING
+  registry_json: PENDING
+  ptsip_profile: PENDING
+  ptsip_conformance: PENDING
+gates:
+  approved_sessions: PENDING
+  machine_document_routing: PENDING
+  responsibility_model_validation: PENDING
+  interpretation_layer_validation: PENDING
+  governance_layout_validation: PENDING
+  development_docs_validation: PENDING
+  registry_validation: PENDING
+  ptsip_profile_validation: PENDING
+  ptsip_conformance: PENDING
+  external_integration: PENDING
+  version_completion: PENDING
+  merge_to_main: BLOCKED
+next:
+  session_id: P1
+  state: NOT_APPROVED

@@ -1,0 +1,220 @@
+schema: sc_task/v1
+task:
+  id: sctool-sdk-1.0.3-marketplace-profile
+  mode: implement
+  language: en
+  output: machine
+  target:
+    expected_repo: Simple-Connection/sctool-sdk
+    package: sctool-sdk
+    version_from: 1.0.2
+    version_to: 1.0.3
+  preflight:
+    - verify_repo
+    - verify_version_1.0.2
+    - verify_clean_or_explain_worktree
+    - inspect_existing_schema_exports_tests
+  stop_if:
+    - repo_mismatch
+    - baseline_version_mismatch
+
+scope:
+  add:
+    - marketplace_profile_schema
+    - marketplace_profile_types
+    - marketplace_profile_validator
+    - marketplace_profile_template_or_scaffold
+    - structured_validation_diagnostics
+    - ai_repair_output
+  preserve:
+    - existing_sctool_authoring
+    - existing_build_package_test
+    - personal_github_sctool_without_marketplace_profile
+    - local_sctool_without_marketplace_profile
+  forbid:
+    - registry_client_responsibility
+    - repository_tool_responsibility
+    - SC_Linked_App_runtime_logic
+    - marketplace_admission_authority
+    - duplicate_registry_validator
+    - publish_without_user_approval
+    - main_merge_without_user_approval
+
+ownership:
+  sctool-sdk:
+    - sctool_authoring
+    - manifest_authoring
+    - marketplace_profile_authoring_contract
+    - local_prevalidation
+    - template_scaffold
+    - ai_repair_diagnostic_format
+  sctool-registry:
+    - authoritative_marketplace_admission
+    - independent_profile_validation
+    - publisher_ownership_validation
+    - publication_authority
+  sctool-registry-client-sdk:
+    - registry_consume
+    - version_resolution
+    - artifact_delivery
+    - verified_update_candidate
+  repository-tool-sdk:
+    - repository_tool_descriptor
+    - repository_tool_validation
+
+marketplace_profile:
+  required_for:
+    - marketplace_submission
+  not_required_for:
+    - personal_github_sync
+    - personal_github_storage
+    - local_development
+    - local_storage
+  sections:
+    details:
+      required: true
+      non_empty: true
+    features:
+      required: true
+      non_empty: true
+    changelog:
+      required: false
+    dependencies:
+      required: false
+    extension_pack:
+      required: false
+  binding:
+    artifact: .sctool
+    rule: embedded_or_exactly_bound
+
+api:
+  require_public_exports:
+    - profile_schema
+    - profile_types
+    - profile_validate
+    - profile_template_or_scaffold
+    - diagnostic_types
+  validation:
+    local_role: preflight_only
+    registry_role: authoritative
+    local_pass_bypasses_registry: false
+
+diagnostic:
+  schema: sctool-marketplace-profile-validation/v1
+  machine_readable: true
+  stable_codes: true
+  copy_safe: true
+  fields:
+    - code
+    - severity
+    - package_id
+    - package_version
+    - profile_schema_version
+    - path
+    - observed
+    - expected
+    - repair_hint
+    - sdk_version
+  forbid:
+    - token
+    - secret
+    - credential
+    - private_key
+    - secret_env_value
+    - raw_private_log
+  ai_use:
+    action: copy
+    goal: repair_profile_without_extra_interpretation
+
+validation_rules:
+  - code: MARKETPLACE_PROFILE_REQUIRED
+    when: marketplace_submission && profile_missing
+    result: fail
+  - code: MARKETPLACE_PROFILE_DETAILS_REQUIRED
+    when: details_missing_or_blank
+    result: fail
+  - code: MARKETPLACE_PROFILE_FEATURES_REQUIRED
+    when: features_missing_or_blank
+    result: fail
+  - code: MARKETPLACE_PROFILE_OPTIONAL_FIELDS
+    when: optional_sections_missing
+    result: pass
+
+tests:
+  required:
+    - valid_required_sections_pass
+    - missing_details_fail
+    - blank_details_fail
+    - missing_features_fail
+    - blank_features_fail
+    - optional_sections_absent_pass
+    - optional_sections_present_pass
+    - personal_github_flow_profile_optional
+    - local_flow_profile_optional
+    - marketplace_flow_profile_required
+    - diagnostic_has_stable_code_and_path
+    - diagnostic_has_repair_hint
+    - diagnostic_has_sdk_version
+    - diagnostic_excludes_secrets
+    - public_exports_resolve
+    - existing_1.0.2_behavior_regression_pass
+
+versioning:
+  update_if_present:
+    - package.json
+    - lockfile
+    - version_constants
+    - exports
+    - schemas
+    - templates
+    - fixtures
+    - docs_index
+    - tests
+  target_version: 1.0.3
+  compatibility: additive
+
+verification:
+  must_pass:
+    - install
+    - typecheck
+    - build
+    - existing_tests
+    - new_profile_tests
+    - package_export_check
+    - package_pack_check
+    - repository_governance_checks_if_configured
+  on_failure: block_completion
+
+handoff:
+  consumer:
+    repo: Simple-Connection/SC_Linked_App
+    branch: dev/2.2.4
+    session: P4
+  report:
+    - source_repo
+    - source_branch
+    - baseline_sha
+    - final_sha
+    - version_before
+    - version_after
+    - changed_files
+    - profile_schema_export
+    - validator_export
+    - template_export
+    - diagnostic_schema
+    - exact_sdk_version
+    - tests
+    - blockers
+
+completion:
+  require:
+    - version_1.0.3
+    - profile_contract_complete
+    - details_required
+    - features_required
+    - optional_sections_optional
+    - personal_usage_profile_optional
+    - public_exports_ready
+    - ai_repair_diagnostic_ready
+    - all_tests_pass
+  final_output: yaml

@@ -1,0 +1,292 @@
+schema_version: "1.0"
+document_type: session_work_plan
+template_id: session_work_plan_v1
+natural_language: FORBIDDEN
+session:
+  id: P1
+  type: B
+  distribution_contract_version: "1.0.3"
+  branch: "dev/1.0.3"
+  governance_repository: "Simple-Connection/sctool-registry"
+implementation:
+  repository: "Simple-Connection/sctool-sdk"
+  branch: "dev/1.0.3"
+approval:
+  planning: APPROVED
+  implementation: REQUIRED
+  implementation_materialization: FORBIDDEN_BEFORE_APPROVAL
+source_task:
+  schema: sc_task/v1
+  id: sctool-sdk-1.0.3-marketplace-profile
+  document: "docs/ver1.0.3/source/sctool-sdk-1.0.3-task.yaml"
+  binding: SHA256
+  sha256: "25b24f0c2eb54c0c09cb347dd145c57357f5708c8a97bc06679065267e5ae27b"
+task_contract:
+  coverage:
+    - scope.add
+    - scope.preserve
+    - scope.forbid
+    - tests.required
+    - verification.must_pass
+    - completion.require
+baseline:
+  package: sctool-sdk
+  expected_version: "1.0.2"
+  target_version: "1.0.3"
+  preflight:
+    - verify_repo
+    - verify_version_1.0.2
+    - verify_clean_or_explain_worktree
+    - inspect_existing_schema_exports_tests
+  blocking_conditions:
+    - repo_mismatch
+    - baseline_version_mismatch
+boundary:
+  add:
+    - marketplace_profile_schema
+    - marketplace_profile_types
+    - marketplace_profile_validator
+    - marketplace_profile_template_or_scaffold
+    - structured_validation_diagnostics
+    - ai_repair_output
+  preserve:
+    - existing_sctool_authoring
+    - existing_build_package_test
+    - personal_github_sctool_without_marketplace_profile
+    - local_sctool_without_marketplace_profile
+  forbid:
+    - registry_client_responsibility
+    - repository_tool_responsibility
+    - SC_Linked_App_runtime_logic
+    - marketplace_admission_authority
+    - duplicate_registry_validator
+    - publish_without_user_approval
+    - main_merge_without_user_approval
+responsibility_migration:
+  source:
+    id: RESP_SCTOOL_MANIFEST_VALIDATION
+  proposed:
+    - id: RESP_SCTOOL_MARKETPLACE_PROFILE_AUTHORING
+      authority: AUTH_SCTOOL_AUTHORING_SDK
+    - id: RESP_SCTOOL_MARKETPLACE_PROFILE_PREVALIDATION
+      authority: AUTH_SCTOOL_AUTHORING_SDK
+    - id: RESP_SCTOOL_MARKETPLACE_PROFILE_TEMPLATE
+      authority: AUTH_SCTOOL_AUTHORING_SDK
+    - id: RESP_SCTOOL_MARKETPLACE_PROFILE_DIAGNOSTIC
+      authority: AUTH_SCTOOL_AUTHORING_SDK
+preconditions:
+  - SCTOOL_SDK_REPOSITORY_RESOLVED
+  - SCTOOL_SDK_BASELINE_VERSION_1_0_2
+  - EXISTING_AUTHORING_BEHAVIOR_IDENTIFIED
+  - MARKETPLACE_ADMISSION_AUTHORITY_REMAINS_REGISTRY
+work_units:
+  - id: P1-W1
+    state: PLANNED
+    purpose: MARKETPLACE_PROFILE_CONTRACT
+    depends_on: []
+    outputs:
+      - MARKETPLACE_PROFILE_SCHEMA
+      - MARKETPLACE_PROFILE_TYPES
+      - MARKETPLACE_PROFILE_BINDING
+    task_refs:
+      - scope.add:marketplace_profile_schema
+      - scope.add:marketplace_profile_types
+      - scope.add:marketplace_profile_template_or_scaffold
+  - id: P1-W2
+    state: PLANNED
+    purpose: MARKETPLACE_PROFILE_PREVALIDATION
+    depends_on:
+      - P1-W1
+    outputs:
+      - MARKETPLACE_PROFILE_VALIDATOR
+      - MARKETPLACE_REQUIRED_POLICY
+      - PERSONAL_PROFILE_OPTIONAL_POLICY
+      - LOCAL_PROFILE_OPTIONAL_POLICY
+    task_refs:
+      - scope.add:marketplace_profile_validator
+      - scope.preserve:existing_sctool_authoring
+      - scope.preserve:existing_build_package_test
+      - scope.preserve:personal_github_sctool_without_marketplace_profile
+      - scope.preserve:local_sctool_without_marketplace_profile
+      - scope.forbid:registry_client_responsibility
+      - scope.forbid:repository_tool_responsibility
+      - scope.forbid:SC_Linked_App_runtime_logic
+      - scope.forbid:marketplace_admission_authority
+      - scope.forbid:duplicate_registry_validator
+      - scope.forbid:publish_without_user_approval
+      - scope.forbid:main_merge_without_user_approval
+  - id: P1-W3
+    state: PLANNED
+    purpose: STRUCTURED_VALIDATION_DIAGNOSTICS
+    depends_on:
+      - P1-W2
+    outputs:
+      - DIAGNOSTIC_SCHEMA_V1
+      - STABLE_DIAGNOSTIC_CODES
+      - REPAIR_HINT
+      - SDK_VERSION_DIAGNOSTIC
+      - SECRET_EXCLUSION
+      - AI_REPAIR_OUTPUT
+    task_refs:
+      - scope.add:structured_validation_diagnostics
+      - scope.add:ai_repair_output
+      - tests.required:diagnostic_has_stable_code_and_path
+      - tests.required:diagnostic_has_repair_hint
+      - tests.required:diagnostic_has_sdk_version
+      - tests.required:diagnostic_excludes_secrets
+  - id: P1-W4
+    state: PLANNED
+    purpose: PROFILE_PUBLIC_EXPORTS
+    depends_on:
+      - P1-W1
+      - P1-W2
+      - P1-W3
+    outputs:
+      - PROFILE_SCHEMA_EXPORT
+      - PROFILE_TYPES_EXPORT
+      - PROFILE_VALIDATE_EXPORT
+      - PROFILE_TEMPLATE_OR_SCAFFOLD_EXPORT
+      - DIAGNOSTIC_TYPES_EXPORT
+    task_refs:
+      - tests.required:public_exports_resolve
+  - id: P1-W5
+    state: PLANNED
+    purpose: MARKETPLACE_PROFILE_BEHAVIOR_TESTS
+    depends_on:
+      - P1-W4
+    outputs:
+      - REQUIRED_SECTION_TESTS
+      - OPTIONAL_SECTION_TESTS
+      - PERSONAL_FLOW_OPTIONAL_TEST
+      - LOCAL_FLOW_OPTIONAL_TEST
+      - MARKETPLACE_FLOW_REQUIRED_TEST
+      - VERSION_1_0_2_REGRESSION_TEST
+    task_refs:
+      - tests.required:valid_required_sections_pass
+      - tests.required:missing_details_fail
+      - tests.required:blank_details_fail
+      - tests.required:missing_features_fail
+      - tests.required:blank_features_fail
+      - tests.required:optional_sections_absent_pass
+      - tests.required:optional_sections_present_pass
+      - tests.required:personal_github_flow_profile_optional
+      - tests.required:local_flow_profile_optional
+      - tests.required:marketplace_flow_profile_required
+      - tests.required:existing_1.0.2_behavior_regression_pass
+  - id: P1-W6
+    state: PLANNED
+    purpose: SDK_PACKAGE_EXACT_VERIFICATION
+    depends_on:
+      - P1-W5
+    outputs:
+      - INSTALL_PASS
+      - TYPECHECK_PASS
+      - BUILD_PASS
+      - EXISTING_TESTS_PASS
+      - PROFILE_TESTS_PASS
+      - PACKAGE_EXPORT_CHECK_PASS
+      - PACKAGE_PACK_CHECK_PASS
+      - GOVERNANCE_CHECK_PASS
+    task_refs:
+      - verification.must_pass:install
+      - verification.must_pass:typecheck
+      - verification.must_pass:build
+      - verification.must_pass:existing_tests
+      - verification.must_pass:new_profile_tests
+      - verification.must_pass:package_export_check
+      - verification.must_pass:package_pack_check
+      - verification.must_pass:repository_governance_checks_if_configured
+  - id: P1-W7
+    state: PLANNED
+    purpose: CROSS_REPOSITORY_EXACT_HANDOFF
+    depends_on:
+      - P1-W6
+    outputs:
+      - SOURCE_REPO
+      - SOURCE_BRANCH
+      - BASELINE_SHA
+      - FINAL_SHA
+      - VERSION_BEFORE
+      - VERSION_AFTER
+      - CHANGED_FILES
+      - PROFILE_SCHEMA_EXPORT
+      - VALIDATOR_EXPORT
+      - TEMPLATE_EXPORT
+      - DIAGNOSTIC_SCHEMA
+      - EXACT_SDK_VERSION
+      - TEST_RESULTS
+      - BLOCKERS
+    task_refs:
+      - completion.require:version_1.0.3
+      - completion.require:profile_contract_complete
+      - completion.require:details_required
+      - completion.require:features_required
+      - completion.require:optional_sections_optional
+      - completion.require:personal_usage_profile_optional
+      - completion.require:public_exports_ready
+      - completion.require:ai_repair_diagnostic_ready
+      - completion.require:all_tests_pass
+verification:
+  must_pass:
+    - install
+    - typecheck
+    - build
+    - existing_tests
+    - new_profile_tests
+    - package_export_check
+    - package_pack_check
+    - repository_governance_checks_if_configured
+  on_failure: block_completion
+handoff:
+  consumer:
+    repo: Simple-Connection/SC_Linked_App
+    branch: dev/2.2.4
+    session: P4
+  report:
+    - source_repo
+    - source_branch
+    - baseline_sha
+    - final_sha
+    - version_before
+    - version_after
+    - changed_files
+    - profile_schema_export
+    - validator_export
+    - template_export
+    - diagnostic_schema
+    - exact_sdk_version
+    - tests
+    - blockers
+completion:
+  require:
+    - version_1.0.3
+    - profile_contract_complete
+    - details_required
+    - features_required
+    - optional_sections_optional
+    - personal_usage_profile_optional
+    - public_exports_ready
+    - ai_repair_diagnostic_ready
+    - all_tests_pass
+  final_output: yaml
+proposed_gates:
+  - GATE_P1_SCTOOL_SDK_PREFLIGHT
+  - GATE_P1_MARKETPLACE_PROFILE_CONTRACT
+  - GATE_P1_MARKETPLACE_PROFILE_REQUIRED_SECTIONS
+  - GATE_P1_MARKETPLACE_PROFILE_OPTIONALITY
+  - GATE_P1_MARKETPLACE_PROFILE_BINDING
+  - GATE_P1_MARKETPLACE_PROFILE_DIAGNOSTICS
+  - GATE_P1_MARKETPLACE_PROFILE_SECRET_EXCLUSION
+  - GATE_P1_MARKETPLACE_PROFILE_PUBLIC_EXPORTS
+  - GATE_P1_SCTOOL_SDK_REGRESSION
+  - GATE_P1_SCTOOL_SDK_PACKAGE
+  - GATE_P1_MARKETPLACE_AUTHORITY_BOUNDARY
+  - GATE_P1_CROSS_REPOSITORY_HANDOFF
+forbidden_effects:
+  - REGISTRY_CLIENT_AUTHORITY_ACQUISITION
+  - REPOSITORY_TOOL_AUTHORITY_ACQUISITION
+  - SC_LINKED_APP_RUNTIME_IMPLEMENTATION
+  - MARKETPLACE_ADMISSION_AUTHORITY_ACQUISITION
+  - REGISTRY_VALIDATOR_DUPLICATION
+  - UNAPPROVED_PACKAGE_PUBLICATION
+  - UNAPPROVED_MAIN_MERGE
