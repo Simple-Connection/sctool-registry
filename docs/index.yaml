@@ -10,16 +10,18 @@ responsibility_index: "docs/responsibility/index.yaml"
 current:
   distribution_contract_version: "1.0.3"
   branch: "dev/1.0.3"
-  state: IN_PROGRESS_ACTIVE_SESSION
+  state: ACTIVE
   migrations:
     machine_routing: COMPLETE
     responsibility_model: COMPLETE
     interpretation_layer: COMPLETE
     governance_layout: COMPLETE
   improvement_plan: "docs/ver1.0.3/1.0.3_Improvement_plan.yaml"
-  current_session: P1
-  current_session_document: "docs/ver1.0.3/session_document/ver.1.0.3_P1_sctool_sdk_marketplace_profile.yaml"
-  next_session: null
+  current_session: null
+  current_session_document: null
+  next_session:
+    id: P2
+    state: NOT_APPROVED
 
 versions:
   "1.0.1":
@@ -56,7 +58,7 @@ versions:
       - {id: P6, state: COMPLETE, format: MACHINE_SESSION, document: "docs/ver1.0.2/session_document/ver.1.0.2_P6_simple_connection_activation_runtime.yaml"}
 
   "1.0.3":
-    state: IN_PROGRESS_ACTIVE_SESSION
+    state: ACTIVE
     branch: "dev/1.0.3"
     source_format: MACHINE
     migrations:
@@ -70,7 +72,7 @@ versions:
     session_document_root: "docs/ver1.0.3/session_document"
     sessions:
       - id: P1
-        state: ACTIVE
+        state: COMPLETE
         format: MACHINE_SESSION
         document: "docs/ver1.0.3/session_document/ver.1.0.3_P1_sctool_sdk_marketplace_profile.yaml"
         planning_state: CONCRETIZED
