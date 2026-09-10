@@ -5,7 +5,7 @@ natural_language: FORBIDDEN
 version:
   distribution_contract_version: "1.0.3"
   branch: "dev/1.0.3"
-  state: ACTIVE
+  state: IN_PROGRESS_ACTIVE_SESSION
   baseline_main: "f12ac6dd604c0bcbbc8f6cb282f22d41631201fb"
   previous_distribution_contract_version: "1.0.2"
 routing:
@@ -17,14 +17,14 @@ routing:
 sessions:
   - id: P1
     type: B
-    state: NOT_APPROVED
-    approval: REQUIRED
+    state: ACTIVE
+    approval: APPROVED
     responsibility_refs:
       - RESP_SCTOOL_AUTHORING_GUIDANCE
       - RESP_SCTOOL_MANIFEST_VALIDATION
       - RESP_SCTOOL_PACKAGE_BUILD
       - RESP_SCTOOL_PACKAGE_TEST
-    document: null
+    document: "docs/ver1.0.3/session_document/ver.1.0.3_P1_sctool_sdk_marketplace_profile.yaml"
     planning_state: CONCRETIZED
     planning_document: "docs/ver1.0.3/session_document/ver.1.0.3_P1_sctool_sdk_marketplace_profile_work_plan.yaml"
   - id: P2
@@ -75,4 +75,4 @@ gates:
   merge_to_main: BLOCKED
 next:
   session_id: P1
-  state: NOT_APPROVED
+  state: ACTIVE
