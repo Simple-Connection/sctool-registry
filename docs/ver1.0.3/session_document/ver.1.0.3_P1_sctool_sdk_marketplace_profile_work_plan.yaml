@@ -9,8 +9,9 @@ session:
   branch: "dev/1.0.3"
   governance_repository: "Simple-Connection/sctool-registry"
 implementation:
-  repository: "Simple-Connection/sctool-sdk"
+  repository: "Simple-Connection/sctool-registry"
   branch: "dev/1.0.3"
+  package_path: "packages/sctool-sdk"
 approval:
   planning: APPROVED
   implementation: REQUIRED
@@ -22,7 +23,7 @@ source_task:
   digest:
     algorithm: SHA256
     canonicalization: UTF8_LF
-    value: "25b24f0c2eb54c0c09cb347dd145c57357f5708c8a97bc06679065267e5ae27b"
+    value: "3be7b6b47258b96816ab1ddb3cbba3703478340c70f296b1beabe3c3fe3196fa"
 task_contract:
   coverage:
     - scope.add
@@ -33,11 +34,11 @@ task_contract:
     - completion.require
 baseline:
   package: sctool-sdk
-  expected_version: "1.0.2"
-  target_version: "1.0.3"
+  expected_version: "0.1.0"
+  target_version: "0.2.0"
   preflight:
     - verify_repo
-    - verify_version_1.0.2
+    - verify_version_0.1.0
     - verify_clean_or_explain_worktree
     - inspect_existing_schema_exports_tests
   blocking_conditions:
@@ -78,7 +79,8 @@ responsibility_migration:
       authority: AUTH_SCTOOL_AUTHORING_SDK
 preconditions:
   - SCTOOL_SDK_REPOSITORY_RESOLVED
-  - SCTOOL_SDK_BASELINE_VERSION_1_0_2
+  - SCTOOL_SDK_PACKAGE_PATH_RESOLVED
+  - SCTOOL_SDK_BASELINE_VERSION_0_1_0
   - EXISTING_AUTHORING_BEHAVIOR_IDENTIFIED
   - MARKETPLACE_ADMISSION_AUTHORITY_REMAINS_REGISTRY
 work_units:
@@ -162,7 +164,7 @@ work_units:
       - PERSONAL_FLOW_OPTIONAL_TEST
       - LOCAL_FLOW_OPTIONAL_TEST
       - MARKETPLACE_FLOW_REQUIRED_TEST
-      - VERSION_1_0_2_REGRESSION_TEST
+      - VERSION_0_1_0_REGRESSION_TEST
     task_refs:
       - tests.required:valid_required_sections_pass
       - tests.required:missing_details_fail
@@ -174,7 +176,7 @@ work_units:
       - tests.required:personal_github_flow_profile_optional
       - tests.required:local_flow_profile_optional
       - tests.required:marketplace_flow_profile_required
-      - tests.required:existing_1.0.2_behavior_regression_pass
+      - tests.required:existing_0.1.0_behavior_regression_pass
   - id: P1-W6
     state: PLANNED
     purpose: SDK_PACKAGE_EXACT_VERIFICATION
@@ -206,6 +208,7 @@ work_units:
     outputs:
       - SOURCE_REPO
       - SOURCE_BRANCH
+      - PACKAGE_PATH
       - BASELINE_SHA
       - FINAL_SHA
       - VERSION_BEFORE
@@ -219,7 +222,8 @@ work_units:
       - TEST_RESULTS
       - BLOCKERS
     task_refs:
-      - completion.require:version_1.0.3
+      - completion.require:distribution_contract_1_0_3
+      - completion.require:sdk_package_version_0_2_0
       - completion.require:profile_contract_complete
       - completion.require:details_required
       - completion.require:features_required
@@ -261,7 +265,8 @@ handoff:
     - blockers
 completion:
   require:
-    - version_1.0.3
+    - distribution_contract_1_0_3
+    - sdk_package_version_0_2_0
     - profile_contract_complete
     - details_required
     - features_required
