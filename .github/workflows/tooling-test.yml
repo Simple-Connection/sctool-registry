@@ -35,18 +35,27 @@ jobs:
       - name: Bootstrap isolated Python
         run: |
           set "PY_VERSION=3.12.10"
-          set "PY_HOME=%LOCALAPPDATA%\SimpleConnection\gha-python-%PY_VERSION%"
+          set "PY_HOME=%LOCALAPPDATA%\SimpleConnection\gha-python-%PY_VERSION%-embed-amd64"
           set "PY_EXE=%PY_HOME%\python.exe"
-          set "PY_INSTALLER=%RUNNER_TEMP%\python-%PY_VERSION%-amd64.exe"
+          set "PY_ARCHIVE=%RUNNER_TEMP%\python-%PY_VERSION%-embed-amd64.zip"
+          set "GET_PIP=%RUNNER_TEMP%\get-pip.py"
           if not exist "%PY_EXE%" (
-            curl.exe --fail --location --retry 3 --output "%PY_INSTALLER%" "https://www.python.org/ftp/python/%PY_VERSION%/python-%PY_VERSION%-amd64.exe"
+            if not exist "%PY_HOME%" mkdir "%PY_HOME%"
+            curl.exe --fail --location --retry 3 --output "%PY_ARCHIVE%" "https://www.python.org/ftp/python/%PY_VERSION%/python-%PY_VERSION%-embed-amd64.zip"
             if errorlevel 1 exit /b 1
-            start "" /wait "%PY_INSTALLER%" /quiet InstallAllUsers=0 TargetDir="%PY_HOME%" Include_pip=1 Include_launcher=0 PrependPath=0 Shortcuts=0 Include_test=0 Include_doc=0
+            tar.exe -xf "%PY_ARCHIVE%" -C "%PY_HOME%"
+            if errorlevel 1 exit /b 1
+            "%PY_EXE%" -c "from pathlib import Path; p=Path(r'%PY_HOME%\python312._pth'); s=p.read_text(); p.write_text(s.replace('#import site','import site'))"
+            if errorlevel 1 exit /b 1
+            curl.exe --fail --location --retry 3 --output "%GET_PIP%" "https://bootstrap.pypa.io/get-pip.py"
+            if errorlevel 1 exit /b 1
+            "%PY_EXE%" "%GET_PIP%" --disable-pip-version-check
             if errorlevel 1 exit /b 1
           )
           "%PY_EXE%" --version
           if errorlevel 1 exit /b 1
           echo SCTOOL_PYTHON=%PY_EXE%>>"%GITHUB_ENV%"
+          echo SCTOOL_PTSIP=%PY_HOME%\Scripts\ptsip.exe>>"%GITHUB_ENV%"
 
       - name: Install governance dependencies
         run: |
@@ -67,4 +76,4 @@ jobs:
 
       - name: Validate PTSIP profile
         run: |
-          "%SCTOOL_PYTHON%" -m ptsip validate .
+          "%SCTOOL_PTSIP%" validate .
