@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -28,6 +29,19 @@ function validProfile() {
 function codes(profile, context = marketContext) {
   return validateMarketplaceProfile(profile, context).map((entry) => entry.code);
 }
+
+test("Marketplace profile JSON schema preserves required and optional section contract", async () => {
+  const schema = JSON.parse(
+    await readFile(new URL("../schemas/marketplace-profile.schema.json", import.meta.url), "utf8"),
+  );
+  assert.deepEqual(schema.required, ["schemaVersion", "details", "features"]);
+  assert.equal(schema.properties.details.pattern, "\\S");
+  assert.equal(schema.properties.features.pattern, "\\S");
+  assert.equal(Object.hasOwn(schema.properties, "changelog"), true);
+  assert.equal(Object.hasOwn(schema.properties, "dependencies"), true);
+  assert.equal(Object.hasOwn(schema.properties, "extension_pack"), true);
+  assert.equal(Object.hasOwn(schema.properties, "extensionPack"), false);
+});
 
 test("valid required sections pass", () => {
   assert.deepEqual(validateMarketplaceProfile(validProfile(), marketContext), []);
