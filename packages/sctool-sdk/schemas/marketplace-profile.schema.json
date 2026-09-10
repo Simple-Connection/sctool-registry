@@ -11,11 +11,13 @@
     },
     "details": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "pattern": "\\S"
     },
     "features": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "pattern": "\\S"
     },
     "changelog": {
       "type": "string"
@@ -23,7 +25,7 @@
     "dependencies": {
       "type": "string"
     },
-    "extensionPack": {
+    "extension_pack": {
       "type": "string"
     }
   }
