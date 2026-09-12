@@ -63,6 +63,7 @@ jobs:
           set -e
 
           if [[ $view_status -eq 0 && -n "$remote_integrity" ]]; then
+            remote_tarball="$(npm view "$name@$version" dist.tarball --registry=https://npm.pkg.github.com)"
             if [[ "$remote_integrity" != "$local_integrity" ]]; then
               echo "Existing package integrity does not match local exact source package." >&2
               exit 1
@@ -86,6 +87,7 @@ jobs:
               echo "Published package remote integrity did not match local pack integrity." >&2
               exit 1
             fi
+            remote_tarball="$(npm view "$name@$version" dist.tarball --registry=https://npm.pkg.github.com)"
           fi
 
           export EVIDENCE_PATH="$evidence"
@@ -93,6 +95,7 @@ jobs:
           export PACKAGE_VERSION="$version"
           export LOCAL_INTEGRITY="$local_integrity"
           export REMOTE_INTEGRITY="$remote_integrity"
+          export REMOTE_TARBALL="$remote_tarball"
           export LOCAL_SHASUM="$local_shasum"
           export LOCAL_SHA256="$local_sha256"
           export PUBLISH_STATUS="$publish_status"
@@ -114,6 +117,7 @@ jobs:
             integrity: {
               npm: process.env.LOCAL_INTEGRITY,
               remoteNpm: process.env.REMOTE_INTEGRITY,
+              remoteTarball: process.env.REMOTE_TARBALL,
               sha1: process.env.LOCAL_SHASUM,
               sha256: process.env.LOCAL_SHA256,
             },
