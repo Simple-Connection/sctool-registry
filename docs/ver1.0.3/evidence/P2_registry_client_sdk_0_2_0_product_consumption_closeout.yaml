@@ -1,0 +1,105 @@
+schema_version: '1.0'
+document_type: cross_repository_exact_closeout
+natural_language: FORBIDDEN
+closeout:
+  id: P2_REGISTRY_CLIENT_SDK_0_2_0_PRODUCT_CONSUMPTION
+  basis: USER_HANDOFF_SEQUENCE
+  registry:
+    repository: Simple-Connection/sctool-registry
+    branch: dev/1.0.3
+    package: '@simple-connection/sctool-registry-client-sdk'
+    version: 0.2.0
+    implementation_sha: 42bce673ea66c3706c5647f75981be73acfd0a04
+    publication:
+      source_sha: 982b78a9a585f6344b42aeac7ddc1b9d7547fcc1
+      workflow_run_id: 34703289355
+      workflow_run_number: 3
+      conclusion: SUCCESS
+      status: PUBLISHED
+      immutable_version_verified: true
+      artifact_id: 10300941083
+      artifact_digest: sha256:86ca7cd34319b260e10e192ee3455ecd8f74fb7e69ad15787fb5cd0b6f23bc88
+      npm_integrity: sha512-M77VERi+kQ7yDKxQpJ58xOhu5cbRZvh+OJHQSb/jN1a7uPzDe3AdqSo20A5NFa+s2W5zT3IdfsF0n81QUNO6Fw==
+      sha1: 5ce42c4f10d8cf4ea4e45b9e947782b1a9c34923
+      sha256: a87121c11122be443574f69eb16777640b3df502dde1cb4763b7cbde743cd1cf
+    immutable_reverification:
+      source_sha: 11cc8c4bdb2e4953ed5c67d3eaa8ff66ad9e3cf9
+      workflow_run_id: 34703433534
+      workflow_run_number: 4
+      conclusion: SUCCESS
+      status: EXISTING_VERIFIED
+      immutable_version_verified: true
+      artifact_id: 10301291353
+      artifact_digest: sha256:1f84da0928cb35994f6047d0fa53f1efbae9c1261b01e287049d2e0d0c76e6ea
+      remote_tarball: https://npm.pkg.github.com/download/@simple-connection/sctool-registry-client-sdk/0.2.0/5ce42c4f10d8cf4ea4e45b9e947782b1a9c34923
+      remote_npm_integrity: sha512-M77VERi+kQ7yDKxQpJ58xOhu5cbRZvh+OJHQSb/jN1a7uPzDe3AdqSo20A5NFa+s2W5zT3IdfsF0n81QUNO6Fw==
+      local_npm_integrity: sha512-M77VERi+kQ7yDKxQpJ58xOhu5cbRZvh+OJHQSb/jN1a7uPzDe3AdqSo20A5NFa+s2W5zT3IdfsF0n81QUNO6Fw==
+      integrity_equal: true
+  product:
+    repository: Simple-Connection/SC_Linked_App
+    branch: dev/2.2.4
+    exact_sha: f2b01bf0c675d2b525ce2b70cc80620b652584d5
+    package_binding:
+      version: 0.2.0
+      resolved: https://npm.pkg.github.com/download/@simple-connection/sctool-registry-client-sdk/0.2.0/5ce42c4f10d8cf4ea4e45b9e947782b1a9c34923
+      integrity: sha512-M77VERi+kQ7yDKxQpJ58xOhu5cbRZvh+OJHQSb/jN1a7uPzDe3AdqSo20A5NFa+s2W5zT3IdfsF0n81QUNO6Fw==
+      exact_lock_match: true
+    discovery:
+      public_export: '@simple-connection/sctool-registry-client-sdk/discovery'
+      contract: registry-discovery-v1
+      runtime_consumer_test: PASS
+      distribution_inactive_fail_closed: PASS
+      raw_github_discovery_fallback: FORBIDDEN
+    regression:
+      workflow_run_id: 34705638646
+      workflow_run_number: 69
+      conclusion: SUCCESS
+      artifact_id: 10300973790
+      artifact_digest: sha256:a770ff99e57180c4f420ff366ffcfd8e45ad1e8b3a3f05abd1495fcf93e84477
+      runner: SELF_HOSTED
+      typecheck: PASS
+      build: PASS
+      windows_failure_matrix: PASS
+    ptsip:
+      workflow_run_id: 34705638662
+      workflow_run_number: 242
+      conclusion: SUCCESS
+      runner: SELF_HOSTED
+      exact_conformance: PASS
+  exact_binding:
+    package_version_equal: true
+    package_integrity_equal: true
+    package_tarball_equal: true
+    discovery_contract_equal: true
+    product_sha_bound_to_ci: true
+    product_regression_success: true
+    product_ptsip_success: true
+review_sequence:
+  - id: R4
+    criterion: PACKAGE_PUBLICATION_IMMUTABLE_INTEGRITY
+    status: PASS
+    evidence:
+      - REGISTRY_PUBLICATION_RUN_34703289355
+      - REGISTRY_IMMUTABLE_REVERIFY_RUN_34703433534
+  - id: R5
+    criterion: PRODUCT_EXACT_PACKAGE_AND_DISCOVERY_CONSUMPTION
+    status: PASS
+    depends_on:
+      - R4
+    evidence:
+      - PRODUCT_SHA_f2b01bf0c675d2b525ce2b70cc80620b652584d5
+      - PRODUCT_REGRESSION_RUN_34705638646
+  - id: R6
+    criterion: CROSS_REPOSITORY_EXACT_EVIDENCE_CLOSURE
+    status: PASS
+    depends_on:
+      - R4
+      - R5
+    evidence:
+      - PRODUCT_PTSIP_RUN_34705638662
+      - PRODUCT_ARTIFACT_10300973790
+      - REGISTRY_PACKAGE_ARTIFACT_10300941083
+result:
+  exact_closeout: PASS
+  production_pages_trust: INACTIVE
+  production_pages_activation_required_for_verified_catalog_data: true
