@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - "dev/1.0.2"
+      - "dev/1.0.3"
     paths:
       - "packages/registry-client-sdk/**"
       - "docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml"
