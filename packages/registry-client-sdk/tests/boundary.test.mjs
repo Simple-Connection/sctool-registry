@@ -26,7 +26,7 @@ requireEqual(REGISTRY_CLIENT_CONTRACT.registrySnapshotSchemaVersion, "1.0.0", "s
 requireEqual(REGISTRY_CLIENT_CONTRACT.registryHeadSchemaVersion, "1.0.0", "head schema");
 requireEqual(REGISTRY_CLIENT_CONTRACT.registryTrustSchemaVersion, "1.0.0", "trust schema");
 requireEqual(REGISTRY_CLIENT_CONTRACT.marketplaceProfileSchemaVersion, 1, "marketplace profile schema");
-requireEqual(REGISTRY_CLIENT_CONTRACT.packageDescriptorSchemaVersion, "2.0.0", "package schema");
+requireEqual(REGISTRY_CLIENT_CONTRACT.packageDescriptorSchemaVersion, "3.0.0", "package schema");
 requireEqual(REGISTRY_CLIENT_CONTRACT.deliveryType, "github-release-asset", "delivery type");
 requireEqual(
   REGISTRY_CLIENT_CONTRACT.artifactRepository,
