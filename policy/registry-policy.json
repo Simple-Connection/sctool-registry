@@ -40,7 +40,18 @@
     },
     "anonymousDownloadAllowed": true,
     "gitHistoryStorageAllowed": false,
-    "defaultReleaseTagPattern": "sctool/{packageId}/v{version}"
+    "defaultReleaseTagPattern": "sctool/{packageId}/v{version}",
+    "custody": {
+      "longTermOwner": "publisher",
+      "originLocator": "required",
+      "centralCacheRole": "current-default-channel-only",
+      "cacheRepository": "Simple-Connection/sctool-artifacts",
+      "currentRetrieval": "cache-preferred-origin-fallback",
+      "historicalRetrieval": "origin-only",
+      "unavailableState": "ARTIFACT_UNAVAILABLE",
+      "redistributionConsent": "signed-required",
+      "shortRotationOverlapAllowed": true
+    }
   },
   "ownership": {
     "enforced": true
