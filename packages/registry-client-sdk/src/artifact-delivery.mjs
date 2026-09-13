@@ -356,6 +356,13 @@ export async function openGitHubReleaseAssetStream(resolvedTarget, {
     ));
   });
 
+  // Integrity verification may intentionally destroy the source stream when a
+  // downstream size/digest gate fails. Attach an immediate observer so the
+  // transport completion rejection cannot become unhandled before the
+  // integrity layer awaits it during cleanup. The original promise remains
+  // rejected and preserves transport failure semantics for callers.
+  completed.catch(() => {});
+
   const abort = () => {
     if (!settled) {
       controller.abort();
