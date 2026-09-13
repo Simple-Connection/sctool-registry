@@ -16,8 +16,8 @@ current:
     interpretation_layer: COMPLETE
     governance_layout: COMPLETE
   improvement_plan: docs/ver1.0.3a1/1.0.3a1_Improvement_plan.yaml
-  current_session: P1
-  current_session_document: docs/ver1.0.3a1/session_document/ver.1.0.3a1_P1_public_artifact_integrity_migration.yaml
+  current_session: null
+  current_session_document: null
   next_session: null
 versions:
   1.0.1:
@@ -122,7 +122,7 @@ versions:
     session_document_root: docs/ver1.0.3a1/session_document
     sessions:
     - id: P1
-      state: ACTIVE
+      state: COMPLETE
       format: MACHINE_SESSION
       document: docs/ver1.0.3a1/session_document/ver.1.0.3a1_P1_public_artifact_integrity_migration.yaml
       planning_state: CONCRETIZED
