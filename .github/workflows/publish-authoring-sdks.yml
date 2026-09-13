@@ -12,12 +12,6 @@ on:
           - sctool-sdk
           - repository-tool-sdk
           - all
-  push:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/publish-authoring-sdks.yml"
-
 permissions:
   contents: read
   packages: write
@@ -28,7 +22,6 @@ concurrency:
 
 jobs:
   publish:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[publish-sctool-sdk-0.2.0]')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact source
