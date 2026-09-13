@@ -76,3 +76,61 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
     need("packages: write" in workflow_text, "SDK_WORKFLOW_PACKAGES_WRITE", errors)
     need("npm pack --json" in workflow_text, "SDK_WORKFLOW_PACK", errors)
     need("dist.integrity" in workflow_text, "SDK_WORKFLOW_REMOTE_INTEGRITY", errors)
+
+    validate_signed_distribution_handoff(ctx, errors)
+
+
+def validate_signed_distribution_handoff(ctx: ValidationContext, errors: list[str]) -> None:
+    path = "docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml"
+    contract = ctx.load(path)
+    scan_machine(contract, path, errors)
+
+    need(contract.get("contract_id") == "REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1", "SIGNED_HANDOFF_CONTRACT_ID", errors)
+    producer = contract.get("producer", {})
+    need(producer.get("repository") == "Simple-Connection/sctool-registry", "SIGNED_HANDOFF_PRODUCER", errors)
+    need(producer.get("workflow") == ".github/workflows/pages.yml", "SIGNED_HANDOFF_WORKFLOW", errors)
+    consumer = contract.get("consumer", {})
+    need(consumer.get("repository") == "Simple-Connection/SCTool_Marketplace_Web", "SIGNED_HANDOFF_CONSUMER", errors)
+    need(consumer.get("source_mutation") == "FORBIDDEN", "SIGNED_HANDOFF_CONSUMER_MUTATION", errors)
+    need(consumer.get("resigning") == "FORBIDDEN", "SIGNED_HANDOFF_CONSUMER_RESIGN", errors)
+
+    bundle = contract.get("bundle", {})
+    need(bundle.get("transport") == "GITHUB_ACTIONS_ARTIFACT_V4", "SIGNED_HANDOFF_TRANSPORT", errors)
+    need(bundle.get("action") == "actions/upload-artifact@v4", "SIGNED_HANDOFF_ACTION", errors)
+    need(bundle.get("name_format") == "registry-signed-distribution-{revision}", "SIGNED_HANDOFF_ARTIFACT_NAME", errors)
+    need(bundle.get("file_set") == "EXACT", "SIGNED_HANDOFF_FILE_SET", errors)
+    need(bundle.get("unexpected_files") == "FORBIDDEN", "SIGNED_HANDOFF_UNEXPECTED_FILES", errors)
+    need(bundle.get("byte_transformation") == "FORBIDDEN", "SIGNED_HANDOFF_BYTE_TRANSFORM", errors)
+    files = bundle.get("files", {})
+    need(files.get("trust", {}).get("path") == "trust.json", "SIGNED_HANDOFF_TRUST_PATH", errors)
+    need(files.get("head", {}).get("path") == "registry-head.json", "SIGNED_HANDOFF_HEAD_PATH", errors)
+    need(files.get("snapshot", {}).get("path_format") == "snapshots/{revision}.json", "SIGNED_HANDOFF_SNAPSHOT_PATH", errors)
+
+    identity = contract.get("identity", {})
+    need(identity.get("producer_run_id", {}).get("selection") == "EXACT", "SIGNED_HANDOFF_RUN_SELECTION", errors)
+    need(identity.get("artifact_id", {}).get("selection") == "EXACT", "SIGNED_HANDOFF_ARTIFACT_SELECTION", errors)
+    need(identity.get("artifact_digest", {}).get("source") == "ACTIONS_UPLOAD_ARTIFACT_OUTPUT", "SIGNED_HANDOFF_DIGEST_SOURCE", errors)
+    need(identity.get("mutable_latest_resolution") == "FORBIDDEN", "SIGNED_HANDOFF_MUTABLE_LATEST", errors)
+    need(identity.get("name_only_resolution_without_run") == "FORBIDDEN", "SIGNED_HANDOFF_NAME_ONLY", errors)
+
+    evidence = contract.get("evidence", {})
+    schema_path = evidence.get("schema")
+    need(schema_path == "schemas/registry-distribution-handoff.schema.json", "SIGNED_HANDOFF_EVIDENCE_SCHEMA", errors)
+    if isinstance(schema_path, str):
+        need((ctx.root / schema_path).is_file(), "SIGNED_HANDOFF_EVIDENCE_SCHEMA_MISSING", errors)
+    need(evidence.get("artifact_name_format") == "registry-signed-distribution-handoff-{revision}", "SIGNED_HANDOFF_EVIDENCE_ARTIFACT", errors)
+
+    hosting = contract.get("hosting", {})
+    need(hosting.get("target_repository") == "Simple-Connection/SCTool_Marketplace_Web", "SIGNED_HANDOFF_HOST_TARGET", errors)
+    need(hosting.get("signing_credentials_in_consumer") == "FORBIDDEN", "SIGNED_HANDOFF_CONSUMER_KEYS", errors)
+    need(hosting.get("signed_bytes_rewrite") == "FORBIDDEN", "SIGNED_HANDOFF_REWRITE", errors)
+
+    cutover = contract.get("cutover", {})
+    need(cutover.get("registry_pages_workflow_removal") == "BLOCKED", "SIGNED_HANDOFF_EARLY_WORKFLOW_REMOVAL", errors)
+    need(cutover.get("registry_pages_disable") == "BLOCKED", "SIGNED_HANDOFF_EARLY_PAGES_DISABLE", errors)
+
+    workflow_text = (ctx.root / producer["workflow"]).read_text(encoding="utf-8")
+    bundle_marker = "registry-signed-distribution-" + "$" + "{{ github.sha }}"
+    evidence_marker = "registry-signed-distribution-handoff-" + "$" + "{{ github.sha }}"
+    need(bundle_marker in workflow_text, "SIGNED_HANDOFF_WORKFLOW_BUNDLE", errors)
+    need(evidence_marker in workflow_text, "SIGNED_HANDOFF_WORKFLOW_EVIDENCE", errors)
