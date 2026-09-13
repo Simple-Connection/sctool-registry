@@ -25,6 +25,7 @@ baseline:
 target:
   package_schema_version: 3.0.0
   submission_schema_version: 2.0.0
+  artifact_delivery_contract_version: 2.0.0
   origin_locator: EXACT_GITHUB_RELEASE_ASSET_IDENTITY
   cache_locator: OPTIONAL_EXACT_GITHUB_RELEASE_ASSET_IDENTITY
   historical_delivery: ORIGIN_ONLY
@@ -49,6 +50,10 @@ boundary:
   - SIGNED_REGISTRY_TRUST
   - NO_PUBLISHER_CRAWLING
   - NO_MUTABLE_LATEST
+  defer:
+  - CACHE_RELEASE_MUTATION_AUTOMATION
+  - REGISTRY_INTAKE_SERVICE
+  - AUTHORING_SDK_PUBLISH_COMMAND
   forbid:
   - HISTORICAL_CACHE_REQUIRED
   - CACHE_AS_PROVENANCE_AUTHORITY
@@ -67,6 +72,7 @@ work_units:
   - PACKAGE_SCHEMA_V3
   - SUBMISSION_SCHEMA_V2
   - POLICY_BOUNDED_CACHE_RULES
+  - ARTIFACT_DELIVERY_V2
 - id: P2-W2
   state: PLANNED
   purpose: DESCRIPTOR_RESOLUTION_TRANSITION
