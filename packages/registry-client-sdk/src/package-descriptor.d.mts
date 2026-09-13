@@ -1,6 +1,6 @@
 export declare const PACKAGE_DESCRIPTOR_SCHEMA_VERSION: "2.0.0";
 export declare const PACKAGE_DESCRIPTOR_DELIVERY_TYPE: "github-release-asset";
-export declare const PACKAGE_DESCRIPTOR_ACCESS_CONTRACT: "registry-access-v1";
+export declare const PACKAGE_DESCRIPTOR_ACCESS_CONTRACT: "registry-public-integrity-v1";
 export declare const PACKAGE_DESCRIPTOR_ARTIFACT_REPOSITORY: "Simple-Connection/sctool-artifacts";
 
 export type RegistrySourceVisibility = "public" | "private" | "undisclosed";
@@ -22,7 +22,7 @@ export interface RegistryArtifactContent {
 }
 
 export interface RegistryArtifactDeliveryAccess {
-  readonly contract: "registry-access-v1";
+  readonly contract: "registry-public-integrity-v1";
 }
 
 export interface RegistryGitHubReleaseAssetLocator {
