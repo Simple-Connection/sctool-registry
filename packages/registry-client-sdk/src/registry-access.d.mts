@@ -3,7 +3,6 @@ export type RegistryAccessState =
   | "gh-unavailable"
   | "unauthenticated"
   | "identity-unresolved"
-  | "access-denied"
   | "network-unavailable"
   | "configuration-error";
 
@@ -36,7 +35,6 @@ export type RegistryCommandRunner = (request: RegistryCommandRequest) => Promise
 export interface CheckRegistryAccessOptions {
   readonly runner?: RegistryCommandRunner;
   readonly environment?: Readonly<Record<string, string | undefined>>;
-  readonly artifactRepository?: string;
   readonly timeoutMs?: number;
 }
 
@@ -61,7 +59,6 @@ export type GitHubExecFile = (
 export interface CheckRegistryAccessWithGitHubCliOptions {
   readonly execFileImpl?: GitHubExecFile;
   readonly environment?: Readonly<Record<string, string | undefined>>;
-  readonly artifactRepository?: string;
   readonly timeoutMs?: number;
 }
 
