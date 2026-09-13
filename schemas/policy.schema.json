@@ -99,7 +99,8 @@
         "access",
         "anonymousDownloadAllowed",
         "gitHistoryStorageAllowed",
-        "defaultReleaseTagPattern"
+        "defaultReleaseTagPattern",
+        "custody"
       ],
       "properties": {
         "access": {
@@ -150,6 +151,50 @@
         },
         "defaultReleaseTagPattern": {
           "const": "sctool/{packageId}/v{version}"
+        },
+        "custody": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "longTermOwner",
+            "originLocator",
+            "centralCacheRole",
+            "cacheRepository",
+            "currentRetrieval",
+            "historicalRetrieval",
+            "unavailableState",
+            "redistributionConsent",
+            "shortRotationOverlapAllowed"
+          ],
+          "properties": {
+            "longTermOwner": {
+              "const": "publisher"
+            },
+            "originLocator": {
+              "const": "required"
+            },
+            "centralCacheRole": {
+              "const": "current-default-channel-only"
+            },
+            "cacheRepository": {
+              "const": "Simple-Connection/sctool-artifacts"
+            },
+            "currentRetrieval": {
+              "const": "cache-preferred-origin-fallback"
+            },
+            "historicalRetrieval": {
+              "const": "origin-only"
+            },
+            "unavailableState": {
+              "const": "ARTIFACT_UNAVAILABLE"
+            },
+            "redistributionConsent": {
+              "const": "signed-required"
+            },
+            "shortRotationOverlapAllowed": {
+              "const": true
+            }
+          }
         }
       }
     },
