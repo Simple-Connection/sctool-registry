@@ -48,9 +48,12 @@ export interface VerifiedUpdateCandidate {
   }>;
   readonly delivery: Readonly<{
     type: "github-release-asset";
+    source: "cache" | "origin";
     repository: string;
+    releaseId: number;
     assetId: number;
-    expectedTag: string;
+    backendTag: string | null;
+    cacheFallbackUsed: boolean;
   }>;
   readonly publishedAt: string;
   readonly contract: Readonly<{
