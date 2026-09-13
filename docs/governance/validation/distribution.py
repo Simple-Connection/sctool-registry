@@ -109,7 +109,7 @@ def validate_signed_distribution_handoff(ctx: ValidationContext, errors: list[st
     identity = contract.get("identity", {})
     need(identity.get("producer_run_id", {}).get("selection") == "EXACT", "SIGNED_HANDOFF_RUN_SELECTION", errors)
     need(identity.get("artifact_id", {}).get("selection") == "EXACT", "SIGNED_HANDOFF_ARTIFACT_SELECTION", errors)
-    need(identity.get("artifact_digest", {}).get("source") == "ACTIONS_UPLOAD_ARTIFACT_OUTPUT", "SIGNED_HANDOFF_DIGEST_SOURCE", errors)
+    need(identity.get("artifact_digest", {}).get("source") == "ACTIONS_UPLOAD_ARTIFACT_OUTPUT_NORMALIZED_SHA256", "SIGNED_HANDOFF_DIGEST_SOURCE", errors)
     need(identity.get("mutable_latest_resolution") == "FORBIDDEN", "SIGNED_HANDOFF_MUTABLE_LATEST", errors)
     need(identity.get("name_only_resolution_without_run") == "FORBIDDEN", "SIGNED_HANDOFF_NAME_ONLY", errors)
 
