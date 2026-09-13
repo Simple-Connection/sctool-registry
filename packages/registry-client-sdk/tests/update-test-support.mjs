@@ -45,7 +45,7 @@ export function makeTarget(overrides = {}) {
     },
     delivery: {
       type: "github-release-asset",
-      access: { contract: "registry-access-v1" },
+      access: { contract: "registry-public-integrity-v1" },
       locator: {
         repository: "Simple-Connection/sctool-artifacts",
         assetId: 101,
@@ -85,67 +85,64 @@ export function observation(installedVersion, overrides = {}) {
   };
 }
 
+function jsonResponse(payload, status = 200) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    body: null,
+    async json() {
+      return payload;
+    },
+  };
+}
+
+function binaryResponse(chunks, status = 200) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    body: Readable.toWeb(Readable.from(chunks)),
+    async json() {
+      throw new Error("binary response has no JSON body");
+    },
+  };
+}
+
 export function createRetrievalHarness(target = makeTarget()) {
   const counters = {
     textRequests: 0,
     releaseQueries: 0,
     assetStreams: 0,
   };
+  const requests = [];
 
-  const runner = async ({ args }) => {
+  const fetchImpl = async (url, init = {}) => {
     counters.textRequests += 1;
-    if (args[0] === "--version") {
-      return { kind: "completed", exitCode: 0, stdout: "gh version 2", stderr: "" };
-    }
-    if (args[0] === "auth") {
-      return { kind: "completed", exitCode: 0, stdout: "", stderr: "" };
-    }
-    if (args[1] === "user") {
-      return { kind: "completed", exitCode: 0, stdout: "tester", stderr: "" };
-    }
-    if (
-      args[1] === "repos/Simple-Connection/sctool-artifacts"
-      && args[2] === "--silent"
-    ) {
-      return { kind: "completed", exitCode: 0, stdout: "", stderr: "" };
-    }
-    if (args[1]?.includes("/releases/tags/")) {
-      counters.releaseQueries += 1;
-      return {
-        kind: "completed",
-        exitCode: 0,
-        stdout: JSON.stringify({
-          id: 55,
-          tag_name: `sctool/${target.packageId}/v${target.version}`,
-          draft: false,
-          assets: [{
-            id: target.delivery.locator.assetId,
-            name: target.content.filename,
-            size: target.content.size,
-          }],
-        }),
-        stderr: "",
-      };
-    }
-    throw new Error(`unexpected command ${JSON.stringify(args)}`);
-  };
+    requests.push({ url: String(url), init });
 
-  const streamRunner = async () => {
-    counters.assetStreams += 1;
-    return {
-      kind: "started",
-      stdout: Readable.from([
+    if (String(url).includes("/releases/tags/")) {
+      counters.releaseQueries += 1;
+      return jsonResponse({
+        id: 55,
+        tag_name: `sctool/${target.packageId}/v${target.version}`,
+        draft: false,
+        assets: [{
+          id: target.delivery.locator.assetId,
+          name: target.content.filename,
+          size: target.content.size,
+        }],
+      });
+    }
+
+    if (String(url).endsWith(`/releases/assets/${target.delivery.locator.assetId}`)) {
+      counters.assetStreams += 1;
+      return binaryResponse([
         artifactBytes.subarray(0, 4),
         artifactBytes.subarray(4),
-      ]),
-      completion: Promise.resolve({
-        kind: "completed",
-        exitCode: 0,
-        stderr: "",
-      }),
-      abort: () => true,
-    };
+      ]);
+    }
+
+    throw new Error(`unexpected public fetch ${url}`);
   };
 
-  return { counters, runner, streamRunner };
+  return { counters, requests, fetchImpl };
 }
