@@ -74,10 +74,17 @@ def package_consistency_errors(
             if isinstance(version, str) and version not in versions:
                 errors.append(f"{label}:channels.{channel}: version {version!r} does not exist in versions")
 
-    artifact_policy = policy.get("artifact", {}).get("access", {})
-    expected_backend = artifact_policy.get("backend")
-    expected_repository = artifact_policy.get("repository")
-    expected_access_contract = artifact_policy.get("contract")
+    artifact_policy = policy.get("artifact", {})
+    access_policy = artifact_policy.get("access", {})
+    custody_policy = artifact_policy.get("custody", {})
+    expected_backend = access_policy.get("backend")
+    expected_access_contract = access_policy.get("contract")
+    expected_cache_repository = custody_policy.get("cacheRepository") or access_policy.get("repository")
+    current_version = (
+        channels.get(default_channel)
+        if isinstance(channels, dict) and isinstance(default_channel, str)
+        else None
+    )
 
     if isinstance(versions, dict):
         for version, version_entry in sorted(versions.items()):
@@ -122,17 +129,27 @@ def package_consistency_errors(
                             f"must match Registry policy contract {expected_access_contract!r}"
                         )
 
-                locator = delivery.get("locator", {})
-                if isinstance(locator, dict):
-                    repository = locator.get("repository")
-                    if expected_repository is not None and repository != expected_repository:
+                cache = delivery.get("cache")
+                if isinstance(cache, dict):
+                    if version != current_version:
                         errors.append(
-                            f"{label}:versions.{version}.artifacts.{target_key}.delivery.locator.repository: "
-                            f"must match Registry policy repository {expected_repository!r}"
+                            f"{label}:versions.{version}.artifacts.{target_key}.delivery.cache: "
+                            "central cache is allowed only for the current default-channel version"
+                        )
+                    repository = cache.get("repository")
+                    if expected_cache_repository is not None and repository != expected_cache_repository:
+                        errors.append(
+                            f"{label}:versions.{version}.artifacts.{target_key}.delivery.cache.repository: "
+                            f"must match Registry cache repository {expected_cache_repository!r}"
+                        )
+                    publication = artifact.get("publication", {})
+                    if not isinstance(publication, dict) or publication.get("publicRedistribution") is not True:
+                        errors.append(
+                            f"{label}:versions.{version}.artifacts.{target_key}.publication.publicRedistribution: "
+                            "public cache requires signed redistribution consent"
                         )
 
     return errors
-
 
 def validate_package_consistency(
     payload: dict[str, Any],
