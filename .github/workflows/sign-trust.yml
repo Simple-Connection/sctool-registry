@@ -32,7 +32,8 @@ jobs:
 
       - name: Install PTSIP and delivery validation dependencies
         run: |
-          python -m pip install "PTSIP==0.3.6"
+          python -m pip install "PTSIP>=0.3.7"
+          python -c "import importlib.metadata as metadata; print('PTSIP resolved version:', metadata.version('PTSIP'))"
           python -m pip install -r tools/requirements.txt
 
       - name: Validate repository before trust mutation
@@ -40,10 +41,14 @@ jobs:
         run: |
           validation="$RUNNER_TEMP/ptsip-validation.json"
           evidence="$RUNNER_TEMP/sctool-registry-product-artifact.json"
+          dependency_evidence="$RUNNER_TEMP/sctool-registry-dependency-evidence.json"
           revision="$(git rev-parse HEAD)"
           tracked="$(python -c "from ptsip.repository.snapshot import capture_snapshot; print(capture_snapshot('.').tracked_content_fingerprint)")"
 
-          ptsip validate . --json > "$validation"
+          if ! ptsip validate . --json > "$validation"; then
+            cat "$validation"
+            exit 1
+          fi
           python tools/generate-ptsip-artifact-evidence.py \
             --validation "$validation" \
             --out "$evidence" \
@@ -51,10 +56,21 @@ jobs:
             --revision "$revision" \
             --tracked-content-sha256 "$tracked" \
             --component registry-catalog \
+            --component registry-client-sdk \
+            --component sctool-authoring-sdk \
+            --component repository-tool-authoring-sdk \
             --component registry-contracts \
             --component product-documentation
 
-          ptsip conform . --artifact-evidence "$evidence"
+          python docs/governance/generate-node-platform-evidence.py \
+            --validation "$validation" \
+            --out "$dependency_evidence" \
+            --repository "$GITHUB_REPOSITORY" \
+            --revision "$revision"
+
+          ptsip conform . \
+            --artifact-evidence "$evidence" \
+            --external-evidence "$dependency_evidence"
           python tools/validate-registry.py
 
       - name: Decode unsigned trust input
