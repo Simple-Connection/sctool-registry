@@ -2,7 +2,6 @@ import { createHash } from "node:crypto";
 import { Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
-import { deriveExpectedReleaseTag } from "./artifact-delivery.mjs";
 import { allocateArtifactStagingResource } from "./artifact-staging.mjs";
 
 const SHA256_RE = /^[a-f0-9]{64}$/;
@@ -40,20 +39,28 @@ function requireBinding(resolvedTarget, retrieval) {
   if (!retrieval || typeof retrieval !== "object") {
     throw new RegistryArtifactIntegrityError("invalid-retrieval", "stream retrieval result is required");
   }
-  const expectedTag = deriveExpectedReleaseTag(resolvedTarget.packageId, resolvedTarget.version);
-  const expectedRepository = resolvedTarget.delivery?.locator?.repository;
-  const expectedAssetId = resolvedTarget.delivery?.locator?.assetId;
+  const source = retrieval.source;
+  if (source !== "cache" && source !== "origin") {
+    throw new RegistryArtifactIntegrityError("invalid-retrieval-source", "retrieval source must be cache or origin");
+  }
+  const locator = resolvedTarget.delivery?.[source];
+  if (!locator || typeof locator !== "object") {
+    throw new RegistryArtifactIntegrityError("artifact-binding-mismatch", "retrieval source is not present in resolved target", {
+      source,
+    });
+  }
   const checks = [
     ["packageId", resolvedTarget.packageId, retrieval.packageId],
     ["version", resolvedTarget.version, retrieval.version],
     ["targetKey", resolvedTarget.targetKey ?? null, retrieval.targetKey ?? null],
-    ["repository", expectedRepository, retrieval.repository],
-    ["assetId", expectedAssetId, retrieval.assetId],
-    ["expectedTag", expectedTag, retrieval.expectedTag],
+    ["repository", locator.repository, retrieval.repository],
+    ["releaseId", locator.releaseId, retrieval.releaseId],
+    ["assetId", locator.assetId, retrieval.assetId],
   ];
   for (const [field, expected, actual] of checks) {
     if (expected !== actual) {
       throw new RegistryArtifactIntegrityError("artifact-binding-mismatch", "retrieved artifact does not match resolved target", {
+        source,
         field,
         expected,
         actual,
@@ -147,10 +154,11 @@ export async function stageAndVerifyRetrievedArtifact(resolvedTarget, retrieval,
       packageId: resolvedTarget.packageId,
       version: resolvedTarget.version,
       targetKey: resolvedTarget.targetKey ?? null,
+      source: retrieval.source,
       repository: retrieval.repository,
-      expectedTag: retrieval.expectedTag,
-      releaseId: retrieval.releaseId ?? null,
+      releaseId: retrieval.releaseId,
       assetId: retrieval.assetId,
+      backendTag: retrieval.backendTag ?? null,
       filename: content.filename,
       size: content.size,
       sha256: content.sha256,
