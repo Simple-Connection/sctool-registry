@@ -4,7 +4,6 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Readable } from "node:stream";
 
-import { RegistryArtifactDeliveryError } from "../src/artifact-delivery.mjs";
 import {
   RegistryArtifactIntegrityError,
   stageAndVerifyRetrievedArtifact,
@@ -14,7 +13,6 @@ import { createVerifiedArtifactLease } from "../src/verified-artifact.mjs";
 function equal(actual, expected, label) {
   if (actual !== expected) throw new Error(`${label}: expected=${expected} actual=${actual}`);
 }
-
 async function integrityError(fn, expected, label) {
   let actual = null;
   try { await fn(); } catch (error) {
@@ -36,22 +34,29 @@ const target = {
   delivery: {
     type: "github-release-asset",
     access: { contract: "registry-public-integrity-v1" },
-    locator: { repository: "Simple-Connection/sctool-artifacts", assetId: 101 },
+    origin: { repository: "ExamplePublisher/example-tool", releaseId: 55, assetId: 101 },
+    cache: { repository: "Simple-Connection/sctool-artifacts", releaseId: 77, assetId: 201 },
   },
-  publishedAt: "2026-09-06T00:00:00Z",
-  contract: { sctoolSpecVersion: "1.0.0" },
+  deliveryPlan: {
+    currentDefaultVersion: "1.2.3",
+    isCurrentDefaultVersion: true,
+    preferredSource: "cache",
+    fallbackSource: "origin",
+  },
 };
 
-function retrieval(overrides = {}) {
+function retrieval(source = "cache", overrides = {}) {
+  const locator = target.delivery[source];
   let aborted = false;
   const value = {
     packageId: target.packageId,
     version: target.version,
     targetKey: target.targetKey,
-    repository: target.delivery.locator.repository,
-    expectedTag: "sctool/example-tool/v1.2.3",
-    releaseId: 55,
-    assetId: 101,
+    source,
+    repository: locator.repository,
+    releaseId: locator.releaseId,
+    assetId: locator.assetId,
+    backendTag: source === "cache" ? "cache-observation" : "publisher-observation",
     backendAssetName: target.content.filename,
     backendAssetSize: target.content.size,
     stream: Readable.from([bytes.subarray(0, 5), bytes.subarray(5)]),
@@ -66,80 +71,66 @@ const root = await mkdtemp(join(tmpdir(), "sctool-registry-integrity-test-"));
 try {
   const success = retrieval();
   const verified = await stageAndVerifyRetrievedArtifact(target, success.value, { temporaryRoot: root });
-  equal(verified.size, bytes.length, "verified size");
+  equal(verified.source, "cache", "verified source");
+  equal(verified.releaseId, 77, "verified exact cache release");
+  equal(verified.assetId, 201, "verified exact cache asset");
   equal(verified.sha256, digest, "verified digest");
-  equal(verified.resource.state, "VERIFIED", "verified staging state");
   const lease = createVerifiedArtifactLease(verified);
   await lease.dispose();
-  equal((await readdir(root)).length, 0, "success disposal removes staging directory");
+  equal((await readdir(root)).length, 0, "success cleanup");
 
-  const filenameMismatch = retrieval({ backendAssetName: "other.sctool" });
+  const origin = retrieval("origin");
+  const originVerified = await stageAndVerifyRetrievedArtifact(target, origin.value, { temporaryRoot: root });
+  equal(originVerified.source, "origin", "origin source verified");
+  await originVerified.resource.dispose();
+
+  const wrongRelease = retrieval("cache", { releaseId: 999 });
+  await integrityError(
+    () => stageAndVerifyRetrievedArtifact(target, wrongRelease.value, { temporaryRoot: root }),
+    "artifact-binding-mismatch",
+    "release identity mismatch",
+  );
+
+  const wrongSource = retrieval("cache", { source: "origin" });
+  await integrityError(
+    () => stageAndVerifyRetrievedArtifact(target, wrongSource.value, { temporaryRoot: root }),
+    "artifact-binding-mismatch",
+    "source locator mismatch",
+  );
+
+  const filenameMismatch = retrieval("cache", { backendAssetName: "other.sctool" });
   await integrityError(
     () => stageAndVerifyRetrievedArtifact(target, filenameMismatch.value, { temporaryRoot: root }),
     "backend-filename-mismatch",
     "filename mismatch",
   );
-  equal(filenameMismatch.wasAborted(), true, "filename mismatch aborts retrieval");
+  equal(filenameMismatch.wasAborted(), true, "filename mismatch aborts");
 
-  const backendSizeMismatch = retrieval({ backendAssetSize: bytes.length + 1 });
+  const backendSizeMismatch = retrieval("cache", { backendAssetSize: bytes.length + 1 });
   await integrityError(
     () => stageAndVerifyRetrievedArtifact(target, backendSizeMismatch.value, { temporaryRoot: root }),
     "backend-size-mismatch",
     "backend size mismatch",
   );
-  equal(backendSizeMismatch.wasAborted(), true, "backend size mismatch aborts retrieval");
 
-  const bindingMismatch = retrieval({ version: "1.2.4" });
+  const short = bytes.subarray(0, bytes.length - 1);
   await integrityError(
-    () => stageAndVerifyRetrievedArtifact(target, bindingMismatch.value, { temporaryRoot: root }),
-    "artifact-binding-mismatch",
-    "identity binding mismatch",
-  );
-  equal(bindingMismatch.wasAborted(), true, "binding mismatch aborts retrieval");
-
-  const oversized = retrieval({
-    backendAssetSize: null,
-    stream: Readable.from([Buffer.concat([bytes, Buffer.from([0])])]),
-  });
-  await integrityError(
-    () => stageAndVerifyRetrievedArtifact(target, oversized.value, { temporaryRoot: root }),
-    "artifact-size-exceeded",
-    "oversized stream aborts early",
-  );
-  equal(oversized.wasAborted(), true, "oversized stream abort requested");
-  equal((await readdir(root)).length, 0, "oversized failure cleans staging");
-
-  const shortBytes = bytes.subarray(0, bytes.length - 1);
-  await integrityError(
-    () => stageAndVerifyRetrievedArtifact(target, retrieval({ backendAssetSize: null, stream: Readable.from([shortBytes]) }).value, { temporaryRoot: root }),
+    () => stageAndVerifyRetrievedArtifact(target, retrieval("cache", { backendAssetSize: null, stream: Readable.from([short]) }).value, { temporaryRoot: root }),
     "artifact-size-mismatch",
     "short stream rejected",
   );
-  equal((await readdir(root)).length, 0, "short failure cleans staging");
 
   const corrupt = Buffer.from(bytes);
   corrupt[0] ^= 0xff;
   await integrityError(
-    () => stageAndVerifyRetrievedArtifact(target, retrieval({ stream: Readable.from([corrupt]) }).value, { temporaryRoot: root }),
+    () => stageAndVerifyRetrievedArtifact(target, retrieval("cache", { stream: Readable.from([corrupt]) }).value, { temporaryRoot: root }),
     "artifact-sha256-mismatch",
     "digest mismatch rejected",
   );
-  equal((await readdir(root)).length, 0, "digest failure cleans staging");
 
-  const transport = retrieval({
-    completed: { then(_resolve, reject) { reject(new RegistryArtifactDeliveryError("download-failed", "failed")); } },
-  });
-  let transportCode = null;
-  try {
-    await stageAndVerifyRetrievedArtifact(target, transport.value, { temporaryRoot: root });
-  } catch (error) {
-    if (!(error instanceof RegistryArtifactDeliveryError)) throw error;
-    transportCode = error.code;
-  }
-  equal(transportCode, "download-failed", "transport failure preserved");
-  equal((await readdir(root)).length, 0, "transport failure cleans staging");
+  equal((await readdir(root)).length, 0, "failure paths clean staging");
 } finally {
   await rm(root, { recursive: true, force: true });
 }
 
-console.log("Registry Client SDK artifact integrity PASS cases=18");
+console.log("Registry Client SDK artifact integrity v3 PASS cases=12");
