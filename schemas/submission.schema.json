@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "SCTool Registry Submission v1",
+  "title": "SCTool Registry Submission v2",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -9,6 +9,8 @@
     "package",
     "target",
     "artifact",
+    "origin",
+    "publication",
     "contract",
     "publisher",
     "proof"
@@ -18,7 +20,7 @@
       "type": "string"
     },
     "schemaVersion": {
-      "const": "1.0.0"
+      "const": "2.0.0"
     },
     "submission": {
       "type": "object",
@@ -148,11 +150,56 @@
           "const": "ed25519"
         },
         "scope": {
-          "const": "sctool-submission-v1"
+          "const": "sctool-submission-v2"
         },
         "signature": {
           "type": "string",
           "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+        }
+      }
+    },
+    "origin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "repository",
+        "releaseId",
+        "assetId"
+      ],
+      "properties": {
+        "type": {
+          "const": "github-release-asset"
+        },
+        "repository": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})/[A-Za-z0-9._-]{1,100}$"
+        },
+        "releaseId": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "assetId": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "marketplace",
+        "publicRedistribution"
+      ],
+      "properties": {
+        "marketplace": {
+          "const": true
+        },
+        "publicRedistribution": {
+          "type": "boolean"
         }
       }
     }
