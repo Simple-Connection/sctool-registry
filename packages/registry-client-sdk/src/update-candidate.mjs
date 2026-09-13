@@ -3,6 +3,7 @@ import {
   DEFAULT_REGISTRY_GITHUB_TIMEOUT_MS,
 } from "./registry-access.mjs";
 import {
+  RegistryArtifactDeliveryError,
   openGitHubReleaseAssetStream,
 } from "./artifact-delivery.mjs";
 import { stageAndVerifyRetrievedArtifact } from "./artifact-integrity.mjs";
@@ -200,9 +201,14 @@ function buildCandidate(resolvedTarget, verifiedRecord, lease) {
     }),
     delivery: freezeCopy({
       type: resolvedTarget.delivery.type,
+      source: verifiedRecord.source,
       repository: verifiedRecord.repository,
+      releaseId: verifiedRecord.releaseId,
       assetId: verifiedRecord.assetId,
-      expectedTag: verifiedRecord.expectedTag,
+      backendTag: verifiedRecord.backendTag,
+      cacheFallbackUsed:
+        resolvedTarget.deliveryPlan?.preferredSource === "cache"
+        && verifiedRecord.source === "origin",
     }),
     publishedAt: resolvedTarget.publishedAt,
     contract: freezeCopy({
@@ -217,19 +223,61 @@ async function retrieveEligibleCandidate(resolvedTarget, {
   artifactRepository,
   timeoutMs,
 }) {
-  const retrieval = await openGitHubReleaseAssetStream(resolvedTarget, {
-    fetchImpl,
-    artifactRepository,
-    timeoutMs,
-  });
-  const verifiedRecord = await stageAndVerifyRetrievedArtifact(resolvedTarget, retrieval);
-  const lease = createVerifiedArtifactLease(verifiedRecord);
-  try {
-    return buildCandidate(resolvedTarget, verifiedRecord, lease);
-  } catch (error) {
-    try { await lease.dispose(); } catch {}
-    throw error;
+  const preferredSource = resolvedTarget.deliveryPlan?.preferredSource ?? "origin";
+  const fallbackSource = resolvedTarget.deliveryPlan?.fallbackSource ?? null;
+  const sources = preferredSource === "cache" && fallbackSource === "origin"
+    ? ["cache", "origin"]
+    : [preferredSource];
+
+  let cacheFailure = null;
+  for (const source of sources) {
+    let verifiedRecord;
+    try {
+      const retrieval = await openGitHubReleaseAssetStream(resolvedTarget, {
+        source,
+        fetchImpl,
+        artifactRepository,
+        timeoutMs,
+      });
+      verifiedRecord = await stageAndVerifyRetrievedArtifact(resolvedTarget, retrieval);
+    } catch (error) {
+      if (source === "cache" && fallbackSource === "origin") {
+        cacheFailure = error;
+        continue;
+      }
+      throw new RegistryArtifactDeliveryError(
+        "ARTIFACT_UNAVAILABLE",
+        "the exact accepted artifact is unavailable from all allowed delivery locations",
+        {
+          packageId: resolvedTarget.packageId,
+          version: resolvedTarget.version,
+          targetKey: resolvedTarget.targetKey,
+          failedSource: source,
+          causeCode: error?.code ?? null,
+          cacheCauseCode: cacheFailure?.code ?? null,
+        },
+      );
+    }
+
+    const lease = createVerifiedArtifactLease(verifiedRecord);
+    try {
+      return buildCandidate(resolvedTarget, verifiedRecord, lease);
+    } catch (error) {
+      try { await lease.dispose(); } catch {}
+      throw error;
+    }
   }
+
+  throw new RegistryArtifactDeliveryError(
+    "ARTIFACT_UNAVAILABLE",
+    "the exact accepted artifact is unavailable from all allowed delivery locations",
+    {
+      packageId: resolvedTarget.packageId,
+      version: resolvedTarget.version,
+      targetKey: resolvedTarget.targetKey,
+      cacheCauseCode: cacheFailure?.code ?? null,
+    },
+  );
 }
 
 export async function resolveUpdateCandidate(resolvedTarget, installationObservation, {
