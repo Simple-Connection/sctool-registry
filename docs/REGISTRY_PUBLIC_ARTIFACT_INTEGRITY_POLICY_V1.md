@@ -1,8 +1,14 @@
 # SCTool Public Artifact Integrity Policy v1
 
-Status: **POLICY DECIDED — IMPLEMENTATION NOT YET AUTHORIZED**
+Status: **POLICY DECIDED — IMPLEMENTATION ACTIVE ON `dev/1.0.3a1`**
 
 This document fixes the approved security model for the Simple-Connection central SCTool artifact cache.
+
+`access_contract_id: registry-public-integrity-v1`
+
+`repository_visibility: PUBLIC`
+
+`artifact_trust_model: FAIL_CLOSED_INTEGRITY`
 
 Canonical cache repository:
 
