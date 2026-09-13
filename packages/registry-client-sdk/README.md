@@ -31,7 +31,7 @@ The Registry Client SDK owns the consumer-side implementation of Registry contra
 @simple-connection/sctool-registry-client-sdk/update-candidate
 ```
 
-`package-descriptor` validates the current package descriptor contract (`schemaVersion = 2.0.0`) and the Registry policy consistency needed by a consumer. Validation is fail-closed and returns an immutable validated descriptor or structured issues.
+`package-descriptor` validates the current package descriptor contract (`schemaVersion = 3.0.0`) and the Registry policy consistency needed by a consumer. Validation is fail-closed and returns an immutable validated descriptor or structured issues.
 
 `resolution` deterministically resolves:
 
@@ -39,7 +39,8 @@ The Registry Client SDK owns the consumer-side implementation of Registry contra
 defaultChannel or explicit channel
 -> concrete version
 -> exact platform-arch target
--> content + delivery metadata
+-> current-default classification
+-> exact origin + optional cache delivery plan
 ```
 
 No version or target fallback is performed.
@@ -50,7 +51,7 @@ Current artifact access contract:
 registry-public-integrity-v1
 ```
 
-The public cache is transport only. Filename, byte size, SHA-256, publisher evidence, and signed Registry state remain the trust boundary.
+The public cache is transport only. Publisher origin is always retained. Current default-channel artifacts may prefer the bounded cache and fall back to the exact origin; historical and alternate-channel artifacts use origin only. Filename, byte size, SHA-256, publisher evidence, and signed Registry state remain the trust boundary.
 
 ## P2 boundary
 
@@ -78,7 +79,9 @@ The SDK does not retain or mutate that product state. It compares `installedVers
 ```text
 resolved version newer
 -> UPDATE_AVAILABLE
--> public exact-asset retrieval
+-> current: exact cache retrieval when present
+-> cache failure: exact publisher-origin fallback
+-> historical/alternate: exact publisher-origin retrieval
 -> SDK-internal staging
 -> integrity verification
 -> VerifiedUpdateCandidate
@@ -101,7 +104,7 @@ Build metadata is ignored for precedence. Prerelease ordering follows semantic-v
 The file-backed verification pipeline is:
 
 ```text
-public exact-asset stream
+exact cache or publisher-origin stream
 -> SDK-internal OS temporary staging
 -> single-pass byte count + SHA-256
 -> filename/backend-size/downloaded-size/digest verification
@@ -110,7 +113,7 @@ public exact-asset stream
 -> VerifiedUpdateCandidate
 ```
 
-The staging filename is SDK-internal and never derived from `content.filename`. Partial or failed staging resources are disposed. The public candidate exposes no raw path or write access.
+The staging filename is SDK-internal and never derived from `content.filename`. Partial or failed staging resources are disposed. If every allowed exact location fails retrieval or integrity verification, delivery fails closed as `ARTIFACT_UNAVAILABLE`. The public candidate exposes no raw path or write access.
 
 A `VerifiedUpdateCandidate` deliberately does not contain:
 
@@ -145,4 +148,4 @@ This SDK must not implement:
 - renderer/UI behavior;
 - production Root trust activation.
 
-The package is currently marked `private` to prevent accidental publication before an explicit SDK distribution mechanism is approved.
+The package is not marked npm-private. Publication remains governed by the Registry Client SDK distribution workflow and restricted GitHub Packages configuration.
