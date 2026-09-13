@@ -11,7 +11,6 @@ import {
 function equal(actual, expected, label) {
   if (actual !== expected) throw new Error(`${label}: expected=${expected} actual=${actual}`);
 }
-
 async function verifiedError(fn, expected, label) {
   let actual = null;
   try { await fn(); } catch (error) {
@@ -20,7 +19,6 @@ async function verifiedError(fn, expected, label) {
   }
   equal(actual, expected, label);
 }
-
 async function readAll(stream) {
   const chunks = [];
   for await (const chunk of stream) chunks.push(Buffer.from(chunk));
@@ -34,16 +32,20 @@ const target = {
   version: "1.2.3",
   targetKey: "win-x64",
   content: { filename: "example.sctool", size: bytes.length, sha256: digest },
-  delivery: { locator: { repository: "Simple-Connection/sctool-artifacts", assetId: 101 } },
+  delivery: {
+    cache: { repository: "Simple-Connection/sctool-artifacts", releaseId: 77, assetId: 201 },
+    origin: { repository: "ExamplePublisher/example-tool", releaseId: 55, assetId: 101 },
+  },
 };
 const retrieval = {
   packageId: "example-tool",
   version: "1.2.3",
   targetKey: "win-x64",
+  source: "cache",
   repository: "Simple-Connection/sctool-artifacts",
-  expectedTag: "sctool/example-tool/v1.2.3",
-  releaseId: 55,
-  assetId: 101,
+  releaseId: 77,
+  assetId: 201,
+  backendTag: "cache-tag",
   backendAssetName: "example.sctool",
   backendAssetSize: bytes.length,
   stream: Readable.from([bytes]),
