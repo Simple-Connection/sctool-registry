@@ -2,6 +2,8 @@
 
 `contract_version: 2.0.0`
 
+> **Migration notice:** the private-artifact authorization model in this document is no longer the approved target architecture. `docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md` fixes the approved target as a public `Simple-Connection/sctool-artifacts` cache with trust based on publisher evidence, signed Registry metadata, exact byte size, and SHA-256 verification. This v2 document remains a reference for the currently implemented private-access behavior until a separately approved successor migration activates the public-integrity contract coherently.
+
 This document is the canonical SCTool Registry admission and artifact-distribution contract after v2 activation.
 It supersedes `docs/REGISTRY_CONTRACT_V1.md` for current Registry admission/distribution behavior while retaining v1 as historical documentation.
 
