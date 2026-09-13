@@ -1,4 +1,4 @@
-export declare const PACKAGE_DESCRIPTOR_SCHEMA_VERSION: "2.0.0";
+export declare const PACKAGE_DESCRIPTOR_SCHEMA_VERSION: "3.0.0";
 export declare const PACKAGE_DESCRIPTOR_DELIVERY_TYPE: "github-release-asset";
 export declare const PACKAGE_DESCRIPTOR_ACCESS_CONTRACT: "registry-public-integrity-v1";
 export declare const PACKAGE_DESCRIPTOR_ARTIFACT_REPOSITORY: "Simple-Connection/sctool-artifacts";
@@ -26,14 +26,21 @@ export interface RegistryArtifactDeliveryAccess {
 }
 
 export interface RegistryGitHubReleaseAssetLocator {
-  readonly repository: "Simple-Connection/sctool-artifacts";
+  readonly repository: string;
+  readonly releaseId: number;
   readonly assetId: number;
 }
 
 export interface RegistryArtifactDelivery {
   readonly type: "github-release-asset";
   readonly access: RegistryArtifactDeliveryAccess;
-  readonly locator: RegistryGitHubReleaseAssetLocator;
+  readonly origin: RegistryGitHubReleaseAssetLocator;
+  readonly cache?: RegistryGitHubReleaseAssetLocator;
+}
+
+export interface RegistryArtifactPublication {
+  readonly marketplace: true;
+  readonly publicRedistribution: boolean;
 }
 
 export interface RegistryArtifactContract {
@@ -43,7 +50,7 @@ export interface RegistryArtifactContract {
 export interface RegistryArtifactSignature {
   readonly algorithm: "ed25519";
   readonly keyId: string;
-  readonly scope: "sctool-submission-v1";
+  readonly scope: "sctool-submission-v2";
   readonly submissionId: string;
   readonly submittedAt: string;
   readonly sdkVersion: string;
@@ -54,6 +61,7 @@ export interface RegistryPackageArtifact {
   readonly target: RegistryArtifactTarget;
   readonly content: RegistryArtifactContent;
   readonly delivery: RegistryArtifactDelivery;
+  readonly publication: RegistryArtifactPublication;
   readonly publishedAt: string;
   readonly contract: RegistryArtifactContract;
   readonly signature: RegistryArtifactSignature;
@@ -65,7 +73,7 @@ export interface RegistryPackageVersion {
 
 export interface RegistryPackageDescriptor {
   readonly $schema?: string;
-  readonly schemaVersion: "2.0.0";
+  readonly schemaVersion: "3.0.0";
   readonly id: string;
   readonly publisher: string;
   readonly source?: RegistryPackageSource;
