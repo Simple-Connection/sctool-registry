@@ -1,10 +1,8 @@
 import {
   DEFAULT_REGISTRY_ARTIFACT_REPOSITORY,
   DEFAULT_REGISTRY_GITHUB_TIMEOUT_MS,
-  createGitHubCliCommandRunner,
 } from "./registry-access.mjs";
 import {
-  createGitHubCliStreamCommandRunner,
   openGitHubReleaseAssetStream,
 } from "./artifact-delivery.mjs";
 import { stageAndVerifyRetrievedArtifact } from "./artifact-integrity.mjs";
@@ -215,16 +213,12 @@ function buildCandidate(resolvedTarget, verifiedRecord, lease) {
 }
 
 async function retrieveEligibleCandidate(resolvedTarget, {
-  runner,
-  streamRunner,
-  environment,
+  fetchImpl,
   artifactRepository,
   timeoutMs,
 }) {
   const retrieval = await openGitHubReleaseAssetStream(resolvedTarget, {
-    runner,
-    streamRunner,
-    environment,
+    fetchImpl,
     artifactRepository,
     timeoutMs,
   });
@@ -239,9 +233,7 @@ async function retrieveEligibleCandidate(resolvedTarget, {
 }
 
 export async function resolveUpdateCandidate(resolvedTarget, installationObservation, {
-  runner,
-  streamRunner,
-  environment = {},
+  fetchImpl = globalThis.fetch,
   artifactRepository = DEFAULT_REGISTRY_ARTIFACT_REPOSITORY,
   timeoutMs = DEFAULT_REGISTRY_GITHUB_TIMEOUT_MS,
 } = {}) {
@@ -254,17 +246,15 @@ export async function resolveUpdateCandidate(resolvedTarget, installationObserva
     });
   }
 
-  if (typeof runner !== "function" || typeof streamRunner !== "function") {
+  if (typeof fetchImpl !== "function") {
     throw new RegistryUpdateCandidateError(
       "configuration-error",
-      "runner and streamRunner are required only when an update candidate is eligible",
+      "fetchImpl is required only when an update candidate is eligible",
     );
   }
 
   const candidate = await retrieveEligibleCandidate(resolvedTarget, {
-    runner,
-    streamRunner,
-    environment,
+    fetchImpl,
     artifactRepository,
     timeoutMs,
   });
@@ -275,32 +265,12 @@ export async function resolveUpdateCandidate(resolvedTarget, installationObserva
 }
 
 export async function resolveUpdateCandidateWithGitHubCli(resolvedTarget, installationObservation, {
-  execFileImpl,
-  spawnImpl,
-  environment = globalThis.process?.env ?? {},
+  fetchImpl = globalThis.fetch,
   artifactRepository = DEFAULT_REGISTRY_ARTIFACT_REPOSITORY,
   timeoutMs = DEFAULT_REGISTRY_GITHUB_TIMEOUT_MS,
 } = {}) {
-  const eligibility = evaluateUpdateCandidateEligibility(resolvedTarget, installationObservation);
-  if (eligibility.state !== "UPDATE_AVAILABLE") {
-    return Object.freeze({
-      ...eligibility,
-      candidate: null,
-    });
-  }
-
-  const runner = createGitHubCliCommandRunner({ execFileImpl });
-  const streamRunner = createGitHubCliStreamCommandRunner({ spawnImpl });
-  if (!runner || !streamRunner) {
-    throw new RegistryUpdateCandidateError(
-      "configuration-error",
-      "execFileImpl and spawnImpl are required only when an update candidate is eligible",
-    );
-  }
   return resolveUpdateCandidate(resolvedTarget, installationObservation, {
-    runner,
-    streamRunner,
-    environment,
+    fetchImpl,
     artifactRepository,
     timeoutMs,
   });
