@@ -128,7 +128,11 @@ jobs:
             --external-evidence "$dependency_evidence"
 
       - name: Validate registry JSON contracts
-        run: python tools/validate-registry.py
+        run: |
+          python tools/test-delivery-package-schema-v3.py
+          python tools/test-submission-schema-v2.py
+          python tools/artifact-cache-lifecycle.py --self-test
+          python tools/validate-registry.py
 
       - name: Test signed Registry distribution handoff tooling
         run: python tools/test-registry-distribution-handoff.py
