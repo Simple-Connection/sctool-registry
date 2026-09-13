@@ -8,6 +8,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMAS = ROOT / "schemas"
+MARKETPLACE_PROFILE_SCHEMA = ROOT / "packages" / "sctool-sdk" / "schemas" / "marketplace-profile.schema.json"
 FORMAT_CHECKER = FormatChecker()
 
 
@@ -18,8 +19,8 @@ def load_json(path: Path) -> Any:
         raise SystemExit(f"Invalid JSON {path.relative_to(ROOT)}: {exc}") from exc
 
 
-def schema_errors(schema_name: str, payload: Any, label: str) -> list[str]:
-    schema = load_json(SCHEMAS / schema_name)
+def schema_errors_from_path(schema_path: Path, payload: Any, label: str) -> list[str]:
+    schema = load_json(schema_path)
     validator = Draft202012Validator(schema, format_checker=FORMAT_CHECKER)
     errors = sorted(
         validator.iter_errors(payload),
@@ -32,8 +33,18 @@ def schema_errors(schema_name: str, payload: Any, label: str) -> list[str]:
     return rendered
 
 
+def schema_errors(schema_name: str, payload: Any, label: str) -> list[str]:
+    return schema_errors_from_path(SCHEMAS / schema_name, payload, label)
+
+
 def validate(schema_name: str, payload: Any, label: str) -> None:
     errors = schema_errors(schema_name, payload, label)
+    if errors:
+        raise SystemExit("\n".join(errors))
+
+
+def validate_marketplace_profile(payload: Any, label: str) -> None:
+    errors = schema_errors_from_path(MARKETPLACE_PROFILE_SCHEMA, payload, label)
     if errors:
         raise SystemExit("\n".join(errors))
 
@@ -137,6 +148,7 @@ def validate_package_consistency(
 def main() -> None:
     for schema_path in sorted(SCHEMAS.glob("*.schema.json")):
         Draft202012Validator.check_schema(load_json(schema_path))
+    Draft202012Validator.check_schema(load_json(MARKETPLACE_PROFILE_SCHEMA))
 
     registry = load_json(ROOT / "registry.json")
     validate("registry.schema.json", registry, "registry.json")
@@ -157,6 +169,18 @@ def main() -> None:
         if payload.get("id") != publisher_id:
             raise SystemExit(f"Publisher identity mismatch: registry key {publisher_id!r} != descriptor id {payload.get('id')!r}")
 
+    marketplace_profiles = registry.get("marketplaceProfiles", {})
+    if not isinstance(marketplace_profiles, dict):
+        raise SystemExit("registry.json:marketplaceProfiles: expected object")
+    for package_id, relative_path in sorted(marketplace_profiles.items()):
+        if package_id not in registry["packages"]:
+            raise SystemExit(
+                f"registry.json:marketplaceProfiles.{package_id}: package is not registered"
+            )
+        path = ROOT / relative_path
+        payload = load_json(path)
+        validate_marketplace_profile(payload, relative_path)
+
     trust_path = ROOT / "trust" / "trust.json"
     if trust_path.is_file():
         validate("trust.schema.json", load_json(trust_path), "trust/trust.json")
@@ -164,6 +188,7 @@ def main() -> None:
     print(
         "Registry JSON validation PASS "
         f"packages={len(registry['packages'])} publishers={len(registry['publishers'])} "
+        f"marketplace_profiles={len(marketplace_profiles)} "
         f"trust={'active' if trust_path.is_file() else 'inactive'}"
     )
 

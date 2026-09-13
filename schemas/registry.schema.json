@@ -34,6 +34,16 @@
         "type": "string",
         "pattern": "^publishers/[A-Za-z0-9](?:[A-Za-z0-9._-]{0,62}[A-Za-z0-9])?\\.json$"
       }
+    },
+    "marketplaceProfiles": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^marketplace-profiles/[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?\\.json$"
+      }
     }
   }
 }

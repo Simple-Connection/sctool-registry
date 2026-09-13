@@ -1,0 +1,95 @@
+schema_version: "1.0"
+document_type: cross_repository_handoff
+natural_language: FORBIDDEN
+handoff:
+  id: P1_SCTOOL_SDK_MARKETPLACE_PROFILE_HANDOFF
+  source_repository: "Simple-Connection/sctool-registry"
+  source_branch: "dev/1.0.3"
+  source_package_path: "packages/sctool-sdk"
+  baseline_sha: "cd2951673c4073bfb28f4bcc130e6218042e4d20"
+  implementation_sha: "ecec8a3e41bf26912ef511d52c3e0a82be95631a"
+  distribution_contract_version: "1.0.3"
+  version_before: "0.1.0"
+  version_after: "0.2.0"
+  consumer_repository: "Simple-Connection/SC_Linked_App"
+  consumer_branch: "dev/2.2.4"
+  consumer_observed_sha: "e56cfe76ebcc1f6c41a0789910e7a5c580a439b1"
+contract:
+  profile_schema_version: 1
+  profile_schema_export: "@simple-connection/sctool-sdk/marketplace-profile-schema"
+  validator_export: "@simple-connection/sctool-sdk/marketplace-profile"
+  template_export: "@simple-connection/sctool-sdk/marketplace-profile-template"
+  diagnostic_schema: "sctool-marketplace-profile-validation/v1"
+  exact_sdk_version: "0.2.0"
+  binding_artifact: ".sctool"
+  binding_rule: EMBEDDED_OR_EXACTLY_BOUND
+  required_sections:
+    - details
+    - features
+  optional_sections:
+    - changelog
+    - dependencies
+    - extension_pack
+  marketplace_submission_profile: REQUIRED
+  personal_github_profile: OPTIONAL
+  local_profile: OPTIONAL
+  registry_admission_authority: PRESERVED
+  local_validation_role: PREFLIGHT_ONLY
+  raw_secret_diagnostic_projection: FORBIDDEN
+exports:
+  - "@simple-connection/sctool-sdk/marketplace-profile"
+  - "@simple-connection/sctool-sdk/marketplace-profile-schema"
+  - "@simple-connection/sctool-sdk/marketplace-profile-template"
+changed_files:
+  - ".github/workflows/sctool-authoring-sdk-regression.yml"
+  - "packages/sctool-sdk/package-lock.json"
+  - "packages/sctool-sdk/package.json"
+  - "packages/sctool-sdk/schemas/marketplace-profile.schema.json"
+  - "packages/sctool-sdk/src/marketplace-profile.ts"
+  - "packages/sctool-sdk/templates/marketplace-profile.json"
+  - "packages/sctool-sdk/tests/marketplace-profile.test.mjs"
+  - "packages/sctool-sdk/tests/package-contract.test.mjs"
+  - "packages/sctool-sdk/tests/run-marketplace-profile-suite.mjs"
+  - "packages/sctool-sdk/tests/run-package-contract-suite.mjs"
+  - "ptsip.yaml"
+verification:
+  authoring_sdk_regression:
+    run_id: 34457847965
+    conclusion: SUCCESS
+    install: PASS
+    typecheck: PASS
+    build: PASS
+    localization_regression_cases: 7
+    localization_regression_fail: 0
+    host_capabilities_regression_cases: 7
+    host_capabilities_regression_fail: 0
+    marketplace_profile_cases: 15
+    marketplace_profile_fail: 0
+    package_contract: PASS
+    package_pack_dry_run: PASS
+    cli_syntax: PASS
+  registry_governance:
+    run_id: 34458082494
+    conclusion: SUCCESS
+  registry_machine_validation:
+    run_id: 34458082495
+    conclusion: SUCCESS
+  registry_pages_build:
+    run_id: 34458082497
+    conclusion: SUCCESS
+    ptsip_exact_architecture: PASS
+    production_trust_deploy: SKIPPED_INACTIVE
+publication:
+  package_publish: NOT_PERFORMED
+  reason: USER_APPROVAL_REQUIRED
+consumer_change_request:
+  product_plan_current_reference: "@simple-connection/sctool-sdk@1.0.3"
+  authoritative_package_reference: "@simple-connection/sctool-sdk@0.2.0"
+  action: UPDATE_PRODUCT_CONSUMER_REFERENCE_BEFORE_PACKAGE_CONSUMPTION
+  product_direct_mutation_by_registry_session: FORBIDDEN
+blockers:
+  product_p4_w3_discovery: WAIT_FOR_REGISTRY_P2
+completion:
+  profile_contract: COMPLETE
+  authoring_sdk_implementation: COMPLETE
+  package_publication: OUT_OF_SCOPE_UNTIL_APPROVED

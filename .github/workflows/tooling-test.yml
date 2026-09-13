@@ -1,0 +1,84 @@
+name: Tooling test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "dev/**"
+    paths:
+      - "docs/**"
+      - "ptsip.yaml"
+      - ".github/workflows/tooling-test.yml"
+  pull_request:
+    paths:
+      - "docs/**"
+      - "ptsip.yaml"
+      - ".github/workflows/tooling-test.yml"
+
+defaults:
+  run:
+    shell: cmd
+
+permissions:
+  contents: read
+
+jobs:
+  governance:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Bootstrap isolated Python
+        run: |
+          set "PY_VERSION=3.12.10"
+          set "PY_HOME=%LOCALAPPDATA%\SimpleConnection\gha-python-%PY_VERSION%-embed-amd64"
+          set "PY_EXE=%PY_HOME%\python.exe"
+          set "PY_ARCHIVE=%RUNNER_TEMP%\python-%PY_VERSION%-embed-amd64.zip"
+          set "GET_PIP=%RUNNER_TEMP%\get-pip.py"
+          if not exist "%PY_EXE%" (
+            if not exist "%PY_HOME%" mkdir "%PY_HOME%"
+            curl.exe --fail --location --retry 3 --output "%PY_ARCHIVE%" "https://www.python.org/ftp/python/%PY_VERSION%/python-%PY_VERSION%-embed-amd64.zip"
+            if errorlevel 1 exit /b 1
+            tar.exe -xf "%PY_ARCHIVE%" -C "%PY_HOME%"
+            if errorlevel 1 exit /b 1
+            "%PY_EXE%" -c "from pathlib import Path; p=Path(r'%PY_HOME%\python312._pth'); s=p.read_text(); p.write_text(s.replace('#import site','import site'))"
+            if errorlevel 1 exit /b 1
+            curl.exe --fail --location --retry 3 --output "%GET_PIP%" "https://bootstrap.pypa.io/get-pip.py"
+            if errorlevel 1 exit /b 1
+            "%PY_EXE%" "%GET_PIP%" --disable-pip-version-check
+            if errorlevel 1 exit /b 1
+          )
+          "%PY_EXE%" --version
+          if errorlevel 1 exit /b 1
+          echo SCTOOL_PYTHON=%PY_EXE%>>"%GITHUB_ENV%"
+          echo SCTOOL_PTSIP=%PY_HOME%\Scripts\ptsip.exe>>"%GITHUB_ENV%"
+
+      - name: Install governance dependencies
+        run: |
+          "%SCTOOL_PYTHON%" -m pip install --disable-pip-version-check -r docs/governance/requirements.txt
+          "%SCTOOL_PYTHON%" -m pip install --disable-pip-version-check "PTSIP==0.3.7"
+
+      - name: Test session state synchronization
+        run: |
+          "%SCTOOL_PYTHON%" docs/governance/test-session-state-sync.py
+
+      - name: Test source task binding
+        run: |
+          "%SCTOOL_PYTHON%" docs/governance/test-task-contract.py
+
+      - name: Verify committed session routing projection
+        run: |
+          "%SCTOOL_PYTHON%" docs/governance/validate.py --root . --sync-session-states
+          git diff --exit-code -- docs/index.yaml docs/ver1.0.3/1.0.3_Improvement_plan.yaml
+
+      - name: Validate machine development documentation
+        run: |
+          "%SCTOOL_PYTHON%" docs/governance/validate.py --root .
+
+      - name: Validate PTSIP profile
+        run: |
+          "%SCTOOL_PTSIP%" validate .

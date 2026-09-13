@@ -1,0 +1,98 @@
+schema_version: '1.0'
+document_type: cross_repository_handoff
+natural_language: FORBIDDEN
+handoff:
+  id: P3_PRODUCT_PACKAGE_REPORT_ROUTING_HANDOFF
+  source_repository: Simple-Connection/sctool-registry
+  source_branch: dev/1.0.3
+  implementation_sha: 881dc9e3c9cc36270c468b61db96772c43b80f7b
+  exact_validation_sha: 881dc9e3c9cc36270c468b61db96772c43b80f7b
+  consumer_repository: Simple-Connection/SC_Linked_App
+  consumer_branch: dev/2.2.4
+  consumer_observed_sha: e56cfe76ebcc1f6c41a0789910e7a5c580a439b1
+  consumer_session: P4
+contract:
+  product_report_schema: sctool-registry-product-report/v1
+  product_report_schema_file: tools/issue-routing/product-report.schema.json
+  product_report_marker: '<!-- sctool-registry-product-report:v1'
+  sdk_report_schema_preserved: sctool-registry-sdk-report/v1
+  sdk_report_marker_preserved: '<!-- sctool-registry-sdk-report:v1'
+  queue_schema_preserved: sctool-registry-sdk-issue-queue/v1
+  queue_discriminator: report_kind
+  product_queue_kind: PRODUCT_PACKAGE
+  sdk_queue_kind: SDK
+sanitization:
+  additional_properties: REJECT
+  secret_fields: REJECT
+  token_fields: REJECT
+  credential_fields: REJECT
+  password_fields: REJECT
+  authorization_fields: REJECT
+  private_key_fields: REJECT
+  raw_log_fields: REJECT
+  stdout_stderr_fields: REJECT
+  environment_fields: REJECT
+  credential_value_patterns: REJECT
+  queue_projection: STABLE_METADATA_ONLY
+routing:
+  github_issues_source_of_truth: true
+  current_version_mode: CURRENT_VERSION
+  current_version_branch: dev/1.0.3
+  current_version: 1.0.3
+  next_version_mode: NEXT_VERSION_QUEUE
+  ambiguous_active_versions: ROUTING_BLOCKED
+  product_report_trigger_enabled: true
+  sdk_report_trigger_preserved: true
+authority:
+  registry_owned:
+  - REPORT_SCHEMA
+  - REPORT_MARKER
+  - REPORT_PARSE_VALIDATE
+  - REPORT_SANITIZATION
+  - ACTIVE_VERSION_ROUTING
+  - QUEUE_PROJECTION
+  product_owned:
+  - REPORT_FINGERPRINT
+  - ISSUE_CREATE_OR_REUSE
+  - LOCAL_ISSUE_LEDGER
+  - UI_COPY_ACTION
+  forbidden_registry_effects:
+  - PRODUCT_FINGERPRINT_GENERATION
+  - PRODUCT_ISSUE_REUSE_IMPLEMENTATION
+  - PRODUCT_LOCAL_LEDGER_IMPLEMENTATION
+  - SC_LINKED_APP_SOURCE_MUTATION
+verification:
+  governance:
+    run_id: 34480481034
+    conclusion: SUCCESS
+    issue_routing_tests: 14/14_PASS
+    development_governance: PASS
+    ptsip_profile: PASS
+    ptsip_warnings: NONE
+  routing:
+    run_id: 34480481128
+    conclusion: SUCCESS
+    route_mode: CURRENT_VERSION
+    target_branch: dev/1.0.3
+    target_version: 1.0.3
+    queue_sync: PASS
+    queue_issue_count: 0
+    queue_changed: false
+consumer_change_request:
+  emit_schema: sctool-registry-product-report/v1
+  emit_marker: '<!-- sctool-registry-product-report:v1'
+  generate_fingerprint_in_product: true
+  create_or_reuse_registry_issue_in_product: true
+  persist_issue_ledger_in_product: true
+  include_only_sanitized_structured_failure: true
+  raw_logs: FORBIDDEN
+  credentials: FORBIDDEN
+  direct_registry_parser_duplication: FORBIDDEN
+  registry_session_product_mutation: FORBIDDEN
+completion:
+  P3-W1: COMPLETE
+  P3-W2: COMPLETE
+  P3-W3: COMPLETE
+  P3-W4: COMPLETE
+  P3-W5: COMPLETE
+  P3-W6: COMPLETE

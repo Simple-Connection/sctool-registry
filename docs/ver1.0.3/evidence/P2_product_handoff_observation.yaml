@@ -1,0 +1,17 @@
+schema_version: "1.0"
+document_type: cross_repository_observation
+natural_language: FORBIDDEN
+observation:
+  repository: "Simple-Connection/SC_Linked_App"
+  branch: "dev/2.2.4"
+  observed_sha: "e56cfe76ebcc1f6c41a0789910e7a5c580a439b1"
+  access: READ_ONLY
+  mutation: FORBIDDEN
+  purpose: P2_FINAL_EXACT_HANDOFF
+binding:
+  registry_repository: "Simple-Connection/sctool-registry"
+  registry_branch: "dev/1.0.3"
+  registry_session: P2
+  consumer_session: P4
+  consumer_work_item: P4-W3
+  exact_sha_required: true

@@ -1,7 +1,7 @@
 {
   "name": "@simple-connection/sctool-sdk",
-  "version": "0.1.0",
-  "description": "SCTool authoring SDK for manifest validation, localization, host capabilities, scaffolding, build, and package verification.",
+  "version": "0.2.0",
+  "description": "SCTool authoring SDK for manifest validation, localization, host capabilities, Marketplace profile authoring, scaffolding, build, and package verification.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -21,10 +21,16 @@
       "types": "./dist/host-capabilities.d.ts",
       "import": "./dist/host-capabilities.js"
     },
+    "./marketplace-profile": {
+      "types": "./dist/marketplace-profile.d.ts",
+      "import": "./dist/marketplace-profile.js"
+    },
     "./schema": "./schemas/tool.schema.json",
     "./build-schema": "./schemas/sctool-build.schema.json",
     "./registry-schema": "./schemas/sctool-projects.schema.json",
     "./host-capabilities-schema": "./schemas/host-capabilities.schema.json",
+    "./marketplace-profile-schema": "./schemas/marketplace-profile.schema.json",
+    "./marketplace-profile-template": "./templates/marketplace-profile.json",
     "./host-capabilities-manifest": "./capabilities/simple-connection.host-capabilities.json",
     "./builder": "./builder/sctool-builder.mjs",
     "./cli": "./cli/sctool.mjs"
@@ -44,6 +50,9 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test:localization": "node ./tests/run-localization-suite.mjs",
     "test:host-capabilities": "node ./tests/run-host-capabilities-suite.mjs",
+    "test:marketplace-profile": "node ./tests/run-marketplace-profile-suite.mjs",
+    "test:package-contract": "node ./tests/run-package-contract-suite.mjs",
+    "test": "npm run test:localization && npm run test:host-capabilities && npm run test:marketplace-profile && npm run test:package-contract",
     "sctool": "node ./cli/sctool.mjs",
     "sctool:build": "npm run build && node ./cli/sctool.mjs build",
     "sctool:test": "npm run build && node ./cli/sctool.mjs test"

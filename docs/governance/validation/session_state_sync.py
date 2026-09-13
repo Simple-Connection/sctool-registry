@@ -21,6 +21,68 @@ class SessionStateSyncChange:
     new_index_state: str | None
 
 
+@dataclass(frozen=True)
+class NextSessionProjectionChange:
+    old_projection: dict[str, Any] | None
+    new_projection: dict[str, Any] | None
+
+
+def project_next_session(plan: dict[str, Any]) -> dict[str, Any] | None:
+    plan_next = plan.get("next")
+    if plan_next is None:
+        return None
+    if not isinstance(plan_next, dict):
+        raise ValueError("NEXT_SESSION_PROJECTION_INVALID_NEXT")
+
+    next_id = plan_next.get("session_id")
+    if next_id is None:
+        return None
+    if not isinstance(next_id, str) or not next_id:
+        raise ValueError("NEXT_SESSION_PROJECTION_INVALID_ID")
+
+    sessions = {
+        entry.get("id"): entry
+        for entry in plan.get("sessions", [])
+        if isinstance(entry, dict) and isinstance(entry.get("id"), str)
+    }
+    session = sessions.get(next_id)
+    if session is None:
+        raise ValueError(f"NEXT_SESSION_PROJECTION_UNKNOWN_SESSION:{next_id}")
+
+    state = session.get("state")
+    if not isinstance(state, str) or not state:
+        raise ValueError(f"NEXT_SESSION_PROJECTION_INVALID_STATE:{next_id}")
+
+    return {
+        "id": next_id,
+        "state": state,
+        "document": session.get("document"),
+        "planning_state": session.get("planning_state"),
+        "planning_document": session.get("planning_document"),
+    }
+
+
+def synchronize_next_session_projection(
+    plan: dict[str, Any],
+    index: dict[str, Any],
+) -> NextSessionProjectionChange | None:
+    current = index.setdefault("current", {})
+    if not isinstance(current, dict):
+        raise ValueError("NEXT_SESSION_PROJECTION_INVALID_CURRENT")
+
+    expected = project_next_session(plan)
+    observed = current.get("next_session")
+    if observed == expected:
+        return None
+
+    old_projection = dict(observed) if isinstance(observed, dict) else None
+    current["next_session"] = dict(expected) if expected is not None else None
+    return NextSessionProjectionChange(
+        old_projection=old_projection,
+        new_projection=dict(expected) if expected is not None else None,
+    )
+
+
 def synchronize_session_states(
     plan: dict[str, Any],
     index: dict[str, Any],

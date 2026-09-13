@@ -1,0 +1,222 @@
+schema_version: '4.0'
+document_type: machine_session
+natural_language: FORBIDDEN
+session:
+  id: P3
+  type: B
+  number: 3
+  approval: APPROVED
+  distribution_contract_version: 1.0.3
+  branch: dev/1.0.3
+  authority_repository: Simple-Connection/sctool-registry
+  improvement_plan: docs/ver1.0.3/1.0.3_Improvement_plan.yaml
+routing:
+  docs_index: docs/index.yaml
+  rules_index: docs/rules/index.yaml
+  template_index: docs/template/index.yaml
+  responsibility_index: docs/responsibility/index.yaml
+  essential_template: docs/template/session_document_template/session_document_essential.yaml
+  type_template: docs/template/session_document_template/session_type_B.yaml
+heads:
+  start: 6614eb3444337e0eb1dbace904b139ecad93fa75
+  implementation: 881dc9e3c9cc36270c468b61db96772c43b80f7b
+  exact_validation: 881dc9e3c9cc36270c468b61db96772c43b80f7b
+responsibility_model:
+  effects:
+    assign: []
+    implement: []
+    preserve: []
+    defer: []
+    transfer: []
+    retire: []
+    forbid: []
+  description_ids: []
+  rationale_ids: []
+payload:
+  implementation:
+    responsibility_refs: []
+    contract_refs: []
+    path_allow:
+    - .github/ISSUE_TEMPLATE/**
+    - .github/registry-sdk-issue-queue.json
+    - .github/workflows/registry-sdk-issue-routing.yml
+    - tools/issue-routing/**
+    - docs/ver1.0.3/evidence/**
+    - docs/ver1.0.3/session_document/ver.1.0.3_P3_product_package_report_routing*.yaml
+    - docs/ver1.0.3/1.0.3_Improvement_plan.yaml
+    - docs/index.yaml
+    path_deny:
+    - packages/registry-client-sdk/**
+    - packages/sctool-sdk/**
+    - packages/repository-tool-sdk/**
+    - Simple-Connection/SC_Linked_App/**
+  responsibility_description_ids: []
+  decision_rationale_ids: []
+work_units:
+- id: P3-W1
+  status: COMPLETE
+  responsibility_refs: []
+  input_refs:
+  - P3_WORK_PLAN
+  output_refs:
+  - tools/issue-routing/product-report.schema.json
+  - .github/ISSUE_TEMPLATE/product-package-report.md
+  completion_codes:
+  - P3_PRODUCT_REPORT_CONTRACT_COMPLETE
+- id: P3-W2
+  status: COMPLETE
+  responsibility_refs: []
+  input_refs:
+  - P3-W1
+  output_refs:
+  - tools/issue-routing/registry_issue_intake.py
+  completion_codes:
+  - P3_PRODUCT_REPORT_INTAKE_PARSER_COMPLETE
+- id: P3-W3
+  status: COMPLETE
+  responsibility_refs: []
+  input_refs:
+  - P3-W2
+  output_refs:
+  - tools/issue-routing/registry_issue_intake.py
+  completion_codes:
+  - P3_PRODUCT_REPORT_SANITIZATION_COMPLETE
+- id: P3-W4
+  status: COMPLETE
+  responsibility_refs: []
+  input_refs:
+  - P3-W3
+  output_refs:
+  - tools/issue-routing/registry_issue_intake.py
+  - .github/workflows/registry-sdk-issue-routing.yml
+  completion_codes:
+  - P3_PRODUCT_REPORT_ACTIVE_VERSION_ROUTING_COMPLETE
+- id: P3-W5
+  status: COMPLETE
+  responsibility_refs: []
+  input_refs:
+  - P3-W4
+  output_refs:
+  - tools/issue-routing/tests/test_registry_issue_intake.py
+  - .github/registry-sdk-issue-queue.json
+  completion_codes:
+  - P3_PRODUCT_REPORT_QUEUE_REGRESSION_COMPLETE
+- id: P3-W6
+  status: COMPLETE
+  responsibility_refs: []
+  input_refs:
+  - P3-W5
+  output_refs:
+  - E_P3_CROSS_REPOSITORY_HANDOFF
+  completion_codes:
+  - P3_CROSS_REPOSITORY_PRODUCT_REPORT_HANDOFF_COMPLETE
+evidence:
+- id: E_P3_APPROVAL
+  kind: USER_APPROVAL
+  head: 6614eb3444337e0eb1dbace904b139ecad93fa75
+  refs:
+    implementation: APPROVED
+    approval_scope: P3_START
+    p2_precondition: COMPLETE
+- id: E_P3_PREFLIGHT
+  kind: EXACT_VALIDATION
+  head: 6614eb3444337e0eb1dbace904b139ecad93fa75
+  refs:
+    repository: Simple-Connection/sctool-registry
+    branch: dev/1.0.3
+    p2_complete: PASS
+    existing_sdk_report_schema: sctool-registry-sdk-report/v1
+    product_report_schema_target: sctool-registry-product-report/v1
+    product_direct_mutation: FORBIDDEN
+- id: E_P3_IMPLEMENTATION
+  kind: EXACT_VALIDATION
+  head: 881dc9e3c9cc36270c468b61db96772c43b80f7b
+  refs:
+    product_report_schema: sctool-registry-product-report/v1
+    product_report_marker: sctool-registry-product-report:v1
+    schema_file: tools/issue-routing/product-report.schema.json
+    marker_template: .github/ISSUE_TEMPLATE/product-package-report.md
+    parser: tools/issue-routing/registry_issue_intake.py
+    routing_workflow: .github/workflows/registry-sdk-issue-routing.yml
+    sdk_report_schema_preserved: sctool-registry-sdk-report/v1
+    queue_schema_preserved: sctool-registry-sdk-issue-queue/v1
+    queue_discriminator: report_kind
+    product_fingerprint_authority: PRODUCT
+    product_issue_reuse_authority: PRODUCT
+    product_local_ledger_authority: PRODUCT
+- id: E_P3_EXACT_VALIDATION
+  kind: EXACT_VALIDATION
+  head: 881dc9e3c9cc36270c468b61db96772c43b80f7b
+  refs:
+    governance_run_id: 34480481034
+    governance: PASS
+    issue_routing_tests: 14/14_PASS
+    development_governance: PASS
+    ptsip_profile: PASS
+    ptsip_warnings: NONE
+    routing_run_id: 34480481128
+    routing: PASS
+    route_mode: CURRENT_VERSION
+    target_branch: dev/1.0.3
+    target_version: 1.0.3
+    queue_sync: PASS
+- id: E_P3_CROSS_REPOSITORY_HANDOFF
+  kind: CROSS_REPOSITORY_EXACT_HANDOFF
+  head: 630510d425d4aafa76ed19d913720ffb16164373
+  refs:
+    handoff_document: docs/ver1.0.3/evidence/P3_product_package_report_routing_handoff.yaml
+    product_repository: Simple-Connection/SC_Linked_App
+    product_branch: dev/2.2.4
+    product_observed_sha: e56cfe76ebcc1f6c41a0789910e7a5c580a439b1
+    product_direct_mutation: FORBIDDEN
+    registry_schema_duplication_in_product: FORBIDDEN
+gates:
+- id: GATE_SESSION_APPROVAL
+  required: true
+  status: PASS
+  evidence_refs:
+  - E_P3_APPROVAL
+- id: GATE_P3_PRODUCT_REPORT_SCHEMA
+  required: true
+  status: PASS
+  evidence_refs:
+  - E_P3_IMPLEMENTATION
+  - E_P3_EXACT_VALIDATION
+- id: GATE_P3_PRODUCT_REPORT_MARKER
+  required: true
+  status: PASS
+  evidence_refs:
+  - E_P3_IMPLEMENTATION
+  - E_P3_EXACT_VALIDATION
+- id: GATE_P3_REPORT_SANITIZATION
+  required: true
+  status: PASS
+  evidence_refs:
+  - E_P3_IMPLEMENTATION
+  - E_P3_EXACT_VALIDATION
+- id: GATE_P3_SDK_REPORT_COMPATIBILITY
+  required: true
+  status: PASS
+  evidence_refs:
+  - E_P3_IMPLEMENTATION
+  - E_P3_EXACT_VALIDATION
+- id: GATE_P3_ACTIVE_BRANCH_ROUTING
+  required: true
+  status: PASS
+  evidence_refs:
+  - E_P3_EXACT_VALIDATION
+- id: GATE_P3_ISSUE_QUEUE_REGRESSION
+  required: true
+  status: PASS
+  evidence_refs:
+  - E_P3_IMPLEMENTATION
+  - E_P3_EXACT_VALIDATION
+- id: GATE_P3_CROSS_REPOSITORY_HANDOFF
+  required: true
+  status: PASS
+  evidence_refs:
+  - E_P3_CROSS_REPOSITORY_HANDOFF
+blockers: []
+state:
+  mode: DERIVED
+  ruleset: SESSION_STATE_V1

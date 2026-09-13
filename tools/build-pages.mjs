@@ -107,6 +107,14 @@ for (const [id, descriptor] of Object.entries(packages)) {
   if (!(descriptor.publisher in publishers)) throw new Error(`Package ${id} references unregistered publisher ${descriptor.publisher}.`);
 }
 
+const marketplaceProfiles = {};
+for (const id of Object.keys(registry.marketplaceProfiles ?? {}).sort()) {
+  if (!(id in packages)) throw new Error(`Marketplace profile ${id} references an unregistered package.`);
+  const path = registry.marketplaceProfiles[id];
+  assertSafeRelativePath(path, "marketplace-profiles/");
+  marketplaceProfiles[id] = parseJson(await readFile(path, "utf8"), path);
+}
+
 const snapshot = {
   schemaVersion: "1.0.0",
   sequence,
@@ -116,6 +124,7 @@ const snapshot = {
   registrySha256: sha256Bytes(registryBytes),
   packages,
   publishers,
+  marketplaceProfiles,
 };
 const snapshotText = `${JSON.stringify(snapshot, null, 2)}\n`;
 const snapshotBytes = Buffer.from(snapshotText, "utf8");
@@ -149,4 +158,4 @@ await mkdir(resolve(outDir, dirname(snapshotPath)), { recursive: true });
 await writeFile(resolve(outDir, snapshotPath), snapshotText, "utf8");
 await writeFile(resolve(outDir, "registry-head.json"), `${JSON.stringify(head, null, 2)}\n`, "utf8");
 await writeFile(resolve(outDir, "trust.json"), trustText.endsWith("\n") ? trustText : `${trustText}\n`, "utf8");
-console.log(`Built signed Pages distribution revision=${revision} sequence=${sequence} packages=${Object.keys(packages).length}.`);
+console.log(`Built signed Pages distribution revision=${revision} sequence=${sequence} packages=${Object.keys(packages).length} marketplace_profiles=${Object.keys(marketplaceProfiles).length}.`);
