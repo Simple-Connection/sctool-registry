@@ -1,0 +1,120 @@
+schema_version: "1.0"
+document_type: registry_signed_distribution_handoff_contract
+natural_language: FORBIDDEN
+contract_id: REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1
+producer:
+  repository: Simple-Connection/sctool-registry
+  workflow: .github/workflows/pages.yml
+  authority: REGISTRY_SIGNED_DISTRIBUTION
+  mutation_owner: REGISTRY
+consumer:
+  repository: Simple-Connection/SCTool_Marketplace_Web
+  authority: PUBLIC_WEB_HOSTING
+  source_mutation: FORBIDDEN
+  resigning: FORBIDDEN
+  canonical_generation: FORBIDDEN
+bundle:
+  transport: GITHUB_ACTIONS_ARTIFACT_V4
+  action: actions/upload-artifact@v4
+  name_format: registry-signed-distribution-{revision}
+  retention_days: 30
+  root: ARTIFACT_ROOT
+  file_set: EXACT
+  files:
+    trust:
+      path: trust.json
+    head:
+      path: registry-head.json
+    snapshot:
+      path_format: snapshots/{revision}.json
+  unexpected_files: FORBIDDEN
+  symlinks: FORBIDDEN
+  byte_transformation: FORBIDDEN
+identity:
+  source_revision:
+    required: true
+    binding: REGISTRY_HEAD_SIGNED_REVISION
+  producer_run_id:
+    required: true
+    selection: EXACT
+  producer_run_attempt:
+    required: true
+  producer_run_conclusion:
+    required: SUCCESS
+  artifact_id:
+    required: true
+    selection: EXACT
+  artifact_name:
+    required: true
+    selection: EXACT
+  artifact_digest:
+    required: true
+    algorithm: SHA256
+    format: sha256:{hex64}
+    source: ACTIONS_UPLOAD_ARTIFACT_OUTPUT_NORMALIZED_SHA256
+  mutable_latest_resolution: FORBIDDEN
+  name_only_resolution_without_run: FORBIDDEN
+evidence:
+  schema: schemas/registry-distribution-handoff.schema.json
+  file: registry-distribution-handoff.json
+  artifact_name_format: registry-signed-distribution-handoff-{revision}
+  producer_generation: REQUIRED
+  producer_validation: REQUIRED
+  fields:
+    - PRODUCER_REPOSITORY
+    - PRODUCER_WORKFLOW
+    - PRODUCER_RUN_ID
+    - PRODUCER_RUN_ATTEMPT
+    - SOURCE_REVISION
+    - ARTIFACT_NAME
+    - ARTIFACT_ID
+    - ARTIFACT_DIGEST
+    - EXACT_FILE_IDENTITIES
+    - TRUST_SEQUENCE
+    - REGISTRY_SEQUENCE
+    - ROOT_KEY_ID
+    - DISTRIBUTION_KEY_ID
+producer_gates:
+  before_bundle_upload:
+    - PTSIP_CONFORMANCE_PASS
+    - REGISTRY_JSON_VALIDATION_PASS
+    - TRUST_SCHEMA_PASS
+    - REGISTRY_HEAD_SCHEMA_PASS
+    - REGISTRY_SNAPSHOT_SCHEMA_PASS
+    - ROOT_SIGNATURE_VERIFICATION_PASS
+    - DISTRIBUTION_SIGNATURE_VERIFICATION_PASS
+    - SNAPSHOT_INTEGRITY_PASS
+  production_branch: main
+  production_trust: ACTIVE
+consumer_gates:
+  required:
+    - PRODUCER_RUN_SUCCESS
+    - EXACT_RUN_ID_MATCH
+    - EXACT_ARTIFACT_ID_MATCH
+    - EXACT_ARTIFACT_DIGEST_MATCH
+    - EXACT_SOURCE_REVISION_MATCH
+    - EXACT_FILE_SET_MATCH
+    - FILE_SHA256_MATCH
+    - FILE_SIZE_MATCH
+    - HEAD_TRUST_SEQUENCE_MATCH
+    - SNAPSHOT_PATH_SAFE
+    - SNAPSHOT_DIGEST_MATCH
+    - SNAPSHOT_SIZE_MATCH
+    - SNAPSHOT_REVISION_MATCH
+    - SNAPSHOT_SOURCE_REPOSITORY_MATCH
+    - SNAPSHOT_SOURCE_COMMIT_MATCH
+    - BYTE_PRESERVATION_PASS
+  source_repository: Simple-Connection/sctool-registry
+hosting:
+  target_repository: Simple-Connection/SCTool_Marketplace_Web
+  target_path: /registry/
+  signing_credentials_in_consumer: FORBIDDEN
+  signed_bytes_rewrite: FORBIDDEN
+cutover:
+  registry_pages_workflow_removal: BLOCKED
+  registry_pages_disable: BLOCKED
+  unblock_requires:
+    - WEB_EXACT_ARTIFACT_CONSUMPTION_PASS
+    - WEB_PUBLIC_REGISTRY_ENDPOINT_PASS
+    - PRODUCT_BOOTSTRAP_ENDPOINT_MIGRATION_PASS
+    - USER_APPROVAL

@@ -95,6 +95,7 @@ components:
       - "docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml"
       - "docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml"
       - "docs/PAGES_DISTRIBUTION_V1.md"
+      - "docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml"
       - "trust/**"
     purpose: canonical_registry_submission_distribution_trust_integrity_and_admission_contracts
     shipped: true
@@ -173,6 +174,8 @@ components:
       - "schemas/**"
       - "policy/**"
       - "trust/**"
+      - "docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml"
+      - "schemas/registry-distribution-handoff.schema.json"
       - "ptsip.yaml"
 
   - id: product-documentation

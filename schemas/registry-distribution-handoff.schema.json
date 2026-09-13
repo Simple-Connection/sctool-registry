@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "registry-distribution-handoff.schema.json",
+  "title": "SCTool Registry signed distribution handoff evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "producer",
+    "artifact",
+    "registry",
+    "files",
+    "verification"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "registry-signed-distribution-handoff/v1"
+    },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "workflow",
+        "runId",
+        "runAttempt",
+        "sourceRevision",
+        "sourceRef"
+      ],
+      "properties": {
+        "repository": {
+          "const": "Simple-Connection/sctool-registry"
+        },
+        "workflow": {
+          "const": ".github/workflows/pages.yml"
+        },
+        "runId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "runAttempt": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sourceRevision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40,64}$"
+        },
+        "sourceRef": {
+          "const": "refs/heads/main"
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "id",
+        "digest"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^registry-signed-distribution-[0-9a-f]{40,64}$"
+        },
+        "id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trustSequence",
+        "sequence",
+        "revision",
+        "rootKeyId",
+        "distributionKeyId",
+        "snapshotPath"
+      ],
+      "properties": {
+        "trustSequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40,64}$"
+        },
+        "rootKeyId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "distributionKeyId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshotPath": {
+          "type": "string",
+          "pattern": "^snapshots/[0-9a-f]{40,64}\\.json$"
+        }
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "sha256",
+          "size"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "jsonSchemas",
+        "rootSignature",
+        "distributionSignature",
+        "snapshotIntegrity",
+        "exactFileSet"
+      ],
+      "properties": {
+        "jsonSchemas": {
+          "const": "PASS"
+        },
+        "rootSignature": {
+          "const": "PASS"
+        },
+        "distributionSignature": {
+          "const": "PASS"
+        },
+        "snapshotIntegrity": {
+          "const": "PASS"
+        },
+        "exactFileSet": {
+          "const": "PASS"
+        }
+      }
+    }
+  }
+}

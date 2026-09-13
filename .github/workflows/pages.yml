@@ -50,6 +50,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       activated: ${{ steps.activation.outputs.activated }}
+      handoff_artifact_id: ${{ steps.handoff_bundle.outputs.artifact-id }}
+      handoff_artifact_digest: ${{ steps.handoff_bundle.outputs.artifact-digest }}
+      handoff_artifact_name: registry-signed-distribution-${{ github.sha }}
     steps:
       - name: Checkout canonical source
         uses: actions/checkout@v6
@@ -129,6 +132,9 @@ jobs:
       - name: Validate registry JSON contracts
         run: python tools/validate-registry.py
 
+      - name: Test signed Registry distribution handoff tooling
+        run: python tools/test-registry-distribution-handoff.py
+
       - name: Detect production trust activation
         id: activation
         shell: bash
@@ -169,6 +175,70 @@ jobs:
         env:
           SCTOOL_REGISTRY_ROOT_PUBLIC_KEY_B64: ${{ vars.SCTOOL_REGISTRY_ROOT_PUBLIC_KEY_B64 }}
         run: node tools/verify-pages.mjs --site _site
+
+      - name: Upload exact signed Registry distribution handoff artifact
+        if: steps.activation.outputs.activated == 'true'
+        id: handoff_bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: registry-signed-distribution-${{ github.sha }}
+          path: _site
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+      - name: Generate exact signed Registry distribution handoff evidence
+        if: steps.activation.outputs.activated == 'true'
+        shell: bash
+        run: |
+          node tools/generate-registry-distribution-handoff.mjs \
+            --site _site \
+            --out registry-distribution-handoff.json \
+            --repository "$GITHUB_REPOSITORY" \
+            --workflow ".github/workflows/pages.yml" \
+            --run-id "$GITHUB_RUN_ID" \
+            --run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --source-revision "$GITHUB_SHA" \
+            --source-ref "$GITHUB_REF" \
+            --artifact-name "registry-signed-distribution-$GITHUB_SHA" \
+            --artifact-id "${{ steps.handoff_bundle.outputs.artifact-id }}" \
+            --artifact-digest "${{ steps.handoff_bundle.outputs.artifact-digest }}"
+
+      - name: Validate exact signed Registry distribution handoff evidence
+        if: steps.activation.outputs.activated == 'true'
+        run: >-
+          python tools/validate-registry-distribution-handoff.py
+          --contract docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml
+          --schema schemas/registry-distribution-handoff.schema.json
+          --evidence registry-distribution-handoff.json
+          --site _site
+
+      - name: Upload signed Registry distribution handoff evidence
+        if: steps.activation.outputs.activated == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: registry-signed-distribution-handoff-${{ github.sha }}
+          path: registry-distribution-handoff.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+      - name: Report signed Registry distribution handoff coordinates
+        if: steps.activation.outputs.activated == 'true'
+        shell: bash
+        run: |
+          {
+            echo "### Signed Registry distribution handoff"
+            echo ""
+            echo "- repository: `$GITHUB_REPOSITORY`"
+            echo "- workflow_run_id: `$GITHUB_RUN_ID`"
+            echo "- workflow_run_attempt: `$GITHUB_RUN_ATTEMPT`"
+            echo "- source_revision: `$GITHUB_SHA`"
+            echo "- artifact_name: `registry-signed-distribution-$GITHUB_SHA`"
+            echo "- artifact_id: `${{ steps.handoff_bundle.outputs.artifact-id }}`"
+            echo "- artifact_digest: `${{ steps.handoff_bundle.outputs.artifact-digest }}`"
+            echo "- evidence_artifact: `registry-signed-distribution-handoff-$GITHUB_SHA`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Configure GitHub Pages
         if: steps.activation.outputs.activated == 'true'
