@@ -45,16 +45,17 @@ publishers/*.json                registered publisher verification keys
 schemas/*.schema.json            canonical registry contracts
 policy/registry-policy.json      machine-readable admission/access policy
 docs/REGISTRY_CONTRACT_V1.md     historical anonymous-download Registry contract
-docs/REGISTRY_CONTRACT_V2.md     current authenticated Registry contract
+docs/REGISTRY_CONTRACT_V2.md     current Registry admission/distribution contract
 docs/REGISTRY_ACCESS_V1.md       historical private artifact access contract
 docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md current public artifact integrity/access authority
+docs/ARTIFACT_DELIVERY_V2.md      current publisher-origin + bounded-cache delivery contract
 docs/PAGES_DISTRIBUTION_V1.md    signed metadata distribution contract (legacy filename)
 trust/README.md                   Root/Distribution Actions Secret bootstrap guidance
 .github/workflows/sign-trust.yml  manual Root trust-signing workflow
 .github/workflows/pages.yml       signed distribution + exact handoff producer workflow
 ```
 
-`.sctool` binaries are not committed to this Git history. Current default-channel cache payloads are published as public GitHub Release assets in the canonical artifact repository:
+`.sctool` binaries are not committed to this Git history. Publisher-owned GitHub Releases are the long-term origin. Current default-channel payloads may additionally be cached as public GitHub Release assets in the canonical cache repository:
 
 ```text
 Simple-Connection/sctool-artifacts
@@ -73,19 +74,9 @@ Simple-Connection/sctool-artifacts
 9. Package ownership is bound to a registered publisher identity.
 10. `.sctool` binaries are not stored in Registry Git history.
 
-## Initial release namespace
+## Artifact locator model
 
-When GitHub Releases are used as the public bounded cache backend, the canonical tag shape is:
-
-```text
-sctool/{packageId}/v{version}
-```
-
-Example:
-
-```text
-sctool/openai-local-bridge/v0.3.1
-```
+Package schema `3.0.0` stores exact GitHub Release identities as `repository + releaseId + assetId`. Publisher tag names are not locator authority. The bounded central cache uses the same exact identity fields and is optional.
 
 ## Distribution architecture
 
@@ -97,7 +88,9 @@ Git repository
   -> SCTool_Marketplace_Web materializes exact bytes at /registry/
   -> Registry consumers verify the pinned Registry Root key
   -> package artifact selected through a signed registry channel
-  -> exact public GitHub Release .sctool retrieval
+  -> current default version: bounded cache preferred when present
+  -> cache failure: exact publisher-origin fallback
+  -> historical/alternate version: exact publisher origin
   -> fail-closed artifact integrity verification
 ```
 
@@ -105,13 +98,13 @@ The client bootstrap contract pins the public Registry head URL and Registry Roo
 
 Registry Root and Distribution private keys are stored as separate GitHub Actions Secrets. The Root private secret is used only by the manually dispatched trust-signing workflow; routine signed distribution production receives only the Root public key and Distribution private key. Signed distribution production remains intentionally inactive until a valid Root-signed `trust/trust.json` exists. See `docs/PAGES_DISTRIBUTION_V1.md` and `trust/README.md`.
 
-Artifact transport is a separate boundary. `docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md` defines `registry-public-integrity-v1`: `Simple-Connection/sctool-artifacts` is public transport, while accepted Registry metadata, publisher evidence, exact byte size, and SHA-256 establish trust. Optional GitHub identity flows must remain separate from artifact read authorization.
+Artifact transport is a separate boundary. `docs/ARTIFACT_DELIVERY_V2.md` and `docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md` define the current model: publisher origin is always retained, `Simple-Connection/sctool-artifacts` is only a bounded current-version cache, and successful download is not trust. Accepted Registry metadata, publisher evidence, exact locator identity, byte size, and SHA-256 establish the fail-closed delivery boundary.
 
-Registry Intake transport, publisher enrollment workflow, authenticated artifact upload/download implementation, and SDK `publish` are follow-up implementation work.
+Registry Intake service implementation, publisher enrollment workflow, SDK `publish`, and GitHub Release cache mutation automation are follow-up implementation work. The current repository already enforces package/submission contracts, client retrieval/fallback semantics, and machine cache lifecycle planning.
 
 ## Development governance — PTSIP 0.3.6
 
-Repository architecture is governed from the first commit by PTSIP Tool `0.3.6` and Specification family `0.3.6-draft`.
+Repository architecture is governed by PTSIP Tool `0.3.7` and Specification family `0.3.6-draft`.
 
 Canonical repository profile:
 
@@ -123,7 +116,7 @@ PTSIP is an **agent/development tool**, not a runtime or repository package depe
 Coding-agent execution environments should install the exact tool version:
 
 ```powershell
-python -m pip install "PTSIP==0.3.6"
+python -m pip install "PTSIP==0.3.7"
 ```
 
 Before and after structural changes, agents follow `AGENTS.md` and use the PTSIP `doctor`, `inspect`, `validate`, and `conform` gates. New tracked paths must be assigned to the Responsibility Map in the same change that introduces them.
