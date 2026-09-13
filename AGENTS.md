@@ -283,7 +283,7 @@ Canonical path:
 packages/registry-client-sdk/
 ```
 
-The SDK owns consumer-side implementation of Registry contracts, including Registry access state semantics, descriptor/channel/version/target resolution, exact delivery locator handling, authenticated artifact retrieval, content integrity verification, and normalized update candidates.
+The SDK owns consumer-side implementation of Registry contracts, including Registry access state semantics, descriptor/channel/version/target resolution, exact delivery locator handling, public exact-asset retrieval, content integrity verification, and normalized update candidates.
 
 It must not own Simple Connection local installation state, active-version selection, rollback, renderer UI, runtime reconcile policy, or publisher-side `.sctool` authoring.
 
@@ -349,7 +349,7 @@ The Distribution private secret may be used by `.github/workflows/pages.yml` for
 
 Never place private key material in generated Pages artifacts, logs, workflow artifacts, test fixtures, committed configuration, or documentation examples.
 
-GitHub end-user credentials are also never Registry repository content. Registry access consumers use the GitHub CLI credential store and must not add GitHub access tokens, OAuth tokens, client private keys, or credential-store material to Registry metadata or SDK results.
+GitHub end-user credentials are also never Registry repository content. Optional GitHub identity consumers may use the GitHub CLI credential store, but public cache retrieval must not require or expose GitHub token material. Tokens, OAuth credentials, client private keys, and credential-store material must not enter Registry metadata or SDK artifact results.
 
 ## Registry invariants
 
