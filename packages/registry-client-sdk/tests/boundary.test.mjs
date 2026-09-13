@@ -17,7 +17,7 @@ requireEqual(
 );
 requireEqual(REGISTRY_CLIENT_SDK_VERSION, "0.2.0", "sdk version");
 requireEqual(REGISTRY_CLIENT_CONTRACT.registryContractVersion, "2.0.0", "registry contract");
-requireEqual(REGISTRY_CLIENT_CONTRACT.registryAccessContract, "registry-access-v1", "access contract");
+requireEqual(REGISTRY_CLIENT_CONTRACT.registryAccessContract, "registry-public-integrity-v1", "access contract");
 requireEqual(REGISTRY_CLIENT_CONTRACT.artifactDeliveryContractVersion, "1.0.0", "delivery contract");
 requireEqual(REGISTRY_CLIENT_CONTRACT.stagedArtifactLifecycleContract, "staged-artifact-lifecycle-v1", "staging lifecycle contract");
 requireEqual(REGISTRY_CLIENT_CONTRACT.updateCandidateContract, "update-candidate-v1", "update candidate contract");
