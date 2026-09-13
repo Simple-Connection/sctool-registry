@@ -117,13 +117,13 @@
           ],
           "properties": {
             "mode": {
-              "const": "github-authenticated"
+              "const": "public-integrity"
             },
             "provider": {
               "const": "github.com"
             },
             "credentialSource": {
-              "const": "gh-cli-credential-store"
+              "const": "none"
             },
             "backend": {
               "const": "github-release-asset"
@@ -132,18 +132,18 @@
               "const": "Simple-Connection/sctool-artifacts"
             },
             "repositoryVisibility": {
-              "const": "private"
+              "const": "public"
             },
             "requiredRepositoryPermission": {
-              "const": "contents-read"
+              "const": "none"
             },
             "contract": {
-              "const": "registry-access-v1"
+              "const": "registry-public-integrity-v1"
             }
           }
         },
         "anonymousDownloadAllowed": {
-          "const": false
+          "const": true
         },
         "gitHistoryStorageAllowed": {
           "const": false
