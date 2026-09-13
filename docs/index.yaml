@@ -9,7 +9,7 @@ responsibility_index: docs/responsibility/index.yaml
 current:
   distribution_contract_version: 1.0.3
   branch: dev/1.0.3
-  state: ACTIVE
+  state: COMPLETE
   migrations:
     machine_routing: COMPLETE
     responsibility_model: COMPLETE
@@ -76,7 +76,7 @@ versions:
       format: MACHINE_SESSION
       document: docs/ver1.0.2/session_document/ver.1.0.2_P6_simple_connection_activation_runtime.yaml
   1.0.3:
-    state: ACTIVE
+    state: COMPLETE
     branch: dev/1.0.3
     source_format: MACHINE
     migrations:
