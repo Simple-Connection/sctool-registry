@@ -50,26 +50,22 @@ function isNetworkFailure(outcome) {
   return NETWORK_ERROR_MARKERS.some((marker) => diagnostic.includes(marker));
 }
 
-function httpStatus(outcome) {
-  if (outcome?.kind !== "completed") return null;
-  const match = `${outcome.stdout ?? ""}\n${outcome.stderr ?? ""}`.match(/HTTP\s+(\d{3})\b/i);
-  return match ? Number(match[1]) : null;
-}
-
 async function runGh(runner, args, env, timeoutMs) {
   return runner({ command: "gh", args: [...args], env, timeoutMs });
 }
 
+/**
+ * Resolve the optional GitHub identity used by Simple Connection user flows.
+ *
+ * Public SCTool cache retrieval does not depend on this function and does not
+ * require repository collaborator/read permission.
+ */
 export async function checkRegistryAccess({
   runner,
   environment = {},
-  artifactRepository = DEFAULT_REGISTRY_ARTIFACT_REPOSITORY,
   timeoutMs = DEFAULT_REGISTRY_GITHUB_TIMEOUT_MS,
 } = {}) {
   if (typeof runner !== "function") return accessResult("configuration-error");
-  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(artifactRepository)) {
-    return accessResult("configuration-error");
-  }
   if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
     return accessResult("configuration-error");
   }
@@ -98,17 +94,11 @@ export async function checkRegistryAccess({
 
   const login = String(user.stdout ?? "").trim();
   if (!login) return accessResult("identity-unresolved");
-  const identity = Object.freeze({ provider: "github.com", login });
 
-  const access = await runGh(runner, ["api", `repos/${artifactRepository}`, "--silent"], env, timeoutMs);
-  if (isNetworkFailure(access)) return accessResult("network-unavailable", identity);
-  if (access?.kind !== "completed") return accessResult("configuration-error", identity);
-  if (access.exitCode === 0) return accessResult("authorized", identity);
-
-  const status = httpStatus(access);
-  if (status === 401) return accessResult("unauthenticated", identity);
-  if (status === 403 || status === 404) return accessResult("access-denied", identity);
-  return accessResult("configuration-error", identity);
+  return accessResult("authorized", Object.freeze({
+    provider: "github.com",
+    login,
+  }));
 }
 
 export function createGitHubCliCommandRunner({ execFileImpl } = {}) {
@@ -151,10 +141,9 @@ export function createGitHubCliCommandRunner({ execFileImpl } = {}) {
 export async function checkRegistryAccessWithGitHubCli({
   execFileImpl,
   environment = globalThis.process?.env ?? {},
-  artifactRepository = DEFAULT_REGISTRY_ARTIFACT_REPOSITORY,
   timeoutMs = DEFAULT_REGISTRY_GITHUB_TIMEOUT_MS,
 } = {}) {
   const runner = createGitHubCliCommandRunner({ execFileImpl });
   if (!runner) return accessResult("configuration-error");
-  return checkRegistryAccess({ runner, environment, artifactRepository, timeoutMs });
+  return checkRegistryAccess({ runner, environment, timeoutMs });
 }
