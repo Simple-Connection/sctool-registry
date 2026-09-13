@@ -1,6 +1,6 @@
 # SCTool Registry
 
-Public metadata registry and authenticated artifact distribution authority for Simple Connection SCTool packages.
+Public metadata registry and integrity-verified artifact distribution authority for Simple Connection SCTool packages.
 
 This repository is a **public registry for distribution metadata**, not a source-code or binary-artifact repository.
 A publisher's source repository may be public, private, self-hosted, or undisclosed.
@@ -22,9 +22,10 @@ Public signed registry metadata
         |
         | package/channel/version resolution
         v
-GitHub-authenticated client
+Registry client
         |
-        | authorized private Release access
+        | public exact Release retrieval
+        | + fail-closed integrity verification
         v
 Simple-Connection/sctool-artifacts
         |
@@ -45,14 +46,15 @@ schemas/*.schema.json            canonical registry contracts
 policy/registry-policy.json      machine-readable admission/access policy
 docs/REGISTRY_CONTRACT_V1.md     historical anonymous-download Registry contract
 docs/REGISTRY_CONTRACT_V2.md     current authenticated Registry contract
-docs/REGISTRY_ACCESS_V1.md       GitHub identity/private artifact access contract
+docs/REGISTRY_ACCESS_V1.md       historical private artifact access contract
+docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md current public artifact integrity/access authority
 docs/PAGES_DISTRIBUTION_V1.md    signed metadata distribution contract (legacy filename)
 trust/README.md                   Root/Distribution Actions Secret bootstrap guidance
 .github/workflows/sign-trust.yml  manual Root trust-signing workflow
 .github/workflows/pages.yml       signed distribution + exact handoff producer workflow
 ```
 
-`.sctool` binaries are not committed to this Git history. Accepted payloads are published as private GitHub Release assets in the canonical artifact repository:
+`.sctool` binaries are not committed to this Git history. Current default-channel cache payloads are published as public GitHub Release assets in the canonical artifact repository:
 
 ```text
 Simple-Connection/sctool-artifacts
@@ -66,14 +68,14 @@ Simple-Connection/sctool-artifacts
 4. Registry intake independently verifies package structure, checksums, identity, ownership, and signatures.
 5. `(package id, version, target)` is immutable after publication.
 6. Retrying the exact same digest is idempotent; a different digest for the same immutable identity is rejected.
-7. Final artifacts require authenticated GitHub access to the canonical private artifact repository.
-8. Artifact credentials are not embedded in Registry metadata or Simple Connection; the SCTool Registry access path uses the GitHub CLI credential store.
+7. Public cache retrieval does not require private repository read permission; successful download alone is not artifact trust.
+8. Artifact trust requires exact identity, publisher evidence, signed Registry state, byte-size, and SHA-256 verification.
 9. Package ownership is bound to a registered publisher identity.
 10. `.sctool` binaries are not stored in Registry Git history.
 
 ## Initial release namespace
 
-When GitHub Releases are used as the private artifact backend, the canonical tag shape is:
+When GitHub Releases are used as the public bounded cache backend, the canonical tag shape is:
 
 ```text
 sctool/{packageId}/v{version}
@@ -95,15 +97,15 @@ Git repository
   -> SCTool_Marketplace_Web materializes exact bytes at /registry/
   -> Registry consumers verify the pinned Registry Root key
   -> package artifact selected through a signed registry channel
-  -> GitHub identity/access verification through the SCTool Registry CLI/SDK
-  -> authenticated private GitHub Release .sctool retrieval
+  -> exact public GitHub Release .sctool retrieval
+  -> fail-closed artifact integrity verification
 ```
 
 The client bootstrap contract pins the public Registry head URL and Registry Root public key, not individual SCTool versions. Package descriptors resolve `defaultChannel` / `channels` to concrete versions at runtime.
 
 Registry Root and Distribution private keys are stored as separate GitHub Actions Secrets. The Root private secret is used only by the manually dispatched trust-signing workflow; routine signed distribution production receives only the Root public key and Distribution private key. Signed distribution production remains intentionally inactive until a valid Root-signed `trust/trust.json` exists. See `docs/PAGES_DISTRIBUTION_V1.md` and `trust/README.md`.
 
-Artifact access is a separate boundary. Registry Contract v2 adopts `docs/REGISTRY_ACCESS_V1.md`: the active GitHub CLI account must be authenticated and authorized to read `Simple-Connection/sctool-artifacts`. Registry access code must not extract or expose GitHub token material merely to establish identity.
+Artifact transport is a separate boundary. `docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md` defines `registry-public-integrity-v1`: `Simple-Connection/sctool-artifacts` is public transport, while accepted Registry metadata, publisher evidence, exact byte size, and SHA-256 establish trust. Optional GitHub identity flows must remain separate from artifact read authorization.
 
 Registry Intake transport, publisher enrollment workflow, authenticated artifact upload/download implementation, and SDK `publish` are follow-up implementation work.
 
