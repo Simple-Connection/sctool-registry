@@ -4,6 +4,18 @@ import type {
   RegistryGitHubIdentity,
 } from "./registry-access.mjs";
 
+export interface RegistryPublicFetchResponse {
+  readonly ok: boolean;
+  readonly status: number;
+  readonly body: unknown;
+  json(): Promise<unknown>;
+}
+
+export type RegistryPublicFetch = (
+  url: string,
+  init?: Readonly<Record<string, unknown>>,
+) => Promise<RegistryPublicFetchResponse>;
+
 export interface ResolvedRegistryTargetDelivery {
   readonly packageId: string;
   readonly version: string;
@@ -28,8 +40,8 @@ export interface ResolvedGitHubReleaseAsset {
   readonly assetId: number;
   readonly backendAssetName: string | null;
   readonly backendAssetSize: number | null;
-  readonly assetApiPath: string;
-  readonly identity: RegistryGitHubIdentity;
+  readonly assetApiUrl: string;
+  readonly identity: RegistryGitHubIdentity | null;
 }
 
 export interface RegistryArtifactReadableStream extends AsyncIterable<Uint8Array> {
@@ -84,6 +96,7 @@ export type GitHubSpawn = (
 ) => GitHubSpawnChild;
 
 export interface ResolveGitHubReleaseAssetOptions {
+  readonly fetchImpl?: RegistryPublicFetch;
   readonly runner?: RegistryCommandRunner;
   readonly environment?: Readonly<Record<string, string | undefined>>;
   readonly artifactRepository?: string;
@@ -95,6 +108,7 @@ export interface OpenGitHubReleaseAssetStreamOptions extends ResolveGitHubReleas
 }
 
 export interface OpenGitHubReleaseAssetStreamWithGitHubCliOptions {
+  readonly fetchImpl?: RegistryPublicFetch;
   readonly execFileImpl?: GitHubExecFile;
   readonly spawnImpl?: GitHubSpawn;
   readonly environment?: Readonly<Record<string, string | undefined>>;
@@ -112,7 +126,7 @@ export interface OpenedGitHubReleaseAssetStream {
   readonly assetId: number;
   readonly backendAssetName: string | null;
   readonly backendAssetSize: number | null;
-  readonly identity: RegistryGitHubIdentity;
+  readonly identity: RegistryGitHubIdentity | null;
   readonly stream: RegistryArtifactReadableStream;
   readonly completed: Promise<Readonly<{ exitCode: 0 }>>;
   readonly abort: () => boolean;
@@ -143,6 +157,7 @@ export declare function openGitHubReleaseAssetStream(
 export declare function resolveGitHubReleaseAssetWithGitHubCli(
   resolvedTarget: ResolvedRegistryTargetDelivery,
   options?: {
+    readonly fetchImpl?: RegistryPublicFetch;
     readonly execFileImpl?: GitHubExecFile;
     readonly environment?: Readonly<Record<string, string | undefined>>;
     readonly artifactRepository?: string;
