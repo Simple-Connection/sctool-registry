@@ -1,0 +1,29 @@
+schema_version: "1.0"
+document_type: registry_consumer_root_bootstrap
+natural_language: FORBIDDEN
+distribution_contract_version: "1.0.3"
+consumer:
+  repository: "Simple-Connection/SC_Linked_App"
+  bootstrap_authority: "Simple-Connection/sctool-registry"
+root:
+  key_id: "registry-root-2026-09"
+  algorithm: "ed25519"
+  encoding: "base64-raw-32"
+  public_key_b64: "KNzyHL7OPst8jS6gv5sA1u5JWx1hH2lTymjSb1pjMJA="
+bootstrap:
+  pages_base_url: "https://simple-connection.github.io/sctool-registry/"
+  registry_head_url: "https://simple-connection.github.io/sctool-registry/registry-head.json"
+  endpoint_lifecycle: "CURRENT_UNTIL_APPROVED_WEB_CUTOVER"
+provenance:
+  root_signing_run_id: 34753722087
+  root_signing_source_sha: "50ee69338cf890433ccd3a1e047489fb7863082a"
+  trust_commit: "8a1e62a72b024789ebf0e20ca726dba8a960d122"
+  trust_sequence: 1
+  trust_root_key_id: "registry-root-2026-09"
+  latest_verified_pages_run_id: 34757364135
+  latest_verified_pages_sha: "7cf8997640d2cbf03526ac0f9426ec190a72ca75"
+verification:
+  root_private_key_in_evidence: FORBIDDEN
+  runtime_root_discovery: FORBIDDEN
+  product_pin_exact_public_key: REQUIRED
+  product_signature_reimplementation: FORBIDDEN
