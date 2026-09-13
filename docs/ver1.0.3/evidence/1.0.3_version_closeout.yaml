@@ -1,0 +1,58 @@
+schema_version: '1.0'
+document_type: version_closeout
+natural_language: FORBIDDEN
+version:
+  distribution_contract_version: 1.0.3
+  development_branch: dev/1.0.3
+  development_head: c7e92e45f6416b7876d8f57a9071e436e4e834f2
+  release_commit: b626e6855df66c401ad352f0e39288319bfff091
+  production_source_head: 8a1e62a72b024789ebf0e20ca726dba8a960d122
+validation:
+  development_governance:
+    run_id: 34706062394
+    conclusion: SUCCESS
+  tooling_test:
+    run_id: 34706062424
+    conclusion: SUCCESS
+  premerge_pages:
+    run_id: 34706062450
+    conclusion: SUCCESS
+  root_trust_signing:
+    run_id: 34753722087
+    conclusion: SUCCESS
+  production_pages:
+    run_id: 34754105092
+    conclusion: SUCCESS
+    deployment: SUCCESS
+trust:
+  state: ACTIVE
+  sequence: 1
+  root_key_id: registry-root-2026-09
+  distribution_key_id: registry-distribution-2026-09
+external_integration:
+  status: PASS
+  evidence:
+  - docs/ver1.0.3/evidence/P1_sctool_sdk_marketplace_profile_handoff.yaml
+  - docs/ver1.0.3/evidence/P2_registry_client_sdk_0_2_0_product_consumption_closeout.yaml
+  - docs/ver1.0.3/evidence/P3_product_package_report_routing_handoff.yaml
+projection:
+  version_state: COMPLETE
+  validation:
+    development_docs: PASS
+    interpretation_layer: PASS
+    registry_json: PASS
+    ptsip_profile: PASS
+    ptsip_conformance: PASS
+  gates:
+    approved_sessions: PASS
+    machine_document_routing: PASS
+    responsibility_model_validation: PASS
+    interpretation_layer_validation: PASS
+    governance_layout_validation: PASS
+    development_docs_validation: PASS
+    registry_validation: PASS
+    ptsip_profile_validation: PASS
+    ptsip_conformance: PASS
+    external_integration: PASS
+    version_completion: PASS
+    merge_to_main: APPROVED
