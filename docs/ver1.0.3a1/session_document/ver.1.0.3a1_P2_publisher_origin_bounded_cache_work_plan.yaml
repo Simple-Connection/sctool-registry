@@ -1,0 +1,116 @@
+schema_version: '1.0'
+document_type: session_work_plan
+template_id: session_work_plan_v1
+natural_language: FORBIDDEN
+session:
+  id: P2
+  type: B
+  distribution_contract_version: 1.0.3a1
+  branch: dev/1.0.3a1
+  governance_repository: Simple-Connection/sctool-registry
+implementation:
+  repository: Simple-Connection/sctool-registry
+  branch: dev/1.0.3a1
+  package_path: packages/registry-client-sdk
+approval:
+  planning: APPROVED
+  implementation: APPROVED
+  implementation_materialization: ALLOWED_AFTER_APPROVAL
+baseline:
+  head_at_approval: 4546a8b3460cfff06e8ec326860fb22bbc1ed3d8
+  package_schema_version: 2.0.0
+  submission_schema_version: 1.0.0
+  cache_repository: Simple-Connection/sctool-artifacts
+  cache_role: PUBLIC_CURRENT_VERSION_CACHE
+target:
+  package_schema_version: 3.0.0
+  submission_schema_version: 2.0.0
+  origin_locator: EXACT_GITHUB_RELEASE_ASSET_IDENTITY
+  cache_locator: OPTIONAL_EXACT_GITHUB_RELEASE_ASSET_IDENTITY
+  historical_delivery: ORIGIN_ONLY
+  current_delivery: CACHE_PREFERRED_ORIGIN_FALLBACK
+  unavailable_state: ARTIFACT_UNAVAILABLE
+  redistribution_consent: SIGNED_REQUIRED_FOR_CACHE
+boundary:
+  implement:
+  - ORIGIN_CACHE_SEPARATE_LOCATORS
+  - DEFAULT_CHANNEL_CURRENT_VERSION_RULE
+  - CURRENT_ONLY_CACHE_INVARIANT
+  - HISTORICAL_ORIGIN_ONLY_INVARIANT
+  - ARTIFACT_UNAVAILABLE_SEMANTICS
+  - PUBLIC_REDISTRIBUTION_SIGNED_CONSENT
+  - CACHE_LIFECYCLE_PLAN
+  preserve:
+  - EXACT_PACKAGE_VERSION_TARGET_IDENTITY
+  - EXACT_FILENAME
+  - EXACT_SIZE
+  - EXACT_SHA256
+  - PUBLISHER_SIGNATURE_EVIDENCE
+  - SIGNED_REGISTRY_TRUST
+  - NO_PUBLISHER_CRAWLING
+  - NO_MUTABLE_LATEST
+  forbid:
+  - HISTORICAL_CACHE_REQUIRED
+  - CACHE_AS_PROVENANCE_AUTHORITY
+  - RELEASE_DISCOVERY_BY_POLLING
+  - SAME_NAME_ASSET_SEARCH
+  - CROSS_RELEASE_SEARCH
+  - VERSION_SUBSTITUTION
+  - DIGEST_SUBSTITUTION
+  - UNCONSENTED_PUBLIC_CACHE_PROMOTION
+  - MAIN_MERGE_WITHOUT_CLOSEOUT
+work_units:
+- id: P2-W1
+  state: PLANNED
+  purpose: CONTRACT_SCHEMA_TRANSITION
+  outputs:
+  - PACKAGE_SCHEMA_V3
+  - SUBMISSION_SCHEMA_V2
+  - POLICY_BOUNDED_CACHE_RULES
+- id: P2-W2
+  state: PLANNED
+  purpose: DESCRIPTOR_RESOLUTION_TRANSITION
+  depends_on: [P2-W1]
+  outputs:
+  - ORIGIN_CACHE_DESCRIPTOR_VALIDATION
+  - CURRENT_VERSION_CLASSIFICATION
+  - DELIVERY_SOURCE_SELECTION
+- id: P2-W3
+  state: PLANNED
+  purpose: EXACT_SOURCE_RETRIEVAL_AND_UNAVAILABLE
+  depends_on: [P2-W2]
+  outputs:
+  - EXACT_RELEASE_ID_RESOLUTION
+  - EXACT_ASSET_ID_RESOLUTION
+  - CACHE_TO_ORIGIN_FALLBACK
+  - HISTORICAL_ORIGIN_ONLY
+  - ARTIFACT_UNAVAILABLE
+- id: P2-W4
+  state: PLANNED
+  purpose: CACHE_LIFECYCLE_MACHINE_ENFORCEMENT
+  depends_on: [P2-W3]
+  outputs:
+  - CURRENT_ONLY_CACHE_VALIDATION
+  - REDISTRIBUTION_CONSENT_VALIDATION
+  - CACHE_PROMOTION_PLAN
+  - OLD_CACHE_EVICTION_PLAN
+- id: P2-W5
+  state: PLANNED
+  purpose: CONTRACT_REGRESSION_CLOSEOUT
+  depends_on: [P2-W4]
+  outputs:
+  - SDK_REGRESSION_PASS
+  - REGISTRY_JSON_PASS
+  - GOVERNANCE_PASS
+  - PTSIP_PASS
+completion:
+  require:
+  - PACKAGE_SCHEMA_V3_ACTIVE
+  - ORIGIN_ALWAYS_REQUIRED
+  - CACHE_OPTIONAL_CURRENT_ONLY
+  - HISTORICAL_ORIGIN_ONLY
+  - ARTIFACT_UNAVAILABLE_FAIL_CLOSED
+  - SIGNED_REDISTRIBUTION_CONSENT
+  - CACHE_LIFECYCLE_MACHINE_PLAN
+  - ALL_TESTS_PASS
+  final_output: yaml
