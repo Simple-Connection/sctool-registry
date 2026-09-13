@@ -80,8 +80,11 @@ verification:
     ptsip_exact_architecture: PASS
     production_trust_deploy: SKIPPED_INACTIVE
 publication:
-  package_publish: NOT_PERFORMED
-  reason: USER_APPROVAL_REQUIRED
+  package_publish: PUBLISHED
+  package: "@simple-connection/sctool-sdk@0.2.0"
+  run_id: 34758447337
+  source_revision: "2ee0d5c6396d790b7ae91d5f83dcab1c0f46fbe0"
+  evidence: "docs/ver1.0.3/evidence/P1_sctool_sdk_0_2_0_publication.yaml"
 consumer_change_request:
   product_plan_current_reference: "@simple-connection/sctool-sdk@1.0.3"
   authoritative_package_reference: "@simple-connection/sctool-sdk@0.2.0"
@@ -92,4 +95,4 @@ blockers:
 completion:
   profile_contract: COMPLETE
   authoring_sdk_implementation: COMPLETE
-  package_publication: OUT_OF_SCOPE_UNTIL_APPROVED
+  package_publication: COMPLETE
