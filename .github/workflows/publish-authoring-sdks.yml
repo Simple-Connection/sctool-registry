@@ -2,13 +2,20 @@ name: Publish Authoring SDK Packages
 
 on:
   workflow_dispatch:
+    inputs:
+      package:
+        description: Authoring SDK package to publish or immutably verify
+        required: true
+        default: sctool-sdk
+        type: choice
+        options:
+          - sctool-sdk
+          - repository-tool-sdk
+          - all
   push:
     branches:
-      - "dev/1.0.2"
+      - main
     paths:
-      - "packages/sctool-sdk/**"
-      - "packages/repository-tool-sdk/**"
-      - "docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml"
       - ".github/workflows/publish-authoring-sdks.yml"
 
 permissions:
@@ -21,6 +28,7 @@ concurrency:
 
 jobs:
   publish:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[publish-sctool-sdk-0.2.0]')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact source
@@ -35,22 +43,35 @@ jobs:
           registry-url: "https://npm.pkg.github.com"
           scope: "@simple-connection"
 
+      - name: Resolve publication target
+        id: target
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            target="${{ inputs.package }}"
+          else
+            target="sctool-sdk"
+          fi
+          echo "package=$target" >> "$GITHUB_OUTPUT"
+          echo "Authoring SDK publication target: $target"
+
       - name: Validate SCTool Authoring SDK
+        if: steps.target.outputs.package == 'sctool-sdk' || steps.target.outputs.package == 'all'
         run: |
           npm --prefix packages/sctool-sdk ci --ignore-scripts
           npm --prefix packages/sctool-sdk run typecheck
           npm --prefix packages/sctool-sdk run build
-          npm --prefix packages/sctool-sdk run test:localization
-          npm --prefix packages/sctool-sdk run test:host-capabilities
+          npm --prefix packages/sctool-sdk run test
           node --check packages/sctool-sdk/cli/sctool.mjs
 
       - name: Validate Repository Tool Authoring SDK
+        if: steps.target.outputs.package == 'repository-tool-sdk' || steps.target.outputs.package == 'all'
         run: |
           npm --prefix packages/repository-tool-sdk ci --ignore-scripts
           npm --prefix packages/repository-tool-sdk run typecheck
           npm --prefix packages/repository-tool-sdk run test:contract
 
-      - name: Publish or verify immutable Authoring SDK packages
+      - name: Publish or verify immutable Authoring SDK package
         shell: bash
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -116,15 +137,70 @@ jobs:
             popd >/dev/null
           }
 
-          publish_one "packages/sctool-sdk" "sctool-sdk-package"
-          publish_one "packages/repository-tool-sdk" "repository-tool-sdk-package"
+          case "${{ steps.target.outputs.package }}" in
+            sctool-sdk)
+              publish_one "packages/sctool-sdk" "sctool-sdk-package"
+              ;;
+            repository-tool-sdk)
+              publish_one "packages/repository-tool-sdk" "repository-tool-sdk-package"
+              ;;
+            all)
+              publish_one "packages/sctool-sdk" "sctool-sdk-package"
+              publish_one "packages/repository-tool-sdk" "repository-tool-sdk-package"
+              ;;
+            *)
+              echo "Unsupported publication target: ${{ steps.target.outputs.package }}" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Verify published SCTool Authoring SDK public exports
+        if: steps.target.outputs.package == 'sctool-sdk' || steps.target.outputs.package == 'all'
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          verify_dir="$RUNNER_TEMP/sctool-sdk-published-verify"
+          mkdir -p "$verify_dir"
+          pushd "$verify_dir" >/dev/null
+          npm pack "@simple-connection/sctool-sdk@0.2.0" --json --registry=https://npm.pkg.github.com > remote-pack.json
+          tarball="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('remote-pack.json','utf8'));process.stdout.write(d[0].filename)")"
+          mkdir extracted
+          tar -xzf "$tarball" -C extracted
+          node <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+          const pkg = JSON.parse(fs.readFileSync("extracted/package/package.json", "utf8"));
+          const required = [
+            "./marketplace-profile",
+            "./marketplace-profile-schema",
+            "./marketplace-profile-template",
+          ];
+          for (const key of required) {
+            if (!Object.prototype.hasOwnProperty.call(pkg.exports || {}, key)) {
+              throw new Error(`Missing published export: ${key}`);
+            }
+          }
+          const fileTargets = [
+            "dist/marketplace-profile.js",
+            "dist/marketplace-profile.d.ts",
+            "schemas/marketplace-profile.schema.json",
+            "templates/marketplace-profile.json",
+          ];
+          for (const rel of fileTargets) {
+            if (!fs.existsSync(path.join("extracted/package", rel))) {
+              throw new Error(`Missing published file: ${rel}`);
+            }
+          }
+          console.log("Published SCTool Authoring SDK exports verification PASS");
+          NODE
+          popd >/dev/null
 
       - name: Upload Authoring SDK package evidence
         uses: actions/upload-artifact@v6
         with:
-          name: authoring-sdk-package-evidence-${{ github.sha }}
-          path: |
-            ${{ runner.temp }}/sctool-sdk-package-evidence.json
-            ${{ runner.temp }}/repository-tool-sdk-package-evidence.json
+          name: authoring-sdk-package-evidence-${{ github.sha }}-${{ steps.target.outputs.package }}
+          path: ${{ runner.temp }}/*-package-evidence.json
           if-no-files-found: error
           retention-days: 30
