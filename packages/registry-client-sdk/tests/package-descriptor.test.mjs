@@ -50,7 +50,7 @@ const validDescriptor = {
           },
           delivery: {
             type: "github-release-asset",
-            access: { contract: "registry-access-v1" },
+            access: { contract: "registry-public-integrity-v1" },
             locator: {
               repository: "Simple-Connection/sctool-artifacts",
               assetId: 123456789,
@@ -75,7 +75,7 @@ const validDescriptor = {
 
 requireEqual(PACKAGE_DESCRIPTOR_SCHEMA_VERSION, "2.0.0", "schema version constant");
 requireEqual(PACKAGE_DESCRIPTOR_DELIVERY_TYPE, "github-release-asset", "delivery type constant");
-requireEqual(PACKAGE_DESCRIPTOR_ACCESS_CONTRACT, "registry-access-v1", "access contract constant");
+requireEqual(PACKAGE_DESCRIPTOR_ACCESS_CONTRACT, "registry-public-integrity-v1", "access contract constant");
 requireEqual(PACKAGE_DESCRIPTOR_ARTIFACT_REPOSITORY, "Simple-Connection/sctool-artifacts", "artifact repository constant");
 
 const valid = validatePackageDescriptor(validDescriptor, { expectedPackageId: "example-tool" });
