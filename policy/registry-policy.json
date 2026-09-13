@@ -29,16 +29,16 @@
   },
   "artifact": {
     "access": {
-      "mode": "github-authenticated",
+      "mode": "public-integrity",
       "provider": "github.com",
-      "credentialSource": "gh-cli-credential-store",
+      "credentialSource": "none",
       "backend": "github-release-asset",
       "repository": "Simple-Connection/sctool-artifacts",
-      "repositoryVisibility": "private",
-      "requiredRepositoryPermission": "contents-read",
-      "contract": "registry-access-v1"
+      "repositoryVisibility": "public",
+      "requiredRepositoryPermission": "none",
+      "contract": "registry-public-integrity-v1"
     },
-    "anonymousDownloadAllowed": false,
+    "anonymousDownloadAllowed": true,
     "gitHistoryStorageAllowed": false,
     "defaultReleaseTagPattern": "sctool/{packageId}/v{version}"
   },
