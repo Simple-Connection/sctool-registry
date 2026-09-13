@@ -3,7 +3,6 @@ export const REGISTRY_ACCESS_STATES = Object.freeze([
   "gh-unavailable",
   "unauthenticated",
   "identity-unresolved",
-  "access-denied",
   "network-unavailable",
   "configuration-error",
 ]);
