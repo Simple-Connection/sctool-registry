@@ -97,7 +97,7 @@ rationales:
       - IMPLEMENTATION_BOUNDARY_CHANGE
     statement: >-
       Registry delivery responsibility extends through exact delivery locator
-      resolution, authenticated retrieval, content integrity verification, and
+      resolution, public exact-asset retrieval, content integrity verification, and
       normalized verified update-candidate production. It stops before Simple
       Connection local installation, activation, rollback, runtime reconciliation,
       or renderer policy.
