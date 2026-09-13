@@ -1,11 +1,11 @@
-import { EventEmitter } from "node:events";
-import { PassThrough, Readable } from "node:stream";
+import { Readable } from "node:stream";
 
 import {
   RegistryArtifactDeliveryError,
   createGitHubCliStreamCommandRunner,
   deriveExpectedReleaseTag,
   openGitHubReleaseAssetStream,
+  openGitHubReleaseAssetStreamWithGitHubCli,
   resolveGitHubReleaseAsset,
 } from "@simple-connection/sctool-registry-client-sdk/artifact-delivery";
 
@@ -35,7 +35,7 @@ function target(overrides = {}) {
     targetKey: "win-x64",
     delivery: {
       type: "github-release-asset",
-      access: { contract: "registry-access-v1" },
+      access: { contract: "registry-public-integrity-v1" },
       locator: {
         repository: "Simple-Connection/sctool-artifacts",
         assetId: 101,
@@ -45,33 +45,46 @@ function target(overrides = {}) {
   };
 }
 
-function authorizedRunner({ release } = {}) {
-  const requests = [];
-  const runner = async (request) => {
-    requests.push(request);
-    const args = request.args;
-    if (args[0] === "--version") return { kind: "completed", exitCode: 0, stdout: "gh version 2\n", stderr: "" };
-    if (args[0] === "auth" && args[1] === "status") return { kind: "completed", exitCode: 0, stdout: "", stderr: "" };
-    if (args[0] === "api" && args[1] === "user") return { kind: "completed", exitCode: 0, stdout: "tester\n", stderr: "" };
-    if (args[0] === "api" && args[1] === "repos/Simple-Connection/sctool-artifacts" && args[2] === "--silent") {
-      return { kind: "completed", exitCode: 0, stdout: "", stderr: "" };
-    }
-    if (args[0] === "api" && args[1].includes("/releases/tags/")) {
-      return {
-        kind: "completed",
-        exitCode: 0,
-        stdout: JSON.stringify(release ?? {
-          id: 55,
-          tag_name: "sctool/example-tool/v1.2.3",
-          draft: false,
-          assets: [{ id: 101, name: "backend-observation.sctool", size: 999 }],
-        }),
-        stderr: "",
-      };
-    }
-    throw new Error(`unexpected command: ${JSON.stringify(args)}`);
+function jsonResponse(payload, status = 200) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    body: null,
+    async json() {
+      return payload;
+    },
   };
-  return { runner, requests };
+}
+
+function binaryResponse(chunks, status = 200) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    body: Readable.toWeb(Readable.from(chunks)),
+    async json() {
+      throw new Error("binary response has no JSON");
+    },
+  };
+}
+
+function publicFetchHarness({ release, bytes = Buffer.from([0, 1, 2, 255]), assetStatus = 200 } = {}) {
+  const requests = [];
+  const fetchImpl = async (url, init = {}) => {
+    requests.push({ url: String(url), init });
+    if (String(url).includes("/releases/tags/")) {
+      return jsonResponse(release ?? {
+        id: 55,
+        tag_name: "sctool/example-tool/v1.2.3",
+        draft: false,
+        assets: [{ id: 101, name: "backend-observation.sctool", size: 999 }],
+      });
+    }
+    if (String(url).endsWith("/releases/assets/101")) {
+      return binaryResponse([bytes.subarray(0, 2), bytes.subarray(2)], assetStatus);
+    }
+    throw new Error(`unexpected fetch: ${url}`);
+  };
+  return { fetchImpl, requests };
 }
 
 async function readAll(stream) {
@@ -81,65 +94,68 @@ async function readAll(stream) {
 }
 
 equal(deriveExpectedReleaseTag("example-tool", "1.2.3"), "sctool/example-tool/v1.2.3", "expected release tag");
+
 await errorCode(
-  () => resolveGitHubReleaseAsset(target({ delivery: { type: "other" } }), { runner: async () => null }),
+  () => resolveGitHubReleaseAsset(target({ delivery: { type: "other" } }), { fetchImpl: async () => null }),
   "unsupported-delivery",
   "unknown delivery fails closed",
 );
+
+await errorCode(
+  () => resolveGitHubReleaseAsset(target({
+    delivery: {
+      type: "github-release-asset",
+      access: { contract: "registry-public-integrity-v1" },
+      locator: { repository: "Other/repo", assetId: 101 },
+    },
+  }), { fetchImpl: async () => null }),
+  "repository-mismatch",
+  "repository mismatch",
+);
+
 await errorCode(
   () => resolveGitHubReleaseAsset(target({
     delivery: {
       type: "github-release-asset",
       access: { contract: "registry-access-v1" },
-      locator: { repository: "Other/repo", assetId: 101 },
+      locator: { repository: "Simple-Connection/sctool-artifacts", assetId: 101 },
     },
-  }), { runner: async () => null }),
-  "repository-mismatch",
-  "repository mismatch",
+  }), { fetchImpl: async () => null }),
+  "unsupported-access-contract",
+  "legacy private access contract rejected",
 );
 
-const success = authorizedRunner();
-const resolved = await resolveGitHubReleaseAsset(target(), {
-  runner: success.runner,
-  environment: { PATH: "x", GH_TOKEN: "forbidden", github_token: "forbidden2" },
-});
+const success = publicFetchHarness();
+const resolved = await resolveGitHubReleaseAsset(target(), { fetchImpl: success.fetchImpl });
 equal(resolved.expectedTag, "sctool/example-tool/v1.2.3", "resolved expected tag");
 equal(resolved.assetId, 101, "resolved exact asset id");
 equal(resolved.backendAssetName, "backend-observation.sctool", "backend name observation");
 equal(resolved.backendAssetSize, 999, "backend size observation");
-equal(resolved.identity.login, "tester", "resolved access identity");
-const releaseRequest = success.requests.at(-1);
-truthy(releaseRequest.args[1].endsWith("sctool%2Fexample-tool%2Fv1.2.3"), "release endpoint uses encoded derived tag");
-truthy(releaseRequest.args[3].includes("select(.id==101)"), "release query filters exact numeric asset id");
-truthy(!("GH_TOKEN" in releaseRequest.env), "release query strips GH_TOKEN");
-truthy(!("github_token" in releaseRequest.env), "release query strips case-insensitive github token");
+equal(resolved.identity, null, "public transport has no GitHub identity authority");
+truthy(success.requests[0].url.endsWith("sctool%2Fexample-tool%2Fv1.2.3"), "release endpoint uses encoded derived tag");
+equal("Authorization" in success.requests[0].init.headers, false, "release query has no authorization header");
 
-const draft = authorizedRunner({
+const draft = publicFetchHarness({
   release: { id: 55, tag_name: "sctool/example-tool/v1.2.3", draft: true, assets: [{ id: 101 }] },
 });
-await errorCode(() => resolveGitHubReleaseAsset(target(), { runner: draft.runner }), "release-draft", "draft release");
+await errorCode(() => resolveGitHubReleaseAsset(target(), { fetchImpl: draft.fetchImpl }), "release-draft", "draft release");
 
-const missing = authorizedRunner({
+const missing = publicFetchHarness({
   release: { id: 55, tag_name: "sctool/example-tool/v1.2.3", draft: false, assets: [] },
 });
-await errorCode(() => resolveGitHubReleaseAsset(target(), { runner: missing.runner }), "asset-not-found", "missing exact asset");
+await errorCode(() => resolveGitHubReleaseAsset(target(), { fetchImpl: missing.fetchImpl }), "asset-not-found", "missing exact asset");
 
-const streamRequests = [];
-const streamRunner = async (request) => {
-  streamRequests.push(request);
-  return {
-    kind: "started",
-    stdout: Readable.from([Buffer.from([0, 1]), Buffer.from([2, 255])]),
-    completion: Promise.resolve({ kind: "completed", exitCode: 0, stderr: "" }),
-    abort: () => true,
-  };
+const failedQuery = {
+  fetchImpl: async () => jsonResponse({ message: "not found" }, 404),
 };
-const accessForStream = authorizedRunner();
-const opened = await openGitHubReleaseAssetStream(target(), {
-  runner: accessForStream.runner,
-  streamRunner,
-  environment: { PATH: "x", GITHUB_TOKEN: "forbidden" },
-});
+await errorCode(
+  () => resolveGitHubReleaseAsset(target(), { fetchImpl: failedQuery.fetchImpl }),
+  "release-query-failed",
+  "public release query failure",
+);
+
+const streamHarness = publicFetchHarness();
+const opened = await openGitHubReleaseAssetStream(target(), { fetchImpl: streamHarness.fetchImpl });
 equal(opened.packageId, "example-tool", "stream preserves package id");
 equal(opened.releaseId, 55, "stream preserves release observation");
 equal(opened.backendAssetName, "backend-observation.sctool", "stream preserves backend name");
@@ -148,53 +164,30 @@ const bytes = await readAll(opened.stream);
 await opened.completed;
 equal(bytes.length, 4, "streamed byte count");
 equal(bytes[3], 255, "stream preserves binary bytes");
-equal(streamRequests[0].args[1], "repos/Simple-Connection/sctool-artifacts/releases/assets/101", "stream uses exact asset API path");
-equal(streamRequests[0].args[3], "Accept: application/octet-stream", "stream requests binary asset");
-truthy(!("GITHUB_TOKEN" in streamRequests[0].env), "stream strips GITHUB_TOKEN");
-truthy(accessForStream.requests.some((request) => request.args[1]?.includes("/releases/tags/")), "stream retrieval remains release-bound");
+equal(streamHarness.requests[1].url.endsWith("/repos/Simple-Connection/sctool-artifacts/releases/assets/101"), true, "stream uses exact asset API URL");
+equal(streamHarness.requests[1].init.headers.Accept, "application/octet-stream", "stream requests binary asset");
+equal("Authorization" in streamHarness.requests[1].init.headers, false, "asset request has no authorization header");
 
-const failedStreamRunner = async () => ({
-  kind: "started",
-  stdout: Readable.from([]),
-  completion: Promise.resolve({ kind: "completed", exitCode: 1, stderr: "failed" }),
-  abort: () => true,
-});
-const failedAccess = authorizedRunner();
-const failedOpened = await openGitHubReleaseAssetStream(target(), {
-  runner: failedAccess.runner,
-  streamRunner: failedStreamRunner,
-});
-await errorCode(() => failedOpened.completed, "download-failed", "nonzero stream completion fails closed");
+const failedAsset = publicFetchHarness({ assetStatus: 404 });
+await errorCode(
+  () => openGitHubReleaseAssetStream(target(), { fetchImpl: failedAsset.fetchImpl }),
+  "download-start-failed",
+  "missing public asset fails closed",
+);
 
-let spawnOptions = null;
-const spawnImpl = (_command, _args, options) => {
-  spawnOptions = options;
-  const child = new EventEmitter();
-  child.stdout = new PassThrough();
-  child.stderr = new PassThrough();
-  child.kill = () => true;
-  queueMicrotask(() => {
-    child.stdout.end(Buffer.from([7, 8]));
-    child.stderr.end();
-    child.emit("close", 0);
-  });
-  return child;
-};
-const cliStreamRunner = createGitHubCliStreamCommandRunner({ spawnImpl });
-truthy(cliStreamRunner, "stream runner created");
-const cliStarted = await cliStreamRunner({
-  command: "gh",
-  args: ["api", "repos/x/y/releases/assets/1"],
-  env: { PATH: "x" },
-  timeoutMs: 1000,
+const compat = publicFetchHarness();
+const compatOpened = await openGitHubReleaseAssetStreamWithGitHubCli(target(), {
+  fetchImpl: compat.fetchImpl,
 });
-equal(cliStarted.kind, "started", "stream runner starts process");
-const cliBytes = await readAll(cliStarted.stdout);
-const cliCompletion = await cliStarted.completion;
-equal(cliCompletion.kind, "completed", "stream runner completion");
-equal(cliCompletion.exitCode, 0, "stream runner exit code");
-equal(cliBytes[1], 8, "stream runner preserves bytes");
-equal(spawnOptions.stdio[1], "pipe", "stream runner pipes stdout");
-equal(createGitHubCliStreamCommandRunner({ spawnImpl, maxDiagnosticBytes: 0 }), null, "invalid diagnostic bound rejected");
+await readAll(compatOpened.stream);
+await compatOpened.completed;
+equal(compat.requests.length, 2, "compatibility wrapper uses public HTTP only");
+equal(createGitHubCliStreamCommandRunner(), null, "legacy CLI stream runner is disabled");
 
-console.log("Registry Client SDK artifact delivery PASS cases=29");
+await errorCode(
+  () => resolveGitHubReleaseAsset(target(), { fetchImpl: null }),
+  "configuration-error",
+  "missing public fetch fails closed",
+);
+
+console.log("Registry Client SDK public artifact delivery PASS cases=24");
