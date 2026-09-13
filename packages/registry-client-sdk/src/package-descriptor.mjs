@@ -1,4 +1,4 @@
-export const PACKAGE_DESCRIPTOR_SCHEMA_VERSION = "2.0.0";
+export const PACKAGE_DESCRIPTOR_SCHEMA_VERSION = "3.0.0";
 export const PACKAGE_DESCRIPTOR_DELIVERY_TYPE = "github-release-asset";
 export const PACKAGE_DESCRIPTOR_ACCESS_CONTRACT = "registry-public-integrity-v1";
 export const PACKAGE_DESCRIPTOR_ARTIFACT_REPOSITORY = "Simple-Connection/sctool-artifacts";
@@ -19,12 +19,13 @@ const DATE_TIME_RE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+)
 const ROOT_KEYS = new Set(["$schema", "schemaVersion", "id", "publisher", "source", "defaultChannel", "channels", "versions"]);
 const SOURCE_KEYS = new Set(["visibility", "repository"]);
 const VERSION_ENTRY_KEYS = new Set(["artifacts"]);
-const ARTIFACT_KEYS = new Set(["target", "content", "delivery", "publishedAt", "contract", "signature"]);
+const ARTIFACT_KEYS = new Set(["target", "content", "delivery", "publication", "publishedAt", "contract", "signature"]);
 const TARGET_KEYS = new Set(["platform", "arch"]);
 const CONTENT_KEYS = new Set(["filename", "sha256", "size"]);
-const DELIVERY_KEYS = new Set(["type", "access", "locator"]);
+const DELIVERY_KEYS = new Set(["type", "access", "origin", "cache"]);
 const ACCESS_KEYS = new Set(["contract"]);
-const LOCATOR_KEYS = new Set(["repository", "assetId"]);
+const LOCATOR_KEYS = new Set(["repository", "releaseId", "assetId"]);
+const PUBLICATION_KEYS = new Set(["marketplace", "publicRedistribution"]);
 const CONTRACT_KEYS = new Set(["sctoolSpecVersion"]);
 const SIGNATURE_KEYS = new Set(["algorithm", "keyId", "scope", "submissionId", "submittedAt", "sdkVersion", "value"]);
 
@@ -169,6 +170,30 @@ function validateContent(content, issues, path) {
   if (addRequired(issues, content, "size", path)) requireSafePositiveInteger(issues, content.size, `${path}.size`);
 }
 
+function validateLocator(locator, issues, path, { cache = false } = {}) {
+  if (!isPlainObject(locator)) {
+    issues.push(issue("invalid-type", path, "expected object"));
+    return;
+  }
+  addUnknownKeys(issues, locator, LOCATOR_KEYS, path);
+  if (addRequired(issues, locator, "repository", path)) {
+    requireString(issues, locator.repository, `${path}.repository`, { pattern: REPOSITORY_RE });
+    if (cache && locator.repository !== PACKAGE_DESCRIPTOR_ARTIFACT_REPOSITORY) {
+      issues.push(issue(
+        "artifact-cache-repository-mismatch",
+        `${path}.repository`,
+        `cache repository must be ${PACKAGE_DESCRIPTOR_ARTIFACT_REPOSITORY}`,
+      ));
+    }
+  }
+  if (addRequired(issues, locator, "releaseId", path)) {
+    requireSafePositiveInteger(issues, locator.releaseId, `${path}.releaseId`);
+  }
+  if (addRequired(issues, locator, "assetId", path)) {
+    requireSafePositiveInteger(issues, locator.assetId, `${path}.assetId`);
+  }
+}
+
 function validateDelivery(delivery, issues, path) {
   if (!isPlainObject(delivery)) {
     issues.push(issue("invalid-type", path, "expected object"));
@@ -189,20 +214,25 @@ function validateDelivery(delivery, issues, path) {
       }
     }
   }
-  if (addRequired(issues, delivery, "locator", path)) {
-    const locatorPath = `${path}.locator`;
-    if (!isPlainObject(delivery.locator)) {
-      issues.push(issue("invalid-type", locatorPath, "expected object"));
-    } else {
-      addUnknownKeys(issues, delivery.locator, LOCATOR_KEYS, locatorPath);
-      if (addRequired(issues, delivery.locator, "repository", locatorPath)) {
-        requireString(issues, delivery.locator.repository, `${locatorPath}.repository`, { pattern: REPOSITORY_RE });
-        if (delivery.locator.repository !== PACKAGE_DESCRIPTOR_ARTIFACT_REPOSITORY) {
-          issues.push(issue("artifact-repository-mismatch", `${locatorPath}.repository`, `repository must be ${PACKAGE_DESCRIPTOR_ARTIFACT_REPOSITORY}`));
-        }
-      }
-      if (addRequired(issues, delivery.locator, "assetId", locatorPath)) requireSafePositiveInteger(issues, delivery.locator.assetId, `${locatorPath}.assetId`);
-    }
+  if (addRequired(issues, delivery, "origin", path)) {
+    validateLocator(delivery.origin, issues, `${path}.origin`);
+  }
+  if (Object.prototype.hasOwnProperty.call(delivery, "cache")) {
+    validateLocator(delivery.cache, issues, `${path}.cache`, { cache: true });
+  }
+}
+
+function validatePublication(publication, issues, path) {
+  if (!isPlainObject(publication)) {
+    issues.push(issue("invalid-type", path, "expected object"));
+    return;
+  }
+  addUnknownKeys(issues, publication, PUBLICATION_KEYS, path);
+  if (addRequired(issues, publication, "marketplace", path) && publication.marketplace !== true) {
+    issues.push(issue("invalid-publication-intent", `${path}.marketplace`, "marketplace publication intent must be true"));
+  }
+  if (addRequired(issues, publication, "publicRedistribution", path) && typeof publication.publicRedistribution !== "boolean") {
+    issues.push(issue("invalid-type", `${path}.publicRedistribution`, "expected boolean"));
   }
 }
 
@@ -227,8 +257,8 @@ function validateSignature(signature, issues, path) {
     issues.push(issue("invalid-value", `${path}.algorithm`, "algorithm must be ed25519"));
   }
   if (Object.prototype.hasOwnProperty.call(signature, "keyId")) requireString(issues, signature.keyId, `${path}.keyId`, { pattern: KEY_ID_RE });
-  if (Object.prototype.hasOwnProperty.call(signature, "scope") && signature.scope !== "sctool-submission-v1") {
-    issues.push(issue("invalid-value", `${path}.scope`, "scope must be sctool-submission-v1"));
+  if (Object.prototype.hasOwnProperty.call(signature, "scope") && signature.scope !== "sctool-submission-v2") {
+    issues.push(issue("invalid-value", `${path}.scope`, "scope must be sctool-submission-v2"));
   }
   if (Object.prototype.hasOwnProperty.call(signature, "submissionId")) requireString(issues, signature.submissionId, `${path}.submissionId`, { minLength: 16, maxLength: 128 });
   if (Object.prototype.hasOwnProperty.call(signature, "submittedAt") && !isValidDateTime(signature.submittedAt)) {
@@ -256,6 +286,7 @@ function validateArtifact(artifact, issues, path, targetKey) {
   }
   if (Object.prototype.hasOwnProperty.call(artifact, "content")) validateContent(artifact.content, issues, `${path}.content`);
   if (Object.prototype.hasOwnProperty.call(artifact, "delivery")) validateDelivery(artifact.delivery, issues, `${path}.delivery`);
+  if (Object.prototype.hasOwnProperty.call(artifact, "publication")) validatePublication(artifact.publication, issues, `${path}.publication`);
   if (Object.prototype.hasOwnProperty.call(artifact, "publishedAt") && !isValidDateTime(artifact.publishedAt)) {
     issues.push(issue("invalid-value", `${path}.publishedAt`, "publishedAt must be an RFC 3339 date-time"));
   }
@@ -339,6 +370,33 @@ function collectPackageDescriptorIssues(input, expectedPackageId) {
     for (const [channel, version] of Object.entries(channels)) {
       if (typeof version === "string" && !Object.prototype.hasOwnProperty.call(versions, version)) {
         issues.push(issue("channel-version-missing", `$.channels.${channel}`, `channel ${channel} points to missing version ${version}`));
+      }
+    }
+
+    const currentVersion = typeof input.defaultChannel === "string"
+      ? channels[input.defaultChannel]
+      : undefined;
+    for (const [version, versionEntry] of Object.entries(versions)) {
+      if (!isPlainObject(versionEntry) || !isPlainObject(versionEntry.artifacts)) continue;
+      for (const [targetKey, artifact] of Object.entries(versionEntry.artifacts)) {
+        if (!isPlainObject(artifact) || !isPlainObject(artifact.delivery)) continue;
+        const artifactPath = `$.versions.${version}.artifacts.${targetKey}`;
+        if (Object.prototype.hasOwnProperty.call(artifact.delivery, "cache")) {
+          if (version !== currentVersion) {
+            issues.push(issue(
+              "historical-cache-forbidden",
+              `${artifactPath}.delivery.cache`,
+              "central cache is allowed only for the current default-channel version",
+            ));
+          }
+          if (!isPlainObject(artifact.publication) || artifact.publication.publicRedistribution !== true) {
+            issues.push(issue(
+              "cache-redistribution-consent-required",
+              `${artifactPath}.publication.publicRedistribution`,
+              "public cache requires signed public redistribution consent",
+            ));
+          }
+        }
       }
     }
   }
