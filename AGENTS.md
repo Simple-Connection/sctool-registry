@@ -2,7 +2,7 @@
 
 ## Repository authority
 
-This repository is the public SCTool metadata registry, authenticated artifact-distribution authority, Registry Client SDK authority, and canonical source/publication authority for the SCTool and Repository Tool Authoring SDKs.
+This repository is the public SCTool metadata registry, artifact-distribution integrity authority, Registry Client SDK authority, and canonical source/publication authority for the SCTool and Repository Tool Authoring SDKs.
 
 Before changing registry identity, schema, publisher trust, package ownership, artifact access/immutability, distribution behavior, Registry Client SDK behavior, or Authoring SDK behavior, read:
 
@@ -11,6 +11,7 @@ docs/REGISTRY_CONTRACT_V2.md
 docs/REGISTRY_ACCESS_V1.md
 docs/ARTIFACT_DELIVERY_V1.md
 docs/REGISTRY_ARTIFACT_CUSTODY_CACHE_POLICY_V1.md
+docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md
 docs/PAGES_DISTRIBUTION_V1.md
 policy/registry-policy.json
 ptsip.yaml
@@ -358,9 +359,10 @@ GitHub end-user credentials are also never Registry repository content. Registry
 4. Registry Intake independently revalidates submitted artifacts.
 5. `(packageId, version, target)` is immutable after publication.
 6. Exact-digest retry is idempotent; different-digest overwrite is rejected.
-7. Published `.sctool` artifacts require authenticated GitHub access to `Simple-Connection/sctool-artifacts`.
-8. GitHub authentication identity is resolved through the GitHub CLI credential-store session; Registry access code must not extract credential material merely to establish identity.
-9. `.sctool` binaries are not stored in Registry Git history.
-10. Simple Connection does not hardcode individual SCTool versions; signed Registry channels resolve versions.
-11. Root trust signing and routine Distribution signing use separate Actions Secrets.
-12. Simple Connection UI/install/runtime policy remains outside the Registry access contract and Registry Client SDK ownership.
+7. The approved target central cache is public `Simple-Connection/sctool-artifacts`; repository visibility and successful download are not artifact trust authorities.
+8. Artifact trust requires fail-closed verification against accepted Registry content identity, publisher evidence, signed Registry state, exact byte size, and SHA-256.
+9. GitHub authentication may serve user identity flows but must not be required solely to authorize reading public central-cache assets after the public-integrity migration.
+10. `.sctool` binaries are not stored in Registry Git history.
+11. Simple Connection does not hardcode individual SCTool versions; signed Registry channels resolve versions.
+12. Root trust signing and routine Distribution signing use separate Actions Secrets.
+13. Simple Connection UI/install/runtime policy remains outside the Registry access contract and Registry Client SDK ownership.
