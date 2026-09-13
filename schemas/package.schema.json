@@ -156,7 +156,7 @@
           "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._:-]{0,126}[A-Za-z0-9])?$"
         },
         "scope": {
-          "const": "sctool-submission-v1"
+          "const": "sctool-submission-v2"
         },
         "submissionId": {
           "type": "string",
@@ -183,6 +183,7 @@
         "target",
         "content",
         "delivery",
+        "publication",
         "publishedAt",
         "contract",
         "signature"
@@ -206,6 +207,25 @@
         },
         "signature": {
           "$ref": "#/$defs/signature"
+        },
+        "publication": {
+          "$ref": "#/$defs/publication"
+        }
+      }
+    },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "marketplace",
+        "publicRedistribution"
+      ],
+      "properties": {
+        "marketplace": {
+          "const": true
+        },
+        "publicRedistribution": {
+          "type": "boolean"
         }
       }
     }
