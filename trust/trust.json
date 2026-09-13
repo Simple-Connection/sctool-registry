@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0.0",
+  "signed": {
+    "scope": "sctool-registry-trust-v1",
+    "sequence": 1,
+    "issuedAt": "2026-09-13T09:55:35Z",
+    "rootKeyId": "registry-root-2026-09",
+    "distributionKeys": [
+      {
+        "keyId": "registry-distribution-2026-09",
+        "algorithm": "ed25519",
+        "encoding": "base64-raw-32",
+        "publicKey": "LJA5JUQEFJaaNwymyG019+Sgcwtia9HAQl4J6iewZ9c=",
+        "status": "active",
+        "validFrom": "2026-09-13T09:55:35Z"
+      }
+    ]
+  },
+  "proof": {
+    "algorithm": "ed25519",
+    "scope": "sctool-registry-trust-v1",
+    "keyId": "registry-root-2026-09",
+    "signature": "HBGXRbD4+0wSyUv/Bn1Rb2mc71uoMN5TFWhuDs3RXW0yz42yG9Ph0Zm6HX6JC0IW2CUlQmsmhGsdYflYKJ6vBg=="
+  }
+}
