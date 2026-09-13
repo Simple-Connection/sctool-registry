@@ -70,7 +70,10 @@ if (sourceRef !== "refs/heads/main") {
 if (artifactName !== `registry-signed-distribution-${sourceRevision}`) {
   throw new Error(`Artifact name does not bind exact revision: ${artifactName}`);
 }
-if (!/^sha256:[0-9a-f]{64}$/.test(artifactDigest)) {
+const normalizedArtifactDigest = /^[0-9a-f]{64}$/.test(artifactDigest)
+  ? `sha256:${artifactDigest}`
+  : artifactDigest;
+if (!/^sha256:[0-9a-f]{64}$/.test(normalizedArtifactDigest)) {
   throw new Error(`Invalid artifact digest: ${artifactDigest}`);
 }
 
@@ -149,7 +152,7 @@ const evidence = {
   artifact: {
     name: artifactName,
     id: artifactId,
-    digest: artifactDigest,
+    digest: normalizedArtifactDigest,
   },
   registry: {
     trustSequence: trust.signed.sequence,
