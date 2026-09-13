@@ -5,7 +5,7 @@ natural_language: FORBIDDEN
 version:
   distribution_contract_version: 1.0.3
   branch: dev/1.0.3
-  state: ACTIVE
+  state: COMPLETE
   baseline_main: f12ac6dd604c0bcbbc8f6cb282f22d41631201fb
   previous_distribution_contract_version: 1.0.2
 routing:
