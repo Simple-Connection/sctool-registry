@@ -66,7 +66,7 @@ boundary:
   - MAIN_MERGE_WITHOUT_CLOSEOUT
 work_units:
 - id: P2-W1
-  state: PLANNED
+  state: COMPLETE
   purpose: CONTRACT_SCHEMA_TRANSITION
   outputs:
   - PACKAGE_SCHEMA_V3
@@ -74,7 +74,7 @@ work_units:
   - POLICY_BOUNDED_CACHE_RULES
   - ARTIFACT_DELIVERY_V2
 - id: P2-W2
-  state: PLANNED
+  state: COMPLETE
   purpose: DESCRIPTOR_RESOLUTION_TRANSITION
   depends_on: [P2-W1]
   outputs:
@@ -82,7 +82,7 @@ work_units:
   - CURRENT_VERSION_CLASSIFICATION
   - DELIVERY_SOURCE_SELECTION
 - id: P2-W3
-  state: PLANNED
+  state: COMPLETE
   purpose: EXACT_SOURCE_RETRIEVAL_AND_UNAVAILABLE
   depends_on: [P2-W2]
   outputs:
@@ -92,7 +92,7 @@ work_units:
   - HISTORICAL_ORIGIN_ONLY
   - ARTIFACT_UNAVAILABLE
 - id: P2-W4
-  state: PLANNED
+  state: COMPLETE
   purpose: CACHE_LIFECYCLE_MACHINE_ENFORCEMENT
   depends_on: [P2-W3]
   outputs:
@@ -101,7 +101,7 @@ work_units:
   - CACHE_PROMOTION_PLAN
   - OLD_CACHE_EVICTION_PLAN
 - id: P2-W5
-  state: PLANNED
+  state: COMPLETE
   purpose: CONTRACT_REGRESSION_CLOSEOUT
   depends_on: [P2-W4]
   outputs:
