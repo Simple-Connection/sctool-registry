@@ -12,10 +12,11 @@ export interface VerifiedArtifactRecord {
   readonly packageId: string;
   readonly version: string;
   readonly targetKey: string | null;
+  readonly source: "cache" | "origin";
   readonly repository: string;
-  readonly expectedTag: string;
-  readonly releaseId: number | null;
+  readonly releaseId: number;
   readonly assetId: number;
+  readonly backendTag: string | null;
   readonly filename: string;
   readonly size: number;
   readonly sha256: string;
