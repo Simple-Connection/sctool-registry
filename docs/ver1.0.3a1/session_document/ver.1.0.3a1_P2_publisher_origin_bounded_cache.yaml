@@ -19,8 +19,8 @@ routing:
   type_template: docs/template/session_document_template/session_type_B.yaml
 heads:
   start: 4546a8b3460cfff06e8ec326860fb22bbc1ed3d8
-  implementation: null
-  exact_validation: null
+  implementation: 8cca238e1804e37d5b5dbcc0205dc3541bca90aa
+  exact_validation: 8cca238e1804e37d5b5dbcc0205dc3541bca90aa
 responsibility_model:
   effects:
     assign: []
@@ -53,7 +53,11 @@ payload:
     - RESP_REGISTRY_RELEASE_RESOLUTION
     - RESP_REGISTRY_ARTIFACT_RETRIEVAL
     - RESP_REGISTRY_ARTIFACT_INTEGRITY
-    contract_refs: []
+    contract_refs:
+    - CONTRACT_REGISTRY_V2
+    - CONTRACT_PACKAGE_SCHEMA_V3
+    - CONTRACT_ARTIFACT_DELIVERY_V2
+    - CONTRACT_REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_V1
     path_allow:
     - policy/registry-policy.json
     - schemas/policy.schema.json
@@ -86,7 +90,7 @@ payload:
   - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
 work_units:
 - id: P2-W1
-  status: PENDING
+  status: COMPLETE
   responsibility_refs:
   - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
   output_refs:
@@ -95,7 +99,7 @@ work_units:
   - policy/registry-policy.json
   completion_codes: [P2_CONTRACT_SCHEMA_TRANSITION_COMPLETE]
 - id: P2-W2
-  status: PENDING
+  status: COMPLETE
   responsibility_refs:
   - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
   - RESP_REGISTRY_CHANNEL_RESOLUTION
@@ -107,7 +111,7 @@ work_units:
   - packages/registry-client-sdk/src/resolution.mjs
   completion_codes: [P2_DESCRIPTOR_SOURCE_SELECTION_COMPLETE]
 - id: P2-W3
-  status: PENDING
+  status: COMPLETE
   responsibility_refs:
   - RESP_REGISTRY_RELEASE_RESOLUTION
   - RESP_REGISTRY_ARTIFACT_RETRIEVAL
@@ -118,7 +122,7 @@ work_units:
   - packages/registry-client-sdk/src/artifact-integrity.mjs
   completion_codes: [P2_EXACT_SOURCE_RETRIEVAL_COMPLETE]
 - id: P2-W4
-  status: PENDING
+  status: COMPLETE
   responsibility_refs:
   - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
   - RESP_REGISTRY_CHANNEL_RESOLUTION
@@ -128,7 +132,7 @@ work_units:
   - tools/artifact-cache-lifecycle.py
   completion_codes: [P2_CACHE_LIFECYCLE_MACHINE_ENFORCEMENT_COMPLETE]
 - id: P2-W5
-  status: PENDING
+  status: COMPLETE
   responsibility_refs:
   - RESP_REGISTRY_ARTIFACT_INTEGRITY
   input_refs: [P2-W4]
@@ -145,6 +149,45 @@ evidence:
     publisher_origin: REQUIRED
     bounded_current_cache: APPROVED
     signed_redistribution_consent: REQUIRED
+- id: E_P2_IMPLEMENTATION
+  kind: COMMIT_SET
+  head: 8cca238e1804e37d5b5dbcc0205dc3541bca90aa
+  refs:
+    package_schema: 3.0.0
+    submission_schema: 2.0.0
+    artifact_delivery_contract: 2.0.0
+    origin_locator: REPOSITORY_RELEASE_ID_ASSET_ID
+    cache_locator: OPTIONAL_REPOSITORY_RELEASE_ID_ASSET_ID
+    current_delivery: CACHE_PREFERRED_ORIGIN_FALLBACK
+    historical_delivery: ORIGIN_ONLY
+    unavailable_state: ARTIFACT_UNAVAILABLE
+    redistribution_consent: SIGNED_REQUIRED
+    cache_mutation_automation: DEFERRED
+    registry_intake_service: DEFERRED
+- id: E_P2_EXACT_VALIDATION
+  kind: EXACT_VALIDATION
+  head: 8cca238e1804e37d5b5dbcc0205dc3541bca90aa
+  refs:
+    governance_run_id: 34768415837
+    governance: PASS
+    producer_validation_run_id: 34768415968
+    producer_validation: PASS
+    producer_sdk_boundary: PASS
+    package_descriptor_v3: PASS
+    resolution_v3: PASS
+    exact_origin_cache_delivery: PASS
+    artifact_integrity_v3: PASS
+    cache_fallback_historical_origin: PASS
+    registry_json_contracts: PASS
+    package_v3_custody_fixture: PASS
+    submission_v2_fixture: PASS
+    cache_lifecycle_planner: PASS
+    ptsip_validation: PASS
+    ptsip_conformance: PASS
+    tooling_run_id: 34768415842
+    tooling: PASS
+    dedicated_sdk_regression_run_id: 34768323087
+    dedicated_sdk_regression: PASS
 gates:
 - id: GATE_SESSION_APPROVAL
   required: true
@@ -152,32 +195,32 @@ gates:
   evidence_refs: [E_P2_APPROVAL]
 - id: GATE_PACKAGE_DESCRIPTOR_REGRESSION
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs: [E_P2_EXACT_VALIDATION]
 - id: GATE_RESOLUTION_REGRESSION
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs: [E_P2_EXACT_VALIDATION]
 - id: GATE_ARTIFACT_DELIVERY_REGRESSION
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs: [E_P2_EXACT_VALIDATION]
 - id: GATE_ARTIFACT_INTEGRITY_REGRESSION
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs: [E_P2_EXACT_VALIDATION]
 - id: GATE_REGISTRY_JSON
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs: [E_P2_EXACT_VALIDATION]
 - id: GATE_PTSIP_PROFILE
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs: [E_P2_EXACT_VALIDATION]
 - id: GATE_PTSIP_CONFORMANCE
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs: [E_P2_EXACT_VALIDATION]
 blockers: []
 state:
   mode: DERIVED
