@@ -4,7 +4,7 @@ export const REGISTRY_CLIENT_SDK_VERSION = "0.2.0";
 export const REGISTRY_CLIENT_CONTRACT = Object.freeze({
   registryContractVersion: "2.0.0",
   registryAccessContract: "registry-public-integrity-v1",
-  artifactDeliveryContractVersion: "1.0.0",
+  artifactDeliveryContractVersion: "2.0.0",
   stagedArtifactLifecycleContract: "staged-artifact-lifecycle-v1",
   updateCandidateContract: "update-candidate-v1",
   discoveryContract: "registry-discovery-v1",
