@@ -2,6 +2,7 @@ import type {
   RegistryArtifactContent,
   RegistryArtifactContract,
   RegistryArtifactDelivery,
+  RegistryArtifactPublication,
   RegistryArtifactSignature,
   RegistryArtifactTarget,
   RegistryPackageVersion,
@@ -27,11 +28,22 @@ export interface ResolvedRegistryPackageVersion {
   readonly channel: string | null;
   readonly version: string;
   readonly versionEntry: RegistryPackageVersion;
+  readonly currentDefaultVersion: string;
+  readonly isCurrentDefaultVersion: boolean;
 }
 
 export interface RegistryPackageTargetSelector extends RegistryPackageVersionSelector {
   readonly platform: string;
   readonly arch: string;
+}
+
+export type RegistryArtifactDeliverySource = "cache" | "origin";
+
+export interface RegistryArtifactDeliveryPlan {
+  readonly currentDefaultVersion: string;
+  readonly isCurrentDefaultVersion: boolean;
+  readonly preferredSource: RegistryArtifactDeliverySource;
+  readonly fallbackSource: "origin" | null;
 }
 
 export interface ResolvedRegistryPackageTarget {
@@ -42,6 +54,8 @@ export interface ResolvedRegistryPackageTarget {
   readonly target: RegistryArtifactTarget;
   readonly content: RegistryArtifactContent;
   readonly delivery: RegistryArtifactDelivery;
+  readonly publication: RegistryArtifactPublication;
+  readonly deliveryPlan: RegistryArtifactDeliveryPlan;
   readonly publishedAt: string;
   readonly contract: RegistryArtifactContract;
   readonly signature: RegistryArtifactSignature;
