@@ -7,17 +7,17 @@ rules_index: docs/rules/index.yaml
 template_index: docs/template/index.yaml
 responsibility_index: docs/responsibility/index.yaml
 current:
-  distribution_contract_version: 1.0.3
-  branch: dev/1.0.3
-  state: COMPLETE
+  distribution_contract_version: 1.0.3a1
+  branch: dev/1.0.3a1
+  state: ACTIVE
   migrations:
     machine_routing: COMPLETE
     responsibility_model: COMPLETE
     interpretation_layer: COMPLETE
     governance_layout: COMPLETE
-  improvement_plan: docs/ver1.0.3/1.0.3_Improvement_plan.yaml
-  current_session: null
-  current_session_document: null
+  improvement_plan: docs/ver1.0.3a1/1.0.3a1_Improvement_plan.yaml
+  current_session: P1
+  current_session_document: docs/ver1.0.3a1/session_document/ver.1.0.3a1_P1_public_artifact_integrity_migration.yaml
   next_session: null
 versions:
   1.0.1:
@@ -107,6 +107,26 @@ versions:
       document: docs/ver1.0.3/session_document/ver.1.0.3_P3_product_package_report_routing.yaml
       planning_state: CONCRETIZED
       planning_document: docs/ver1.0.3/session_document/ver.1.0.3_P3_product_package_report_routing_work_plan.yaml
+  1.0.3a1:
+    state: ACTIVE
+    branch: dev/1.0.3a1
+    source_format: MACHINE
+    migrations:
+      machine_routing: COMPLETE
+      responsibility_model: COMPLETE
+      interpretation_layer: COMPLETE
+      governance_layout: COMPLETE
+    improvement_plan:
+      path: docs/ver1.0.3a1/1.0.3a1_Improvement_plan.yaml
+      format: MACHINE_YAML
+    session_document_root: docs/ver1.0.3a1/session_document
+    sessions:
+    - id: P1
+      state: ACTIVE
+      format: MACHINE_SESSION
+      document: docs/ver1.0.3a1/session_document/ver.1.0.3a1_P1_public_artifact_integrity_migration.yaml
+      planning_state: CONCRETIZED
+      planning_document: docs/ver1.0.3a1/session_document/ver.1.0.3a1_P1_public_artifact_integrity_migration_work_plan.yaml
 templates:
   improvement_plan: docs/template/improvement_plan.yaml
   session_essential: docs/template/session_document_template/session_document_essential.yaml
