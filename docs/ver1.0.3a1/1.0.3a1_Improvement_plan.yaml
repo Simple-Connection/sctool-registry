@@ -17,7 +17,7 @@ routing:
 sessions:
 - id: P1
   type: B
-  state: ACTIVE
+  state: COMPLETE
   approval: APPROVED
   responsibility_refs:
   - RESP_REGISTRY_ACCESS
@@ -34,21 +34,21 @@ migrations:
   governance_layout: COMPLETE
 validation:
   evidence_head: null
-  development_docs: PENDING
-  interpretation_layer: PENDING
-  registry_json: PENDING
-  ptsip_profile: PENDING
-  ptsip_conformance: PENDING
+  development_docs: PASS
+  interpretation_layer: PASS
+  registry_json: PASS
+  ptsip_profile: PASS
+  ptsip_conformance: PASS
 gates:
   approved_sessions: PASS
-  machine_document_routing: PENDING
-  responsibility_model_validation: PENDING
-  interpretation_layer_validation: PENDING
-  governance_layout_validation: PENDING
-  development_docs_validation: PENDING
-  registry_validation: PENDING
-  ptsip_profile_validation: PENDING
-  ptsip_conformance: PENDING
+  machine_document_routing: PASS
+  responsibility_model_validation: PASS
+  interpretation_layer_validation: PASS
+  governance_layout_validation: PASS
+  development_docs_validation: PASS
+  registry_validation: PASS
+  ptsip_profile_validation: PASS
+  ptsip_conformance: PASS
   external_integration: NOT_APPLICABLE
   version_completion: PENDING
   merge_to_main: BLOCKED
