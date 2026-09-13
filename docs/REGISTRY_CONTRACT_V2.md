@@ -17,7 +17,7 @@ GitHub login = optional separate user-identity flow, not cache read authorizatio
 ```
 
 GitHub Pages metadata signing, Root/Distribution trust, immutable snapshots, and client anti-rollback remain governed by `docs/PAGES_DISTRIBUTION_V1.md`.
-Where that v1 Pages document describes `.sctool` payloads as anonymous assets, this contract, `docs/REGISTRY_ACCESS_V1.md`, and `docs/ARTIFACT_DELIVERY_V1.md` supersede only that payload-access/delivery assumption; signed metadata mechanics remain unchanged.
+Where that v1 Pages document describes `.sctool` payloads as anonymous assets, this contract, `docs/REGISTRY_ACCESS_V1.md`, and `docs/ARTIFACT_DELIVERY_V2.md` supersede only that payload-access/delivery assumption; signed metadata mechanics remain unchanged.
 
 ## 1. Identity
 
@@ -84,20 +84,22 @@ Registry Intake does not trust a publisher-side validation result as proof of ac
 
 ## 4. Submission signature
 
-The only v2 submission signature algorithm is Ed25519.
+The submission signature algorithm is Ed25519.
 
-The signature scope remains:
+The active submission schema and signature scope are:
 
 ```text
-sctool-submission-v1
+schemas/submission.schema.json
+schemaVersion = 2.0.0
+scope = sctool-submission-v2
 ```
 
-The v2 Registry contract does not change the signed submission payload merely because artifact delivery is authenticated.
+Submission v2 binds both the exact publisher-origin locator and explicit publication intent into publisher-signed evidence.
 
 The canonical UTF-8 payload is LF-delimited in the exact order below, with no trailing LF:
 
 ```text
-SCTOOL-SUBMISSION-V1
+SCTOOL-SUBMISSION-V2
 {submission.id}
 {submission.createdAt}
 {package.id}
@@ -107,18 +109,31 @@ SCTOOL-SUBMISSION-V1
 {artifact.filename}
 {artifact.sha256}
 {artifact.size}
+{origin.type}
+{origin.repository}
+{origin.releaseId}
+{origin.assetId}
+{publication.marketplace}
+{publication.publicRedistribution}
 {contract.sctoolSpecVersion}
 {contract.sdkVersion}
 {publisher.id}
 {publisher.keyId}
 ```
 
+Boolean publication fields are serialized as lowercase `true` or `false`.
+
 `artifact.sha256` is lowercase hexadecimal SHA-256 of the exact submitted `.sctool` bytes.
-`artifact.size` is the exact byte length represented as an unsigned base-10 integer.
+`artifact.size`, `origin.releaseId`, and `origin.assetId` are unsigned base-10 integers.
 
-The Registry reconstructs this payload from the received submission and verifies the signature against the registered publisher public key.
+The Registry reconstructs this payload from the submission and verifies the signature against the registered publisher public key.
 
-Package descriptor field placement after admission is governed separately by `ARTIFACT_DELIVERY_V1`; that structural separation does not alter the submission signature scope or payload above.
+`publication.marketplace = true` is explicit Marketplace publication intent.
+`publication.publicRedistribution = true` additionally grants Simple-Connection permission to place the exact accepted bytes in the bounded public central cache.
+
+A publisher Release existing by itself is not publication intent.
+
+Package descriptor field placement after admission is governed by `ARTIFACT_DELIVERY_V2`. The accepted package descriptor preserves the v2 publication intent and signature evidence.
 
 ## 5. Registry Intake validation
 
@@ -175,7 +190,9 @@ A delivery locator is not part of immutable Registry identity and may not be use
 
 Canonical Registry metadata remains public and is distributed as signed metadata.
 
-The current central `.sctool` cache backend is:
+Long-term artifact custody belongs to the publisher origin recorded in the accepted package descriptor.
+
+The bounded Simple-Connection cache backend is:
 
 ```text
 provider:             github.com
@@ -183,27 +200,40 @@ backend:              github-release-asset
 repository:           Simple-Connection/sctool-artifacts
 repositoryVisibility: public
 accessContract:       registry-public-integrity-v1
+role:                 current-default-channel-cache
 ```
 
-A conforming client does **not** require collaborator membership, private-repository read permission, or GitHub authentication solely to retrieve a public central-cache asset.
-
-Public retrieval is transport only. Before bytes become a verified artifact, the client must preserve exact release/asset binding and verify the accepted filename, byte size, SHA-256, publisher evidence, and signed Registry state required by the applicable contracts.
-
-The canonical release tag shape remains:
+The current default-channel version is exactly:
 
 ```text
-sctool/{packageId}/v{version}
+package.channels[package.defaultChannel]
 ```
 
-Example:
+Only that version may carry a central-cache locator in steady-state Registry metadata, and only when publisher-signed submission evidence permits public redistribution.
+
+Historical and alternate-channel versions are retrieved from their exact publisher origin.
+
+Package schema `3.0.0` records exact GitHub locators as:
 
 ```text
-sctool/openai-local-bridge/v0.3.1
+repository
+releaseId
+assetId
 ```
+
+Release tags are observations only and are not locator authority. A conforming client resolves the exact numeric release ID and exact numeric asset ID.
+
+For a current version with a valid cache locator, the cache is preferred. If cache retrieval or integrity verification fails, the client may retry the exact publisher origin for the same accepted content identity.
+
+If every allowed exact location is unavailable or fails verification, the result is:
+
+```text
+ARTIFACT_UNAVAILABLE
+```
+
+No failure permits version substitution, target substitution, cross-release search, same-name search, mutable-latest lookup, or digest substitution.
 
 `.sctool` payloads must not be committed into Registry Git history.
-
-Knowing a release URL, asset ID, tag, or asset name does not establish artifact trust.
 
 ## 8. GitHub identity boundary
 
@@ -272,21 +302,23 @@ Public-integrity artifact delivery changes how the selected payload is retrieved
 
 ## 11. Package descriptor and artifact delivery contract
 
-The transitional flat HTTPS locator is retired.
-The canonical package descriptor schema is now:
+The canonical package descriptor schema is:
 
 ```text
 schemas/package.schema.json
-schemaVersion = 2.0.0
+schemaVersion = 3.0.0
 ```
 
-Artifact content and delivery are separated according to:
+The current artifact delivery contract is:
 
 ```text
-docs/ARTIFACT_DELIVERY_V1.md
+docs/ARTIFACT_DELIVERY_V2.md
+artifact_delivery_contract_version = 2.0.0
 ```
 
-The canonical artifact shape is:
+`ARTIFACT_DELIVERY_V2` remains the historical single-central-locator reference.
+
+The canonical artifact shape separates immutable content identity from delivery locations:
 
 ```text
 artifact
@@ -297,69 +329,43 @@ artifact
 │  └─ size
 ├─ delivery
 │  ├─ type = github-release-asset
-│  ├─ access
-│  │  └─ contract = registry-public-integrity-v1
-│  └─ locator
+│  ├─ access.contract = registry-public-integrity-v1
+│  ├─ origin
+│  │  ├─ repository
+│  │  ├─ releaseId
+│  │  └─ assetId
+│  └─ cache (optional)
 │     ├─ repository
+│     ├─ releaseId
 │     └─ assetId
+├─ publication
+│  ├─ marketplace = true
+│  └─ publicRedistribution = true | false
 ├─ publishedAt
 ├─ contract
-└─ signature
+└─ signature.scope = sctool-submission-v2
 ```
 
-For Registry Distribution `1.0.1`:
+`delivery.origin` is always required.
 
-```text
-delivery.locator.repository
-= Simple-Connection/sctool-artifacts
+`delivery.cache` is optional and may exist only for the current default-channel version. Its repository must equal `Simple-Connection/sctool-artifacts`, and signed publication evidence must have `publicRedistribution = true`.
 
-delivery.locator.assetId
-= positive JavaScript-safe GitHub Release asset integer
-```
+The publisher origin repository is not constrained to the central cache repository.
 
-The expected release tag is not duplicated in package metadata. It is derived from canonical package identity:
+Unknown delivery types, malformed locators, historical cache locators, unconsented cache locators, and content identity mismatches fail closed.
 
-```text
-sctool/{packageId}/v{version}
-```
-
-The backend asset name is not a second naming authority; a resolved GitHub asset must match `content.filename`.
-Retrieved bytes must match `content.size` and `content.sha256`.
-
-The package descriptor must not contain credential material, authenticated user identity, private keys, token sources, or entitlement state.
-
-Unknown delivery types and invalid/mismatched delivery metadata fail closed. There is no generic HTTPS fallback.
-
-The earlier descriptor fields:
-
-```text
-assetName
-url
-sha256
-size
-```
-
-are not accepted as the v2 artifact shape. Their responsibilities are now represented as:
-
-```text
-assetName -> content.filename
-sha256    -> content.sha256
-size      -> content.size
-url       -> removed from the common artifact envelope
-```
-
-No compatibility bridge is required because the Registry currently contains zero published packages and production trust remains inactive.
+No compatibility bridge is required for the package-schema-2 to package-schema-3 transition because the Registry currently contains zero published packages.
 
 ## 12. Pages distribution compatibility
 
 Signed GitHub Pages snapshots continue to aggregate complete package descriptors.
-The existing head/snapshot signing and anti-rollback model is unchanged by package descriptor schema `2.0.0`.
+The existing head/snapshot signing and anti-rollback model is unchanged by package descriptor schema `3.0.0`.
 
-`registry-snapshot.schema.json` resolves `package.schema.json`, so a package descriptor `2.0.0` is validated inside the existing signed snapshot envelope.
+`registry-snapshot.schema.json` resolves `package.schema.json`, so a package descriptor `3.0.0` is validated inside the existing signed snapshot envelope.
 
 The numeric `assetId` is restricted to the JavaScript safe-integer range to remain compatible with SCTool canonical JSON v1 signed metadata.
 
-Production trust activation remains separately deferred. Adoption of descriptor schema `2.0.0` does not activate Root trust or Pages publication by itself.
+Production trust activation remains separately deferred. Adoption of descriptor schema `3.0.0` does not activate Root trust or Pages publication by itself.
 
 ## 13. Security properties and non-goals
 
