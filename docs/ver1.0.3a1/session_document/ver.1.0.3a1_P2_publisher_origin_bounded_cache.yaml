@@ -63,10 +63,13 @@ payload:
     - docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md
     - docs/REGISTRY_CONTRACT_V2.md
     - docs/ARTIFACT_DELIVERY_V1.md
+    - docs/ARTIFACT_DELIVERY_V2.md
     - docs/responsibility/**
+    - README.md
     - packages/registry-client-sdk/**
     - tools/validate-registry.py
-    - tools/test-delivery-package-schema-v2.py
+    - tools/test-delivery-package-schema-v3.py
+    - tools/test-submission-schema-v2.py
     - tools/artifact-cache-lifecycle.py
     - .github/workflows/registry-client-sdk-regression.yml
     - .github/workflows/pages.yml
