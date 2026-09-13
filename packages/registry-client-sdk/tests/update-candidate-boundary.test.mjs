@@ -15,9 +15,7 @@ import {
 const target = makeTarget();
 const harness = createRetrievalHarness(target);
 const resolution = await resolveUpdateCandidate(target, observation("1.2.2"), {
-  runner: harness.runner,
-  streamRunner: harness.streamRunner,
-  environment: { PATH: "x", GH_TOKEN: "forbidden" },
+  fetchImpl: harness.fetchImpl,
 });
 const candidate = resolution.candidate;
 truthy(candidate, "candidate exists");
