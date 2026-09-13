@@ -40,6 +40,7 @@ components:
       - "policy/registry-policy.json"
       - "docs/REGISTRY_CONTRACT_V2.md"
       - "docs/REGISTRY_ACCESS_V1.md"
+      - "docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md"
       - "docs/ARTIFACT_DELIVERY_V1.md"
       - "docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml"
       - "docs/UPDATE_CANDIDATE_V1.yaml"
