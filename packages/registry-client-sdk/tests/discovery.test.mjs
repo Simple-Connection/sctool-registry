@@ -88,7 +88,7 @@ function fixture({ sequence = 2, revision = "a".repeat(40), profile = undefined 
     registrySha256: "b".repeat(64),
     packages: {
       "alpha-tool": {
-        schemaVersion: "2.0.0",
+        schemaVersion: "3.0.0",
         id: "alpha-tool",
         publisher: "SimpleConnection",
         defaultChannel: "stable",
@@ -99,7 +99,7 @@ function fixture({ sequence = 2, revision = "a".repeat(40), profile = undefined 
         },
       },
       "hidden-tool": {
-        schemaVersion: "2.0.0",
+        schemaVersion: "3.0.0",
         id: "hidden-tool",
         publisher: "SimpleConnection",
         defaultChannel: "stable",
