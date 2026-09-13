@@ -19,8 +19,8 @@ routing:
   type_template: docs/template/session_document_template/session_type_B.yaml
 heads:
   start: bdeb6c838517682210a9babbf14f4725bd353720
-  implementation: null
-  exact_validation: null
+  implementation: 5d933e4494e0b9c16e1f886b27e542e889ae7005
+  exact_validation: ac652ae6e5a1ee04201bc8d05faf418d2b381089
 responsibility_model:
   effects:
     assign: []
@@ -77,7 +77,7 @@ payload:
   - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
 work_units:
 - id: P1-W1
-  status: PENDING
+  status: COMPLETE
   responsibility_refs:
   - RESP_REGISTRY_ACCESS
   input_refs:
@@ -88,7 +88,7 @@ work_units:
   completion_codes:
   - PUBLIC_ACCESS_POLICY_MACHINE_COMPLETE
 - id: P1-W2
-  status: PENDING
+  status: COMPLETE
   responsibility_refs:
   - RESP_REGISTRY_ACCESS
   - RESP_REGISTRY_RELEASE_RESOLUTION
@@ -101,7 +101,7 @@ work_units:
   completion_codes:
   - PUBLIC_RELEASE_RETRIEVAL_COMPLETE
 - id: P1-W3
-  status: PENDING
+  status: COMPLETE
   responsibility_refs:
   - RESP_REGISTRY_ARTIFACT_INTEGRITY
   input_refs:
@@ -112,7 +112,7 @@ work_units:
   completion_codes:
   - PUBLIC_CACHE_INTEGRITY_FAIL_CLOSED_COMPLETE
 - id: P1-W4
-  status: PENDING
+  status: COMPLETE
   responsibility_refs:
   - RESP_REGISTRY_ACCESS
   - RESP_REGISTRY_RELEASE_RESOLUTION
@@ -129,7 +129,7 @@ work_units:
   completion_codes:
   - PUBLIC_INTEGRITY_CONTRACT_ALIGNMENT_COMPLETE
 - id: P1-W5
-  status: PENDING
+  status: COMPLETE
   responsibility_refs:
   - RESP_REGISTRY_ACCESS
   - RESP_REGISTRY_ARTIFACT_INTEGRITY
@@ -148,6 +148,34 @@ evidence:
     implementation: APPROVED
     public_cache: APPROVED
     integrity_first: APPROVED
+- id: E_P1_IMPLEMENTATION
+  kind: COMMIT_SET
+  head: 5d933e4494e0b9c16e1f886b27e542e889ae7005
+  refs:
+    access_contract: registry-public-integrity-v1
+    artifact_repository: Simple-Connection/sctool-artifacts
+    repository_visibility: PUBLIC
+    private_repository_probe: REMOVED
+    public_release_transport: IMPLEMENTED
+    exact_asset_identity: PRESERVED
+    sha256_verification: PRESERVED
+    byte_size_verification: PRESERVED
+- id: E_P1_EXACT_VALIDATION
+  kind: EXACT_VALIDATION
+  head: ac652ae6e5a1ee04201bc8d05faf418d2b381089
+  refs:
+    registry_client_regression_run_id: 34766645285
+    registry_client_regression: PASS
+    package_pack: PASS
+    governance_run_id: 34766703466
+    machine_development_documentation: PASS
+    ptsip_profile: PASS
+    producer_validation_run_id: 34766703483
+    registry_client_sdk_boundary: PASS
+    registry_json_contracts: PASS
+    ptsip_architecture: PASS
+    signed_handoff_tooling: PASS
+    publication_on_dev_branch: SKIPPED_EXPECTED
 gates:
 - id: GATE_SESSION_APPROVAL
   required: true
@@ -156,32 +184,39 @@ gates:
   - E_P1_APPROVAL
 - id: GATE_REGISTRY_ACCESS_REGRESSION
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs:
+  - E_P1_EXACT_VALIDATION
 - id: GATE_ARTIFACT_DELIVERY_REGRESSION
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs:
+  - E_P1_EXACT_VALIDATION
 - id: GATE_ARTIFACT_INTEGRITY_REGRESSION
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs:
+  - E_P1_EXACT_VALIDATION
 - id: GATE_PACKAGE_DESCRIPTOR_REGRESSION
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs:
+  - E_P1_EXACT_VALIDATION
 - id: GATE_REGISTRY_JSON
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs:
+  - E_P1_EXACT_VALIDATION
 - id: GATE_PTSIP_PROFILE
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs:
+  - E_P1_EXACT_VALIDATION
 - id: GATE_PTSIP_CONFORMANCE
   required: true
-  status: PENDING
-  evidence_refs: []
+  status: PASS
+  evidence_refs:
+  - E_P1_EXACT_VALIDATION
 blockers: []
 state:
   mode: DERIVED
