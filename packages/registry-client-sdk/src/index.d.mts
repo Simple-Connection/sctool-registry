@@ -8,7 +8,7 @@ export interface RegistryClientContractIdentity {
   readonly stagedArtifactLifecycleContract: "staged-artifact-lifecycle-v1";
   readonly updateCandidateContract: "update-candidate-v1";
   readonly discoveryContract: "registry-discovery-v1";
-  readonly packageDescriptorSchemaVersion: "2.0.0";
+  readonly packageDescriptorSchemaVersion: "3.0.0";
   readonly registrySnapshotSchemaVersion: "1.0.0";
   readonly registryHeadSchemaVersion: "1.0.0";
   readonly registryTrustSchemaVersion: "1.0.0";
