@@ -1,5 +1,9 @@
 import type { GitHubExecFile, RegistryCommandRunner } from "./registry-access.mjs";
-import type { RegistryStreamCommandRunner, GitHubSpawn } from "./artifact-delivery.mjs";
+import type {
+  RegistryPublicFetch,
+  RegistryStreamCommandRunner,
+  GitHubSpawn,
+} from "./artifact-delivery.mjs";
 import type { ResolvedRegistryPackageTarget } from "./resolution.mjs";
 import type { VerifiedArtifactLease } from "./verified-artifact.mjs";
 
@@ -78,6 +82,7 @@ export declare class RegistryUpdateCandidateError extends Error {
 }
 
 export interface ResolveUpdateCandidateOptions {
+  readonly fetchImpl?: RegistryPublicFetch;
   readonly runner?: RegistryCommandRunner;
   readonly streamRunner?: RegistryStreamCommandRunner;
   readonly environment?: Readonly<Record<string, string | undefined>>;
@@ -86,6 +91,7 @@ export interface ResolveUpdateCandidateOptions {
 }
 
 export interface ResolveUpdateCandidateWithGitHubCliOptions {
+  readonly fetchImpl?: RegistryPublicFetch;
   readonly execFileImpl?: GitHubExecFile;
   readonly spawnImpl?: GitHubSpawn;
   readonly environment?: Readonly<Record<string, string | undefined>>;
