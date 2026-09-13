@@ -11,10 +11,10 @@ It is intentionally separate from `Kinirin/Simple-Connection/program-sdk/sctool-
 The Registry Client SDK owns the consumer-side implementation of Registry contracts, including:
 
 - Registry metadata and package descriptor consumption;
-- `registry-access-v1` identity/authorization behavior;
+- optional GitHub user-identity behavior, separate from public artifact transport;
 - package/channel/version/target resolution;
 - delivery discriminator and exact backend locator handling;
-- authenticated streaming artifact retrieval;
+- public GitHub Release streaming retrieval without private repository read grants;
 - ephemeral Registry-owned staging;
 - filename/size/SHA-256 verification;
 - read-only verified artifact access;
@@ -44,13 +44,21 @@ defaultChannel or explicit channel
 
 No version or target fallback is performed.
 
+Current artifact access contract:
+
+```text
+registry-public-integrity-v1
+```
+
+The public cache is transport only. Filename, byte size, SHA-256, publisher evidence, and signed Registry state remain the trust boundary.
+
 ## P2 boundary
 
 Distribution `1.0.2` P2 owns descriptor/channel/version/target resolution only.
 
 ## P3 boundary
 
-Distribution `1.0.2` P3 established exact release/asset binding and authenticated GitHub CLI retrieval. P4 preserves that authority while using streaming transport.
+Distribution `1.0.2` P3 established exact release/asset binding. Distribution `1.0.3a1` migrates retrieval from private GitHub CLI authorization to public HTTP transport while preserving exact release/asset binding and fail-closed integrity verification.
 
 ## P4 boundary
 
@@ -70,7 +78,7 @@ The SDK does not retain or mutate that product state. It compares `installedVers
 ```text
 resolved version newer
 -> UPDATE_AVAILABLE
--> authenticated retrieval
+-> public exact-asset retrieval
 -> SDK-internal staging
 -> integrity verification
 -> VerifiedUpdateCandidate
@@ -93,7 +101,7 @@ Build metadata is ignored for precedence. Prerelease ordering follows semantic-v
 The file-backed verification pipeline is:
 
 ```text
-authenticated asset stream
+public exact-asset stream
 -> SDK-internal OS temporary staging
 -> single-pass byte count + SHA-256
 -> filename/backend-size/downloaded-size/digest verification
