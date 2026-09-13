@@ -10,6 +10,7 @@ Before changing registry identity, schema, publisher trust, package ownership, a
 docs/REGISTRY_CONTRACT_V2.md
 docs/REGISTRY_ACCESS_V1.md
 docs/ARTIFACT_DELIVERY_V1.md
+docs/REGISTRY_ARTIFACT_CUSTODY_CACHE_POLICY_V1.md
 docs/PAGES_DISTRIBUTION_V1.md
 policy/registry-policy.json
 ptsip.yaml

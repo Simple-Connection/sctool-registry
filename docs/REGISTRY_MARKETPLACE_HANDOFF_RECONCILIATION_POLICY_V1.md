@@ -230,16 +230,20 @@ Reconciliation must be idempotent:
 
 ## 12. Trigger policy
 
-The authoritative model is Marketplace pull/reconcile.
+The authoritative model is **event-driven consumer-owned reconciliation**.
 
-Required trigger capabilities for a future implementation are:
+Routine scheduled polling is forbidden. The Marketplace must not consume Actions capacity by periodically checking the Registry when no accepted Registry publication occurred.
 
-- periodic reconciliation;
-- manual reconciliation through `workflow_dispatch`.
+A future implementation must support:
 
-The default periodic target should be hourly. The exact schedule is an operational parameter and may be changed without changing this policy, but routine reconciliation should not be intentionally configured with a freshness window greater than 24 hours without an explicit operational reason.
+- reconciliation initiated by an accepted Registry signed-publication event;
+- manual reconciliation through `workflow_dispatch` or an equivalent operator-controlled trigger.
 
-A future Registry-originated notification may be added only as an optimization to reduce latency. The Marketplace must still resolve and verify producer state independently.
+The event is only a wake-up signal. It must not carry acceptance authority. After the event, the Marketplace independently resolves the producer run and exact artifacts and performs the full consumer verification gate before mutating its accepted state.
+
+The implementation must not require crawling or polling publisher repositories. Publisher release discovery is outside the Marketplace handoff reconciliation responsibility and is governed by `REGISTRY_ARTIFACT_CUSTODY_CACHE_POLICY_V1`.
+
+The exact cross-repository event transport is intentionally deferred to implementation planning. It must not grant the Registry contents-write authority over the Marketplace repository.
 
 ## 13. Credential and permission policy
 
@@ -291,7 +295,7 @@ Implementation must not change these decisions without revising this policy:
 - no automatic rollback;
 - independent public exact-byte verification.
 
-Implementation details that may be selected later include script names, workflow names, credential mechanism, exact schedule, retry count, and alerting surface, provided they preserve the policy above.
+Implementation details that may be selected later include script names, workflow names, credential mechanism, event transport, retry count, and alerting surface, provided they preserve the policy above. Scheduled polling is not an allowed implementation detail.
 
 ## 17. Implementation approval gate
 
@@ -305,7 +309,7 @@ That implementation approval should identify at minimum:
 2. the Marketplace script or tool responsible for producer discovery and atomic lock generation;
 3. credential source and exact permissions;
 4. concurrency control;
-5. periodic and manual triggers;
+5. accepted-publication event and manual triggers;
 6. atomic file-update behavior;
 7. validation and deployment evidence;
 8. failure reporting;

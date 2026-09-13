@@ -97,6 +97,7 @@ components:
       - "docs/PAGES_DISTRIBUTION_V1.md"
       - "docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml"
       - "docs/REGISTRY_MARKETPLACE_HANDOFF_RECONCILIATION_POLICY_V1.md"
+      - "docs/REGISTRY_ARTIFACT_CUSTODY_CACHE_POLICY_V1.md"
       - "trust/**"
     purpose: canonical_registry_submission_distribution_trust_integrity_and_admission_contracts
     shipped: true
