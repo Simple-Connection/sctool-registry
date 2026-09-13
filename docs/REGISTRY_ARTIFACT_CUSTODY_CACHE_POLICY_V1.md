@@ -6,7 +6,9 @@ This document fixes the long-term custody, cache, publication-intent, and histor
 
 It is a policy decision, not an implementation authorization. Existing runtime contracts, schemas, Registry Client SDK behavior, Registry Intake behavior, and artifact backends remain unchanged until a separately approved migration implements this policy.
 
-The current contracts that centralize all accepted payloads in `Simple-Connection/sctool-artifacts` are therefore **migration inputs**, not the intended final custody model:
+The existing repository coordinate `Simple-Connection/sctool-artifacts` is retained as the canonical Simple-Connection central-cache repository identity. The repository may be recreated under the same name when implementation begins.
+
+The current contracts that use that repository as permanent custody for all accepted payloads are **migration inputs**. The repository identity is preserved, but its long-term role changes from unbounded all-version custody to bounded current-version cache:
 
 - `docs/REGISTRY_CONTRACT_V2.md`
 - `docs/ARTIFACT_DELIVERY_V1.md`
@@ -74,7 +76,9 @@ The Registry must not treat a cache locator as content identity.
 
 The central cache is a bounded delivery optimization for the current default-channel accepted version.
 
-It is not the canonical historical archive and must not become the only provenance record for publisher content.
+Its canonical repository identity is `Simple-Connection/sctool-artifacts`.
+
+It is not the canonical historical archive and must not become the only provenance record for publisher content. Recreating that repository does not restore the former all-version custody policy.
 
 ## 4. Definition of current version
 
@@ -108,7 +112,15 @@ A short overlap between the old and new current version is allowed only while ro
 
 Central `.sctool` payloads must not be committed to Registry Git history.
 
-The concrete central storage repository/backend is an implementation detail, but Git history is forbidden as payload storage.
+The canonical central cache repository is:
+
+`Simple-Connection/sctool-artifacts`
+
+A separate `Simple-Connection/sctool-cache` repository must not be introduced merely to implement this policy. Reusing the established repository coordinate reduces unnecessary contract, SDK, policy, and operational churn.
+
+The repository is a cache/delivery backend only. Git history remains forbidden as payload storage; cached `.sctool` bytes must use a release-asset or another separately approved non-Git-history storage surface within that repository.
+
+Repository visibility and access policy remain a separate implementation decision and must be chosen consistently with publisher-origin visibility and the applicable Registry access contract.
 
 ## 6. Origin and cache are separate locators
 
@@ -235,9 +247,18 @@ This is a policy choice, not an accidental cache-expiration behavior.
 
 ## 15. Migration status
 
-The current Registry v2 implementation contract centralizes accepted artifact delivery in `Simple-Connection/sctool-artifacts`.
+The Registry v2 contract and Registry Client SDK already use the repository coordinate `Simple-Connection/sctool-artifacts`. That coordinate is preserved and will be reused when the central cache repository is provisioned again.
 
-That current behavior remains operative until a separately approved migration changes the contract, schema, policy, Intake, SDK/client, tests, and delivery behavior coherently.
+The repository is currently not present, and there are currently no registered packages requiring artifact retrieval. Recreating the repository is therefore infrastructure provisioning, not restoration of a functioning all-version archive.
+
+The migration must change the **semantics**, not unnecessarily rename the backend:
+
+- current default-channel accepted artifacts may be cached in `Simple-Connection/sctool-artifacts`;
+- historical artifacts are resolved from publisher origin;
+- Registry metadata must model publisher origin independently of the optional central cache;
+- existing SDK and policy constants referencing `Simple-Connection/sctool-artifacts` may be retained where they represent the cache coordinate, but they must no longer imply permanent custody of every accepted version.
+
+That behavior remains unimplemented until a separately approved migration changes the contract, schema, policy, Intake, SDK/client, tests, and delivery behavior coherently.
 
 No implementation may partially switch historical versions to publisher origin while leaving metadata unable to express an exact origin locator.
 
@@ -248,7 +269,7 @@ The migration must be fail-closed and preserve existing immutable content identi
 Before implementation begins, a separate implementation plan and explicit approval must cover at minimum:
 
 1. origin locator schema and exact release/asset identity;
-2. optional central-cache locator schema;
+2. central-cache locator schema using `Simple-Connection/sctool-artifacts`;
 3. package schema version transition;
 4. Registry policy transition;
 5. Registry Intake explicit-submission flow;
