@@ -2,16 +2,18 @@
 
 `contract_version: 2.0.0`
 
-> **Migration notice:** the private-artifact authorization model in this document is no longer the approved target architecture. `docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md` fixes the approved target as a public `Simple-Connection/sctool-artifacts` cache with trust based on publisher evidence, signed Registry metadata, exact byte size, and SHA-256 verification. This v2 document remains a reference for the currently implemented private-access behavior until a separately approved successor migration activates the public-integrity contract coherently.
+> **1.0.3a1 migration:** artifact transport is public and artifact trust is integrity-based. `docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md` is the active access/security authority with access contract `registry-public-integrity-v1`. GitHub user authentication may remain a separate product identity flow but is not a precondition for reading public cache assets.
 
 This document is the canonical SCTool Registry admission and artifact-distribution contract after v2 activation.
 It supersedes `docs/REGISTRY_CONTRACT_V1.md` for current Registry admission/distribution behavior while retaining v1 as historical documentation.
 
-The breaking change from v1 is deliberate:
+The current delivery model is deliberate:
 
 ```text
-v1: final .sctool artifacts are anonymously downloadable over HTTPS
-v2: final .sctool artifacts require authenticated GitHub access to the canonical private artifact repository
+canonical Registry metadata = public + signed
+current central .sctool cache = public GitHub Release assets
+artifact trust = exact identity + publisher evidence + signed Registry state + size + SHA-256
+GitHub login = optional separate user-identity flow, not cache read authorization
 ```
 
 GitHub Pages metadata signing, Root/Distribution trust, immutable snapshots, and client anti-rollback remain governed by `docs/PAGES_DISTRIBUTION_V1.md`.
@@ -140,7 +142,7 @@ version immutability
 
 The Registry must validate the uploaded artifact itself. A publisher-provided `PASS` field, test log, or checksum report is not authoritative.
 
-Authenticated delivery does not weaken artifact integrity requirements.
+Public delivery does not weaken artifact integrity requirements; it makes those integrity requirements the security boundary.
 
 ## 6. Immutability
 
@@ -166,42 +168,28 @@ same packageId
 
 Published artifact bytes are never overwritten in place.
 
-Authentication controls who may retrieve an artifact; it does not redefine artifact identity or allow mutable replacement.
+Repository visibility and successful retrieval do not redefine artifact identity or allow mutable replacement.
 A delivery locator is not part of immutable Registry identity and may not be used to substitute different bytes for an existing identity.
 
-## 7. Authenticated distribution
+## 7. Public integrity distribution
 
-Canonical Registry metadata remains public and may be distributed through signed GitHub Pages metadata.
+Canonical Registry metadata remains public and is distributed as signed metadata.
 
-The final `.sctool` artifact backend is:
+The current central `.sctool` cache backend is:
 
 ```text
 provider:             github.com
 backend:              github-release-asset
 repository:           Simple-Connection/sctool-artifacts
-repositoryVisibility: private
+repositoryVisibility: public
+accessContract:       registry-public-integrity-v1
 ```
 
-End-user artifact retrieval requires the GitHub identity/access contract defined by:
+A conforming client does **not** require collaborator membership, private-repository read permission, or GitHub authentication solely to retrieve a public central-cache asset.
 
-```text
-docs/REGISTRY_ACCESS_V1.md
-```
+Public retrieval is transport only. Before bytes become a verified artifact, the client must preserve exact release/asset binding and verify the accepted filename, byte size, SHA-256, publisher evidence, and signed Registry state required by the applicable contracts.
 
-A conforming client must establish:
-
-```text
-GitHub CLI available
-+ authenticated github.com session
-+ canonical GitHub identity resolved via `gh api user`
-+ authenticated read access to Simple-Connection/sctool-artifacts
-```
-
-before attempting private `.sctool` artifact retrieval.
-
-The client must not require publisher repository permission or a publisher API token. Access is granted against the canonical Registry artifact repository, not the publisher source repository.
-
-The canonical release tag shape is:
+The canonical release tag shape remains:
 
 ```text
 sctool/{packageId}/v{version}
@@ -215,31 +203,26 @@ sctool/openai-local-bridge/v0.3.1
 
 `.sctool` payloads must not be committed into Registry Git history.
 
-Knowing an artifact URL, asset ID, tag, or asset name is not itself authorization to read a private artifact.
+Knowing a release URL, asset ID, tag, or asset name does not establish artifact trust.
 
 ## 8. GitHub identity boundary
 
-GitHub authentication and Registry authorization are distinct:
+GitHub user identity and public artifact transport are separate responsibilities.
 
 ```text
-authentication
-= establish which github.com account is active
+GitHub identity
+= optional Simple Connection / Marketplace user-identity input
 
-authorization
-= establish whether that account may read Simple-Connection/sctool-artifacts
+public artifact transport
+= unauthenticated read of allowed public Release metadata/assets
+
+artifact trust
+= fail-closed Registry/publisher/integrity verification
 ```
 
-The canonical current identity is the login returned by:
+The Registry SDK may expose GitHub CLI identity helpers for product identity flows, but artifact retrieval must not probe or require read authorization to `Simple-Connection/sctool-artifacts`.
 
-```text
-gh api user --jq ".login"
-```
-
-The Registry SDK/CLI must not mint a separate Simple Connection private client key for Registry access and must not extract GitHub token material merely to establish identity.
-
-Inherited `GH_TOKEN` and `GITHUB_TOKEN` values must not override the interactive GitHub CLI credential-store identity used for Registry access.
-
-Detailed state normalization and failure semantics are defined by `REGISTRY_ACCESS_V1`.
+The Registry SDK/CLI must not extract or expose credential material merely to establish identity.
 
 ## 9. Authority split
 
@@ -259,14 +242,14 @@ Registry Git metadata
 Signed GitHub Pages metadata
 = public trust/head/snapshot distribution
 
-Private GitHub artifact repository
-= authenticated immutable .sctool payload backend
+Public GitHub artifact cache
+= bounded current-version .sctool transport backend
 
 GitHub
-= end-user identity provider + private repository authorization
+= public Release transport + optional end-user identity provider
 
 Simple Connection / SCTool Registry CLI
-= Registry metadata consumer + GitHub identity/access consumer + artifact verifier
+= Registry metadata consumer + exact public artifact retriever + artifact verifier
 ```
 
 Simple Connection UI, local install state, activation, and runtime policy are outside the Registry contract.
@@ -285,7 +268,7 @@ versions
 
 to a concrete version at runtime.
 
-Authenticated artifact delivery changes how the selected payload is retrieved, not how the package version is selected.
+Public-integrity artifact delivery changes how the selected payload is retrieved, not how the package version is selected.
 
 ## 11. Package descriptor and artifact delivery contract
 
@@ -315,7 +298,7 @@ artifact
 ├─ delivery
 │  ├─ type = github-release-asset
 │  ├─ access
-│  │  └─ contract = registry-access-v1
+│  │  └─ contract = registry-public-integrity-v1
 │  └─ locator
 │     ├─ repository
 │     └─ assetId
@@ -343,7 +326,7 @@ sctool/{packageId}/v{version}
 The backend asset name is not a second naming authority; a resolved GitHub asset must match `content.filename`.
 Retrieved bytes must match `content.size` and `content.sha256`.
 
-The package descriptor must not contain GitHub credential material, authenticated user identity, private keys, token sources, or entitlement state.
+The package descriptor must not contain credential material, authenticated user identity, private keys, token sources, or entitlement state.
 
 Unknown delivery types and invalid/mismatched delivery metadata fail closed. There is no generic HTTPS fallback.
 
@@ -380,7 +363,7 @@ Production trust activation remains separately deferred. Adoption of descriptor 
 
 ## 13. Security properties and non-goals
 
-This contract provides GitHub-account authorization for private Registry artifacts.
+This contract provides public artifact transport with cryptographically and structurally verified artifact identity. It does not use repository secrecy as the artifact trust boundary.
 
 It does not claim:
 
@@ -392,6 +375,6 @@ prevention of copying by an already-authorized user
 commercial license enforcement
 ```
 
-An authorized GitHub user may use their own valid GitHub credentials outside Simple Connection to access a permitted artifact.
+A public central-cache artifact may be downloaded outside Simple Connection; direct download does not establish Registry acceptance or verified installation eligibility.
 
 Commercial entitlement or per-device access may be introduced by a future contract without weakening v2 artifact integrity, immutability, and fail-closed delivery rules.
