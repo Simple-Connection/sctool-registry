@@ -58,7 +58,7 @@
       "required": ["contract"],
       "properties": {
         "contract": {
-          "const": "registry-access-v1"
+          "const": "registry-public-integrity-v1"
         }
       }
     },
