@@ -38,7 +38,7 @@ def valid_descriptor() -> dict[str, Any]:
                         },
                         "delivery": {
                             "type": "github-release-asset",
-                            "access": {"contract": "registry-access-v1"},
+                            "access": {"contract": "registry-public-integrity-v1"},
                             "locator": {
                                 "repository": "Simple-Connection/sctool-artifacts",
                                 "assetId": 123456789,
