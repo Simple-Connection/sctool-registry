@@ -39,14 +39,13 @@ async function caseRun(label, fn) {
   console.log(`PASS ${label}`);
 }
 
-await caseRun("authorized identity and exact repository read", async () => {
+await caseRun("authenticated identity does not probe artifact repository", async () => {
   const requests = [];
   const result = await checkRegistryAccess({
     runner: sequenceRunner([
       completed(0, "gh version 2.97.0"),
       completed(0),
       completed(0, "Kinirin\n"),
-      completed(0),
     ], requests),
     environment: { PATH: "safe" },
   });
@@ -54,13 +53,17 @@ await caseRun("authorized identity and exact repository read", async () => {
     state: "authorized",
     identity: { provider: "github.com", login: "Kinirin" },
     authorized: true,
-  }, "authorized result");
+  }, "identity result");
   jsonEqual(requests.map((request) => request.args), [
     ["--version"],
     ["auth", "status", "--hostname", "github.com"],
     ["api", "user", "--jq", ".login"],
-    ["api", "repos/Simple-Connection/sctool-artifacts", "--silent"],
-  ], "command sequence");
+  ], "identity command sequence");
+  equal(
+    requests.some(({ args }) => args.join(" ").includes("repos/Simple-Connection/sctool-artifacts")),
+    false,
+    "public artifact repository is never permission-probed",
+  );
 });
 
 await caseRun("missing gh normalizes to gh-unavailable", async () => {
@@ -87,27 +90,6 @@ await caseRun("empty identity normalizes to identity-unresolved", async () => {
   equal(result.state, "identity-unresolved", "state");
 });
 
-await caseRun("repository 403 normalizes to access-denied", async () => {
-  const result = await checkRegistryAccess({
-    runner: sequenceRunner([
-      completed(), completed(), completed(0, "Kinirin\n"),
-      completed(1, "", "gh: Forbidden (HTTP 403)"),
-    ]),
-  });
-  equal(result.state, "access-denied", "state");
-  equal(result.identity?.login, "Kinirin", "identity");
-});
-
-await caseRun("repository 404 normalizes to access-denied", async () => {
-  const result = await checkRegistryAccess({
-    runner: sequenceRunner([
-      completed(), completed(), completed(0, "Kinirin\n"),
-      completed(1, "", "gh: Not Found (HTTP 404)"),
-    ]),
-  });
-  equal(result.state, "access-denied", "state");
-});
-
 await caseRun("transport and timeout normalize to network-unavailable", async () => {
   for (const failure of [{ kind: "transport-error" }, { kind: "timeout" }]) {
     const result = await checkRegistryAccess({
@@ -120,55 +102,54 @@ await caseRun("transport and timeout normalize to network-unavailable", async ()
 await caseRun("token override names are removed case-insensitively", async () => {
   const sanitized = sanitizeRegistryGitHubEnvironment({
     PATH: "safe",
-    GH_TOKEN: "secret-one",
-    github_token: "secret-two",
-    Gh_ToKeN: "secret-three",
+    GH_TOKEN: "sentinel-one",
+    github_token: "sentinel-two",
+    Gh_ToKeN: "sentinel-three",
     GH_HOST: "github.com",
   });
   jsonEqual(sanitized, { PATH: "safe", GH_HOST: "github.com" }, "sanitized environment");
 });
 
-await caseRun("injected GitHub CLI adapter never invokes auth token or leaks credentials", async () => {
+await caseRun("GitHub identity adapter never probes cache permission or exposes credential material", async () => {
   const calls = [];
-  const secretOne = "sentinel-gh-token";
-  const secretTwo = "sentinel-github-token";
   const execFileImpl = (command, args, options, callback) => {
     calls.push({ command, args, options });
     const signature = args.join(" ");
     if (signature === "--version") callback(null, "gh version 2.97.0\n", "");
     else if (signature === "auth status --hostname github.com") callback(null, "", "");
     else if (signature === "api user --jq .login") callback(null, "Kinirin\n", "");
-    else if (signature === "api repos/Simple-Connection/sctool-artifacts --silent") callback(null, "", "");
     else callback({ code: 2 }, "", "unexpected");
   };
 
   const result = await checkRegistryAccessWithGitHubCli({
     execFileImpl,
-    environment: { PATH: "safe", GH_TOKEN: secretOne, GITHUB_TOKEN: secretTwo },
+    environment: { PATH: "safe", GH_TOKEN: "sentinel-one", GITHUB_TOKEN: "sentinel-two" },
   });
   equal(result.state, "authorized", "state");
   truthy(calls.every(({ options }) => !("GH_TOKEN" in options.env)), "GH_TOKEN stripped");
   truthy(calls.every(({ options }) => !("GITHUB_TOKEN" in options.env)), "GITHUB_TOKEN stripped");
-  truthy(calls.every(({ args }) => args.join(" ") !== "auth token"), "auth token not invoked");
-  const serialized = JSON.stringify(result);
-  equal(serialized.includes(secretOne), false, "GH secret absent");
-  equal(serialized.includes(secretTwo), false, "GITHUB secret absent");
-  equal(/token|credential|privateKey/i.test(serialized), false, "credential fields absent");
+  equal(calls.some(({ args }) => args.join(" ") === "auth token"), false, "auth token not invoked");
+  equal(
+    calls.some(({ args }) => args.join(" ").includes("repos/Simple-Connection/sctool-artifacts")),
+    false,
+    "cache permission probe not invoked",
+  );
+  equal(/sentinel-one|sentinel-two/.test(JSON.stringify(result)), false, "credential material absent");
 });
 
 await caseRun("invalid configuration and missing host executor fail closed", async () => {
   let called = false;
-  const invalidRepo = await checkRegistryAccess({
-    artifactRepository: "not-a-repository",
+  const invalidTimeout = await checkRegistryAccess({
+    timeoutMs: 0,
     runner: async () => {
       called = true;
       return completed();
     },
   });
-  equal(invalidRepo.state, "configuration-error", "invalid repository");
+  equal(invalidTimeout.state, "configuration-error", "invalid timeout");
   equal(called, false, "runner not called");
   const noExecutor = await checkRegistryAccessWithGitHubCli();
   equal(noExecutor.state, "configuration-error", "missing executor");
 });
 
-console.log(`Registry access regression PASS cases=${passed}`);
+console.log(`Registry identity regression PASS cases=${passed}`);
