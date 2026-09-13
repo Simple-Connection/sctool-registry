@@ -1,0 +1,42 @@
+schema_version: "1.0"
+document_type: authoring_sdk_package_publication
+natural_language: FORBIDDEN
+package:
+  name: "@simple-connection/sctool-sdk"
+  version: "0.2.0"
+  registry: "https://npm.pkg.github.com"
+  tarball: "https://npm.pkg.github.com/download/@simple-connection/sctool-sdk/0.2.0/1e19368a15aeeb1275b0de661ce6468cf6117359"
+source:
+  repository: "Simple-Connection/sctool-registry"
+  revision: "2ee0d5c6396d790b7ae91d5f83dcab1c0f46fbe0"
+workflow:
+  name: "Publish Authoring SDK Packages"
+  run_id: 34758447337
+  run_number: 2
+  event: push
+  conclusion: SUCCESS
+publication:
+  status: PUBLISHED
+  immutable_version_verified: true
+integrity:
+  npm: "sha512-7oUtsXlK+p40RaVu/a6iIkXC7TB9icDRquVY7pA7NZRBevTphINyoLQc/RS01TiCq6TwNha843Ng3RPgZy68aQ=="
+  remote_npm: "sha512-7oUtsXlK+p40RaVu/a6iIkXC7TB9icDRquVY7pA7NZRBevTphINyoLQc/RS01TiCq6TwNha843Ng3RPgZy68aQ=="
+  sha1: "1e19368a15aeeb1275b0de661ce6468cf6117359"
+  sha256: "9b2a2354b3122ba3c4c96309d30b5f8eadc7b08aa9b2ce30934bd30612447ca9"
+evidence_artifact:
+  id: 10317723512
+  name: "authoring-sdk-package-evidence-2ee0d5c6396d790b7ae91d5f83dcab1c0f46fbe0-sctool-sdk"
+  digest: "sha256:082ea2c31f27df0de5d6ee0de464502ff0fc3453cd5b4f62f95570cfbb50f615"
+public_exports_verification:
+  conclusion: PASS
+  exports:
+    - "@simple-connection/sctool-sdk/marketplace-profile"
+    - "@simple-connection/sctool-sdk/marketplace-profile-schema"
+    - "@simple-connection/sctool-sdk/marketplace-profile-template"
+  published_files:
+    - "dist/marketplace-profile.js"
+    - "dist/marketplace-profile.d.ts"
+    - "schemas/marketplace-profile.schema.json"
+    - "templates/marketplace-profile.json"
+repository_tool_sdk:
+  publication_in_this_run: NOT_PERFORMED
