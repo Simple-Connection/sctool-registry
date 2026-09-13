@@ -2,7 +2,7 @@
 
 `artifact_delivery_contract_version: 1.0.0`
 
-> **Migration notice:** the current `registry-access-v1` private-access assumption is scheduled for replacement by the approved public-integrity model in `docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md`. Existing v1 descriptor/access semantics remain implementation references until a separately approved successor schema and delivery contract are activated.
+> **1.0.3a1 migration:** `registry-public-integrity-v1` is the active access contract for the public `Simple-Connection/sctool-artifacts` cache. Repository read permission is not an artifact trust condition; exact locator binding and content verification remain fail-closed.
 
 `package_descriptor_schema_version: 2.0.0`
 
@@ -16,7 +16,7 @@ content
 = what exact artifact bytes are expected
 
 delivery
-= how an authorized client locates/retrieves those bytes
+= how a client locates/retrieves those bytes before integrity verification
 ```
 
 Changing a delivery backend must not redefine package identity, target identity, expected artifact digest, expected byte size, publisher evidence, or SCTool compatibility.
@@ -39,7 +39,7 @@ A package descriptor artifact uses this shape:
   "delivery": {
     "type": "github-release-asset",
     "access": {
-      "contract": "registry-access-v1"
+      "contract": "registry-public-integrity-v1"
     },
     "locator": {
       "repository": "Simple-Connection/sctool-artifacts",
@@ -108,7 +108,7 @@ delivery.type
   explicit backend discriminator
 
 delivery.access.contract
-  access/authorization contract reference
+  transport/integrity access contract reference
 
 delivery.locator
   backend-specific locator object
@@ -128,7 +128,7 @@ Unknown types fail closed. There is no wildcard or generic HTTPS fallback.
 For this type:
 
 ```text
-delivery.access.contract = registry-access-v1
+delivery.access.contract = registry-public-integrity-v1
 ```
 
 `delivery.access` is a contract reference only. It must not contain or redefine:
@@ -146,7 +146,7 @@ device identity
 entitlement/license state
 ```
 
-Those concerns remain owned by `docs/REGISTRY_ACCESS_V1.md` and Registry policy.
+Those concerns remain owned by `docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md` and Registry policy.
 
 ## 4. GitHub Release asset locator
 
@@ -224,7 +224,7 @@ The expected release tag is derived rather than stored:
 sctool/{packageId}/v{version}
 ```
 
-After `registry-access-v1` succeeds, a conforming resolver must conceptually:
+After `registry-public-integrity-v1` succeeds, a conforming resolver must conceptually:
 
 ```text
 1. require locator.repository == Registry policy artifact repository
@@ -234,7 +234,7 @@ After `registry-access-v1` succeeds, a conforming resolver must conceptually:
 5. find exactly one asset whose numeric id == locator.assetId
 6. require resolved asset.name == content.filename
 7. when backend size is available, require it == content.size
-8. retrieve that exact asset through the authenticated access boundary
+8. retrieve that exact public asset through the public-integrity transport boundary
 9. require downloaded byte length == content.size
 10. require SHA-256(downloaded bytes) == content.sha256
 ```
@@ -252,7 +252,7 @@ retrieved byte-length mismatch
 retrieved SHA-256 mismatch
 ```
 
-Failure does not authorize cross-release search, same-name fallback, arbitrary URL fallback, or anonymous HTTPS fallback.
+Failure does not authorize cross-release search, same-name fallback, arbitrary URL fallback, mutable-latest fallback, or any bypass of exact integrity verification.
 
 ## 7. Immutability interaction
 
@@ -277,7 +277,7 @@ artifact requires target/content/delivery/publishedAt/contract/signature
 content requires filename/sha256/size
 legacy flat assetName/url/sha256/size artifact shape is rejected
 delivery.type is const github-release-asset
-delivery.access.contract is const registry-access-v1
+delivery.access.contract is const registry-public-integrity-v1
 locator requires repository + assetId
 assetId and content.size are positive JavaScript-safe integers
 unknown delivery/access/locator fields are rejected
@@ -309,7 +309,7 @@ The numeric `assetId` safe-integer restriction is compatible with SCTool canonic
 ## 10. Security invariants
 
 ```text
-knowledge of repository + assetId is not authorization
+knowledge of repository + assetId is not artifact trust
 credentials are never package metadata
 unknown delivery types fail closed
 unregistered type/access combinations fail closed
@@ -319,7 +319,7 @@ no same-name, cross-release, arbitrary-URL, or anonymous fallback is permitted
 artifact bytes are verified against content.sha256
 artifact byte length is verified against content.size
 publisher submission signature scope remains sctool-submission-v1
-private/public source-repository visibility does not redefine artifact access
+private/public source-repository visibility does not redefine accepted artifact identity
 ```
 
 ## 11. Transition status
