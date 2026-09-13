@@ -7,7 +7,7 @@ packages:
   SCTOOL_AUTHORING_SDK:
     source: "packages/sctool-sdk"
     package: "@simple-connection/sctool-sdk"
-    version: "0.1.0"
+    version: "0.2.0"
     authority: AUTH_SCTOOL_AUTHORING_SDK
   REPOSITORY_TOOL_AUTHORING_SDK:
     source: "packages/repository-tool-sdk"
