@@ -8,7 +8,7 @@ export const REGISTRY_CLIENT_CONTRACT = Object.freeze({
   stagedArtifactLifecycleContract: "staged-artifact-lifecycle-v1",
   updateCandidateContract: "update-candidate-v1",
   discoveryContract: "registry-discovery-v1",
-  packageDescriptorSchemaVersion: "2.0.0",
+  packageDescriptorSchemaVersion: "3.0.0",
   registrySnapshotSchemaVersion: "1.0.0",
   registryHeadSchemaVersion: "1.0.0",
   registryTrustSchemaVersion: "1.0.0",
