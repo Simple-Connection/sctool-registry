@@ -27,6 +27,21 @@ sessions:
   document: docs/ver1.0.3a1/session_document/ver.1.0.3a1_P1_public_artifact_integrity_migration.yaml
   planning_state: CONCRETIZED
   planning_document: docs/ver1.0.3a1/session_document/ver.1.0.3a1_P1_public_artifact_integrity_migration_work_plan.yaml
+- id: P2
+  type: B
+  state: ACTIVE
+  approval: APPROVED
+  responsibility_refs:
+  - RESP_REGISTRY_DESCRIPTOR_CONSUMPTION
+  - RESP_REGISTRY_CHANNEL_RESOLUTION
+  - RESP_REGISTRY_VERSION_RESOLUTION
+  - RESP_REGISTRY_TARGET_RESOLUTION
+  - RESP_REGISTRY_RELEASE_RESOLUTION
+  - RESP_REGISTRY_ARTIFACT_RETRIEVAL
+  - RESP_REGISTRY_ARTIFACT_INTEGRITY
+  document: docs/ver1.0.3a1/session_document/ver.1.0.3a1_P2_publisher_origin_bounded_cache.yaml
+  planning_state: CONCRETIZED
+  planning_document: docs/ver1.0.3a1/session_document/ver.1.0.3a1_P2_publisher_origin_bounded_cache_work_plan.yaml
 migrations:
   machine_routing: COMPLETE
   responsibility_model: COMPLETE
