@@ -2,7 +2,9 @@
 
 `artifact_delivery_contract_version: 1.0.0`
 
-> **1.0.3a1 migration:** `registry-public-integrity-v1` is the active access contract for the public `Simple-Connection/sctool-artifacts` cache. Repository read permission is not an artifact trust condition; exact locator binding and content verification remain fail-closed.
+`status: HISTORICAL_SINGLE_CENTRAL_LOCATOR_REFERENCE`
+
+> **Historical notice:** this contract records the package-schema-2 single-central-locator model. Current delivery authority is `docs/ARTIFACT_DELIVERY_V2.md` with package schema `3.0.0`.
 
 `package_descriptor_schema_version: 2.0.0`
 
