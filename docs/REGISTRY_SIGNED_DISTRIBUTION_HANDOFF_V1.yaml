@@ -39,6 +39,8 @@ identity:
     selection: EXACT
   producer_run_attempt:
     required: true
+  producer_run_conclusion:
+    required: SUCCESS
   artifact_id:
     required: true
     selection: EXACT
@@ -49,7 +51,7 @@ identity:
     required: true
     algorithm: SHA256
     format: sha256:{hex64}
-    source: ACTIONS_UPLOAD_ARTIFACT_OUTPUT
+    source: ACTIONS_UPLOAD_ARTIFACT_OUTPUT_NORMALIZED_SHA256
   mutable_latest_resolution: FORBIDDEN
   name_only_resolution_without_run: FORBIDDEN
 evidence:
@@ -86,6 +88,7 @@ producer_gates:
   production_trust: ACTIVE
 consumer_gates:
   required:
+    - PRODUCER_RUN_SUCCESS
     - EXACT_RUN_ID_MATCH
     - EXACT_ARTIFACT_ID_MATCH
     - EXACT_ARTIFACT_DIGEST_MATCH
