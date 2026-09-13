@@ -321,7 +321,7 @@ responsibilities:
     ownership: PRIMARY
     normative: MUST
     state: ALLOCATED
-    scope: {repository_id: SCTOOL_ARTIFACTS, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
+    scope: {repository_id: SCTOOL_REGISTRY, component_id: COMP_REGISTRY_CLIENT_SDK, root: "packages/registry-client-sdk"}
     contract_refs: [CONTRACT_ARTIFACT_DELIVERY_V2, CONTRACT_REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_V1]
     transfer: {state: NONE, from_authority_id: null, to_authority_id: AUTH_REGISTRY_CLIENT_SDK, predecessor_retirement: NOT_APPLICABLE}
     interpretation:
