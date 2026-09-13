@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - "dev/1.0.3"
+      - "dev/1.0.3a1"
     paths:
       - "packages/registry-client-sdk/**"
       - "schemas/registry.schema.json"
