@@ -30,9 +30,13 @@ function requireString(value, code, field) {
   return value;
 }
 
-function requireAssetId(value) {
+function requirePositiveId(value, field) {
   if (!Number.isSafeInteger(value) || value <= 0) {
-    throw new RegistryArtifactDeliveryError("invalid-asset-id", "delivery locator assetId must be a positive safe integer");
+    throw new RegistryArtifactDeliveryError(
+      `invalid-${field}`,
+      `${field} must be a positive safe integer`,
+      { field, value: value ?? null },
+    );
   }
   return value;
 }
@@ -52,37 +56,6 @@ function requireTimeout(timeoutMs) {
     throw new RegistryArtifactDeliveryError("configuration-error", "timeoutMs must be positive");
   }
   return timeoutMs;
-}
-
-function validateResolvedTarget(resolvedTarget, artifactRepository) {
-  if (!resolvedTarget || typeof resolvedTarget !== "object") {
-    throw new RegistryArtifactDeliveryError("invalid-target", "resolved target is required");
-  }
-  const packageId = requireString(resolvedTarget.packageId, "invalid-package-id", "packageId");
-  const version = requireString(resolvedTarget.version, "invalid-version", "version");
-  const delivery = resolvedTarget.delivery;
-  if (!delivery || typeof delivery !== "object") {
-    throw new RegistryArtifactDeliveryError("invalid-delivery", "resolved target delivery metadata is required");
-  }
-  if (delivery.type !== DELIVERY_TYPE) {
-    throw new RegistryArtifactDeliveryError("unsupported-delivery", "delivery type is not supported", {
-      deliveryType: delivery.type ?? null,
-    });
-  }
-  if (delivery.access?.contract !== ACCESS_CONTRACT) {
-    throw new RegistryArtifactDeliveryError("unsupported-access-contract", "delivery access contract is not supported", {
-      accessContract: delivery.access?.contract ?? null,
-    });
-  }
-  const repository = delivery.locator?.repository;
-  if (repository !== artifactRepository) {
-    throw new RegistryArtifactDeliveryError("repository-mismatch", "delivery repository does not match Registry authority", {
-      repository: repository ?? null,
-      expectedRepository: artifactRepository,
-    });
-  }
-  const assetId = requireAssetId(delivery.locator?.assetId);
-  return { packageId, version, repository, assetId };
 }
 
 function publicHeaders(accept) {
@@ -116,6 +89,81 @@ async function fetchWithTimeout(fetchImpl, url, init, timeoutMs, code, message) 
   }
 }
 
+function validateDeliveryEnvelope(resolvedTarget) {
+  if (!resolvedTarget || typeof resolvedTarget !== "object") {
+    throw new RegistryArtifactDeliveryError("invalid-target", "resolved target is required");
+  }
+  const packageId = requireString(resolvedTarget.packageId, "invalid-package-id", "packageId");
+  const version = requireString(resolvedTarget.version, "invalid-version", "version");
+  const delivery = resolvedTarget.delivery;
+  if (!delivery || typeof delivery !== "object") {
+    throw new RegistryArtifactDeliveryError("invalid-delivery", "resolved target delivery metadata is required");
+  }
+  if (delivery.type !== DELIVERY_TYPE) {
+    throw new RegistryArtifactDeliveryError("unsupported-delivery", "delivery type is not supported", {
+      deliveryType: delivery.type ?? null,
+    });
+  }
+  if (delivery.access?.contract !== ACCESS_CONTRACT) {
+    throw new RegistryArtifactDeliveryError("unsupported-access-contract", "delivery access contract is not supported", {
+      accessContract: delivery.access?.contract ?? null,
+    });
+  }
+  return { packageId, version, delivery };
+}
+
+function selectLocator(resolvedTarget, requestedSource, artifactRepository) {
+  const { packageId, version, delivery } = validateDeliveryEnvelope(resolvedTarget);
+  const planned = resolvedTarget.deliveryPlan?.preferredSource;
+  const source = requestedSource === undefined || requestedSource === "preferred"
+    ? (planned ?? (delivery.cache ? "cache" : "origin"))
+    : requestedSource;
+
+  if (source !== "cache" && source !== "origin") {
+    throw new RegistryArtifactDeliveryError("invalid-delivery-source", "delivery source must be cache or origin", {
+      source,
+    });
+  }
+  if (source === "cache" && resolvedTarget.deliveryPlan?.isCurrentDefaultVersion !== true) {
+    throw new RegistryArtifactDeliveryError(
+      "historical-cache-forbidden",
+      "central cache cannot be selected for a non-current version",
+      { version },
+    );
+  }
+
+  const locator = delivery[source];
+  if (!locator || typeof locator !== "object") {
+    throw new RegistryArtifactDeliveryError("delivery-source-unavailable", `${source} locator is not available`, {
+      source,
+      version,
+    });
+  }
+
+  const repository = requireString(locator.repository, "invalid-repository", `delivery.${source}.repository`);
+  if (source === "cache" && repository !== artifactRepository) {
+    throw new RegistryArtifactDeliveryError("repository-mismatch", "cache repository does not match Registry policy", {
+      source,
+      repository,
+      expectedRepository: artifactRepository,
+    });
+  }
+
+  return freeze({
+    packageId,
+    version,
+    targetKey: resolvedTarget.targetKey ?? null,
+    source,
+    repository,
+    releaseId: requirePositiveId(locator.releaseId, "release-id"),
+    assetId: requirePositiveId(locator.assetId, "asset-id"),
+  });
+}
+
+/**
+ * @deprecated Release tags are no longer locator authority in package schema v3.
+ * This helper remains only for compatibility with legacy callers.
+ */
 export function deriveExpectedReleaseTag(packageId, version) {
   requireString(packageId, "invalid-package-id", "packageId");
   requireString(version, "invalid-version", "version");
@@ -123,15 +171,15 @@ export function deriveExpectedReleaseTag(packageId, version) {
 }
 
 export async function resolveGitHubReleaseAsset(resolvedTarget, {
+  source = "preferred",
   fetchImpl = globalThis.fetch,
   artifactRepository = DEFAULT_REGISTRY_ARTIFACT_REPOSITORY,
   timeoutMs = DEFAULT_REGISTRY_GITHUB_TIMEOUT_MS,
 } = {}) {
   const fetcher = requireFetch(fetchImpl);
   requireTimeout(timeoutMs);
-  const target = validateResolvedTarget(resolvedTarget, artifactRepository);
-  const expectedTag = deriveExpectedReleaseTag(target.packageId, target.version);
-  const url = `${GITHUB_API_BASE}/repos/${target.repository}/releases/tags/${encodeURIComponent(expectedTag)}`;
+  const target = selectLocator(resolvedTarget, source, artifactRepository);
+  const url = `${GITHUB_API_BASE}/repos/${target.repository}/releases/${target.releaseId}`;
 
   const response = await fetchWithTimeout(
     fetcher,
@@ -143,14 +191,19 @@ export async function resolveGitHubReleaseAsset(resolvedTarget, {
     },
     timeoutMs,
     "release-query-failed",
-    "expected public GitHub release could not be resolved",
+    "exact public GitHub release could not be resolved",
   );
 
   if (!response?.ok) {
     throw new RegistryArtifactDeliveryError(
       "release-query-failed",
-      "expected public GitHub release could not be resolved",
-      { status: response?.status ?? null, expectedTag },
+      "exact public GitHub release could not be resolved",
+      {
+        source: target.source,
+        status: response?.status ?? null,
+        repository: target.repository,
+        releaseId: target.releaseId,
+      },
     );
   }
 
@@ -158,35 +211,44 @@ export async function resolveGitHubReleaseAsset(resolvedTarget, {
   try {
     release = await response.json();
   } catch {
-    throw new RegistryArtifactDeliveryError("release-response-invalid", "GitHub release response is not valid JSON");
+    throw new RegistryArtifactDeliveryError("release-response-invalid", "GitHub release response is not valid JSON", {
+      source: target.source,
+    });
   }
-  if (!release || typeof release !== "object") {
-    throw new RegistryArtifactDeliveryError("release-response-invalid", "GitHub release response is invalid");
-  }
-  if (release.tag_name !== expectedTag) {
-    throw new RegistryArtifactDeliveryError("release-tag-mismatch", "resolved GitHub release tag does not match expected tag", {
-      expectedTag,
-      actualTag: release.tag_name ?? null,
+
+  if (!release || typeof release !== "object" || release.id !== target.releaseId) {
+    throw new RegistryArtifactDeliveryError("release-id-mismatch", "resolved GitHub release identity does not match locator", {
+      source: target.source,
+      expectedReleaseId: target.releaseId,
+      actualReleaseId: release?.id ?? null,
     });
   }
   if (release.draft !== false) {
-    throw new RegistryArtifactDeliveryError("release-draft", "draft GitHub releases cannot resolve Registry artifacts");
+    throw new RegistryArtifactDeliveryError("release-draft", "draft GitHub releases cannot resolve Registry artifacts", {
+      source: target.source,
+      releaseId: target.releaseId,
+    });
   }
   if (!Array.isArray(release.assets)) {
-    throw new RegistryArtifactDeliveryError("release-response-invalid", "GitHub release assets are missing");
+    throw new RegistryArtifactDeliveryError("release-response-invalid", "GitHub release assets are missing", {
+      source: target.source,
+      releaseId: target.releaseId,
+    });
   }
 
   const matches = release.assets.filter((asset) => asset?.id === target.assetId);
   if (matches.length === 0) {
-    throw new RegistryArtifactDeliveryError("asset-not-found", "delivery assetId is absent from the expected release", {
+    throw new RegistryArtifactDeliveryError("asset-not-found", "delivery assetId is absent from the exact release", {
+      source: target.source,
+      releaseId: target.releaseId,
       assetId: target.assetId,
-      expectedTag,
     });
   }
   if (matches.length !== 1) {
-    throw new RegistryArtifactDeliveryError("asset-not-unique", "delivery assetId resolved more than once in the expected release", {
+    throw new RegistryArtifactDeliveryError("asset-not-unique", "delivery assetId resolved more than once in the exact release", {
+      source: target.source,
+      releaseId: target.releaseId,
       assetId: target.assetId,
-      expectedTag,
       matches: matches.length,
     });
   }
@@ -195,11 +257,12 @@ export async function resolveGitHubReleaseAsset(resolvedTarget, {
   return freeze({
     packageId: target.packageId,
     version: target.version,
-    targetKey: resolvedTarget.targetKey ?? null,
+    targetKey: target.targetKey,
+    source: target.source,
     repository: target.repository,
-    expectedTag,
-    releaseId: Number.isSafeInteger(release.id) ? release.id : null,
+    releaseId: target.releaseId,
     assetId: target.assetId,
+    backendTag: typeof release.tag_name === "string" ? release.tag_name : null,
     backendAssetName: typeof asset.name === "string" ? asset.name : null,
     backendAssetSize: Number.isSafeInteger(asset.size) ? asset.size : null,
     assetApiUrl: `${GITHUB_API_BASE}/repos/${target.repository}/releases/assets/${target.assetId}`,
@@ -208,6 +271,7 @@ export async function resolveGitHubReleaseAsset(resolvedTarget, {
 }
 
 export async function openGitHubReleaseAssetStream(resolvedTarget, {
+  source = "preferred",
   fetchImpl = globalThis.fetch,
   artifactRepository = DEFAULT_REGISTRY_ARTIFACT_REPOSITORY,
   timeoutMs = DEFAULT_REGISTRY_GITHUB_TIMEOUT_MS,
@@ -216,6 +280,7 @@ export async function openGitHubReleaseAssetStream(resolvedTarget, {
   requireTimeout(timeoutMs);
 
   const resolvedAsset = await resolveGitHubReleaseAsset(resolvedTarget, {
+    source,
     fetchImpl: fetcher,
     artifactRepository,
     timeoutMs,
@@ -235,6 +300,7 @@ export async function openGitHubReleaseAssetStream(resolvedTarget, {
     clearTimeout(timer);
     if (error?.name === "AbortError") {
       throw new RegistryArtifactDeliveryError("network-timeout", "public GitHub release asset download timed out", {
+        source: resolvedAsset.source,
         assetId: resolvedAsset.assetId,
       });
     }
@@ -242,7 +308,7 @@ export async function openGitHubReleaseAssetStream(resolvedTarget, {
       "download-start-failed",
       "exact public GitHub release asset stream could not be started",
       error,
-      { assetId: resolvedAsset.assetId },
+      { source: resolvedAsset.source, assetId: resolvedAsset.assetId },
     );
   }
 
@@ -251,7 +317,11 @@ export async function openGitHubReleaseAssetStream(resolvedTarget, {
     throw new RegistryArtifactDeliveryError(
       "download-start-failed",
       "exact public GitHub release asset stream could not be started",
-      { status: response?.status ?? null, assetId: resolvedAsset.assetId },
+      {
+        source: resolvedAsset.source,
+        status: response?.status ?? null,
+        assetId: resolvedAsset.assetId,
+      },
     );
   }
 
@@ -264,7 +334,7 @@ export async function openGitHubReleaseAssetStream(resolvedTarget, {
       "download-start-failed",
       "public GitHub release asset response body is not streamable",
       error,
-      { assetId: resolvedAsset.assetId },
+      { source: resolvedAsset.source, assetId: resolvedAsset.assetId },
     );
   }
 
@@ -280,6 +350,7 @@ export async function openGitHubReleaseAssetStream(resolvedTarget, {
     stream.once("error", (error) => finish(
       reject,
       transportFailure("download-failed", "exact public GitHub release asset retrieval failed", error, {
+        source: resolvedAsset.source,
         assetId: resolvedAsset.assetId,
       }),
     ));
@@ -298,10 +369,11 @@ export async function openGitHubReleaseAssetStream(resolvedTarget, {
     packageId: resolvedAsset.packageId,
     version: resolvedAsset.version,
     targetKey: resolvedAsset.targetKey,
+    source: resolvedAsset.source,
     repository: resolvedAsset.repository,
-    expectedTag: resolvedAsset.expectedTag,
     releaseId: resolvedAsset.releaseId,
     assetId: resolvedAsset.assetId,
+    backendTag: resolvedAsset.backendTag,
     backendAssetName: resolvedAsset.backendAssetName,
     backendAssetSize: resolvedAsset.backendAssetSize,
     identity: null,
@@ -311,34 +383,25 @@ export async function openGitHubReleaseAssetStream(resolvedTarget, {
   });
 }
 
-/**
- * @deprecated Public cache retrieval no longer uses GitHub CLI. This compatibility
- * wrapper delegates to the public HTTP transport and never performs gh auth.
- */
 export async function resolveGitHubReleaseAssetWithGitHubCli(resolvedTarget, options = {}) {
   return resolveGitHubReleaseAsset(resolvedTarget, {
+    source: options.source,
     fetchImpl: options.fetchImpl ?? globalThis.fetch,
     artifactRepository: options.artifactRepository,
     timeoutMs: options.timeoutMs,
   });
 }
 
-/**
- * @deprecated Public cache retrieval no longer uses GitHub CLI. This compatibility
- * wrapper delegates to the public HTTP transport and never performs gh auth.
- */
 export async function openGitHubReleaseAssetStreamWithGitHubCli(resolvedTarget, options = {}) {
   return openGitHubReleaseAssetStream(resolvedTarget, {
+    source: options.source,
     fetchImpl: options.fetchImpl ?? globalThis.fetch,
     artifactRepository: options.artifactRepository,
     timeoutMs: options.timeoutMs,
   });
 }
 
-/**
- * @deprecated Streaming subprocess transport is retained only as a compatibility
- * symbol. Public artifact retrieval does not use it.
- */
+/** @deprecated Public artifact retrieval does not use GitHub CLI subprocess streaming. */
 export function createGitHubCliStreamCommandRunner() {
   return null;
 }
