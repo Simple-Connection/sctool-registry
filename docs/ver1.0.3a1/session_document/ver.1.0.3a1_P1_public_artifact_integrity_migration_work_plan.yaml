@@ -53,14 +53,14 @@ preconditions:
 - MAIN_BASELINE_BDEB6C838517682210A9BABB
 work_units:
 - id: P1-W1
-  state: PLANNED
+  state: COMPLETE
   purpose: MACHINE_POLICY_PUBLIC_ACCESS
   depends_on: []
   outputs:
   - REGISTRY_POLICY_PUBLIC_ACCESS
   - POLICY_SCHEMA_PUBLIC_ACCESS
 - id: P1-W2
-  state: PLANNED
+  state: COMPLETE
   purpose: REGISTRY_CLIENT_PUBLIC_RETRIEVAL
   depends_on:
   - P1-W1
@@ -69,7 +69,7 @@ work_units:
   - PUBLIC_RELEASE_RESOLUTION
   - PUBLIC_RELEASE_STREAM_RETRIEVAL
 - id: P1-W3
-  state: PLANNED
+  state: COMPLETE
   purpose: FAIL_CLOSED_INTEGRITY_PRESERVATION
   depends_on:
   - P1-W2
@@ -79,7 +79,7 @@ work_units:
   - ASSET_NAME_MISMATCH_REJECT
   - ASSET_IDENTITY_MISMATCH_REJECT
 - id: P1-W4
-  state: PLANNED
+  state: COMPLETE
   purpose: CONTRACT_AND_REGRESSION_ALIGNMENT
   depends_on:
   - P1-W3
@@ -89,7 +89,7 @@ work_units:
   - ARTIFACT_DELIVERY_REGRESSION
   - REGISTRY_JSON_VALIDATION
 - id: P1-W5
-  state: PLANNED
+  state: COMPLETE
   purpose: EXACT_VALIDATION_CLOSEOUT
   depends_on:
   - P1-W4
