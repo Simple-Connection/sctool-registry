@@ -16,8 +16,8 @@ current:
     interpretation_layer: COMPLETE
     governance_layout: COMPLETE
   improvement_plan: docs/ver1.0.3a1/1.0.3a1_Improvement_plan.yaml
-  current_session: null
-  current_session_document: null
+  current_session: P2
+  current_session_document: docs/ver1.0.3a1/session_document/ver.1.0.3a1_P2_publisher_origin_bounded_cache.yaml
   next_session: null
 versions:
   1.0.1:
