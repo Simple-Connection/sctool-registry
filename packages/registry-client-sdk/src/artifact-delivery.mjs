@@ -1,14 +1,14 @@
+import { Readable } from "node:stream";
+
 import {
   DEFAULT_REGISTRY_ARTIFACT_REPOSITORY,
   DEFAULT_REGISTRY_GITHUB_TIMEOUT_MS,
-  checkRegistryAccess,
-  createGitHubCliCommandRunner,
-  sanitizeRegistryGitHubEnvironment,
 } from "./registry-access.mjs";
 
 const DELIVERY_TYPE = "github-release-asset";
-const ACCESS_CONTRACT = "registry-access-v1";
-const DEFAULT_DIAGNOSTIC_LIMIT = 16 * 1024;
+const ACCESS_CONTRACT = "registry-public-integrity-v1";
+const GITHUB_API_BASE = "https://api.github.com";
+const USER_AGENT = "sctool-registry-client-sdk";
 
 function freeze(value) {
   return Object.freeze(value);
@@ -35,6 +35,23 @@ function requireAssetId(value) {
     throw new RegistryArtifactDeliveryError("invalid-asset-id", "delivery locator assetId must be a positive safe integer");
   }
   return value;
+}
+
+function requireFetch(fetchImpl) {
+  if (typeof fetchImpl !== "function") {
+    throw new RegistryArtifactDeliveryError(
+      "configuration-error",
+      "public artifact retrieval requires a fetch implementation",
+    );
+  }
+  return fetchImpl;
+}
+
+function requireTimeout(timeoutMs) {
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+    throw new RegistryArtifactDeliveryError("configuration-error", "timeoutMs must be positive");
+  }
+  return timeoutMs;
 }
 
 function validateResolvedTarget(resolvedTarget, artifactRepository) {
@@ -68,27 +85,35 @@ function validateResolvedTarget(resolvedTarget, artifactRepository) {
   return { packageId, version, repository, assetId };
 }
 
-function commandFailure(code, message, outcome) {
+function publicHeaders(accept) {
+  return {
+    Accept: accept,
+    "User-Agent": USER_AGENT,
+    "X-GitHub-Api-Version": "2022-11-28",
+  };
+}
+
+function transportFailure(code, message, error, details = {}) {
+  if (error instanceof RegistryArtifactDeliveryError) return error;
   return new RegistryArtifactDeliveryError(code, message, {
-    kind: outcome?.kind ?? null,
-    exitCode: outcome?.kind === "completed" ? outcome.exitCode : null,
+    ...details,
+    cause: error?.name ?? null,
   });
 }
 
-async function requireAuthorizedAccess({ runner, environment, artifactRepository, timeoutMs }) {
-  const access = await checkRegistryAccess({
-    runner,
-    environment,
-    artifactRepository,
-    timeoutMs,
-  });
-  if (!access.authorized) {
-    throw new RegistryArtifactDeliveryError("access-not-authorized", "Registry artifact access is not authorized", {
-      accessState: access.state,
-      login: access.identity?.login ?? null,
-    });
+async function fetchWithTimeout(fetchImpl, url, init, timeoutMs, code, message) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetchImpl(url, { ...init, signal: controller.signal });
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new RegistryArtifactDeliveryError("network-timeout", message, { url });
+    }
+    throw transportFailure(code, message, error, { url });
+  } finally {
+    clearTimeout(timer);
   }
-  return access.identity;
 }
 
 export function deriveExpectedReleaseTag(packageId, version) {
@@ -98,38 +123,40 @@ export function deriveExpectedReleaseTag(packageId, version) {
 }
 
 export async function resolveGitHubReleaseAsset(resolvedTarget, {
-  runner,
-  environment = {},
+  fetchImpl = globalThis.fetch,
   artifactRepository = DEFAULT_REGISTRY_ARTIFACT_REPOSITORY,
   timeoutMs = DEFAULT_REGISTRY_GITHUB_TIMEOUT_MS,
 } = {}) {
-  if (typeof runner !== "function") {
-    throw new RegistryArtifactDeliveryError("configuration-error", "GitHub CLI command runner is required");
-  }
-  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
-    throw new RegistryArtifactDeliveryError("configuration-error", "timeoutMs must be positive");
-  }
-
+  const fetcher = requireFetch(fetchImpl);
+  requireTimeout(timeoutMs);
   const target = validateResolvedTarget(resolvedTarget, artifactRepository);
-  const identity = await requireAuthorizedAccess({ runner, environment, artifactRepository, timeoutMs });
   const expectedTag = deriveExpectedReleaseTag(target.packageId, target.version);
-  const env = sanitizeRegistryGitHubEnvironment(environment);
-  const endpoint = `repos/${target.repository}/releases/tags/${encodeURIComponent(expectedTag)}`;
-  const jq = `{id:.id,tag_name:.tag_name,draft:.draft,assets:[.assets[]|select(.id==${target.assetId})|{id,name,size}]}`;
-  const outcome = await runner({
-    command: "gh",
-    args: ["api", endpoint, "--jq", jq],
-    env,
-    timeoutMs,
-  });
+  const url = `${GITHUB_API_BASE}/repos/${target.repository}/releases/tags/${encodeURIComponent(expectedTag)}`;
 
-  if (outcome?.kind !== "completed" || outcome.exitCode !== 0) {
-    throw commandFailure("release-query-failed", "expected GitHub release could not be resolved", outcome);
+  const response = await fetchWithTimeout(
+    fetcher,
+    url,
+    {
+      method: "GET",
+      headers: publicHeaders("application/vnd.github+json"),
+      redirect: "follow",
+    },
+    timeoutMs,
+    "release-query-failed",
+    "expected public GitHub release could not be resolved",
+  );
+
+  if (!response?.ok) {
+    throw new RegistryArtifactDeliveryError(
+      "release-query-failed",
+      "expected public GitHub release could not be resolved",
+      { status: response?.status ?? null, expectedTag },
+    );
   }
 
   let release;
   try {
-    release = JSON.parse(String(outcome.stdout ?? ""));
+    release = await response.json();
   } catch {
     throw new RegistryArtifactDeliveryError("release-response-invalid", "GitHub release response is not valid JSON");
   }
@@ -148,6 +175,7 @@ export async function resolveGitHubReleaseAsset(resolvedTarget, {
   if (!Array.isArray(release.assets)) {
     throw new RegistryArtifactDeliveryError("release-response-invalid", "GitHub release assets are missing");
   }
+
   const matches = release.assets.filter((asset) => asset?.id === target.assetId);
   if (matches.length === 0) {
     throw new RegistryArtifactDeliveryError("asset-not-found", "delivery assetId is absent from the expected release", {
@@ -174,128 +202,97 @@ export async function resolveGitHubReleaseAsset(resolvedTarget, {
     assetId: target.assetId,
     backendAssetName: typeof asset.name === "string" ? asset.name : null,
     backendAssetSize: Number.isSafeInteger(asset.size) ? asset.size : null,
-    assetApiPath: `repos/${target.repository}/releases/assets/${target.assetId}`,
-    identity,
+    assetApiUrl: `${GITHUB_API_BASE}/repos/${target.repository}/releases/assets/${target.assetId}`,
+    identity: null,
   });
-}
-
-export function createGitHubCliStreamCommandRunner({
-  spawnImpl,
-  maxDiagnosticBytes = DEFAULT_DIAGNOSTIC_LIMIT,
-} = {}) {
-  if (typeof spawnImpl !== "function") return null;
-  if (!Number.isSafeInteger(maxDiagnosticBytes) || maxDiagnosticBytes <= 0) return null;
-
-  return async ({ command, args, env, timeoutMs }) => {
-    let child;
-    try {
-      child = spawnImpl(command, [...args], {
-        env,
-        windowsHide: true,
-        stdio: ["ignore", "pipe", "pipe"],
-      });
-    } catch {
-      return { kind: "transport-error" };
-    }
-
-    if (!child || !child.stdout || typeof child.once !== "function" || typeof child.kill !== "function") {
-      try { child?.kill?.(); } catch {}
-      return { kind: "transport-error" };
-    }
-
-    let stderr = "";
-    if (child.stderr && typeof child.stderr.on === "function") {
-      child.stderr.on("data", (chunk) => {
-        if (stderr.length >= maxDiagnosticBytes) return;
-        stderr += String(chunk).slice(0, maxDiagnosticBytes - stderr.length);
-      });
-    }
-
-    const completion = new Promise((resolve) => {
-      let settled = false;
-      let timedOut = false;
-      const finish = (value) => {
-        if (settled) return;
-        settled = true;
-        if (timer !== null) clearTimeout(timer);
-        resolve(value);
-      };
-      const timer = Number.isFinite(timeoutMs) && timeoutMs > 0
-        ? setTimeout(() => {
-            timedOut = true;
-            try { child.kill(); } catch {}
-          }, timeoutMs)
-        : null;
-
-      child.once("error", (error) => {
-        if (error?.code === "ENOENT") {
-          finish({ kind: "not-found" });
-          return;
-        }
-        if (timedOut || error?.code === "ETIMEDOUT") {
-          finish({ kind: "timeout" });
-          return;
-        }
-        finish({ kind: "transport-error" });
-      });
-      child.once("close", (code) => {
-        if (timedOut) {
-          finish({ kind: "timeout" });
-          return;
-        }
-        finish({
-          kind: "completed",
-          exitCode: Number.isInteger(code) ? code : 1,
-          stderr,
-        });
-      });
-    });
-
-    return {
-      kind: "started",
-      stdout: child.stdout,
-      completion,
-      abort: () => {
-        try { return child.kill(); } catch { return false; }
-      },
-    };
-  };
 }
 
 export async function openGitHubReleaseAssetStream(resolvedTarget, {
-  runner,
-  streamRunner,
-  environment = {},
+  fetchImpl = globalThis.fetch,
   artifactRepository = DEFAULT_REGISTRY_ARTIFACT_REPOSITORY,
   timeoutMs = DEFAULT_REGISTRY_GITHUB_TIMEOUT_MS,
 } = {}) {
-  if (typeof runner !== "function" || typeof streamRunner !== "function") {
-    throw new RegistryArtifactDeliveryError("configuration-error", "text and stream GitHub CLI runners are required");
-  }
+  const fetcher = requireFetch(fetchImpl);
+  requireTimeout(timeoutMs);
 
   const resolvedAsset = await resolveGitHubReleaseAsset(resolvedTarget, {
-    runner,
-    environment,
+    fetchImpl: fetcher,
     artifactRepository,
     timeoutMs,
   });
-  const env = sanitizeRegistryGitHubEnvironment(environment);
-  const started = await streamRunner({
-    command: "gh",
-    args: ["api", resolvedAsset.assetApiPath, "-H", "Accept: application/octet-stream"],
-    env,
-    timeoutMs,
-  });
-  if (started?.kind !== "started" || !started.stdout || !started.completion || typeof started.abort !== "function") {
-    throw commandFailure("download-start-failed", "exact GitHub release asset stream could not be started", started);
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let response;
+  try {
+    response = await fetcher(resolvedAsset.assetApiUrl, {
+      method: "GET",
+      headers: publicHeaders("application/octet-stream"),
+      redirect: "follow",
+      signal: controller.signal,
+    });
+  } catch (error) {
+    clearTimeout(timer);
+    if (error?.name === "AbortError") {
+      throw new RegistryArtifactDeliveryError("network-timeout", "public GitHub release asset download timed out", {
+        assetId: resolvedAsset.assetId,
+      });
+    }
+    throw transportFailure(
+      "download-start-failed",
+      "exact public GitHub release asset stream could not be started",
+      error,
+      { assetId: resolvedAsset.assetId },
+    );
   }
 
-  const completed = Promise.resolve(started.completion).then((outcome) => {
-    if (outcome?.kind !== "completed" || outcome.exitCode !== 0) {
-      throw commandFailure("download-failed", "exact GitHub release asset retrieval failed", outcome);
-    }
-    return freeze({ exitCode: 0 });
+  if (!response?.ok || !response.body) {
+    clearTimeout(timer);
+    throw new RegistryArtifactDeliveryError(
+      "download-start-failed",
+      "exact public GitHub release asset stream could not be started",
+      { status: response?.status ?? null, assetId: resolvedAsset.assetId },
+    );
+  }
+
+  let stream;
+  try {
+    stream = Readable.fromWeb(response.body);
+  } catch (error) {
+    clearTimeout(timer);
+    throw transportFailure(
+      "download-start-failed",
+      "public GitHub release asset response body is not streamable",
+      error,
+      { assetId: resolvedAsset.assetId },
+    );
+  }
+
+  let settled = false;
+  const completed = new Promise((resolve, reject) => {
+    const finish = (fn, value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      fn(value);
+    };
+    stream.once("end", () => finish(resolve, freeze({ exitCode: 0 })));
+    stream.once("error", (error) => finish(
+      reject,
+      transportFailure("download-failed", "exact public GitHub release asset retrieval failed", error, {
+        assetId: resolvedAsset.assetId,
+      }),
+    ));
   });
+
+  const abort = () => {
+    if (!settled) {
+      controller.abort();
+      try { stream.destroy(); } catch {}
+      clearTimeout(timer);
+    }
+    return true;
+  };
 
   return freeze({
     packageId: resolvedAsset.packageId,
@@ -307,48 +304,41 @@ export async function openGitHubReleaseAssetStream(resolvedTarget, {
     assetId: resolvedAsset.assetId,
     backendAssetName: resolvedAsset.backendAssetName,
     backendAssetSize: resolvedAsset.backendAssetSize,
-    identity: resolvedAsset.identity,
-    stream: started.stdout,
+    identity: null,
+    stream,
     completed,
-    abort: started.abort,
+    abort,
   });
 }
 
-export async function resolveGitHubReleaseAssetWithGitHubCli(resolvedTarget, {
-  execFileImpl,
-  environment = globalThis.process?.env ?? {},
-  artifactRepository = DEFAULT_REGISTRY_ARTIFACT_REPOSITORY,
-  timeoutMs = DEFAULT_REGISTRY_GITHUB_TIMEOUT_MS,
-} = {}) {
-  const runner = createGitHubCliCommandRunner({ execFileImpl });
-  if (!runner) {
-    throw new RegistryArtifactDeliveryError("configuration-error", "execFileImpl is required");
-  }
+/**
+ * @deprecated Public cache retrieval no longer uses GitHub CLI. This compatibility
+ * wrapper delegates to the public HTTP transport and never performs gh auth.
+ */
+export async function resolveGitHubReleaseAssetWithGitHubCli(resolvedTarget, options = {}) {
   return resolveGitHubReleaseAsset(resolvedTarget, {
-    runner,
-    environment,
-    artifactRepository,
-    timeoutMs,
+    fetchImpl: options.fetchImpl ?? globalThis.fetch,
+    artifactRepository: options.artifactRepository,
+    timeoutMs: options.timeoutMs,
   });
 }
 
-export async function openGitHubReleaseAssetStreamWithGitHubCli(resolvedTarget, {
-  execFileImpl,
-  spawnImpl,
-  environment = globalThis.process?.env ?? {},
-  artifactRepository = DEFAULT_REGISTRY_ARTIFACT_REPOSITORY,
-  timeoutMs = DEFAULT_REGISTRY_GITHUB_TIMEOUT_MS,
-} = {}) {
-  const runner = createGitHubCliCommandRunner({ execFileImpl });
-  const streamRunner = createGitHubCliStreamCommandRunner({ spawnImpl });
-  if (!runner || !streamRunner) {
-    throw new RegistryArtifactDeliveryError("configuration-error", "execFileImpl and spawnImpl are required");
-  }
+/**
+ * @deprecated Public cache retrieval no longer uses GitHub CLI. This compatibility
+ * wrapper delegates to the public HTTP transport and never performs gh auth.
+ */
+export async function openGitHubReleaseAssetStreamWithGitHubCli(resolvedTarget, options = {}) {
   return openGitHubReleaseAssetStream(resolvedTarget, {
-    runner,
-    streamRunner,
-    environment,
-    artifactRepository,
-    timeoutMs,
+    fetchImpl: options.fetchImpl ?? globalThis.fetch,
+    artifactRepository: options.artifactRepository,
+    timeoutMs: options.timeoutMs,
   });
+}
+
+/**
+ * @deprecated Streaming subprocess transport is retained only as a compatibility
+ * symbol. Public artifact retrieval does not use it.
+ */
+export function createGitHubCliStreamCommandRunner() {
+  return null;
 }
