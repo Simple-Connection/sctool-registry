@@ -1,22 +1,22 @@
 # SCTool Artifact Custody and Current-Version Cache Policy v1
 
-Status: **POLICY DECIDED — IMPLEMENTATION NOT YET AUTHORIZED**
+Status: **POLICY DECIDED — CONTRACT/CLIENT MIGRATION IMPLEMENTED ON `dev/1.0.3a1`; CACHE MUTATION AUTOMATION DEFERRED**
 
 This document fixes the long-term custody, cache, publication-intent, and historical-artifact availability policy for publisher-produced `.sctool` payloads.
 
-It is a policy decision, not an implementation authorization. Existing runtime contracts, schemas, Registry Client SDK behavior, Registry Intake behavior, and artifact backends remain unchanged until a separately approved migration implements this policy.
+Implementation was authorized for `dev/1.0.3a1`. Package/submission schemas, Registry policy, Registry validation, Registry Client SDK source selection/retrieval, and cache lifecycle planning now implement this policy. Registry Intake service implementation and GitHub Release cache upload/delete automation do not yet exist in this repository and remain separately owned operational work.
 
-The existing repository coordinate `Simple-Connection/sctool-artifacts` is retained as the canonical Simple-Connection central-cache repository identity. The repository may be recreated under the same name when implementation begins.
+The existing repository coordinate `Simple-Connection/sctool-artifacts` is retained as the canonical Simple-Connection central-cache repository identity. Provisioning or recreating that repository is operational work and does not change the bounded-cache semantics.
 
-The current contracts that use that repository as permanent custody for all accepted payloads are **migration inputs**. The repository identity is preserved, but its long-term role changes from unbounded all-version custody to bounded current-version cache:
+The former permanent-custody contracts were migration inputs. The repository identity is preserved, but its long-term role is now bounded current-version cache:
 
 - `docs/REGISTRY_CONTRACT_V2.md`
-- `docs/ARTIFACT_DELIVERY_V1.md`
+- `docs/ARTIFACT_DELIVERY_V2.md`
 - `docs/REGISTRY_ACCESS_V1.md`
 - `policy/registry-policy.json`
 - `schemas/package.schema.json`
 
-A later implementation must revise those authorities together rather than partially applying this policy.
+The `1.0.3a1` migration revised these authorities together. `ARTIFACT_DELIVERY_V1` remains historical; `ARTIFACT_DELIVERY_V2` is current.
 
 ## 1. Decision
 
@@ -126,7 +126,7 @@ The cache is a delivery optimization, not an access-control boundary. Public cac
 
 ## 6. Origin and cache are separate locators
 
-A future package/delivery contract must model publisher origin and central cache separately.
+The current package/delivery contract models publisher origin and central cache separately.
 
 Conceptually:
 
@@ -143,13 +143,13 @@ Conceptually:
 
 The same accepted artifact content identity must be verified regardless of which delivery location is used.
 
-The future schema must not overload one locator so that a cache silently replaces publisher origin provenance.
+Package schema `3.0.0` keeps `delivery.origin` and optional `delivery.cache` separate so cache state cannot replace publisher origin provenance.
 
 ## 7. Current-version retrieval
 
 For the current default-channel version, the central cache is the preferred delivery location when present and valid.
 
-The publisher origin remains recorded as canonical provenance and may be used as an exact-content fallback if the future delivery contract permits it.
+The publisher origin remains recorded as canonical provenance and may be used as an exact-content fallback under `ARTIFACT_DELIVERY_V2`.
 
 Any fallback must verify the exact accepted filename, byte size, SHA-256, package/version/target identity, and required publisher evidence.
 
@@ -183,7 +183,7 @@ A new central cache becomes eligible only after:
 5. the version is accepted into Registry metadata;
 6. the package's current default channel is approved to point to that accepted version.
 
-The future implementation must copy/cache exact bytes only after origin verification and must verify the cached bytes again against the accepted content identity.
+Any operational cache mutation implementation must copy/cache exact bytes only after origin verification and must verify cached bytes again against the accepted content identity.
 
 ## 10. Cache rotation and eviction
 
