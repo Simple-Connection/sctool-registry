@@ -111,10 +111,26 @@ hosting:
   signing_credentials_in_consumer: FORBIDDEN
   signed_bytes_rewrite: FORBIDDEN
 cutover:
-  registry_pages_workflow_removal: BLOCKED
-  registry_pages_disable: BLOCKED
-  unblock_requires:
-    - WEB_EXACT_ARTIFACT_CONSUMPTION_PASS
-    - WEB_PUBLIC_REGISTRY_ENDPOINT_PASS
-    - PRODUCT_BOOTSTRAP_ENDPOINT_MIGRATION_PASS
-    - USER_APPROVAL
+  legacy_registry_pages_publication: RETIRED
+  registry_producer_workflow: PRESERVED
+  registry_pages_workflow_removal: FORBIDDEN
+  registry_pages_disable: FORBIDDEN
+  marketplace_hosting: ACTIVE
+  marketplace_reverification_required: false
+  marketplace_public_base_url: https://simple-connection.github.io/SCTool_Marketplace_Web/registry/
+  accepted_distribution:
+    producer_run_id: 34757364135
+    producer_run_attempt: 1
+    source_revision: 7cf8997640d2cbf03526ac0f9426ec190a72ca75
+    artifact_id: 10317154228
+    artifact_digest: sha256:f5beab394de7613d84ef6cd426246bd659a133b242ab5b599be59ad5fdd3a434
+    evidence_artifact_id: 10317084559
+    evidence_artifact_digest: sha256:de4b9ef91b02ec47bd3c986c2f4418ad7000f3cb9a753f17b07680a57803221c
+  marketplace_acceptance:
+    revision: b57d296906e306a970b08c88232a3769bb0e10c7
+    workflow_run_id: 34758339545
+    workflow_run_attempt: 1
+    workflow_run_conclusion: SUCCESS
+    deployment_evidence_artifact_id: 10318300825
+    deployment_evidence_artifact_digest: sha256:caab0c6bfebf76ccda310d9b9401c314bfd4e4ce1e865c833c24438e176e6fc0
+    public_endpoint_exact_bytes: PASS

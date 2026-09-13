@@ -259,7 +259,7 @@ registry-contracts
 = NEUTRAL_CONTRACT
 
 registry-pages-delivery
-= Root trust signing, snapshot assembly/verification and GitHub Pages metadata publication
+= Root trust signing, signed snapshot assembly/verification, and exact signed distribution/handoff production
 = DELIVERY
 
 product-documentation
@@ -341,7 +341,7 @@ SCTOOL_REGISTRY_ROOT_PRIVATE_KEY_B64
 SCTOOL_REGISTRY_DISTRIBUTION_PRIVATE_KEY_B64
 ```
 
-The Root private secret may be referenced only by the manually dispatched `.github/workflows/sign-trust.yml` trust-signing path. Routine Pages publication must never request, echo, copy, persist, or otherwise consume the Root private secret.
+The Root private secret may be referenced only by the manually dispatched `.github/workflows/sign-trust.yml` trust-signing path. Routine signed distribution production must never request, echo, copy, persist, or otherwise consume the Root private secret.
 
 The Distribution private secret may be used by `.github/workflows/pages.yml` for routine `registry-head.json` signing. The corresponding Registry Root public key is non-secret configuration and is pinned independently by Simple Connection.
 

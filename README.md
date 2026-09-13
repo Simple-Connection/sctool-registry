@@ -46,10 +46,10 @@ policy/registry-policy.json      machine-readable admission/access policy
 docs/REGISTRY_CONTRACT_V1.md     historical anonymous-download Registry contract
 docs/REGISTRY_CONTRACT_V2.md     current authenticated Registry contract
 docs/REGISTRY_ACCESS_V1.md       GitHub identity/private artifact access contract
-docs/PAGES_DISTRIBUTION_V1.md    GitHub Pages signed metadata distribution contract
+docs/PAGES_DISTRIBUTION_V1.md    signed metadata distribution contract (legacy filename)
 trust/README.md                   Root/Distribution Actions Secret bootstrap guidance
 .github/workflows/sign-trust.yml  manual Root trust-signing workflow
-.github/workflows/pages.yml       signed Pages metadata delivery workflow
+.github/workflows/pages.yml       signed distribution + exact handoff producer workflow
 ```
 
 `.sctool` binaries are not committed to this Git history. Accepted payloads are published as private GitHub Release assets in the canonical artifact repository:
@@ -91,16 +91,17 @@ Registry source metadata remains canonical in this repository. Simple Connection
 
 ```text
 Git repository
-  -> signed GitHub Pages trust/head/snapshot metadata
-  -> Simple Connection verifies the pinned Registry Root key
+  -> signed Registry trust/head/snapshot distribution artifact
+  -> SCTool_Marketplace_Web materializes exact bytes at /registry/
+  -> Registry consumers verify the pinned Registry Root key
   -> package artifact selected through a signed registry channel
   -> GitHub identity/access verification through the SCTool Registry CLI/SDK
   -> authenticated private GitHub Release .sctool retrieval
 ```
 
-The client bootstrap contract pins the Pages head URL and Registry Root public key, not individual SCTool versions. Package descriptors resolve `defaultChannel` / `channels` to concrete versions at runtime.
+The client bootstrap contract pins the public Registry head URL and Registry Root public key, not individual SCTool versions. Package descriptors resolve `defaultChannel` / `channels` to concrete versions at runtime.
 
-Registry Root and Distribution private keys are stored as separate GitHub Actions Secrets. The Root private secret is used only by the manually dispatched trust-signing workflow; routine Pages publication receives only the Root public key and Distribution private key. Pages publication remains intentionally inactive until a valid Root-signed `trust/trust.json` exists. See `docs/PAGES_DISTRIBUTION_V1.md` and `trust/README.md`.
+Registry Root and Distribution private keys are stored as separate GitHub Actions Secrets. The Root private secret is used only by the manually dispatched trust-signing workflow; routine signed distribution production receives only the Root public key and Distribution private key. Signed distribution production remains intentionally inactive until a valid Root-signed `trust/trust.json` exists. See `docs/PAGES_DISTRIBUTION_V1.md` and `trust/README.md`.
 
 Artifact access is a separate boundary. Registry Contract v2 adopts `docs/REGISTRY_ACCESS_V1.md`: the active GitHub CLI account must be authenticated and authorized to read `Simple-Connection/sctool-artifacts`. Registry access code must not extract or expose GitHub token material merely to establish identity.
 

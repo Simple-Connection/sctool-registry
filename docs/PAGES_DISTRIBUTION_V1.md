@@ -3,7 +3,13 @@
 `distribution_contract_version: 1.0.0`
 
 This document defines the public metadata distribution boundary used by Simple Connection.
-GitHub remains the canonical repository and artifact host, while GitHub Pages serves signed registry metadata.
+GitHub remains the canonical repository and artifact host. Registry-owned GitHub Pages publication is retired; public hosting is owned by `Simple-Connection/SCTool_Marketplace_Web` at `https://simple-connection.github.io/SCTool_Marketplace_Web/registry/`.
+
+## Hosting closeout override
+
+This file keeps its legacy name for compatibility. Its signing, snapshot, verification, and byte-contract clauses remain authoritative for Registry production. Any clause below that assigns public hosting or deployment to `Simple-Connection/sctool-registry` is superseded by `docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml`.
+
+The Registry producer must create and verify the exact signed distribution and handoff evidence. The Marketplace host must consume accepted bytes unchanged and must not own Registry signing, canonical snapshot generation, trust authority, or private signing keys.
 
 ## 1. Fixed client bootstrap
 
@@ -18,7 +24,7 @@ The client must not pin an SCTool package version, package release URL, publishe
 The canonical Pages head URL is expected to be:
 
 ```text
-https://simple-connection.github.io/sctool-registry/registry-head.json
+https://simple-connection.github.io/SCTool_Marketplace_Web/registry/registry-head.json
 ```
 
 A later hosting migration may change the bootstrap endpoint in a Simple Connection release without changing package identity or registry contracts.
@@ -70,7 +76,7 @@ The Registry Root private key is stored as the GitHub Actions Secret:
 SCTOOL_REGISTRY_ROOT_PRIVATE_KEY_B64
 ```
 
-It must never be committed to Git, embedded in Simple Connection, printed by workflow steps, or supplied to the routine Pages publication workflow.
+It must never be committed to Git, embedded in Simple Connection, printed by workflow steps, or supplied to the routine signed distribution workflow.
 It is consumed only by the manually dispatched Root trust-signing workflow.
 
 Simple Connection pins the corresponding Registry Root public key. GitHub Actions stores the same public value as the non-secret variable:
@@ -93,7 +99,7 @@ The routine Distribution private key is stored separately as:
 SCTOOL_REGISTRY_DISTRIBUTION_PRIVATE_KEY_B64
 ```
 
-The routine Pages workflow may consume the Distribution private key, but must not consume the Root private key.
+The routine signed distribution workflow may consume the Distribution private key, but must not consume the Root private key.
 
 This is a GitHub-hosted root trust model, not an offline root model. Separating Root and Distribution credentials prevents routine publication from requiring the Root credential and reduces accidental exposure, but a GitHub administrator or workflow mutation with sufficient access to repository Actions Secrets remains inside the Registry Root trust domain.
 
@@ -113,7 +119,7 @@ workflow_dispatch
 -> commit trust/trust.json to main
 ```
 
-The Root-signing workflow must not be triggered by `push`, `pull_request`, a publisher submission, or routine Pages publication.
+The Root-signing workflow must not be triggered by `push`, `pull_request`, a publisher submission, or routine signed distribution production.
 
 ### Distribution key rotation
 
@@ -248,7 +254,7 @@ otherwise
 A user-requested Refresh may bypass the local TTL.
 GitHub REST API is not part of the client discovery protocol.
 
-## 10. Pages publication gate
+## 10. Signed distribution production gate
 
 The custom GitHub Actions workflow must:
 
@@ -262,8 +268,9 @@ PTSIP validate/conform
 -> assemble immutable snapshot
 -> sign registry-head.json
 -> validate generated Pages JSON contracts
--> independently verify generated Pages cryptographic output
--> deploy Pages artifact
+-> independently verify generated signed distribution cryptographic output
+-> upload exact signed Registry distribution artifact
+-> generate and validate exact handoff evidence
 ```
 
 The Pages workflow receives only:
@@ -275,4 +282,4 @@ SCTOOL_REGISTRY_DISTRIBUTION_PRIVATE_KEY_B64
 
 It must never reference `SCTOOL_REGISTRY_ROOT_PRIVATE_KEY_B64`.
 
-Before `trust/trust.json` exists, Pages publication remains intentionally inactive while repository governance and Registry JSON contract checks still run.
+Before `trust/trust.json` exists, signed distribution production remains intentionally inactive while repository governance and Registry JSON contract checks still run.

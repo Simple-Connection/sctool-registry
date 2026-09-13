@@ -1,4 +1,4 @@
-name: Publish signed SCTool Registry Pages
+name: Produce signed SCTool Registry distribution
 
 on:
   workflow_dispatch:
@@ -38,11 +38,9 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: sctool-registry-pages-${{ github.ref }}
+  group: sctool-registry-distribution-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -143,7 +141,7 @@ jobs:
             echo "activated=true" >> "$GITHUB_OUTPUT"
           else
             echo "activated=false" >> "$GITHUB_OUTPUT"
-            echo "Pages publication is inactive outside main or until trust/trust.json is root-signed and committed."
+            echo "Signed Registry distribution production is inactive outside main or until trust/trust.json is root-signed and committed."
           fi
 
       - name: Resolve deterministic publication identity
@@ -154,7 +152,7 @@ jobs:
           echo "sequence=$(git rev-list --count "$GITHUB_SHA")" >> "$GITHUB_OUTPUT"
           echo "issued_at=$(git show -s --format=%cI "$GITHUB_SHA")" >> "$GITHUB_OUTPUT"
 
-      - name: Build signed Pages distribution
+      - name: Build signed Registry distribution
         if: steps.activation.outputs.activated == 'true'
         env:
           SCTOOL_REGISTRY_ROOT_PUBLIC_KEY_B64: ${{ vars.SCTOOL_REGISTRY_ROOT_PUBLIC_KEY_B64 }}
@@ -166,11 +164,11 @@ jobs:
           --issued-at "${{ steps.identity.outputs.issued_at }}"
           --out _site
 
-      - name: Validate generated Pages JSON contracts
+      - name: Validate generated Registry distribution JSON contracts
         if: steps.activation.outputs.activated == 'true'
         run: python tools/validate-pages.py --site _site
 
-      - name: Verify generated Pages distribution
+      - name: Verify generated Registry distribution
         if: steps.activation.outputs.activated == 'true'
         env:
           SCTOOL_REGISTRY_ROOT_PUBLIC_KEY_B64: ${{ vars.SCTOOL_REGISTRY_ROOT_PUBLIC_KEY_B64 }}
@@ -239,25 +237,3 @@ jobs:
             echo "- artifact_digest: ${{ steps.handoff_bundle.outputs.artifact-digest }}"
             echo "- evidence_artifact: registry-signed-distribution-handoff-$GITHUB_SHA"
           } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Configure GitHub Pages
-        if: steps.activation.outputs.activated == 'true'
-        uses: actions/configure-pages@v5
-
-      - name: Upload GitHub Pages artifact
-        if: steps.activation.outputs.activated == 'true'
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: _site
-
-  deploy:
-    if: needs.build.outputs.activated == 'true'
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy GitHub Pages artifact
-        id: deployment
-        uses: actions/deploy-pages@v4
