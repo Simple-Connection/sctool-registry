@@ -37,7 +37,7 @@ export function resolvePackageVersion(input, { channel, version } = {}) {
     }
     const versionEntry = descriptor.versions[version];
     if (!versionEntry) throw new RegistryResolutionError("version-not-found", `version ${version} does not exist`, { version });
-    return freezeResult({ packageId: descriptor.id, channel: null, version, versionEntry });
+    return freezeResult({ packageId: descriptor.id, channel: null, version, versionEntry, currentDefaultVersion: descriptor.channels[descriptor.defaultChannel], isCurrentDefaultVersion: version === descriptor.channels[descriptor.defaultChannel] });
   }
 
   const selectedChannel = channel === undefined ? descriptor.defaultChannel : channel;
@@ -55,7 +55,7 @@ export function resolvePackageVersion(input, { channel, version } = {}) {
       version: selectedVersion,
     });
   }
-  return freezeResult({ packageId: descriptor.id, channel: selectedChannel, version: selectedVersion, versionEntry });
+  return freezeResult({ packageId: descriptor.id, channel: selectedChannel, version: selectedVersion, versionEntry, currentDefaultVersion: descriptor.channels[descriptor.defaultChannel], isCurrentDefaultVersion: selectedVersion === descriptor.channels[descriptor.defaultChannel] });
 }
 
 export function resolvePackageTarget(input, { channel, version, platform, arch } = {}) {
@@ -75,6 +75,15 @@ export function resolvePackageTarget(input, { channel, version, platform, arch }
       canonicalTargetKey,
     });
   }
+  const cache = artifact.delivery.cache ?? null;
+  const isCurrentDefaultVersion = resolvedVersion.isCurrentDefaultVersion === true;
+  const deliveryPlan = freezeResult({
+    currentDefaultVersion: resolvedVersion.currentDefaultVersion,
+    isCurrentDefaultVersion,
+    preferredSource: isCurrentDefaultVersion && cache ? "cache" : "origin",
+    fallbackSource: isCurrentDefaultVersion && cache ? "origin" : null,
+  });
+
   return freezeResult({
     packageId: resolvedVersion.packageId,
     channel: resolvedVersion.channel,
@@ -83,6 +92,8 @@ export function resolvePackageTarget(input, { channel, version, platform, arch }
     target: artifact.target,
     content: artifact.content,
     delivery: artifact.delivery,
+    publication: artifact.publication,
+    deliveryPlan,
     publishedAt: artifact.publishedAt,
     contract: artifact.contract,
     signature: artifact.signature,
