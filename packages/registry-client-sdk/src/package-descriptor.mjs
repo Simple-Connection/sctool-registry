@@ -1,6 +1,6 @@
 export const PACKAGE_DESCRIPTOR_SCHEMA_VERSION = "2.0.0";
 export const PACKAGE_DESCRIPTOR_DELIVERY_TYPE = "github-release-asset";
-export const PACKAGE_DESCRIPTOR_ACCESS_CONTRACT = "registry-access-v1";
+export const PACKAGE_DESCRIPTOR_ACCESS_CONTRACT = "registry-public-integrity-v1";
 export const PACKAGE_DESCRIPTOR_ARTIFACT_REPOSITORY = "Simple-Connection/sctool-artifacts";
 
 const MAX_SAFE_INTEGER = 9_007_199_254_740_991;
