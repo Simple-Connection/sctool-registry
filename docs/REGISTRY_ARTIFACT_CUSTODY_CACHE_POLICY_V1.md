@@ -120,7 +120,9 @@ A separate `Simple-Connection/sctool-cache` repository must not be introduced me
 
 The repository is a cache/delivery backend only. Git history remains forbidden as payload storage; cached `.sctool` bytes must use a release-asset or another separately approved non-Git-history storage surface within that repository.
 
-Repository visibility and access policy remain a separate implementation decision and must be chosen consistently with publisher-origin visibility and the applicable Registry access contract.
+Repository visibility is fixed by `REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1` as `PUBLIC`.
+
+The cache is a delivery optimization, not an access-control boundary. Public cache bytes remain untrusted until exact integrity and signature verification succeeds.
 
 ## 6. Origin and cache are separate locators
 
@@ -277,10 +279,12 @@ Before implementation begins, a separate implementation plan and explicit approv
 7. current-version cache creation and digest verification;
 8. cache rotation and old-cache eviction;
 9. Registry Client SDK resolution for current and historical versions;
-10. access-policy differences between central cache and publisher origin;
+10. public central-cache access versus publisher-origin access differences;
 11. historical `ARTIFACT_UNAVAILABLE` semantics;
 12. migration compatibility with existing accepted metadata;
 13. tests for origin disappearance, cache failure, digest mismatch, channel advancement, eviction, and retry;
-14. event-driven Registry-to-Marketplace publication without scheduled publisher or Marketplace polling.
+14. event-driven Registry-to-Marketplace publication without scheduled publisher or Marketplace polling;
+15. public redistribution consent before promotion into the public central cache;
+16. integrity-first verification proving cache compromise cannot create trusted bytes.
 
 Until that implementation is separately approved, this document fixes architecture policy only.
