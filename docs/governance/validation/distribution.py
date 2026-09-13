@@ -126,8 +126,8 @@ def validate_signed_distribution_handoff(ctx: ValidationContext, errors: list[st
     need(hosting.get("signed_bytes_rewrite") == "FORBIDDEN", "SIGNED_HANDOFF_REWRITE", errors)
 
     cutover = contract.get("cutover", {})
-    need(cutover.get("registry_pages_workflow_removal") == "BLOCKED", "SIGNED_HANDOFF_EARLY_WORKFLOW_REMOVAL", errors)
-    need(cutover.get("registry_pages_disable") == "BLOCKED", "SIGNED_HANDOFF_EARLY_PAGES_DISABLE", errors)
+    need(cutover.get("registry_pages_workflow_removal") == "FORBIDDEN", "SIGNED_HANDOFF_EARLY_WORKFLOW_REMOVAL", errors)
+    need(cutover.get("registry_pages_disable") == "FORBIDDEN", "SIGNED_HANDOFF_EARLY_PAGES_DISABLE", errors)
 
     workflow_text = (ctx.root / producer["workflow"]).read_text(encoding="utf-8")
     bundle_marker = "registry-signed-distribution-" + "$" + "{{ github.sha }}"
