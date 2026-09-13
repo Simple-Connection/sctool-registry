@@ -3,7 +3,7 @@ export declare const REGISTRY_CLIENT_SDK_VERSION: "0.2.0";
 
 export interface RegistryClientContractIdentity {
   readonly registryContractVersion: "2.0.0";
-  readonly registryAccessContract: "registry-access-v1";
+  readonly registryAccessContract: "registry-public-integrity-v1";
   readonly artifactDeliveryContractVersion: "1.0.0";
   readonly stagedArtifactLifecycleContract: "staged-artifact-lifecycle-v1";
   readonly updateCandidateContract: "update-candidate-v1";
