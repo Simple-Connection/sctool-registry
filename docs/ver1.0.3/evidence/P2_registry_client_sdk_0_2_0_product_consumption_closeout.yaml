@@ -103,3 +103,7 @@ result:
   exact_closeout: PASS
   production_pages_trust: INACTIVE
   production_pages_activation_required_for_verified_catalog_data: true
+supersession:
+  production_pages_trust:
+    status: SUPERSEDED
+    evidence: docs/ver1.0.3/evidence/1.0.3_version_closeout.yaml
