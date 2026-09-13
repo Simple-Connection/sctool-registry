@@ -12,16 +12,10 @@ import {
 function equal(actual, expected, label) {
   if (actual !== expected) throw new Error(`${label}: expected=${expected} actual=${actual}`);
 }
-
-function truthy(value, label) {
-  if (!value) throw new Error(label);
-}
-
+function truthy(value, label) { if (!value) throw new Error(label); }
 async function errorCode(fn, expected, label) {
   let actual = null;
-  try {
-    await fn();
-  } catch (error) {
+  try { await fn(); } catch (error) {
     if (!(error instanceof RegistryArtifactDeliveryError)) throw error;
     actual = error.code;
   }
@@ -29,60 +23,81 @@ async function errorCode(fn, expected, label) {
 }
 
 function target(overrides = {}) {
-  return {
+  const base = {
     packageId: "example-tool",
     version: "1.2.3",
     targetKey: "win-x64",
+    deliveryPlan: {
+      currentDefaultVersion: "1.2.3",
+      isCurrentDefaultVersion: true,
+      preferredSource: "cache",
+      fallbackSource: "origin",
+    },
     delivery: {
       type: "github-release-asset",
       access: { contract: "registry-public-integrity-v1" },
-      locator: {
-        repository: "Simple-Connection/sctool-artifacts",
-        assetId: 101,
-      },
+      origin: { repository: "ExamplePublisher/example-tool", releaseId: 10, assetId: 101 },
+      cache: { repository: "Simple-Connection/sctool-artifacts", releaseId: 20, assetId: 201 },
     },
+  };
+  return {
+    ...base,
     ...overrides,
+    deliveryPlan: { ...base.deliveryPlan, ...(overrides.deliveryPlan ?? {}) },
+    delivery: {
+      ...base.delivery,
+      ...(overrides.delivery ?? {}),
+      access: { ...base.delivery.access, ...(overrides.delivery?.access ?? {}) },
+      origin: { ...base.delivery.origin, ...(overrides.delivery?.origin ?? {}) },
+      ...(overrides.delivery && Object.prototype.hasOwnProperty.call(overrides.delivery, "cache")
+        ? { cache: overrides.delivery.cache }
+        : { cache: { ...base.delivery.cache } }),
+    },
   };
 }
 
 function jsonResponse(payload, status = 200) {
+  return { ok: status >= 200 && status < 300, status, body: null, async json() { return payload; } };
+}
+function binaryResponse(bytes, status = 200) {
   return {
     ok: status >= 200 && status < 300,
     status,
-    body: null,
-    async json() {
-      return payload;
-    },
+    body: status >= 200 && status < 300 ? Readable.toWeb(Readable.from([bytes])) : null,
+    async json() { throw new Error("not json"); },
   };
 }
 
-function binaryResponse(chunks, status = 200) {
-  return {
-    ok: status >= 200 && status < 300,
-    status,
-    body: Readable.toWeb(Readable.from(chunks)),
-    async json() {
-      throw new Error("binary response has no JSON");
-    },
-  };
-}
-
-function publicFetchHarness({ release, bytes = Buffer.from([0, 1, 2, 255]), assetStatus = 200 } = {}) {
+function harness(options = {}) {
   const requests = [];
   const fetchImpl = async (url, init = {}) => {
-    requests.push({ url: String(url), init });
-    if (String(url).includes("/releases/tags/")) {
-      return jsonResponse(release ?? {
-        id: 55,
-        tag_name: "sctool/example-tool/v1.2.3",
+    const value = String(url);
+    requests.push({ url: value, init });
+    if (value.endsWith("/repos/Simple-Connection/sctool-artifacts/releases/20")) {
+      if (options.cacheReleaseStatus) return jsonResponse({}, options.cacheReleaseStatus);
+      return jsonResponse({
+        id: options.cacheReleaseId ?? 20,
+        tag_name: "cache-tag-is-observation-only",
         draft: false,
-        assets: [{ id: 101, name: "backend-observation.sctool", size: 999 }],
+        assets: options.cacheAssets ?? [{ id: 201, name: "example.sctool", size: 4 }],
       });
     }
-    if (String(url).endsWith("/releases/assets/101")) {
-      return binaryResponse([bytes.subarray(0, 2), bytes.subarray(2)], assetStatus);
+    if (value.endsWith("/repos/ExamplePublisher/example-tool/releases/10")) {
+      if (options.originReleaseStatus) return jsonResponse({}, options.originReleaseStatus);
+      return jsonResponse({
+        id: options.originReleaseId ?? 10,
+        tag_name: "publisher-custom-tag",
+        draft: false,
+        assets: options.originAssets ?? [{ id: 101, name: "example.sctool", size: 4 }],
+      });
     }
-    throw new Error(`unexpected fetch: ${url}`);
+    if (value.endsWith("/repos/Simple-Connection/sctool-artifacts/releases/assets/201")) {
+      return binaryResponse(Buffer.from([0, 1, 2, 3]), options.cacheAssetStatus ?? 200);
+    }
+    if (value.endsWith("/repos/ExamplePublisher/example-tool/releases/assets/101")) {
+      return binaryResponse(Buffer.from([4, 5, 6, 7]), options.originAssetStatus ?? 200);
+    }
+    throw new Error(`unexpected fetch ${value}`);
   };
   return { fetchImpl, requests };
 }
@@ -93,101 +108,75 @@ async function readAll(stream) {
   return Buffer.concat(chunks);
 }
 
-equal(deriveExpectedReleaseTag("example-tool", "1.2.3"), "sctool/example-tool/v1.2.3", "expected release tag");
+equal(deriveExpectedReleaseTag("example-tool", "1.2.3"), "sctool/example-tool/v1.2.3", "legacy tag helper remains deterministic");
+
+const h = harness();
+const preferred = await resolveGitHubReleaseAsset(target(), { fetchImpl: h.fetchImpl });
+equal(preferred.source, "cache", "current preferred source is cache");
+equal(preferred.releaseId, 20, "cache exact release id");
+equal(preferred.assetId, 201, "cache exact asset id");
+equal(preferred.backendTag, "cache-tag-is-observation-only", "tag retained only as observation");
+truthy(h.requests[0].url.endsWith("/releases/20"), "release resolved by exact id");
+equal(h.requests[0].url.includes("/releases/tags/"), false, "tag lookup forbidden");
+equal("Authorization" in h.requests[0].init.headers, false, "public request has no authorization header");
+
+const originH = harness();
+const origin = await resolveGitHubReleaseAsset(target(), { source: "origin", fetchImpl: originH.fetchImpl });
+equal(origin.source, "origin", "origin source selected");
+equal(origin.repository, "ExamplePublisher/example-tool", "publisher repository accepted");
+equal(origin.releaseId, 10, "origin exact release id");
+equal(origin.assetId, 101, "origin exact asset id");
 
 await errorCode(
-  () => resolveGitHubReleaseAsset(target({ delivery: { type: "other" } }), { fetchImpl: async () => null }),
-  "unsupported-delivery",
-  "unknown delivery fails closed",
+  () => resolveGitHubReleaseAsset(target({
+    deliveryPlan: { isCurrentDefaultVersion: false, preferredSource: "origin", fallbackSource: null },
+  }), { source: "cache", fetchImpl: harness().fetchImpl }),
+  "historical-cache-forbidden",
+  "historical cache selection rejected",
 );
 
 await errorCode(
   () => resolveGitHubReleaseAsset(target({
-    delivery: {
-      type: "github-release-asset",
-      access: { contract: "registry-public-integrity-v1" },
-      locator: { repository: "Other/repo", assetId: 101 },
-    },
-  }), { fetchImpl: async () => null }),
+    delivery: { cache: { repository: "OtherOrg/cache", releaseId: 20, assetId: 201 } },
+  }), { fetchImpl: harness().fetchImpl }),
   "repository-mismatch",
-  "repository mismatch",
+  "cache repository mismatch",
 );
 
 await errorCode(
   () => resolveGitHubReleaseAsset(target({
-    delivery: {
-      type: "github-release-asset",
-      access: { contract: "registry-access-v1" },
-      locator: { repository: "Simple-Connection/sctool-artifacts", assetId: 101 },
-    },
-  }), { fetchImpl: async () => null }),
+    delivery: { access: { contract: "registry-access-v1" } },
+  }), { fetchImpl: harness().fetchImpl }),
   "unsupported-access-contract",
   "legacy private access contract rejected",
 );
 
-const success = publicFetchHarness();
-const resolved = await resolveGitHubReleaseAsset(target(), { fetchImpl: success.fetchImpl });
-equal(resolved.expectedTag, "sctool/example-tool/v1.2.3", "resolved expected tag");
-equal(resolved.assetId, 101, "resolved exact asset id");
-equal(resolved.backendAssetName, "backend-observation.sctool", "backend name observation");
-equal(resolved.backendAssetSize, 999, "backend size observation");
-equal(resolved.identity, null, "public transport has no GitHub identity authority");
-truthy(success.requests[0].url.endsWith("sctool%2Fexample-tool%2Fv1.2.3"), "release endpoint uses encoded derived tag");
-equal("Authorization" in success.requests[0].init.headers, false, "release query has no authorization header");
-
-const draft = publicFetchHarness({
-  release: { id: 55, tag_name: "sctool/example-tool/v1.2.3", draft: true, assets: [{ id: 101 }] },
-});
-await errorCode(() => resolveGitHubReleaseAsset(target(), { fetchImpl: draft.fetchImpl }), "release-draft", "draft release");
-
-const missing = publicFetchHarness({
-  release: { id: 55, tag_name: "sctool/example-tool/v1.2.3", draft: false, assets: [] },
-});
-await errorCode(() => resolveGitHubReleaseAsset(target(), { fetchImpl: missing.fetchImpl }), "asset-not-found", "missing exact asset");
-
-const failedQuery = {
-  fetchImpl: async () => jsonResponse({ message: "not found" }, 404),
-};
 await errorCode(
-  () => resolveGitHubReleaseAsset(target(), { fetchImpl: failedQuery.fetchImpl }),
-  "release-query-failed",
-  "public release query failure",
+  () => resolveGitHubReleaseAsset(target(), { fetchImpl: harness({ cacheReleaseId: 999 }).fetchImpl }),
+  "release-id-mismatch",
+  "release id mismatch rejected",
 );
 
-const streamHarness = publicFetchHarness();
-const opened = await openGitHubReleaseAssetStream(target(), { fetchImpl: streamHarness.fetchImpl });
-equal(opened.packageId, "example-tool", "stream preserves package id");
-equal(opened.releaseId, 55, "stream preserves release observation");
-equal(opened.backendAssetName, "backend-observation.sctool", "stream preserves backend name");
-equal(opened.backendAssetSize, 999, "stream preserves backend size");
+await errorCode(
+  () => resolveGitHubReleaseAsset(target(), { fetchImpl: harness({ cacheAssets: [] }).fetchImpl }),
+  "asset-not-found",
+  "missing exact cache asset rejected",
+);
+
+const streamH = harness();
+const opened = await openGitHubReleaseAssetStream(target(), { fetchImpl: streamH.fetchImpl });
+equal(opened.source, "cache", "stream source preserved");
+equal(opened.releaseId, 20, "stream exact release preserved");
 const bytes = await readAll(opened.stream);
 await opened.completed;
-equal(bytes.length, 4, "streamed byte count");
-equal(bytes[3], 255, "stream preserves binary bytes");
-equal(streamHarness.requests[1].url.endsWith("/repos/Simple-Connection/sctool-artifacts/releases/assets/101"), true, "stream uses exact asset API URL");
-equal(streamHarness.requests[1].init.headers.Accept, "application/octet-stream", "stream requests binary asset");
-equal("Authorization" in streamHarness.requests[1].init.headers, false, "asset request has no authorization header");
+equal(bytes.length, 4, "cache stream bytes");
+truthy(streamH.requests[1].url.endsWith("/releases/assets/201"), "exact cache asset API used");
 
-const failedAsset = publicFetchHarness({ assetStatus: 404 });
-await errorCode(
-  () => openGitHubReleaseAssetStream(target(), { fetchImpl: failedAsset.fetchImpl }),
-  "download-start-failed",
-  "missing public asset fails closed",
-);
+const compatH = harness();
+const compat = await openGitHubReleaseAssetStreamWithGitHubCli(target(), { source: "origin", fetchImpl: compatH.fetchImpl });
+await readAll(compat.stream);
+await compat.completed;
+equal(compat.source, "origin", "compat wrapper delegates to exact public origin transport");
+equal(createGitHubCliStreamCommandRunner(), null, "legacy CLI stream runner disabled");
 
-const compat = publicFetchHarness();
-const compatOpened = await openGitHubReleaseAssetStreamWithGitHubCli(target(), {
-  fetchImpl: compat.fetchImpl,
-});
-await readAll(compatOpened.stream);
-await compatOpened.completed;
-equal(compat.requests.length, 2, "compatibility wrapper uses public HTTP only");
-equal(createGitHubCliStreamCommandRunner(), null, "legacy CLI stream runner is disabled");
-
-await errorCode(
-  () => resolveGitHubReleaseAsset(target(), { fetchImpl: null }),
-  "configuration-error",
-  "missing public fetch fails closed",
-);
-
-console.log("Registry Client SDK public artifact delivery PASS cases=24");
+console.log("Registry Client SDK exact origin/cache artifact delivery PASS cases=22");
