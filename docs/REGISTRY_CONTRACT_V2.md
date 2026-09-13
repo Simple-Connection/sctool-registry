@@ -316,7 +316,7 @@ docs/ARTIFACT_DELIVERY_V2.md
 artifact_delivery_contract_version = 2.0.0
 ```
 
-`ARTIFACT_DELIVERY_V2` remains the historical single-central-locator reference.
+`ARTIFACT_DELIVERY_V1` remains the historical single-central-locator reference.
 
 The canonical artifact shape separates immutable content identity from delivery locations:
 
