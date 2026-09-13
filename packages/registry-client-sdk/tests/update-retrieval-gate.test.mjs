@@ -17,8 +17,7 @@ let cases = 0;
 
 const currentHarness = createRetrievalHarness(target);
 const current = await resolveUpdateCandidate(target, observation("1.2.3"), {
-  runner: currentHarness.runner,
-  streamRunner: currentHarness.streamRunner,
+  fetchImpl: currentHarness.fetchImpl,
 });
 equal(current.state, "CURRENT", "current state");
 cases += 1;
@@ -31,8 +30,7 @@ cases += 1;
 
 const downgradeHarness = createRetrievalHarness(target);
 const downgrade = await resolveUpdateCandidate(target, observation("2.0.0"), {
-  runner: downgradeHarness.runner,
-  streamRunner: downgradeHarness.streamRunner,
+  fetchImpl: downgradeHarness.fetchImpl,
 });
 equal(downgrade.state, "DOWNGRADE_NOT_CANDIDATE", "downgrade state");
 cases += 1;
@@ -49,8 +47,7 @@ await errorCode(
     target,
     observation("1.2.2", { authority: "AUTH_REGISTRY_CLIENT_SDK" }),
     {
-      runner: invalidHarness.runner,
-      streamRunner: invalidHarness.streamRunner,
+      fetchImpl: invalidHarness.fetchImpl,
     },
   ),
   RegistryUpdateCandidateError,
@@ -65,9 +62,7 @@ cases += 1;
 
 const eligibleHarness = createRetrievalHarness(target);
 const eligible = await resolveUpdateCandidate(target, observation("1.2.2"), {
-  runner: eligibleHarness.runner,
-  streamRunner: eligibleHarness.streamRunner,
-  environment: { PATH: "x", GH_TOKEN: "forbidden" },
+  fetchImpl: eligibleHarness.fetchImpl,
 });
 equal(eligible.state, "UPDATE_AVAILABLE", "eligible state");
 cases += 1;
