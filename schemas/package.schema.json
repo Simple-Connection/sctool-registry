@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "SCTool Registry Package Descriptor v2",
+  "title": "SCTool Registry Package Descriptor v3",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -19,7 +19,10 @@
     "target": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["platform", "arch"],
+      "required": [
+        "platform",
+        "arch"
+      ],
       "properties": {
         "platform": {
           "type": "string",
@@ -34,7 +37,11 @@
     "content": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["filename", "sha256", "size"],
+      "required": [
+        "filename",
+        "sha256",
+        "size"
+      ],
       "properties": {
         "filename": {
           "type": "string",
@@ -55,7 +62,9 @@
     "deliveryAccess": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["contract"],
+      "required": [
+        "contract"
+      ],
       "properties": {
         "contract": {
           "const": "registry-public-integrity-v1"
@@ -65,13 +74,22 @@
     "githubReleaseAssetLocator": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["repository", "assetId"],
+      "required": [
+        "repository",
+        "releaseId",
+        "assetId"
+      ],
       "properties": {
         "repository": {
           "type": "string",
           "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})/[A-Za-z0-9._-]{1,100}$"
         },
         "assetId": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "releaseId": {
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991
@@ -83,7 +101,11 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": ["type", "access", "locator"],
+          "required": [
+            "type",
+            "access",
+            "origin"
+          ],
           "properties": {
             "type": {
               "const": "github-release-asset"
@@ -91,7 +113,10 @@
             "access": {
               "$ref": "#/$defs/deliveryAccess"
             },
-            "locator": {
+            "origin": {
+              "$ref": "#/$defs/githubReleaseAssetLocator"
+            },
+            "cache": {
               "$ref": "#/$defs/githubReleaseAssetLocator"
             }
           }
@@ -101,7 +126,9 @@
     "contract": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["sctoolSpecVersion"],
+      "required": [
+        "sctoolSpecVersion"
+      ],
       "properties": {
         "sctoolSpecVersion": {
           "$ref": "#/$defs/semver"
@@ -188,7 +215,7 @@
       "type": "string"
     },
     "schemaVersion": {
-      "const": "2.0.0"
+      "const": "3.0.0"
     },
     "id": {
       "type": "string",
@@ -201,10 +228,16 @@
     "source": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["visibility"],
+      "required": [
+        "visibility"
+      ],
       "properties": {
         "visibility": {
-          "enum": ["public", "private", "undisclosed"]
+          "enum": [
+            "public",
+            "private",
+            "undisclosed"
+          ]
         },
         "repository": {
           "type": "string",
@@ -235,7 +268,9 @@
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["artifacts"],
+        "required": [
+          "artifacts"
+        ],
         "properties": {
           "artifacts": {
             "type": "object",
