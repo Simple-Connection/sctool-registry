@@ -35,7 +35,7 @@ const target = {
   content: { filename: "example-tool.sctool", sha256: digest, size: bytes.length },
   delivery: {
     type: "github-release-asset",
-    access: { contract: "registry-access-v1" },
+    access: { contract: "registry-public-integrity-v1" },
     locator: { repository: "Simple-Connection/sctool-artifacts", assetId: 101 },
   },
   publishedAt: "2026-09-06T00:00:00Z",
