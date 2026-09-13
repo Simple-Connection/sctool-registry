@@ -132,6 +132,9 @@ jobs:
       - name: Validate registry JSON contracts
         run: python tools/validate-registry.py
 
+      - name: Test signed Registry distribution handoff tooling
+        run: python tools/test-registry-distribution-handoff.py
+
       - name: Detect production trust activation
         id: activation
         shell: bash
