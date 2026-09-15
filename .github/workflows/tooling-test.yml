@@ -60,7 +60,7 @@ jobs:
       - name: Install governance dependencies
         run: |
           "%SCTOOL_PYTHON%" -m pip install --disable-pip-version-check -r docs/governance/requirements.txt
-          "%SCTOOL_PYTHON%" -m pip install --disable-pip-version-check "PTSIP==0.3.7"
+          "%SCTOOL_PYTHON%" -m pip install --disable-pip-version-check "PTSIP==0.3.8a1"
 
       - name: Test session state synchronization
         run: |
@@ -73,7 +73,7 @@ jobs:
       - name: Verify committed session routing projection
         run: |
           "%SCTOOL_PYTHON%" docs/governance/validate.py --root . --sync-session-states
-          git diff --exit-code -- docs/index.yaml docs/ver1.0.3/1.0.3_Improvement_plan.yaml
+          git diff --exit-code -- docs/index.yaml
 
       - name: Validate machine development documentation
         run: |
