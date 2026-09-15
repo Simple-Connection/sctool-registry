@@ -16,7 +16,7 @@ from validation.session_state_sync import (
     synchronize_session_states,
     write_yaml_documents_atomically,
 )
-from validation import artifact, distribution, install, interpretation, planning, responsibility, routing, session
+from validation import artifact, distribution, install, interpretation, planning, policy, responsibility, routing, session
 
 
 def main() -> int:
@@ -91,6 +91,7 @@ def main() -> int:
 
     for validator in (
         routing.validate,
+        policy.validate,
         responsibility.validate,
         interpretation.validate,
         artifact.validate,
@@ -110,7 +111,7 @@ def main() -> int:
     print(
         "Development governance validation PASS "
         f"versions={len(ctx.index['versions'])} "
-        f"sessions={len(ctx.plan['sessions'])} "
+        f"sessions={len(ctx.plan['sessions']) if ctx.plan is not None else 0} "
         f"responsibilities={len(ctx.responsibilities['responsibilities'])} "
         f"rationales={len(ctx.rationale.get('rationales', {}))} "
         f"gates={len(ctx.gate_registry['gates'])}"

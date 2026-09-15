@@ -2,7 +2,7 @@
 
 `registry_access_contract_version: 1.0.0`
 
-> **Migration notice:** private repository read authorization defined by this contract is no longer the approved target artifact-access architecture. `docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md` fixes the approved target as public central-cache transport with fail-closed content and signature verification. This v1 access contract remains a reference for currently implemented SDK behavior until a separately approved successor migration removes private-repository authorization as an artifact retrieval precondition.
+> **Migration notice:** private repository read authorization defined by this contract is no longer the approved target artifact-access architecture. `docs/policy/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md` fixes the approved target as public central-cache transport with fail-closed content and signature verification. This v1 access contract remains a reference for currently implemented SDK behavior until a separately approved successor migration removes private-repository authorization as an artifact retrieval precondition.
 
 This document defines the GitHub identity and authenticated artifact-access boundary that SCTool Registry clients and the SCTool SDK consume.
 
@@ -15,7 +15,7 @@ docs/REGISTRY_CONTRACT_V2.md
 policy/registry-policy.json schemaVersion 2.0.0
 ```
 
-`docs/REGISTRY_CONTRACT_V1.md` and `schemas/policy-v1.schema.json` are retained as historical v1 references for the earlier anonymous-download model.
+`docs/ver1.0.1/history/REGISTRY_CONTRACT_V1.md` and `schemas/policy-v1.schema.json` are retained as historical v1 references for the earlier anonymous-download model.
 
 The v2 activation is an intentional breaking policy change; the meaning of Registry Contract v1 is not changed in place.
 

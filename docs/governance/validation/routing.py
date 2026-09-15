@@ -16,6 +16,7 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
         improvement_template_path: ctx.load(improvement_template_path),
         essential_template_path: ctx.load(essential_template_path),
         ctx.responsibility_index_path: ctx.responsibility_index,
+        ctx.policy_index_path: ctx.policy_index,
         ctx.responsibility_index["routes"]["authorities"]: ctx.authorities,
         ctx.responsibility_index["routes"]["vocabulary"]: ctx.vocabulary,
         ctx.responsibility_index["routes"]["contracts"]: ctx.contracts,
@@ -156,6 +157,27 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
             )
 
 
+    need(
+        index["template_index"] == ctx.template_index_path,
+        "INDEX_TEMPLATE_ROUTE",
+        errors,
+    )
+    need(
+        index["rules_index"] == ctx.rules_index_path,
+        "INDEX_RULES_ROUTE",
+        errors,
+    )
+    need(
+        index["responsibility_index"] == ctx.responsibility_index_path,
+        "INDEX_RESPONSIBILITY_ROUTE",
+        errors,
+    )
+    need(
+        index["policy_index"] == ctx.policy_index_path,
+        "INDEX_POLICY_ROUTE",
+        errors,
+    )
+
     template_index = ctx.template_index
     need(
         template_index["rules_index"] == ctx.rules_index_path,
@@ -201,6 +223,7 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
         ("RULES", ctx.rules_index_path, layout.get("rules_root")),
         ("TEMPLATE", ctx.template_index_path, layout.get("template_root")),
         ("RESPONSIBILITY", ctx.responsibility_index_path, layout.get("responsibility_root")),
+        ("POLICY", ctx.policy_index_path, layout.get("policy_root")),
     )
     for route_name, route_path, root_path in route_roots:
         need(

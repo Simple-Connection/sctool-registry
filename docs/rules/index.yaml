@@ -13,7 +13,9 @@ layout:
   rules_root: "docs/rules"
   template_root: "docs/template"
   responsibility_root: "docs/responsibility"
+  policy_root: "docs/policy"
   version_root_pattern: "docs/ver{version}"
+  history_root_pattern: "docs/ver{version}/history"
   tooling_root: "docs/governance"
   forbidden_paths:
     - "docs/governance/index.yaml"

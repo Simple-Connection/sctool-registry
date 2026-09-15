@@ -6,6 +6,9 @@ natural_language: FORBIDDEN
 rules_index: docs/rules/index.yaml
 template_index: docs/template/index.yaml
 responsibility_index: docs/responsibility/index.yaml
+policy_index: docs/policy/index.yaml
+history_entry_policy: INDEX_ONLY
+expired_document_policy: REMOVE
 current:
   distribution_contract_version: null
   branch: main
@@ -37,6 +40,12 @@ versions:
       state: COMPLETE
       format: LEGACY_BUILD_SESSION
       document: docs/ver1.0.1/session_document/ver.1.0.1_P2_artifact_delivery_descriptor_schema_boundary.yaml
+    history_root: docs/ver1.0.1/history
+    history:
+    - id: REGISTRY_CONTRACT_V1
+      document_class: CONTRACT
+      entry_mode: INDEX_ONLY
+      path: docs/ver1.0.1/history/REGISTRY_CONTRACT_V1.md
   1.0.2:
     state: HISTORICAL_COMPLETE
     branch: dev/1.0.2

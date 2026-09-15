@@ -2,7 +2,7 @@
 
 `artifact_delivery_contract_version: 1.0.0`
 
-> **Migration notice:** the current `registry-access-v1` private-access assumption is scheduled for replacement by the approved public-integrity model in `docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md`. Existing v1 descriptor/access semantics remain implementation references until a separately approved successor schema and delivery contract are activated.
+> **Migration notice:** the current `registry-access-v1` private-access assumption is scheduled for replacement by the approved public-integrity model in `docs/policy/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md`. Existing v1 descriptor/access semantics remain implementation references until a separately approved successor schema and delivery contract are activated.
 
 `package_descriptor_schema_version: 2.0.0`
 
