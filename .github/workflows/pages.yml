@@ -67,6 +67,9 @@ jobs:
       - name: Validate development governance
         run: python docs/governance/validate.py --root .
 
+      - name: Test machine agent entry routing
+        run: python docs/governance/test-agent-entry.py
+
       - name: Validate Registry Client SDK boundary
         run: npm --prefix packages/registry-client-sdk test
 
