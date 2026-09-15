@@ -17,6 +17,7 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
         essential_template_path: ctx.load(essential_template_path),
         ctx.responsibility_index_path: ctx.responsibility_index,
         ctx.policy_index_path: ctx.policy_index,
+        ctx.agent_index_path: ctx.agent_index,
         ctx.responsibility_index["routes"]["authorities"]: ctx.authorities,
         ctx.responsibility_index["routes"]["vocabulary"]: ctx.vocabulary,
         ctx.responsibility_index["routes"]["contracts"]: ctx.contracts,
@@ -177,6 +178,11 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
         "INDEX_POLICY_ROUTE",
         errors,
     )
+    need(
+        index["agent_index"] == ctx.agent_index_path,
+        "INDEX_AGENT_ROUTE",
+        errors,
+    )
 
     need(index.get("history_entry_policy") == "INDEX_ONLY", "HISTORY_ENTRY_POLICY", errors)
     need(index.get("expired_document_policy") == "REMOVE", "EXPIRED_DOCUMENT_POLICY", errors)
@@ -255,6 +261,7 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
         ("TEMPLATE", ctx.template_index_path, layout.get("template_root")),
         ("RESPONSIBILITY", ctx.responsibility_index_path, layout.get("responsibility_root")),
         ("POLICY", ctx.policy_index_path, layout.get("policy_root")),
+        ("AGENT", ctx.agent_index_path, layout.get("agent_root")),
     )
     for route_name, route_path, root_path in route_roots:
         need(

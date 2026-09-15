@@ -16,7 +16,7 @@ from validation.session_state_sync import (
     synchronize_session_states,
     write_yaml_documents_atomically,
 )
-from validation import artifact, distribution, install, interpretation, planning, policy, responsibility, routing, session
+from validation import agent, artifact, distribution, install, interpretation, planning, policy, responsibility, routing, session
 
 
 def main() -> int:
@@ -91,6 +91,7 @@ def main() -> int:
 
     for validator in (
         routing.validate,
+        agent.validate,
         policy.validate,
         responsibility.validate,
         interpretation.validate,

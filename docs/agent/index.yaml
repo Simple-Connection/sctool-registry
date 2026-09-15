@@ -1,0 +1,200 @@
+schema_version: "1.0"
+document_type: agent_entry_index
+natural_language: FORBIDDEN
+entry_root: docs/agent/entries
+resolver: docs/governance/agent-entry.py
+default_task_class: REPOSITORY_STATUS
+history_default_entry: FORBIDDEN
+entries:
+  ENTRY_DEVELOPMENT:
+    path: docs/agent/entries/development.md
+  ENTRY_GOVERNANCE:
+    path: docs/agent/entries/governance.md
+  ENTRY_POLICY:
+    path: docs/agent/entries/policy.md
+  ENTRY_RESPONSIBILITY:
+    path: docs/agent/entries/responsibility.md
+  ENTRY_PTSIP:
+    path: docs/agent/entries/ptsip.md
+  ENTRY_COMPONENTS:
+    path: docs/agent/entries/components.md
+  ENTRY_REGISTRY_CLIENT_SDK:
+    path: docs/agent/entries/registry-client-sdk.md
+  ENTRY_ISSUE_ROUTING:
+    path: docs/agent/entries/issue-routing.md
+  ENTRY_AUTHORING_SDK:
+    path: docs/agent/entries/authoring-sdk.md
+  ENTRY_TRUST_DISTRIBUTION:
+    path: docs/agent/entries/trust-distribution.md
+  ENTRY_REGISTRY_CONTRACT:
+    path: docs/agent/entries/registry-contract.md
+task_classes:
+  REPOSITORY_STATUS:
+    entries: []
+    routes:
+      - docs/index.yaml
+      - ptsip.yaml
+    selectors: []
+  VERSION_DEVELOPMENT:
+    entries:
+      - ENTRY_DEVELOPMENT
+      - ENTRY_GOVERNANCE
+    routes:
+      - docs/index.yaml
+      - docs/rules/index.yaml
+      - docs/template/index.yaml
+      - docs/responsibility/index.yaml
+    selectors:
+      - docs/index.yaml
+      - docs/ver*/**
+      - docs/template/**
+      - docs/rules/**
+  GOVERNANCE:
+    entries:
+      - ENTRY_GOVERNANCE
+    routes:
+      - docs/index.yaml
+      - docs/rules/index.yaml
+      - docs/template/index.yaml
+      - docs/responsibility/index.yaml
+      - docs/agent/index.yaml
+    selectors:
+      - AGENTS.md
+      - docs/agent/**
+      - docs/governance/**
+  POLICY:
+    entries:
+      - ENTRY_POLICY
+    routes:
+      - docs/policy/index.yaml
+      - docs/index.yaml
+    selectors:
+      - docs/policy/**
+      - policy/**
+  RESPONSIBILITY:
+    entries:
+      - ENTRY_RESPONSIBILITY
+    routes:
+      - docs/responsibility/index.yaml
+      - docs/index.yaml
+    selectors:
+      - docs/responsibility/**
+  PTSIP:
+    entries:
+      - ENTRY_PTSIP
+    routes:
+      - ptsip.yaml
+    selectors:
+      - ptsip.yaml
+  REGISTRY_CLIENT_SDK_GENERAL:
+    entries:
+      - ENTRY_COMPONENTS
+      - ENTRY_REGISTRY_CLIENT_SDK
+    routes:
+      - packages/registry-client-sdk/package.json
+      - ptsip.yaml
+    selectors:
+      - packages/registry-client-sdk/**
+  REGISTRY_CLIENT_SDK_ACCESS:
+    entries:
+      - ENTRY_REGISTRY_CLIENT_SDK
+    routes:
+      - docs/REGISTRY_ACCESS_V1.md
+      - docs/REGISTRY_CONTRACT_V2.md
+      - policy/registry-policy.json
+    selectors:
+      - docs/REGISTRY_ACCESS_V1.md
+  REGISTRY_CLIENT_SDK_DELIVERY:
+    entries:
+      - ENTRY_REGISTRY_CLIENT_SDK
+    routes:
+      - docs/ARTIFACT_DELIVERY_V1.md
+      - docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml
+      - policy/registry-policy.json
+    selectors:
+      - docs/ARTIFACT_DELIVERY_V1.md
+      - docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml
+  REGISTRY_CLIENT_SDK_UPDATE:
+    entries:
+      - ENTRY_REGISTRY_CLIENT_SDK
+    routes:
+      - docs/UPDATE_CANDIDATE_V1.yaml
+      - docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml
+      - docs/SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1.yaml
+    selectors:
+      - docs/UPDATE_CANDIDATE_V1.yaml
+      - docs/SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1.yaml
+  REGISTRY_CLIENT_SDK_PUBLICATION:
+    entries:
+      - ENTRY_REGISTRY_CLIENT_SDK
+    routes:
+      - docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml
+      - packages/registry-client-sdk/package.json
+      - .github/workflows/publish-registry-client-sdk.yml
+    selectors:
+      - docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml
+      - .github/workflows/publish-registry-client-sdk.yml
+      - delivery/registry-client-sdk-package/**
+  ISSUE_ROUTING:
+    entries:
+      - ENTRY_ISSUE_ROUTING
+    routes:
+      - .github/registry-sdk-issue-queue.json
+      - tools/issue-routing/registry_issue_intake.py
+    selectors:
+      - .github/registry-sdk-issue-queue.json
+      - .github/ISSUE_TEMPLATE/**
+      - .github/workflows/registry-sdk-issue-routing.yml
+      - tools/issue-routing/**
+  AUTHORING_SDK_SCTOOL:
+    entries:
+      - ENTRY_COMPONENTS
+      - ENTRY_AUTHORING_SDK
+    routes:
+      - packages/sctool-sdk/package.json
+      - docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml
+    selectors:
+      - packages/sctool-sdk/**
+  AUTHORING_SDK_REPOSITORY_TOOL:
+    entries:
+      - ENTRY_COMPONENTS
+      - ENTRY_AUTHORING_SDK
+    routes:
+      - packages/repository-tool-sdk/package.json
+      - docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml
+    selectors:
+      - packages/repository-tool-sdk/**
+  TRUST_DISTRIBUTION:
+    entries:
+      - ENTRY_TRUST_DISTRIBUTION
+      - ENTRY_REGISTRY_CONTRACT
+    routes:
+      - docs/PAGES_DISTRIBUTION_V1.md
+      - docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml
+      - trust/trust.json
+      - .github/workflows/pages.yml
+      - .github/workflows/sign-trust.yml
+    selectors:
+      - trust/**
+      - docs/PAGES_DISTRIBUTION_V1.md
+      - docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml
+      - .github/workflows/pages.yml
+      - .github/workflows/sign-trust.yml
+  REGISTRY_CONTRACT:
+    entries:
+      - ENTRY_REGISTRY_CONTRACT
+    routes:
+      - docs/REGISTRY_CONTRACT_V2.md
+      - policy/registry-policy.json
+      - docs/policy/index.yaml
+    selectors:
+      - docs/REGISTRY_CONTRACT_V2.md
+      - schemas/*.schema.json
+      - registry.json
+      - packages/*.json
+      - publishers/**
+  HISTORY:
+    entries: []
+    routes:
+      - docs/index.yaml
+    selectors: []

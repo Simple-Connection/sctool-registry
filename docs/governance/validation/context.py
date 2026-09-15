@@ -28,6 +28,8 @@ class ValidationContext:
     responsibility_index: dict[str, Any]
     policy_index_path: str
     policy_index: dict[str, Any]
+    agent_index_path: str
+    agent_index: dict[str, Any]
     authorities: dict[str, Any]
     vocabulary: dict[str, Any]
     contracts: dict[str, Any]
@@ -57,6 +59,8 @@ def load_context(root: Path, index_path: str) -> ValidationContext:
     responsibility_index = load_yaml(root, responsibility_index_path)
     policy_index_path = index["policy_index"]
     policy_index = load_yaml(root, policy_index_path)
+    agent_index_path = index["agent_index"]
+    agent_index = load_yaml(root, agent_index_path)
     routes = responsibility_index["routes"]
     contracts = load_yaml(root, routes["contracts"])
     contract_routes = contracts["contracts"]
@@ -89,6 +93,8 @@ def load_context(root: Path, index_path: str) -> ValidationContext:
         responsibility_index=responsibility_index,
         policy_index_path=policy_index_path,
         policy_index=policy_index,
+        agent_index_path=agent_index_path,
+        agent_index=agent_index,
         authorities=load_yaml(root, routes["authorities"]),
         vocabulary=load_yaml(root, routes["vocabulary"]),
         contracts=contracts,

@@ -14,6 +14,7 @@ layout:
   template_root: "docs/template"
   responsibility_root: "docs/responsibility"
   policy_root: "docs/policy"
+  agent_root: "docs/agent"
   version_root_pattern: "docs/ver{version}"
   history_root_pattern: "docs/ver{version}/history"
   tooling_root: "docs/governance"

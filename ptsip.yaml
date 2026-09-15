@@ -215,6 +215,7 @@ components:
       - ".github/registry-sdk-issue-queue.json"
       - "tools/issue-routing/**"
       - "docs/index.yaml"
+      - "docs/agent/**"
       - "docs/rules/**"
       - "docs/template/**"
       - "docs/responsibility/**"
