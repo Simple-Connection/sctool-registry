@@ -9,6 +9,7 @@ responsibility_index: docs/responsibility/index.yaml
 policy_index: docs/policy/index.yaml
 history_entry_policy: INDEX_ONLY
 expired_document_policy: REMOVE
+expired_documents: []
 current:
   distribution_contract_version: null
   branch: main

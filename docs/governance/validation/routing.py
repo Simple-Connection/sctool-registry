@@ -178,6 +178,37 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
         errors,
     )
 
+    need(index.get("history_entry_policy") == "INDEX_ONLY", "HISTORY_ENTRY_POLICY", errors)
+    need(index.get("expired_document_policy") == "REMOVE", "EXPIRED_DOCUMENT_POLICY", errors)
+
+    for version_id, version_entry in index.get("versions", {}).items():
+        history = version_entry.get("history", [])
+        if history:
+            expected_history_root = f"docs/ver{version_id}/history"
+            need(
+                version_entry.get("history_root") == expected_history_root,
+                f"HISTORY_ROOT:{version_id}:{version_entry.get('history_root')}",
+                errors,
+            )
+        for entry in history:
+            path = entry.get("path")
+            need(
+                isinstance(path, str) and path.startswith(f"docs/ver{version_id}/history/"),
+                f"HISTORY_PATH:{version_id}:{path}",
+                errors,
+            )
+            need(entry.get("entry_mode") == "INDEX_ONLY", f"HISTORY_ENTRY_MODE:{version_id}:{path}", errors)
+            if isinstance(path, str):
+                need((ctx.root / path).is_file(), f"HISTORY_FILE_MISSING:{version_id}:{path}", errors)
+
+    for entry in index.get("expired_documents", []):
+        path = entry.get("path") if isinstance(entry, dict) else entry
+        need(
+            isinstance(path, str) and not (ctx.root / path).exists(),
+            f"EXPIRED_DOCUMENT_PRESENT:{path}",
+            errors,
+        )
+
     template_index = ctx.template_index
     need(
         template_index["rules_index"] == ctx.rules_index_path,
