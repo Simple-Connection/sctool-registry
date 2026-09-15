@@ -1,368 +1,102 @@
 # AGENTS.md
 
-## Repository authority
+## Purpose
 
-This repository is the public SCTool metadata registry, artifact-distribution integrity authority, Registry Client SDK authority, and canonical source/publication authority for the SCTool and Repository Tool Authoring SDKs.
+This file is the minimal coding-agent entry point for `Simple-Connection/sctool-registry`.
+Do not preload repository policy, historical version documents, or implementation details from this file.
 
-Before changing registry identity, schema, publisher trust, package ownership, artifact access/immutability, distribution behavior, Registry Client SDK behavior, or Authoring SDK behavior, read:
+## Required entry order
+
+Start with:
 
 ```text
-docs/REGISTRY_CONTRACT_V2.md
-docs/REGISTRY_ACCESS_V1.md
-docs/ARTIFACT_DELIVERY_V1.md
-docs/REGISTRY_ARTIFACT_CUSTODY_CACHE_POLICY_V1.md
-docs/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md
-docs/PAGES_DISTRIBUTION_V1.md
-policy/registry-policy.json
+docs/index.yaml
 ptsip.yaml
 ```
 
-`docs/REGISTRY_CONTRACT_V1.md` and `schemas/policy-v1.schema.json` are retained as historical v1 references. Do not silently restore v1 anonymous artifact delivery into the current v2 policy.
-
-## Version-scoped development branches
-
-Development work is organized by `distribution_contract_version`. One version uses one persistent branch:
+Then read only the routes required by the task.
 
 ```text
-dev/{major}.{minor}.{micro}
-```
+development/version/session work
+-> docs/index.yaml
 
-Do not create a branch per session. Do not infer the active version or session from prose, package versions, schema versions, SDK versions, or Tool versions.
+policy work
+-> docs/policy/index.yaml
 
-The canonical machine entry point for development documentation is:
+responsibility/authority work
+-> docs/responsibility/index.yaml
 
-```text
-docs/index.yaml
-```
-
-A coding agent entering version/session work must resolve routing in this order:
-
-```text
-docs/index.yaml
+governance rules/templates
 -> docs/rules/index.yaml
 -> docs/template/index.yaml
--> docs/responsibility/index.yaml
--> current version improvement_plan
--> approved current session_document
--> session_document_essential template
--> selected session_type template
+
+active contract work
+-> follow the contract path referenced by the relevant active index/responsibility entry
 ```
 
-`docs/index.yaml` is authoritative for the current distribution contract version, version state, current/next session state, version-plan path, session-document paths, and template routing. It must contain machine values only and must not contain free-form natural-language planning text.
+Do not scan `docs/ver*/**` during normal entry.
+Version folders are historical/version-scoped records and are entered only when `docs/index.yaml` routes to them or the task explicitly requires history.
 
-Each machine-governed version has one canonical improvement plan at:
+## Repository state rules
+
+`docs/index.yaml` is the authority for active development routing.
+
+If:
+
+```yaml
+current:
+  state: IDLE
+  distribution_contract_version: null
+```
+
+there is no active version-development session.
+
+Do not infer or create a version, session, or `dev/**` branch from package versions, issue text, historical documents, or repository contents.
+
+Creating a branch requires explicit user approval.
+Do not create a version branch, hotfix branch, or operational branch without that approval.
+
+## PTSIP
+
+The maintained development Tool is:
 
 ```text
-docs/ver{major}.{minor}.{micro}/{major}.{minor}.{micro}_Improvement_plan.yaml
+PTSIP Tool: 0.3.8a1
+Project Profile: pp.1.01
+Profile: ptsip.yaml
 ```
 
-The improvement plan must follow `docs/template/improvement_plan.yaml`. Natural-language fields are forbidden in the improvement plan. Version goals and future work must be represented by stable machine identifiers, enums, paths, states, gate IDs, and evidence references.
+Use the profile as machine authority. Do not restate its component ownership model here.
 
-Before creating a new development branch, resolve the target version from `docs/index.yaml`. Reuse an existing matching `dev/{major}.{minor}.{micro}` branch when that version is already active.
-
-Multiple sessions belonging to the same version remain on that version branch. Session completion does not authorize a merge to `main`. The version branch becomes merge-eligible only after version-level machine gates are satisfied and any required explicit approval is recorded.
-
-## Machine session entry and documentation layout
-
-Canonical layout:
+Minimum validation after repository/governance changes:
 
 ```text
-docs/
-├─ index.yaml
-├─ rules/
-│  ├─ index.yaml
-│  └─ session-state.yaml
-├─ template/
-│  ├─ index.yaml
-│  ├─ improvement_plan.yaml
-│  └─ session_document_template/
-│     ├─ session_document_essential.yaml
-│     ├─ session_type_A.yaml
-│     ├─ session_type_B.yaml
-│     └─ session_type_C.yaml
-├─ responsibility/
-│  ├─ index.yaml
-│  ├─ authorities.yaml
-│  ├─ vocabulary.yaml
-│  ├─ contracts.yaml
-│  ├─ responsibilities.yaml
-│  ├─ descriptions.yaml
-│  ├─ rationale.yaml
-│  └─ gates.yaml
-├─ governance/
-│  ├─ validate.py
-│  ├─ requirements.txt
-│  └─ validation/
-│     ├─ common.py
-│     ├─ context.py
-│     ├─ interpretation.py
-│     ├─ responsibility.py
-│     ├─ routing.py
-│     ├─ session.py
-│     └─ state.py
-└─ ver{major}.{minor}.{micro}/
-   ├─ {major}.{minor}.{micro}_Improvement_plan.yaml
-   └─ session_document/
-      └─ ver.{major}.{minor}.{micro}_P{N}_*.yaml
-```
-
-
-`docs/template/session_document_template/session_document_essential.yaml` defines the common machine-only routing/state/evidence fields. It must not introduce natural-language payload fields.
-
-The governance validator and its Python package are colocated under the validator namespace:
-
-```text
-docs/governance/validate.py
-docs/governance/requirements.txt
-docs/governance/validation/**
-```
-
-This placement is intentionally limited to validator tooling. Machine state, rules, templates, responsibility semantics, and version/session records remain sibling authorities under `docs/` rather than children of the validator namespace.
-
-Session type templates remain machine/reference-only:
-
-```text
-A = DECISION
-B = IMPLEMENTATION
-C = VALIDATION_CLOSEOUT
-```
-
-Natural language must not be embedded in the docs index, improvement plan, session templates, or session documents. Authority-relevant unmodeled semantics and decision intent are preserved only through registered description/rationale references under `docs/responsibility/`.
-
-A new primary session is not materialized before explicit approval. After approval, create exactly one session YAML by combining the essential machine fields with the selected type payload, then update the version improvement plan and `docs/index.yaml` in the same logical change.
-
-Primary sessions use `P1`, `P2`, `P3`, ... . Use `P1.1`, `P1.2`, ... only when an already approved primary session must be split into a subordinate session.
-
-Historical session documents created before this machine-entry model may retain their recorded payload. Their routing references must point to the current YAML improvement plan, and new sessions must use the template routing above.
-
-Repository-governance owns `docs/index.yaml`, `docs/rules/**`, `docs/template/**`, `docs/responsibility/**`, `docs/ver*/**`, and the validator tooling under `docs/governance/**`. Keep these authorities flat: do not move rules, templates, responsibility semantics, or version/session state under `docs/governance/`.
-
-## Responsibility machine model
-
-Authority responsibility must be decomposed into closed machine dimensions instead of replacing prose with opaque constants. Canonical dimensions and allocations are routed by `docs/responsibility/index.yaml`.
-
-If authority-relevant semantics are not expressible by the current closed dimensions, qualify the missing semantic as a candidate dimension or value. Register it only when it is stable, reusable, and orthogonal. Otherwise keep a `responsibility_description_id` reference.
-
-Natural language is preserved in a separate interpretation layer instead of being removed. `docs/responsibility/descriptions.yaml` is only for authority-relevant semantics that remain unmodeled by closed dimensions. `docs/responsibility/rationale.yaml` preserves why an authority allocation or boundary was chosen, including historical migration intent and review triggers. Rationale is explanatory and does not override the machine responsibility dimensions.
-
-Each responsibility declares `interpretation.semantic_coverage`. `COMPLETE` requires `responsibility_description_id: null`; `PARTIAL` requires a registered description. Responsibilities marked `rationale_required: true` must reference active rationale entries whose `applies_to` includes that responsibility. Superseded rationale must not be used as active interpretation.
-
-A future change that matches a rationale `review_on` trigger must re-evaluate the linked rationale before changing the responsibility dimensions. Do not infer that a machine dimension change automatically preserves the prior design intent.
-
-Session state is derived. Session documents must not assert independent `audit`, `plan`, `apply`, `test`, or `closeout` state values. `docs/rules/session-state.yaml` owns the machine state rules; `docs/governance/validation/state.py` evaluates them, and `docs/governance/validate.py` checks that the version improvement plan agrees.
-
-`docs/governance/validate.py` is the single public governance-validation command. Domain checks are implemented behind it in `docs/governance/validation/`; do not add separate public validator commands for routing, responsibility, interpretation, session, or state checks.
-
-The session named by `docs/index.yaml -> current.next_session` remains unmaterialized until explicit approval. Validator failures must not be bypassed by pre-creating its session document or changing approval state outside the declared machine rules.
-
-## PTSIP is mandatory from the first commit
-
-Architecture and responsibility ownership are governed by:
-
-```text
-PTSIP Tool:          0.3.7
-Specification:       0.3.6-draft
-Specification rev:   d6995ed232e845b88d8235b851e80ab54b7804ea
-Profile:             ptsip.yaml
-```
-
-Tool version and bound Specification identity are separate. A compatible Tool update must not silently rewrite the historical Specification binding.
-
-PTSIP is a coding-agent/development tool. Do **not** add PTSIP to registry runtime dependencies or Registry Client SDK dependencies merely to make it available locally.
-
-The coding-agent execution environment should install the exact maintained tool version:
-
-```powershell
-python -m pip install "PTSIP==0.3.7"
-ptsip --version
-```
-
-If the execution environment cannot reach the package index, do not silently add PTSIP as a repository dependency or vendor it into this repository. Report that the tool gate could not run and keep the canonical profile/specification revision unchanged.
-
-## Required structural workflow
-
-Before an architecture or path-placement change:
-
-```powershell
-ptsip doctor .
-ptsip inspect .
-```
-
-After the change:
-
-```powershell
+python docs/governance/validate.py --root .
 ptsip validate .
-ptsip conform .
 ```
 
-For release/merge gating when applicable:
+Run additional PTSIP inspection/conformance commands only when required by the task or release gate.
 
-```powershell
-ptsip gate .
-```
+## Read-on-demand rule
 
-A new tracked path must be assigned in `ptsip.yaml` in the same change that introduces it. PTSIP classifications are determined by primary lifecycle ownership, not by directory name, language, framework, or whether a file is executable.
+Do not read all contracts, policies, responsibility records, templates, version plans, session documents, or history up front.
 
-Canonical classifications are:
+Resolve the smallest authoritative route from the indexes above, read only that material, perform the task, and expand the read set only when a referenced dependency requires it.
+
+## Hard boundaries
+
+- Never commit private keys, GitHub tokens, credential-store contents, or secret values.
+- Do not treat historical documents as active authority unless an active index explicitly routes to them.
+- Do not bypass governance/PTSIP validation by changing machine state to make a failing gate disappear.
+- Do not modify another repository merely because it consumes Registry output; cross-repository mutation requires separate authority.
+- `.sctool` binaries are not Registry Git content.
+
+## Validation entry point
+
+The public repository-governance command is:
 
 ```text
-PRODUCT
-DEVELOPMENT_TOOLING
-DELIVERY
-OPERATIONS
-NEUTRAL_CONTRACT
+python docs/governance/validate.py --root .
 ```
 
-## Packages namespace
-
-The canonical package namespaces are:
-
-```text
-packages/{packageId}.json
-= accepted Registry package descriptor
-
-packages/registry-client-sdk/**
-= Registry consumption SDK
-
-packages/sctool-sdk/**
-= SCTool Authoring SDK
-
-packages/repository-tool-sdk/**
-= Repository Tool Authoring SDK
-```
-
-Registry Client SDK, SCTool Authoring SDK, and Repository Tool Authoring SDK are independent Product SDK components. Authoring source/build/test/compatibility responsibilities must not be reintroduced into Simple-Connection/SC_Linked_App.
-
-## Current responsibility boundaries
-
-```text
-registry-catalog
-= public runtime-consumed registry metadata
-= PRODUCT
-
-registry-client-sdk
-= Simple Connection runtime client for Registry metadata/access/delivery/integrity contracts
-= PRODUCT
-
-sctool-authoring-sdk
-= SCTool manifest/scaffold/build/test/package authoring
-= PRODUCT
-
-repository-tool-authoring-sdk
-= generic Repository Tool descriptor/scaffold/validation authoring
-= PRODUCT
-
-authoring-sdk-package-delivery
-= immutable GitHub Packages publication for both Authoring SDKs
-= DELIVERY
-
-registry-contracts
-= schemas, admission/access/distribution/trust policy and canonical contracts
-= NEUTRAL_CONTRACT
-
-registry-pages-delivery
-= Root trust signing, signed snapshot assembly/verification, and exact signed distribution/handoff production
-= DELIVERY
-
-product-documentation
-= public registry documentation
-= PRODUCT
-
-repository-governance
-= PTSIP profile and coding-agent governance
-= DEVELOPMENT_TOOLING
-```
-
-Do not classify future Registry Intake implementation, artifact release publication outside this Pages metadata boundary, or operational monitoring by analogy. Determine its actual lifecycle ownership when that responsibility is introduced and update `ptsip.yaml` explicitly.
-
-## Registry Client SDK boundary
-
-Canonical path:
-
-```text
-packages/registry-client-sdk/
-```
-
-The SDK owns consumer-side implementation of Registry contracts, including Registry access state semantics, descriptor/channel/version/target resolution, exact delivery locator handling, authenticated artifact retrieval, content integrity verification, and normalized update candidates.
-
-It must not own Simple Connection local installation state, active-version selection, rollback, renderer UI, runtime reconcile policy, or publisher-side `.sctool` authoring.
-
-Registry Client SDK publication is separately governed by its approved Delivery workflow. Authoring SDK publication is governed by `.github/workflows/publish-authoring-sdks.yml` and `docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml`.
-
-## Registry Client SDK issue routing
-
-Registry-owned consumer failures discovered in `Simple-Connection/SC_Linked_App` must be reported to `Simple-Connection/sctool-registry` Issues. Do not open those failures in `Simple-Connection/SC_Linked_App` Issues merely because the failure was observed there.
-
-The canonical coding-agent report entrypoint in the consumer repository is:
-
-```text
-npm run registry:sdk:report -- --kind <KIND> --summary "<SUMMARY>" [--severity <SEVERITY>] [--command "<COMMAND>"] [--log "<PATH>"]
-```
-
-The reporter target repository is fixed to `Simple-Connection/sctool-registry`. It records a machine report ID, consumer branch/head, Registry Client SDK package/version, evidence references, and a routing hint. It must not upload log contents automatically.
-
-Registry issue routing uses GitHub Issues as the source of truth and `.github/registry-sdk-issue-queue.json` only as the active-version projection. A `dev/<semver>` branch is route-active only when all of the following hold:
-
-1. its `docs/index.yaml -> current.branch` equals that branch;
-2. its current version state is non-terminal;
-3. the branch has commits not yet merged into `main`.
-
-Exactly one route-active version receives the issue in its tracked queue. If no version branch is route-active, the issue remains an uncommitted next-version queue item and is absorbed when the next `dev/**` branch becomes active and receives a push. Multiple route-active version branches are a fail-closed routing error.
-
-The queue is not an implementation approval and must not cause GitHub Actions to synthesize product or SDK patches. A coding agent selects the highest-priority queued issue with:
-
-```text
-python tools/issue-routing/registry_issue_intake.py next
-```
-
-Then it patches the owning Registry surface on the routed version branch under the normal session/responsibility/PTSIP rules. Closing the GitHub issue removes it from the next queue synchronization.
-
-## Authoring SDK boundary
-
-Canonical source paths:
-
-```text
-packages/sctool-sdk/
-packages/repository-tool-sdk/
-```
-
-The SCTool Authoring SDK owns SCTool manifest validation, localization, host-capability authoring contracts, scaffold/build/test/package behavior, and its CLI. It must not absorb Registry access, descriptor resolution, artifact retrieval, update-candidate production, or Simple Connection local runtime state.
-
-The Repository Tool Authoring SDK owns Repository Tool descriptor/schema validation, canonical identity, runtime-capable classification, scaffold behavior, and its CLI. It must not own Simple Connection repository binding, host projection, enablement, runtime registration, process lifecycle, or renderer behavior.
-
-Both packages are published as immutable exact versions. Consumer repositories pin package versions and remain consumers, not source or compatibility authorities.
-
-## Registry trust secret boundary
-
-Private key values are never repository content.
-
-Canonical GitHub Actions secret names are:
-
-```text
-SCTOOL_REGISTRY_ROOT_PRIVATE_KEY_B64
-SCTOOL_REGISTRY_DISTRIBUTION_PRIVATE_KEY_B64
-```
-
-The Root private secret may be referenced only by the manually dispatched `.github/workflows/sign-trust.yml` trust-signing path. Routine signed distribution production must never request, echo, copy, persist, or otherwise consume the Root private secret.
-
-The Distribution private secret may be used by `.github/workflows/pages.yml` for routine `registry-head.json` signing. The corresponding Registry Root public key is non-secret configuration and is pinned independently by Simple Connection.
-
-Never place private key material in generated Pages artifacts, logs, workflow artifacts, test fixtures, committed configuration, or documentation examples.
-
-GitHub end-user credentials are also never Registry repository content. Registry access consumers use the GitHub CLI credential store and must not add GitHub access tokens, OAuth tokens, client private keys, or credential-store material to Registry metadata or SDK results.
-
-## Registry invariants
-
-1. Source repository visibility is not an admission requirement.
-2. Publishers do not receive direct write access to the registry repository.
-3. Publisher submissions use registered Ed25519 identities.
-4. Registry Intake independently revalidates submitted artifacts.
-5. `(packageId, version, target)` is immutable after publication.
-6. Exact-digest retry is idempotent; different-digest overwrite is rejected.
-7. The approved target central cache is public `Simple-Connection/sctool-artifacts`; repository visibility and successful download are not artifact trust authorities.
-8. Artifact trust requires fail-closed verification against accepted Registry content identity, publisher evidence, signed Registry state, exact byte size, and SHA-256.
-9. GitHub authentication may serve user identity flows but must not be required solely to authorize reading public central-cache assets after the public-integrity migration.
-10. `.sctool` binaries are not stored in Registry Git history.
-11. Simple Connection does not hardcode individual SCTool versions; signed Registry channels resolve versions.
-12. Root trust signing and routine Distribution signing use separate Actions Secrets.
-13. Simple Connection UI/install/runtime policy remains outside the Registry access contract and Registry Client SDK ownership.
+Domain validation remains behind this command. Do not invent parallel governance entry points when the existing validator can own the check.
