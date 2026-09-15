@@ -12,8 +12,8 @@ class ValidationContext:
     root: Path
     index_path: str
     index: dict[str, Any]
-    plan_path: str
-    plan: dict[str, Any]
+    plan_path: str | None
+    plan: dict[str, Any] | None
     rules_index_path: str
     rules_index: dict[str, Any]
     state_rules_path: str
@@ -40,8 +40,8 @@ class ValidationContext:
 
 def load_context(root: Path, index_path: str) -> ValidationContext:
     index = load_yaml(root, index_path)
-    plan_path = index["current"]["improvement_plan"]
-    plan = load_yaml(root, plan_path)
+    plan_path = index.get("current", {}).get("improvement_plan")
+    plan = load_yaml(root, plan_path) if isinstance(plan_path, str) else None
 
     rules_index_path = index["rules_index"]
     rules_index = load_yaml(root, rules_index_path)

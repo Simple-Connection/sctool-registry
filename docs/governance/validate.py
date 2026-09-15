@@ -42,7 +42,7 @@ def main() -> int:
         print(f"ERROR CONTEXT_LOAD:{exc}")
         return 2
 
-    if args.sync_session_states:
+    if args.sync_session_states and ctx.plan is not None and ctx.plan_path is not None:
         try:
             changes = synchronize_session_states(
                 ctx.plan,
@@ -85,6 +85,9 @@ def main() -> int:
         except (ValidationError, KeyError, TypeError, ValueError, OSError) as exc:
             print(f"ERROR SESSION_STATE_SYNC:{exc}")
             return 2
+    elif args.sync_session_states:
+        print("SYNC SESSION_STATE no_active_version")
+        print("SYNC NEXT_SESSION_PROJECTION no_active_version")
 
     for validator in (
         routing.validate,

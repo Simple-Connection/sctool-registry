@@ -6,6 +6,8 @@ from .task_contract import validate_bound_task
 
 
 def validate(ctx: ValidationContext, errors: list[str]) -> None:
+    if ctx.plan is None:
+        return
     plan_sessions = {entry["id"]: entry for entry in ctx.plan.get("sessions", [])}
     index_next = ctx.index.get("current", {}).get("next_session", {})
     gate_ids = set(ctx.gate_registry.get("gates", {}))

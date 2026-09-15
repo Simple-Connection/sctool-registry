@@ -56,3 +56,12 @@ projection:
     external_integration: PASS
     version_completion: PASS
     merge_to_main: APPROVED
+archive:
+  state: CLOSED
+  closed_on: "2026-09-15"
+  archived_from_docs_current: true
+  archived_main_head: "bdeb6c838517682210a9babbf14f4725bd353720"
+  active_development_version: null
+  next_version_materialized: false
+  next_version_branch_created: false
+  historical_entry_mode: INDEX_ONLY

@@ -7,18 +7,18 @@ rules_index: docs/rules/index.yaml
 template_index: docs/template/index.yaml
 responsibility_index: docs/responsibility/index.yaml
 current:
-  distribution_contract_version: 1.0.3
-  branch: dev/1.0.3
-  state: COMPLETE
-  migrations:
-    machine_routing: COMPLETE
-    responsibility_model: COMPLETE
-    interpretation_layer: COMPLETE
-    governance_layout: COMPLETE
-  improvement_plan: docs/ver1.0.3/1.0.3_Improvement_plan.yaml
+  distribution_contract_version: null
+  branch: main
+  state: IDLE
+  improvement_plan: null
   current_session: null
   current_session_document: null
   next_session: null
+latest_complete:
+  distribution_contract_version: 1.0.3
+  improvement_plan: docs/ver1.0.3/1.0.3_Improvement_plan.yaml
+  closeout_evidence: docs/ver1.0.3/evidence/1.0.3_version_closeout.yaml
+  archive_state: CLOSED
 versions:
   1.0.1:
     state: HISTORICAL_COMPLETE
@@ -38,7 +38,7 @@ versions:
       format: LEGACY_BUILD_SESSION
       document: docs/ver1.0.1/session_document/ver.1.0.1_P2_artifact_delivery_descriptor_schema_boundary.yaml
   1.0.2:
-    state: COMPLETE
+    state: HISTORICAL_COMPLETE
     branch: dev/1.0.2
     source_format: MACHINE
     migrations:
@@ -76,7 +76,7 @@ versions:
       format: MACHINE_SESSION
       document: docs/ver1.0.2/session_document/ver.1.0.2_P6_simple_connection_activation_runtime.yaml
   1.0.3:
-    state: COMPLETE
+    state: HISTORICAL_COMPLETE
     branch: dev/1.0.3
     source_format: MACHINE
     migrations:

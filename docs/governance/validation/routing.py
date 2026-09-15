@@ -10,7 +10,6 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
 
     machine_docs = {
         ctx.index_path: ctx.index,
-        ctx.plan_path: ctx.plan,
         ctx.rules_index_path: ctx.rules_index,
         ctx.state_rules_path: ctx.state_rules,
         ctx.template_index_path: ctx.template_index,
@@ -23,107 +22,139 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
         ctx.responsibility_index["routes"]["responsibilities"]: ctx.responsibilities,
         ctx.responsibility_index["routes"]["gates"]: ctx.gate_registry,
     }
+    if ctx.plan is not None and ctx.plan_path is not None:
+        machine_docs[ctx.plan_path] = ctx.plan
     for rel, doc in machine_docs.items():
         if doc.get("natural_language") == "FORBIDDEN":
             scan_machine(doc, rel, errors)
 
     index = ctx.index
     plan = ctx.plan
-    version = plan["version"]["distribution_contract_version"]
+    if plan is None:
+        current = index.get("current", {})
+        need(current.get("state") == "IDLE", "INDEX_IDLE_STATE", errors)
+        need(current.get("distribution_contract_version") is None, "INDEX_IDLE_VERSION", errors)
+        need(current.get("branch") == "main", "INDEX_IDLE_BRANCH", errors)
+        need(current.get("improvement_plan") is None, "INDEX_IDLE_PLAN", errors)
+        need(current.get("current_session") is None, "INDEX_IDLE_SESSION", errors)
+        need(current.get("current_session_document") is None, "INDEX_IDLE_SESSION_DOCUMENT", errors)
+        need(current.get("next_session") is None, "INDEX_IDLE_NEXT_SESSION", errors)
 
-    need(
-        index["current"]["distribution_contract_version"] == version,
-        "INDEX_PLAN_VERSION",
-        errors,
-    )
-    need(
-        index["current"]["branch"] == plan["version"]["branch"],
-        "INDEX_PLAN_BRANCH",
-        errors,
-    )
-    need(
-        index["current"]["state"] == plan["version"]["state"],
-        "INDEX_PLAN_STATE",
-        errors,
-    )
-    need(
-        index["versions"][version]["state"] == plan["version"]["state"],
-        "VERSION_PLAN_STATE",
-        errors,
-    )
-    need(
-        index["current"]["improvement_plan"] == ctx.plan_path,
-        "INDEX_PLAN_ROUTE",
-        errors,
-    )
-    need(
-        index["template_index"] == ctx.template_index_path,
-        "INDEX_TEMPLATE_ROUTE",
-        errors,
-    )
-    need(
-        index["rules_index"] == ctx.rules_index_path,
-        "INDEX_RULES_ROUTE",
-        errors,
-    )
-    need(
-        index["responsibility_index"] == ctx.responsibility_index_path,
-        "INDEX_RESPONSIBILITY_ROUTE",
-        errors,
-    )
-
-    plan_routing = plan["routing"]
-    need(
-        plan_routing["docs_index"] == ctx.index_path,
-        "PLAN_DOCS_INDEX_ROUTE",
-        errors,
-    )
-    need(
-        plan_routing["rules_index"] == ctx.rules_index_path,
-        "PLAN_RULES_ROUTE",
-        errors,
-    )
-    need(
-        plan_routing["template_index"] == ctx.template_index_path,
-        "PLAN_TEMPLATE_ROUTE",
-        errors,
-    )
-    need(
-        plan_routing["responsibility_index"] == ctx.responsibility_index_path,
-        "PLAN_RESPONSIBILITY_ROUTE",
-        errors,
-    )
-
-    version_entry = index["versions"][version]
-    need(
-        version_entry["improvement_plan"]["path"] == ctx.plan_path,
-        "VERSION_PLAN_ROUTE",
-        errors,
-    )
-    need(
-        version_entry["session_document_root"] == plan_routing["session_document_root"],
-        "VERSION_SESSION_ROOT",
-        errors,
-    )
-
-    migration_ids = ctx.rules_index["migration_ids"]
-    current_migrations = index["current"].get("migrations", {})
-    version_migrations = version_entry.get("migrations", {})
-    plan_migrations = plan.get("migrations", {})
-    for migration_id in migration_ids:
-        need(migration_id in current_migrations, f"CURRENT_MIGRATION_MISSING:{migration_id}", errors)
-        need(migration_id in version_migrations, f"VERSION_MIGRATION_MISSING:{migration_id}", errors)
-        need(migration_id in plan_migrations, f"PLAN_MIGRATION_MISSING:{migration_id}", errors)
+        latest = index.get("latest_complete", {})
+        latest_version = latest.get("distribution_contract_version")
+        need(latest_version in index.get("versions", {}), f"INDEX_LATEST_VERSION:{latest_version}", errors)
+        if latest_version in index.get("versions", {}):
+            latest_entry = index["versions"][latest_version]
+            need(
+                latest_entry.get("state") == "HISTORICAL_COMPLETE",
+                f"INDEX_LATEST_STATE:{latest_version}:{latest_entry.get('state')}",
+                errors,
+            )
+            plan_route = latest_entry.get("improvement_plan", {}).get("path")
+            need(latest.get("improvement_plan") == plan_route, "INDEX_LATEST_PLAN_ROUTE", errors)
+        closeout_path = latest.get("closeout_evidence")
         need(
-            current_migrations.get(migration_id) == plan_migrations.get(migration_id),
-            f"CURRENT_MIGRATION_STATE:{migration_id}",
+            isinstance(closeout_path, str) and (ctx.root / closeout_path).is_file(),
+            f"INDEX_LATEST_CLOSEOUT:{closeout_path}",
+            errors,
+        )
+    else:
+        version = plan["version"]["distribution_contract_version"]
+
+        need(
+            index["current"]["distribution_contract_version"] == version,
+            "INDEX_PLAN_VERSION",
             errors,
         )
         need(
-            version_migrations.get(migration_id) == plan_migrations.get(migration_id),
-            f"VERSION_MIGRATION_STATE:{migration_id}",
+            index["current"]["branch"] == plan["version"]["branch"],
+            "INDEX_PLAN_BRANCH",
             errors,
         )
+        need(
+            index["current"]["state"] == plan["version"]["state"],
+            "INDEX_PLAN_STATE",
+            errors,
+        )
+        need(
+            index["versions"][version]["state"] == plan["version"]["state"],
+            "VERSION_PLAN_STATE",
+            errors,
+        )
+        need(
+            index["current"]["improvement_plan"] == ctx.plan_path,
+            "INDEX_PLAN_ROUTE",
+            errors,
+        )
+        need(
+            index["template_index"] == ctx.template_index_path,
+            "INDEX_TEMPLATE_ROUTE",
+            errors,
+        )
+        need(
+            index["rules_index"] == ctx.rules_index_path,
+            "INDEX_RULES_ROUTE",
+            errors,
+        )
+        need(
+            index["responsibility_index"] == ctx.responsibility_index_path,
+            "INDEX_RESPONSIBILITY_ROUTE",
+            errors,
+        )
+
+        plan_routing = plan["routing"]
+        need(
+            plan_routing["docs_index"] == ctx.index_path,
+            "PLAN_DOCS_INDEX_ROUTE",
+            errors,
+        )
+        need(
+            plan_routing["rules_index"] == ctx.rules_index_path,
+            "PLAN_RULES_ROUTE",
+            errors,
+        )
+        need(
+            plan_routing["template_index"] == ctx.template_index_path,
+            "PLAN_TEMPLATE_ROUTE",
+            errors,
+        )
+        need(
+            plan_routing["responsibility_index"] == ctx.responsibility_index_path,
+            "PLAN_RESPONSIBILITY_ROUTE",
+            errors,
+        )
+
+        version_entry = index["versions"][version]
+        need(
+            version_entry["improvement_plan"]["path"] == ctx.plan_path,
+            "VERSION_PLAN_ROUTE",
+            errors,
+        )
+        need(
+            version_entry["session_document_root"] == plan_routing["session_document_root"],
+            "VERSION_SESSION_ROOT",
+            errors,
+        )
+
+        migration_ids = ctx.rules_index["migration_ids"]
+        current_migrations = index["current"].get("migrations", {})
+        version_migrations = version_entry.get("migrations", {})
+        plan_migrations = plan.get("migrations", {})
+        for migration_id in migration_ids:
+            need(migration_id in current_migrations, f"CURRENT_MIGRATION_MISSING:{migration_id}", errors)
+            need(migration_id in version_migrations, f"VERSION_MIGRATION_MISSING:{migration_id}", errors)
+            need(migration_id in plan_migrations, f"PLAN_MIGRATION_MISSING:{migration_id}", errors)
+            need(
+                current_migrations.get(migration_id) == plan_migrations.get(migration_id),
+                f"CURRENT_MIGRATION_STATE:{migration_id}",
+                errors,
+            )
+            need(
+                version_migrations.get(migration_id) == plan_migrations.get(migration_id),
+                f"VERSION_MIGRATION_STATE:{migration_id}",
+                errors,
+            )
+
 
     template_index = ctx.template_index
     need(
@@ -179,27 +210,28 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
             errors,
         )
 
-    version_root_pattern = layout.get("version_root_pattern")
-    version_root = (
-        version_root_pattern.replace("{version}", version)
-        if isinstance(version_root_pattern, str)
-        else None
-    )
-    need(
-        isinstance(version_root, str)
-        and (ctx.plan_path == version_root or ctx.plan_path.startswith(version_root.rstrip("/") + "/")),
-        f"VERSION_PLAN_ROOT:{ctx.plan_path}:{version_root}",
-        errors,
-    )
-    need(
-        isinstance(version_root, str)
-        and (
-            plan_routing["session_document_root"] == version_root
-            or plan_routing["session_document_root"].startswith(version_root.rstrip("/") + "/")
-        ),
-        f"VERSION_SESSION_ROOT_LAYOUT:{plan_routing['session_document_root']}:{version_root}",
-        errors,
-    )
+    if plan is not None:
+        version_root_pattern = layout.get("version_root_pattern")
+        version_root = (
+            version_root_pattern.replace("{version}", version)
+            if isinstance(version_root_pattern, str)
+            else None
+        )
+        need(
+            isinstance(version_root, str)
+            and (ctx.plan_path == version_root or ctx.plan_path.startswith(version_root.rstrip("/") + "/")),
+            f"VERSION_PLAN_ROOT:{ctx.plan_path}:{version_root}",
+            errors,
+        )
+        need(
+            isinstance(version_root, str)
+            and (
+                plan_routing["session_document_root"] == version_root
+                or plan_routing["session_document_root"].startswith(version_root.rstrip("/") + "/")
+            ),
+            f"VERSION_SESSION_ROOT_LAYOUT:{plan_routing['session_document_root']}:{version_root}",
+            errors,
+        )
 
     responsibility_root = layout.get("responsibility_root")
     if isinstance(responsibility_root, str):
@@ -249,4 +281,7 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
 
     branch = current_branch(ctx.root)
     if branch:
-        need(branch == plan["version"]["branch"], f"GIT_BRANCH:{branch}:{plan['version']['branch']}", errors)
+        if plan is None:
+            need(branch == "main", f"GIT_BRANCH_IDLE:{branch}:main", errors)
+        else:
+            need(branch == plan["version"]["branch"], f"GIT_BRANCH:{branch}:{plan['version']['branch']}", errors)

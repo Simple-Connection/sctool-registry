@@ -6,6 +6,8 @@ from .state import derive_session_state
 
 
 def validate(ctx: ValidationContext, errors: list[str]) -> None:
+    if ctx.plan is None:
+        return
     plan = ctx.plan
     index = ctx.index
     version = plan["version"]["distribution_contract_version"]

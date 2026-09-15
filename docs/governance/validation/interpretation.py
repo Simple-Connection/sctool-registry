@@ -9,8 +9,16 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
     responsibilities = ctx.responsibilities["responsibilities"]
     descriptions = ctx.descriptions.get("descriptions", {})
     rationales = ctx.rationale.get("rationales", {})
-    version = ctx.plan["version"]["distribution_contract_version"]
-    plan_sessions = {session["id"]: session for session in ctx.plan["sessions"]}
+    version = (
+        ctx.plan["version"]["distribution_contract_version"]
+        if ctx.plan is not None
+        else None
+    )
+    plan_sessions = (
+        {session["id"]: session for session in ctx.plan["sessions"]}
+        if ctx.plan is not None
+        else {}
+    )
 
     for responsibility_id, responsibility in responsibilities.items():
         interpretation = responsibility.get("interpretation")
