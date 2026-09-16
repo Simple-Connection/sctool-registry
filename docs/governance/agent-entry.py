@@ -6,15 +6,15 @@ import fnmatch
 import json
 from pathlib import Path
 import sys
+from typing import Any
 
 import yaml
-
 
 ROOT = Path(__file__).resolve().parents[2]
 INDEX = ROOT / "docs" / "agent" / "index.yaml"
 
 
-def load_index() -> dict:
+def load_index() -> dict[str, Any]:
     value = yaml.safe_load(INDEX.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
         raise ValueError("AGENT_INDEX_ROOT")
@@ -22,65 +22,97 @@ def load_index() -> dict:
 
 
 def dedupe(values: list[str]) -> list[str]:
-    seen: set[str] = set()
-    result: list[str] = []
-    for value in values:
-        if value not in seen:
-            seen.add(value)
-            result.append(value)
-    return result
+    return list(dict.fromkeys(values))
+
+
+def merge_dict_lists(target: dict[str, list[str]], source: dict[str, Any]) -> None:
+    for key, values in source.items():
+        if isinstance(values, list):
+            target[key] = dedupe(target.get(key, []) + [str(v) for v in values])
+
+
+def resolve(index: dict[str, Any], selected: list[str]) -> dict[str, Any]:
+    task_classes = index["task_classes"]
+    unknown = [item for item in selected if item not in task_classes]
+    if unknown:
+        raise ValueError("UNKNOWN_TASK_CLASS:" + ",".join(unknown))
+
+    intents: list[str] = []
+    routes: list[str] = []
+    constraints: list[str] = []
+    forbidden: list[str] = []
+    owned: list[str] = []
+    excluded: list[str] = []
+    authority_modes: list[str] = []
+    commands: dict[str, list[str]] = {}
+    machine: dict[str, Any] = {}
+    conditional: dict[str, Any] = {}
+
+    for task_class in selected:
+        item = task_classes[task_class]
+        intents.extend(item.get("intent_ids", []))
+        routes.extend(item.get("routes", []))
+        directives = item.get("directives", {})
+        if directives.get("authority_mode"):
+            authority_modes.append(str(directives["authority_mode"]))
+        constraints.extend(directives.get("constraints", []))
+        forbidden.extend(directives.get("forbidden", []))
+        owned.extend(directives.get("owned_capabilities", []))
+        excluded.extend(directives.get("excluded_capabilities", []))
+        merge_dict_lists(commands, directives.get("commands", {}))
+        if isinstance(directives.get("machine"), dict):
+            machine.update(directives["machine"])
+        if isinstance(directives.get("conditional_task_classes"), dict):
+            conditional.update(directives["conditional_task_classes"])
+
+    return {
+        "task_classes": selected,
+        "intent_ids": dedupe(intents),
+        "authority_modes": dedupe(authority_modes),
+        "constraints": dedupe(constraints),
+        "forbidden": dedupe(forbidden),
+        "owned_capabilities": dedupe(owned),
+        "excluded_capabilities": dedupe(excluded),
+        "conditional_task_classes": conditional,
+        "commands": commands,
+        "machine": machine,
+        "read_set": dedupe(routes),
+    }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--task-class", action="append", default=[])
     parser.add_argument("--path", action="append", default=[])
+    parser.add_argument("--catalog", action="store_true")
     parser.add_argument("--format", choices=("json", "lines"), default="json")
     args = parser.parse_args()
 
     index = load_index()
-    task_classes = index.get("task_classes", {})
-    selected = list(args.task_class)
+    task_classes = index["task_classes"]
 
-    for path in args.path:
-        normalized = Path(path).as_posix().lstrip("./")
-        matches = [
-            task_class
-            for task_class, entry in task_classes.items()
-            if any(fnmatch.fnmatch(normalized, selector) for selector in entry.get("selectors", []))
-        ]
-        selected.extend(matches)
+    if args.catalog:
+        print(json.dumps({
+            key: {"intent_ids": value.get("intent_ids", []), "selector_count": len(value.get("selectors", []))}
+            for key, value in task_classes.items()
+        }, indent=2))
+        return 0
+
+    selected = list(args.task_class)
+    for raw_path in args.path:
+        path = Path(raw_path).as_posix().lstrip("./")
+        selected.extend(
+            key for key, value in task_classes.items()
+            if any(fnmatch.fnmatch(path, pattern) for pattern in value.get("selectors", []))
+        )
 
     selected = dedupe(selected)
     if not selected:
         selected = [index["default_task_class"]]
 
-    unknown = [task_class for task_class in selected if task_class not in task_classes]
-    if unknown:
-        raise ValueError("UNKNOWN_TASK_CLASS:" + ",".join(unknown))
-
-    entry_ids: list[str] = []
-    routes: list[str] = []
-    for task_class in selected:
-        entry = task_classes[task_class]
-        entry_ids.extend(entry.get("entries", []))
-        routes.extend(entry.get("routes", []))
-
-    entry_ids = dedupe(entry_ids)
-    routes = dedupe(routes)
-    entry_paths = [index["entries"][entry_id]["path"] for entry_id in entry_ids]
-    read_set = dedupe(entry_paths + routes)
-
-    result = {
-        "task_classes": selected,
-        "entries": entry_ids,
-        "routes": routes,
-        "read_set": read_set,
-    }
-
+    result = resolve(index, selected)
     if args.format == "lines":
-        for path in read_set:
-            print(path)
+        print("\n".join(result["read_set"]))
     else:
         print(json.dumps(result, indent=2))
     return 0

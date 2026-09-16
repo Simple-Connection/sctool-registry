@@ -1,200 +1,229 @@
-schema_version: "1.0"
+schema_version: "2.0"
 document_type: agent_entry_index
 natural_language: FORBIDDEN
-entry_root: docs/agent/entries
 resolver: docs/governance/agent-entry.py
 default_task_class: REPOSITORY_STATUS
 history_default_entry: FORBIDDEN
-entries:
-  ENTRY_DEVELOPMENT:
-    path: docs/agent/entries/development.md
-  ENTRY_GOVERNANCE:
-    path: docs/agent/entries/governance.md
-  ENTRY_POLICY:
-    path: docs/agent/entries/policy.md
-  ENTRY_RESPONSIBILITY:
-    path: docs/agent/entries/responsibility.md
-  ENTRY_PTSIP:
-    path: docs/agent/entries/ptsip.md
-  ENTRY_COMPONENTS:
-    path: docs/agent/entries/components.md
-  ENTRY_REGISTRY_CLIENT_SDK:
-    path: docs/agent/entries/registry-client-sdk.md
-  ENTRY_ISSUE_ROUTING:
-    path: docs/agent/entries/issue-routing.md
-  ENTRY_AUTHORING_SDK:
-    path: docs/agent/entries/authoring-sdk.md
-  ENTRY_TRUST_DISTRIBUTION:
-    path: docs/agent/entries/trust-distribution.md
-  ENTRY_REGISTRY_CONTRACT:
-    path: docs/agent/entries/registry-contract.md
+direct_index_read: NOT_REQUIRED
 task_classes:
   REPOSITORY_STATUS:
-    entries: []
-    routes:
-      - docs/index.yaml
-      - ptsip.yaml
+    intent_ids: [CURRENT_REPOSITORY_STATE, ACTIVE_VERSION_LOOKUP]
+    routes: [docs/index.yaml, ptsip.yaml]
     selectors: []
+    directives:
+      authority_mode: INDEX_ROUTED
+      constraints: [DO_NOT_INFER_ACTIVE_VERSION]
+      forbidden: [HISTORICAL_DEFAULT_ENTRY]
+      commands: {}
   VERSION_DEVELOPMENT:
-    entries:
-      - ENTRY_DEVELOPMENT
-      - ENTRY_GOVERNANCE
-    routes:
-      - docs/index.yaml
-      - docs/rules/index.yaml
-      - docs/template/index.yaml
-      - docs/responsibility/index.yaml
-    selectors:
-      - docs/index.yaml
-      - docs/ver*/**
-      - docs/template/**
-      - docs/rules/**
+    intent_ids: [VERSION_PLAN, VERSION_SESSION, VERSION_BRANCH, VERSION_CLOSEOUT]
+    routes: [docs/index.yaml, docs/rules/index.yaml, docs/template/index.yaml, docs/responsibility/index.yaml]
+    selectors: [docs/index.yaml, "docs/ver*/**", "docs/template/**", "docs/rules/**"]
+    directives:
+      authority_mode: INDEX_ROUTED
+      constraints:
+        - ONE_ACTIVE_VERSION_ONE_PERSISTENT_DEV_BRANCH
+        - VERSION_AND_SESSION_MUST_NOT_BE_INFERRED
+        - SESSION_COMPLETION_DOES_NOT_AUTHORIZE_MAIN_MERGE
+        - VERSION_MERGE_REQUIRES_MACHINE_GATES
+        - NEW_PRIMARY_SESSION_REQUIRES_EXPLICIT_APPROVAL
+      forbidden:
+        - BRANCH_CREATION_WITHOUT_EXPLICIT_USER_APPROVAL
+        - SESSION_MATERIALIZATION_BEFORE_APPROVAL
+        - HISTORICAL_VERSION_DEFAULT_ENTRY
+      machine:
+        branch_pattern: "dev/{major}.{minor}.{micro}"
+        improvement_plan_pattern: "docs/ver{version}/{version}_Improvement_plan.yaml"
+      commands: {}
   GOVERNANCE:
-    entries:
-      - ENTRY_GOVERNANCE
-    routes:
-      - docs/index.yaml
-      - docs/rules/index.yaml
-      - docs/template/index.yaml
-      - docs/responsibility/index.yaml
-      - docs/agent/index.yaml
-    selectors:
-      - AGENTS.md
-      - docs/agent/**
-      - docs/governance/**
+    intent_ids: [GOVERNANCE_VALIDATION, AGENT_ENTRY_ROUTING, MACHINE_DOCUMENT_ROUTING]
+    routes: [docs/index.yaml, docs/rules/index.yaml, docs/template/index.yaml, docs/responsibility/index.yaml, docs/agent/index.yaml]
+    selectors: [AGENTS.md, "docs/agent/**", "docs/governance/**"]
+    directives:
+      authority_mode: MACHINE_VALIDATED
+      constraints:
+        - MACHINE_AUTHORITIES_REMAIN_OUTSIDE_VALIDATOR_NAMESPACE
+        - SESSION_STATE_IS_DERIVED
+        - MACHINE_DOCUMENT_FREE_FORM_PLANNING_FORBIDDEN
+        - SINGLE_PUBLIC_GOVERNANCE_VALIDATOR
+        - AGENT_ENTRY_MUST_BE_INDEX_ROUTED
+      forbidden: [STATE_EDIT_TO_BYPASS_GATE, PARALLEL_PUBLIC_GOVERNANCE_VALIDATOR]
+      commands:
+        validate:
+          - "python docs/governance/validate.py --root ."
+          - "python docs/governance/test-agent-entry.py"
   POLICY:
-    entries:
-      - ENTRY_POLICY
-    routes:
-      - docs/policy/index.yaml
-      - docs/index.yaml
-    selectors:
-      - docs/policy/**
-      - policy/**
+    intent_ids: [POLICY_DECISION, POLICY_INDEX, POLICY_MIGRATION]
+    routes: [docs/policy/index.yaml, docs/index.yaml]
+    selectors: ["docs/policy/**", "policy/**"]
+    directives:
+      authority_mode: INDEX_ROUTED
+      constraints:
+        - ACTIVE_POLICY_INDEX_ROUTED
+        - HISTORICAL_POLICY_INDEX_ONLY
+        - EXPIRED_POLICY_REMOVED
+        - POLICY_DECISION_AND_IMPLEMENTATION_AUTHORIZATION_DISTINCT
+      forbidden: [HISTORICAL_POLICY_AS_ACTIVE_AUTHORITY, VERSION_HISTORY_SCAN_FOR_POLICY_DISCOVERY]
+      conditional_task_classes:
+        RESPONSIBILITY: POLICY_CHANGES_AUTHORITY_BOUNDARY
+        PTSIP: POLICY_CHANGES_COMPONENT_OWNERSHIP
+      commands: {}
   RESPONSIBILITY:
-    entries:
-      - ENTRY_RESPONSIBILITY
-    routes:
-      - docs/responsibility/index.yaml
-      - docs/index.yaml
-    selectors:
-      - docs/responsibility/**
+    intent_ids: [AUTHORITY_BOUNDARY, RESPONSIBILITY_MODEL, RATIONALE_REVIEW]
+    routes: [docs/responsibility/index.yaml, docs/index.yaml]
+    selectors: ["docs/responsibility/**"]
+    directives:
+      authority_mode: INDEX_ROUTED
+      constraints:
+        - CLOSED_MACHINE_DIMENSIONS_PRIMARY
+        - DESCRIPTION_LAYER_FOR_UNMODELED_AUTHORITY_SEMANTICS
+        - RATIONALE_LAYER_EXPLANATORY_NOT_OVERRIDING
+        - REVIEW_TRIGGER_REQUIRES_RATIONALE_REEVALUATION
+      forbidden: [OPAQUE_ADHOC_AUTHORITY_CONSTANT, SUPERSEDED_RATIONALE_AS_ACTIVE_AUTHORITY]
+      commands: {}
   PTSIP:
-    entries:
-      - ENTRY_PTSIP
-    routes:
-      - ptsip.yaml
-    selectors:
-      - ptsip.yaml
+    intent_ids: [COMPONENT_OWNERSHIP, PATH_CLASSIFICATION, PTSIP_PROFILE]
+    routes: [ptsip.yaml]
+    selectors: [ptsip.yaml]
+    directives:
+      authority_mode: PROFILE_BOUND
+      constraints:
+        - PTSIP_IS_DEVELOPMENT_TOOLING
+        - NEW_TRACKED_PATH_REQUIRES_PROFILE_ASSIGNMENT
+        - CLASSIFICATION_BY_LIFECYCLE_OWNERSHIP
+      forbidden: [PTSIP_RUNTIME_DEPENDENCY, PTSIP_VENDORING_AS_ENVIRONMENT_WORKAROUND]
+      machine:
+        tool_version: "0.3.8a1"
+        project_profile: "pp.1.01"
+        specification_family: "0.3.7-draft"
+        specification_revision: "3c47816770d194ae42f98faedc911d980db0e62a"
+      commands:
+        validate: ["ptsip validate ."]
+        release_optional: ["ptsip conform .", "ptsip gate ."]
   REGISTRY_CLIENT_SDK_GENERAL:
-    entries:
-      - ENTRY_COMPONENTS
-      - ENTRY_REGISTRY_CLIENT_SDK
-    routes:
-      - packages/registry-client-sdk/package.json
-      - ptsip.yaml
-    selectors:
-      - packages/registry-client-sdk/**
+    intent_ids: [REGISTRY_CLIENT_SDK_SOURCE, REGISTRY_CLIENT_SDK_BOUNDARY]
+    routes: [packages/registry-client-sdk/package.json, ptsip.yaml]
+    selectors: ["packages/registry-client-sdk/**"]
+    directives: &registry_client_sdk_directives
+      authority_mode: ACTIVE_CONTRACT_ROUTED
+      owned_capabilities:
+        - REGISTRY_ACCESS_SEMANTICS
+        - DESCRIPTOR_CHANNEL_VERSION_TARGET_RESOLUTION
+        - EXACT_DELIVERY_RESOLUTION
+        - REGISTRY_ARTIFACT_RETRIEVAL
+        - EPHEMERAL_ARTIFACT_STAGING
+        - ARTIFACT_INTEGRITY_VERIFICATION
+        - VERIFIED_CANDIDATE_AND_LEASE_PRODUCTION
+      excluded_capabilities:
+        - PRODUCT_PERSISTENT_INSTALL_STATE
+        - PRODUCT_ACTIVE_VERSION_SELECTION
+        - PRODUCT_ACTIVATION
+        - PRODUCT_ROLLBACK
+        - PRODUCT_RENDERER_UI
+        - PRODUCT_RUNTIME_RECONCILIATION
+        - PUBLISHER_SCTOOL_AUTHORING
+      constraints: [NARROW_TASK_CLASS_PREFERRED, PUBLICATION_IS_SEPARATE_IMMUTABLE_DELIVERY_BOUNDARY]
+      forbidden: [PRODUCT_PERSISTENT_INSTALL_OWNERSHIP, RAW_CONSUMER_AUTHORITY_EXPANSION_WITHOUT_APPROVED_CONTRACT]
+      commands: {}
   REGISTRY_CLIENT_SDK_ACCESS:
-    entries:
-      - ENTRY_REGISTRY_CLIENT_SDK
-    routes:
-      - docs/REGISTRY_ACCESS_V1.md
-      - docs/REGISTRY_CONTRACT_V2.md
-      - policy/registry-policy.json
-    selectors:
-      - docs/REGISTRY_ACCESS_V1.md
+    intent_ids: [REGISTRY_ACCESS, CLIENT_AUTHORIZATION]
+    routes: [docs/REGISTRY_ACCESS_V1.md, docs/REGISTRY_CONTRACT_V2.md, policy/registry-policy.json]
+    selectors: [docs/REGISTRY_ACCESS_V1.md]
+    directives: *registry_client_sdk_directives
   REGISTRY_CLIENT_SDK_DELIVERY:
-    entries:
-      - ENTRY_REGISTRY_CLIENT_SDK
-    routes:
-      - docs/ARTIFACT_DELIVERY_V1.md
-      - docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml
-      - policy/registry-policy.json
-    selectors:
-      - docs/ARTIFACT_DELIVERY_V1.md
-      - docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml
+    intent_ids: [ARTIFACT_DELIVERY, ARTIFACT_STAGING, ARTIFACT_INTEGRITY]
+    routes: [docs/ARTIFACT_DELIVERY_V1.md, docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml, policy/registry-policy.json]
+    selectors: [docs/ARTIFACT_DELIVERY_V1.md, docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml]
+    directives: *registry_client_sdk_directives
   REGISTRY_CLIENT_SDK_UPDATE:
-    entries:
-      - ENTRY_REGISTRY_CLIENT_SDK
-    routes:
-      - docs/UPDATE_CANDIDATE_V1.yaml
-      - docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml
-      - docs/SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1.yaml
-    selectors:
-      - docs/UPDATE_CANDIDATE_V1.yaml
-      - docs/SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1.yaml
+    intent_ids: [UPDATE_CANDIDATE, VERIFIED_ARTIFACT_LEASE, UPDATE_INSTALL_BOUNDARY]
+    routes: [docs/UPDATE_CANDIDATE_V1.yaml, docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml, docs/SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1.yaml]
+    selectors: [docs/UPDATE_CANDIDATE_V1.yaml, docs/SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1.yaml]
+    directives: *registry_client_sdk_directives
   REGISTRY_CLIENT_SDK_PUBLICATION:
-    entries:
-      - ENTRY_REGISTRY_CLIENT_SDK
-    routes:
-      - docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml
-      - packages/registry-client-sdk/package.json
-      - .github/workflows/publish-registry-client-sdk.yml
-    selectors:
-      - docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml
-      - .github/workflows/publish-registry-client-sdk.yml
-      - delivery/registry-client-sdk-package/**
+    intent_ids: [REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION, IMMUTABLE_PACKAGE_VERIFICATION]
+    routes: [docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml, packages/registry-client-sdk/package.json, .github/workflows/publish-registry-client-sdk.yml]
+    selectors: [docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml, .github/workflows/publish-registry-client-sdk.yml, "delivery/registry-client-sdk-package/**"]
+    directives: *registry_client_sdk_directives
   ISSUE_ROUTING:
-    entries:
-      - ENTRY_ISSUE_ROUTING
-    routes:
-      - .github/registry-sdk-issue-queue.json
-      - tools/issue-routing/registry_issue_intake.py
-    selectors:
-      - .github/registry-sdk-issue-queue.json
-      - .github/ISSUE_TEMPLATE/**
-      - .github/workflows/registry-sdk-issue-routing.yml
-      - tools/issue-routing/**
+    intent_ids: [REGISTRY_SDK_ISSUE_INTAKE, ACTIVE_VERSION_ISSUE_ROUTE]
+    routes: [.github/registry-sdk-issue-queue.json, tools/issue-routing/registry_issue_intake.py]
+    selectors: [.github/registry-sdk-issue-queue.json, ".github/ISSUE_TEMPLATE/**", .github/workflows/registry-sdk-issue-routing.yml, "tools/issue-routing/**"]
+    directives:
+      authority_mode: GITHUB_ISSUE_SOURCE_OF_TRUTH
+      constraints:
+        - ISSUE_SOURCE_OF_TRUTH_GITHUB
+        - QUEUE_IS_ACTIVE_VERSION_PROJECTION_ONLY
+        - EXACTLY_ONE_ROUTE_ACTIVE_BRANCH_OR_FAIL_CLOSED
+        - ZERO_ACTIVE_BRANCH_LEAVES_NEXT_VERSION_QUEUE
+        - QUEUE_PRESENCE_IS_NOT_IMPLEMENTATION_APPROVAL
+      forbidden: [AUTOMATIC_LOG_CONTENT_UPLOAD, PRODUCT_REPOSITORY_ISSUE_AS_REGISTRY_FAILURE_AUTHORITY, MULTIPLE_ROUTE_ACTIVE_BRANCHES]
+      commands:
+        next: ["python tools/issue-routing/registry_issue_intake.py next"]
   AUTHORING_SDK_SCTOOL:
-    entries:
-      - ENTRY_COMPONENTS
-      - ENTRY_AUTHORING_SDK
-    routes:
-      - packages/sctool-sdk/package.json
-      - docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml
-    selectors:
-      - packages/sctool-sdk/**
+    intent_ids: [SCTOOL_AUTHORING, SCTOOL_AUTHORING_PACKAGE]
+    routes: [packages/sctool-sdk/package.json, docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml]
+    selectors: ["packages/sctool-sdk/**"]
+    directives: &authoring_directives
+      authority_mode: PACKAGE_SCOPED
+      constraints: [IMMUTABLE_EXACT_VERSION_PUBLICATION, CONSUMER_PIN_EXACT_VERSION]
+      forbidden:
+        - AUTHORING_SDK_OWNS_REGISTRY_ACCESS
+        - AUTHORING_SDK_OWNS_ARTIFACT_RETRIEVAL
+        - AUTHORING_SDK_OWNS_PRODUCT_RUNTIME_STATE
+      commands: {}
   AUTHORING_SDK_REPOSITORY_TOOL:
-    entries:
-      - ENTRY_COMPONENTS
-      - ENTRY_AUTHORING_SDK
-    routes:
-      - packages/repository-tool-sdk/package.json
-      - docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml
-    selectors:
-      - packages/repository-tool-sdk/**
+    intent_ids: [REPOSITORY_TOOL_AUTHORING, REPOSITORY_TOOL_AUTHORING_PACKAGE]
+    routes: [packages/repository-tool-sdk/package.json, docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml]
+    selectors: ["packages/repository-tool-sdk/**"]
+    directives: *authoring_directives
   TRUST_DISTRIBUTION:
-    entries:
-      - ENTRY_TRUST_DISTRIBUTION
-      - ENTRY_REGISTRY_CONTRACT
-    routes:
-      - docs/PAGES_DISTRIBUTION_V1.md
-      - docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml
-      - trust/trust.json
-      - .github/workflows/pages.yml
-      - .github/workflows/sign-trust.yml
-    selectors:
-      - trust/**
-      - docs/PAGES_DISTRIBUTION_V1.md
-      - docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml
-      - .github/workflows/pages.yml
-      - .github/workflows/sign-trust.yml
+    intent_ids: [TRUST_SIGNING, SIGNED_DISTRIBUTION, MARKETPLACE_HANDOFF]
+    routes: [docs/PAGES_DISTRIBUTION_V1.md, docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml, trust/trust.json, .github/workflows/pages.yml, .github/workflows/sign-trust.yml]
+    selectors: ["trust/**", docs/PAGES_DISTRIBUTION_V1.md, docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml, .github/workflows/pages.yml, .github/workflows/sign-trust.yml]
+    directives:
+      authority_mode: SPLIT_SIGNING_AUTHORITY
+      constraints:
+        - ROOT_PRIVATE_SIGNING_MANUAL_TRUST_PATH_ONLY
+        - ROUTINE_DISTRIBUTION_MAY_USE_DISTRIBUTION_PRIVATE_KEY
+        - ROOT_PUBLIC_KEY_IS_NON_SECRET_BOOTSTRAP
+        - SIGNED_DISTRIBUTION_SEPARATE_FROM_PRODUCT_INSTALL_RUNTIME
+      forbidden:
+        - PRIVATE_KEY_REPOSITORY_CONTENT
+        - ROOT_PRIVATE_KEY_ROUTINE_DISTRIBUTION_USE
+        - SECRET_IN_LOG
+        - SECRET_IN_ARTIFACT
+        - SECRET_IN_FIXTURE
+        - SECRET_IN_DOCUMENTATION_EXAMPLE
+        - END_USER_GITHUB_CREDENTIAL_REPOSITORY_CONTENT
+      commands: {}
   REGISTRY_CONTRACT:
-    entries:
-      - ENTRY_REGISTRY_CONTRACT
-    routes:
-      - docs/REGISTRY_CONTRACT_V2.md
-      - policy/registry-policy.json
-      - docs/policy/index.yaml
-    selectors:
-      - docs/REGISTRY_CONTRACT_V2.md
-      - schemas/*.schema.json
-      - registry.json
-      - packages/*.json
-      - publishers/**
+    intent_ids: [REGISTRY_SCHEMA, REGISTRY_ADMISSION, REGISTRY_IMMUTABILITY]
+    routes: [docs/REGISTRY_CONTRACT_V2.md, policy/registry-policy.json, docs/policy/index.yaml]
+    selectors: [docs/REGISTRY_CONTRACT_V2.md, "schemas/*.schema.json", registry.json, "packages/*.json", "publishers/**"]
+    directives:
+      authority_mode: ACTIVE_CONTRACT_ONLY
+      constraints:
+        - SOURCE_VISIBILITY_NOT_ADMISSION_REQUIREMENT
+        - PUBLISHER_NO_DIRECT_REGISTRY_WRITE
+        - PUBLISHER_ED25519_IDENTITY
+        - REGISTRY_INTAKE_INDEPENDENT_REVALIDATION
+        - PACKAGE_VERSION_TARGET_IMMUTABLE
+        - EXACT_DIGEST_RETRY_IDEMPOTENT
+        - TRANSPORT_AVAILABILITY_NOT_TRUST_AUTHORITY
+        - ARTIFACT_TRUST_FAIL_CLOSED
+        - SCTOOL_BINARY_NOT_REGISTRY_GIT_CONTENT
+        - SIGNED_CHANNEL_VERSION_RESOLUTION
+        - ROOT_AND_DISTRIBUTION_CREDENTIAL_SEPARATION
+        - PRODUCT_INSTALL_RUNTIME_UI_OUTSIDE_REGISTRY_SDK
+      forbidden: [HISTORICAL_V1_AS_ACTIVE_AUTHORITY]
+      commands: {}
   HISTORY:
-    entries: []
-    routes:
-      - docs/index.yaml
+    intent_ids: [HISTORICAL_LOOKUP]
+    routes: [docs/index.yaml]
     selectors: []
+    directives:
+      authority_mode: INDEX_ONLY
+      constraints: [EXPLICIT_HISTORY_INTENT_REQUIRED]
+      forbidden: [HISTORY_AS_DEFAULT_ACTIVE_AUTHORITY]
+      commands: {}

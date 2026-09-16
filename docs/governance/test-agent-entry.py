@@ -6,56 +6,41 @@ from pathlib import Path
 import subprocess
 import sys
 
-
 ROOT = Path(__file__).resolve().parents[2]
 RESOLVER = ROOT / "docs" / "governance" / "agent-entry.py"
 
 
-def resolve(*args: str) -> dict:
-    result = subprocess.run(
-        [sys.executable, str(RESOLVER), *args],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
+def run(*args: str) -> dict:
+    result = subprocess.run([sys.executable, str(RESOLVER), *args], cwd=ROOT, check=True, capture_output=True, text=True)
     return json.loads(result.stdout)
 
 
 def main() -> int:
-    update = resolve("--task-class", "REGISTRY_CLIENT_SDK_UPDATE")
-    assert update["task_classes"] == ["REGISTRY_CLIENT_SDK_UPDATE"]
+    catalog = run("--catalog")
+    assert "REGISTRY_CLIENT_SDK_UPDATE" in catalog
+    assert "POLICY" in catalog
+
+    update = run("--task-class", "REGISTRY_CLIENT_SDK_UPDATE")
     assert update["read_set"] == [
-        "docs/agent/entries/registry-client-sdk.md",
         "docs/UPDATE_CANDIDATE_V1.yaml",
         "docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml",
         "docs/SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1.yaml",
     ]
-    assert "docs/agent/entries/authoring-sdk.md" not in update["read_set"]
-    assert "docs/ver1.0.3/1.0.3_Improvement_plan.yaml" not in update["read_set"]
+    assert "PRODUCT_PERSISTENT_INSTALL_OWNERSHIP" in update["forbidden"]
+    assert "PRODUCT_PERSISTENT_INSTALL_STATE" in update["excluded_capabilities"]
+    assert not any(path.startswith("docs/agent/") for path in update["read_set"])
+    assert not any(path.startswith("docs/ver") for path in update["read_set"])
 
-    policy = resolve("--task-class", "POLICY")
-    assert policy["read_set"] == [
-        "docs/agent/entries/policy.md",
-        "docs/policy/index.yaml",
-        "docs/index.yaml",
-    ]
-
-    by_path = resolve("--path", "docs/UPDATE_CANDIDATE_V1.yaml")
+    by_path = run("--path", "docs/UPDATE_CANDIDATE_V1.yaml")
     assert by_path["task_classes"] == ["REGISTRY_CLIENT_SDK_UPDATE"]
     assert by_path["read_set"] == update["read_set"]
 
-    combined = resolve(
-        "--task-class", "REGISTRY_CLIENT_SDK_UPDATE",
-        "--task-class", "RESPONSIBILITY",
-    )
-    assert combined["task_classes"] == [
-        "REGISTRY_CLIENT_SDK_UPDATE",
-        "RESPONSIBILITY",
-    ]
+    policy = run("--task-class", "POLICY")
+    assert policy["read_set"] == ["docs/policy/index.yaml", "docs/index.yaml"]
+    assert policy["conditional_task_classes"]["RESPONSIBILITY"] == "POLICY_CHANGES_AUTHORITY_BOUNDARY"
+
+    combined = run("--task-class", "REGISTRY_CLIENT_SDK_UPDATE", "--task-class", "RESPONSIBILITY")
     assert combined["read_set"] == [
-        "docs/agent/entries/registry-client-sdk.md",
-        "docs/agent/entries/responsibility.md",
         "docs/UPDATE_CANDIDATE_V1.yaml",
         "docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml",
         "docs/SIMPLE_CONNECTION_INSTALL_TRANSACTION_V1.yaml",
@@ -63,7 +48,10 @@ def main() -> int:
         "docs/index.yaml",
     ]
 
-    print("Agent entry routing PASS")
+    entry_root = ROOT / "docs" / "agent" / "entries"
+    assert not entry_root.exists() or not any(p.is_file() for p in entry_root.rglob("*"))
+
+    print("Agent entry routing PASS inline_machine_directives=true direct_entry_reads=0")
     return 0
 
 
