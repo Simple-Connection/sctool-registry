@@ -77,6 +77,15 @@ jobs:
             fi
             publish_status="EXISTING_VERIFIED"
           else
+            set +e
+            npm view "$name" name --registry=https://registry.npmjs.org >/dev/null 2>&1
+            package_exists_status=$?
+            set -e
+            if [[ $package_exists_status -ne 0 && -z "${NODE_AUTH_TOKEN:-}" ]]; then
+              echo "NPMJS_BOOTSTRAP_AUTH_REQUIRED: first publication requires repository secret NPM_TOKEN with npm scope publish authority." >&2
+              echo "After first publication, configure npm trusted publishing for publish-registry-client-sdk.yml and remove the long-lived publish token." >&2
+              exit 1
+            fi
             npm publish "$tarball" --registry=https://registry.npmjs.org --access public
             publish_status="PUBLISHED"
             remote_integrity=""

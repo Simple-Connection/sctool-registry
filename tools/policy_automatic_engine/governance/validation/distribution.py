@@ -7,32 +7,70 @@ from .context import ValidationContext
 
 
 def validate(ctx: ValidationContext, errors: list[str]) -> None:
-    contract = ctx.registry_client_sdk_distribution
-    scan_machine(contract, "docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml", errors)
+    validate_registry_client_sdk_distribution(ctx, errors)
+    validate_authoring_sdk_distribution(ctx, errors)
+    validate_signed_distribution_handoff(ctx, errors)
 
+
+def _validate_public_package_json(
+    ctx: ValidationContext,
+    package_root: str,
+    expected_name: str,
+    expected_version: str,
+    errors: list[str],
+    prefix: str,
+) -> None:
+    package_path = ctx.root / package_root / "package.json"
+    need(package_path.is_file(), f"{prefix}_PACKAGE_JSON_MISSING", errors)
+    if not package_path.is_file():
+        return
+    package_json = json.loads(package_path.read_text(encoding="utf-8"))
+    need(package_json.get("name") == expected_name, f"{prefix}_PACKAGE_NAME", errors)
+    need(package_json.get("version") == expected_version, f"{prefix}_PACKAGE_VERSION", errors)
+    need(package_json.get("private") is not True, f"{prefix}_PACKAGE_PRIVATE_FLAG", errors)
+    publish_config = package_json.get("publishConfig", {})
     need(
-        contract.get("contract_id") == "REGISTRY_CLIENT_SDK_DISTRIBUTION_V1",
-        "SDK_DISTRIBUTION_CONTRACT_ID",
+        publish_config.get("registry") == "https://registry.npmjs.org",
+        f"{prefix}_PACKAGE_PUBLISH_REGISTRY",
         errors,
     )
-    need(
-        contract.get("responsibility") == "RESP_REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION",
-        "SDK_DISTRIBUTION_RESPONSIBILITY",
-        errors,
-    )
-    need(
-        contract.get("authority") == "AUTH_REGISTRY_SDK_PACKAGE_DELIVERY",
-        "SDK_DISTRIBUTION_AUTHORITY",
-        errors,
-    )
-    need(contract.get("mechanism") == "GITHUB_PACKAGES", "SDK_DISTRIBUTION_MECHANISM", errors)
-    need(contract.get("registry") == "https://npm.pkg.github.com", "SDK_DISTRIBUTION_REGISTRY", errors)
-    need(
-        contract.get("package") == "@simple-connection/sctool-registry-client-sdk",
-        "SDK_DISTRIBUTION_PACKAGE",
-        errors,
-    )
-    need(contract.get("visibility") == "PRIVATE", "SDK_DISTRIBUTION_VISIBILITY", errors)
+    need(publish_config.get("access") == "public", f"{prefix}_PACKAGE_PUBLISH_ACCESS", errors)
+
+
+def _validate_public_npm_workflow(
+    workflow_text: str,
+    errors: list[str],
+    prefix: str,
+) -> None:
+    need("id-token: write" in workflow_text, f"{prefix}_WORKFLOW_OIDC_PERMISSION", errors)
+    need("packages: write" not in workflow_text, f"{prefix}_WORKFLOW_GITHUB_PACKAGES_RETIRED", errors)
+    need("https://registry.npmjs.org" in workflow_text, f"{prefix}_WORKFLOW_NPMJS_REGISTRY", errors)
+    need("--access public" in workflow_text, f"{prefix}_WORKFLOW_PUBLIC_ACCESS", errors)
+    need("secrets.NPM_TOKEN" in workflow_text, f"{prefix}_WORKFLOW_BOOTSTRAP_TOKEN", errors)
+    need("NPM_CONFIG_USERCONFIG: /dev/null" in workflow_text, f"{prefix}_WORKFLOW_ANONYMOUS_VERIFY", errors)
+    need('node-version: "24"' in workflow_text, f"{prefix}_WORKFLOW_NODE_24", errors)
+
+
+def validate_registry_client_sdk_distribution(ctx: ValidationContext, errors: list[str]) -> None:
+    contract = ctx.registry_client_sdk_distribution
+    path = "docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml"
+    scan_machine(contract, path, errors)
+
+    need(contract.get("contract_id") == "REGISTRY_CLIENT_SDK_DISTRIBUTION_V1", "SDK_DISTRIBUTION_CONTRACT_ID", errors)
+    need(contract.get("responsibility") == "RESP_REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION", "SDK_DISTRIBUTION_RESPONSIBILITY", errors)
+    need(contract.get("authority") == "AUTH_REGISTRY_SDK_PACKAGE_DELIVERY", "SDK_DISTRIBUTION_AUTHORITY", errors)
+    need(contract.get("mechanism") == "NPMJS_PUBLIC_REGISTRY", "SDK_DISTRIBUTION_MECHANISM", errors)
+    need(contract.get("registry") == "https://registry.npmjs.org", "SDK_DISTRIBUTION_REGISTRY", errors)
+    need(contract.get("package") == "@simple-connection/sctool-registry-client-sdk", "SDK_DISTRIBUTION_PACKAGE", errors)
+    need(contract.get("version") == "0.2.2", "SDK_DISTRIBUTION_VERSION", errors)
+    need(contract.get("visibility") == "PUBLIC", "SDK_DISTRIBUTION_VISIBILITY", errors)
+
+    consumer = contract.get("consumer", {})
+    need(consumer.get("primary_repository") == "Simple-Connection/SC_Linked_App", "SDK_DISTRIBUTION_PRIMARY_CONSUMER", errors)
+    need(consumer.get("public_consumers") == "ALLOWED", "SDK_DISTRIBUTION_PUBLIC_CONSUMERS", errors)
+    need(consumer.get("authentication") == "NOT_REQUIRED", "SDK_DISTRIBUTION_CONSUMER_AUTH", errors)
+    need(consumer.get("anonymous_installation") == "REQUIRED", "SDK_DISTRIBUTION_ANONYMOUS_INSTALL", errors)
+    need(consumer.get("exact_version_pin") == "REQUIRED", "SDK_DISTRIBUTION_EXACT_PIN", errors)
 
     policy = contract.get("version_policy", {})
     need(policy.get("dependency_range") == "EXACT", "SDK_DISTRIBUTION_EXACT_VERSION", errors)
@@ -42,42 +80,132 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
 
     publish = contract.get("publish", {})
     workflow = publish.get("workflow")
-    need(
-        workflow == ".github/workflows/publish-registry-client-sdk.yml",
-        "SDK_DISTRIBUTION_WORKFLOW",
-        errors,
-    )
-    need((ctx.root / workflow).is_file(), "SDK_DISTRIBUTION_WORKFLOW_MISSING", errors)
+    need(workflow == ".github/workflows/publish-registry-client-sdk.yml", "SDK_DISTRIBUTION_WORKFLOW", errors)
+    need(isinstance(workflow, str) and (ctx.root / workflow).is_file(), "SDK_DISTRIBUTION_WORKFLOW_MISSING", errors)
     need(publish.get("from_ci") == "REQUIRED", "SDK_DISTRIBUTION_CI", errors)
+    need(publish.get("access") == "PUBLIC", "SDK_DISTRIBUTION_PUBLIC_ACCESS", errors)
     need(publish.get("pack_before_publish") == "REQUIRED", "SDK_DISTRIBUTION_PACK", errors)
     need(publish.get("local_integrity_evidence") == "REQUIRED", "SDK_DISTRIBUTION_LOCAL_INTEGRITY", errors)
     need(publish.get("remote_integrity_verification") == "REQUIRED", "SDK_DISTRIBUTION_REMOTE_INTEGRITY", errors)
+    need(publish.get("anonymous_remote_verification") == "REQUIRED", "SDK_DISTRIBUTION_ANONYMOUS_REMOTE", errors)
     existing = publish.get("existing_version", {})
     need(existing.get("integrity_equal") == "REUSE", "SDK_DISTRIBUTION_REUSE", errors)
     need(existing.get("integrity_mismatch") == "FAIL_CLOSED", "SDK_DISTRIBUTION_MISMATCH", errors)
 
     auth = contract.get("authentication", {})
-    need(auth.get("ci", {}).get("preferred") == "GITHUB_TOKEN", "SDK_DISTRIBUTION_CI_AUTH", errors)
-    need(
-        auth.get("local_development", {}).get("source_controlled_token") == "FORBIDDEN",
-        "SDK_DISTRIBUTION_LOCAL_TOKEN",
-        errors,
-    )
+    publication = auth.get("publication", {})
+    need(publication.get("preferred") == "NPM_TRUSTED_PUBLISHING_OIDC", "SDK_DISTRIBUTION_CI_AUTH", errors)
+    need(publication.get("bootstrap") == "NPM_TOKEN", "SDK_DISTRIBUTION_BOOTSTRAP_AUTH", errors)
+    need(publication.get("source_controlled_token") == "FORBIDDEN", "SDK_DISTRIBUTION_LOCAL_TOKEN", errors)
+    github_actions = publication.get("github_actions", {})
+    need(github_actions.get("id_token_permission") == "WRITE", "SDK_DISTRIBUTION_OIDC_PERMISSION", errors)
+    need(github_actions.get("runner") == "GITHUB_HOSTED", "SDK_DISTRIBUTION_OIDC_RUNNER", errors)
+    need(github_actions.get("node_major") == 24, "SDK_DISTRIBUTION_NODE_MAJOR", errors)
+    need(github_actions.get("npm_minimum") == "11.5.1", "SDK_DISTRIBUTION_NPM_MINIMUM", errors)
+    consumer_auth = auth.get("consumer", {})
+    need(consumer_auth.get("required") is False, "SDK_DISTRIBUTION_CONSUMER_AUTH_REQUIRED", errors)
+    need(consumer_auth.get("token") == "FORBIDDEN_AS_REQUIREMENT", "SDK_DISTRIBUTION_CONSUMER_TOKEN", errors)
 
-    package_path = ctx.root / contract["producer"]["package_root"] / "package.json"
-    package_json = json.loads(package_path.read_text(encoding="utf-8"))
-    need(package_json.get("name") == contract.get("package"), "SDK_PACKAGE_NAME", errors)
-    need(package_json.get("private") is not True, "SDK_PACKAGE_PRIVATE_FLAG", errors)
-    publish_config = package_json.get("publishConfig", {})
-    need(publish_config.get("registry") == contract.get("registry"), "SDK_PACKAGE_PUBLISH_REGISTRY", errors)
-    need(publish_config.get("access") == "restricted", "SDK_PACKAGE_PUBLISH_ACCESS", errors)
+    trusted = contract.get("trusted_publisher", {})
+    need(trusted.get("provider") == "GITHUB_ACTIONS", "SDK_DISTRIBUTION_TRUST_PROVIDER", errors)
+    need(trusted.get("repository") == "Simple-Connection/sctool-registry", "SDK_DISTRIBUTION_TRUST_REPOSITORY", errors)
+    need(trusted.get("workflow_filename") == "publish-registry-client-sdk.yml", "SDK_DISTRIBUTION_TRUST_WORKFLOW", errors)
+    need(trusted.get("allowed_action") == "NPM_PUBLISH", "SDK_DISTRIBUTION_TRUST_ACTION", errors)
 
-    workflow_text = (ctx.root / workflow).read_text(encoding="utf-8")
-    need("packages: write" in workflow_text, "SDK_WORKFLOW_PACKAGES_WRITE", errors)
-    need("npm pack --json" in workflow_text, "SDK_WORKFLOW_PACK", errors)
-    need("dist.integrity" in workflow_text, "SDK_WORKFLOW_REMOTE_INTEGRITY", errors)
+    producer = contract.get("producer", {})
+    package_root = producer.get("package_root")
+    need(package_root == "packages/registry-client-sdk", "SDK_DISTRIBUTION_PACKAGE_ROOT", errors)
+    if isinstance(package_root, str):
+        _validate_public_package_json(
+            ctx,
+            package_root,
+            "@simple-connection/sctool-registry-client-sdk",
+            "0.2.2",
+            errors,
+            "SDK",
+        )
 
-    validate_signed_distribution_handoff(ctx, errors)
+    if isinstance(workflow, str) and (ctx.root / workflow).is_file():
+        workflow_text = (ctx.root / workflow).read_text(encoding="utf-8")
+        _validate_public_npm_workflow(workflow_text, errors, "SDK")
+        need("npm pack --json" in workflow_text, "SDK_WORKFLOW_PACK", errors)
+        need("dist.integrity" in workflow_text, "SDK_WORKFLOW_REMOTE_INTEGRITY", errors)
+        need("@simple-connection/sctool-registry-client-sdk@0.2.2" in workflow_text, "SDK_WORKFLOW_VERSION", errors)
+
+
+def validate_authoring_sdk_distribution(ctx: ValidationContext, errors: list[str]) -> None:
+    path = "docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml"
+    contract = ctx.load(path)
+    scan_machine(contract, path, errors)
+
+    need(contract.get("contract_id") == "AUTHORING_SDK_DISTRIBUTION_V1", "AUTHORING_DISTRIBUTION_CONTRACT_ID", errors)
+    need(contract.get("mechanism") == "NPMJS_PUBLIC_REGISTRY", "AUTHORING_DISTRIBUTION_MECHANISM", errors)
+    need(contract.get("registry") == "https://registry.npmjs.org", "AUTHORING_DISTRIBUTION_REGISTRY", errors)
+    need(contract.get("source_repository") == "Simple-Connection/sctool-registry", "AUTHORING_DISTRIBUTION_SOURCE", errors)
+    workflow = contract.get("workflow")
+    need(workflow == ".github/workflows/publish-authoring-sdks.yml", "AUTHORING_DISTRIBUTION_WORKFLOW", errors)
+    need(isinstance(workflow, str) and (ctx.root / workflow).is_file(), "AUTHORING_DISTRIBUTION_WORKFLOW_MISSING", errors)
+
+    packages = contract.get("packages", {})
+    expected = {
+        "SCTOOL_AUTHORING_SDK": (
+            "packages/sctool-sdk",
+            "@simple-connection/sctool-sdk",
+            "0.2.1",
+            "AUTH_SCTOOL_AUTHORING_SDK",
+        ),
+        "REPOSITORY_TOOL_AUTHORING_SDK": (
+            "packages/repository-tool-sdk",
+            "@simple-connection/repository-tool-sdk",
+            "0.1.1",
+            "AUTH_REPOSITORY_TOOL_AUTHORING_SDK",
+        ),
+    }
+    for key, (package_root, package_name, version, authority) in expected.items():
+        item = packages.get(key, {})
+        prefix = f"AUTHORING_{key}"
+        need(item.get("source") == package_root, f"{prefix}_SOURCE", errors)
+        need(item.get("package") == package_name, f"{prefix}_NAME", errors)
+        need(item.get("version") == version, f"{prefix}_VERSION", errors)
+        need(item.get("authority") == authority, f"{prefix}_AUTHORITY", errors)
+        need(item.get("visibility") == "PUBLIC", f"{prefix}_VISIBILITY", errors)
+        _validate_public_package_json(ctx, package_root, package_name, version, errors, prefix)
+
+    publication = contract.get("publication", {})
+    need(publication.get("authority") == "AUTH_AUTHORING_SDK_PACKAGE_DELIVERY", "AUTHORING_DISTRIBUTION_AUTHORITY", errors)
+    need(publication.get("access") == "PUBLIC", "AUTHORING_DISTRIBUTION_PUBLIC_ACCESS", errors)
+    need(publication.get("immutable_version") is True, "AUTHORING_DISTRIBUTION_IMMUTABLE", errors)
+    need(publication.get("exact_source_revision_evidence") is True, "AUTHORING_DISTRIBUTION_REVISION_EVIDENCE", errors)
+    need(publication.get("local_remote_integrity_match_required") is True, "AUTHORING_DISTRIBUTION_INTEGRITY", errors)
+    need(publication.get("anonymous_remote_verification") is True, "AUTHORING_DISTRIBUTION_ANONYMOUS_REMOTE", errors)
+    publication_auth = publication.get("authentication", {})
+    need(publication_auth.get("preferred") == "NPM_TRUSTED_PUBLISHING_OIDC", "AUTHORING_DISTRIBUTION_CI_AUTH", errors)
+    need(publication_auth.get("bootstrap") == "NPM_TOKEN", "AUTHORING_DISTRIBUTION_BOOTSTRAP_AUTH", errors)
+    need(publication_auth.get("source_controlled_token") == "FORBIDDEN", "AUTHORING_DISTRIBUTION_SOURCE_TOKEN", errors)
+    github_actions = publication_auth.get("github_actions", {})
+    need(github_actions.get("id_token_permission") == "WRITE", "AUTHORING_DISTRIBUTION_OIDC_PERMISSION", errors)
+    need(github_actions.get("runner") == "GITHUB_HOSTED", "AUTHORING_DISTRIBUTION_OIDC_RUNNER", errors)
+    need(github_actions.get("node_major") == 24, "AUTHORING_DISTRIBUTION_NODE_MAJOR", errors)
+    need(github_actions.get("npm_minimum") == "11.5.1", "AUTHORING_DISTRIBUTION_NPM_MINIMUM", errors)
+
+    consumer = contract.get("consumer", {})
+    need(consumer.get("primary_repository") == "Simple-Connection/SC_Linked_App", "AUTHORING_DISTRIBUTION_PRIMARY_CONSUMER", errors)
+    need(consumer.get("public_consumers") == "ALLOWED", "AUTHORING_DISTRIBUTION_PUBLIC_CONSUMERS", errors)
+    need(consumer.get("authentication") == "NOT_REQUIRED", "AUTHORING_DISTRIBUTION_CONSUMER_AUTH", errors)
+    need(consumer.get("anonymous_installation") == "REQUIRED", "AUTHORING_DISTRIBUTION_ANONYMOUS_INSTALL", errors)
+    need(consumer.get("exact_version_pin_required") is True, "AUTHORING_DISTRIBUTION_EXACT_PIN", errors)
+
+    trusted = contract.get("trusted_publisher", {})
+    need(trusted.get("provider") == "GITHUB_ACTIONS", "AUTHORING_DISTRIBUTION_TRUST_PROVIDER", errors)
+    need(trusted.get("repository") == "Simple-Connection/sctool-registry", "AUTHORING_DISTRIBUTION_TRUST_REPOSITORY", errors)
+    need(trusted.get("workflow_filename") == "publish-authoring-sdks.yml", "AUTHORING_DISTRIBUTION_TRUST_WORKFLOW", errors)
+    need(trusted.get("allowed_action") == "NPM_PUBLISH", "AUTHORING_DISTRIBUTION_TRUST_ACTION", errors)
+
+    if isinstance(workflow, str) and (ctx.root / workflow).is_file():
+        workflow_text = (ctx.root / workflow).read_text(encoding="utf-8")
+        _validate_public_npm_workflow(workflow_text, errors, "AUTHORING")
+        need("@simple-connection/sctool-sdk@0.2.1" in workflow_text, "AUTHORING_WORKFLOW_SCTOOL_VERSION", errors)
+        need("@simple-connection/repository-tool-sdk@0.1.1" in workflow_text, "AUTHORING_WORKFLOW_REPOSITORY_TOOL_VERSION", errors)
 
 
 def validate_signed_distribution_handoff(ctx: ValidationContext, errors: list[str]) -> None:
