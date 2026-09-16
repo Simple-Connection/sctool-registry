@@ -262,6 +262,8 @@ components:
     executable: true
     release_owner: development-tooling
     compatibility_owner: development-tooling
+    manifests:
+      - "tools/issue-routing/requirements.txt"
 
 relationships:
   - id: registry-contracts-specify-catalog
@@ -391,6 +393,11 @@ relationships:
 
 component_dependency_policy:
   default: deny
+  allow:
+    - from: repository-governance
+      to: policy-automatic-engine
+    - from: registry-pages-delivery
+      to: policy-automatic-engine
 
 policies:
   product_to_nonproduct_runtime_dependency: deny
