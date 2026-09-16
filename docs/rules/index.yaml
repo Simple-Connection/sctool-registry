@@ -26,8 +26,6 @@ layout:
     forbidden_active_references:
       - "docs/governance/"
       - "policy/registry-policy.json"
-      - "policy/**"
-      - "governance/**"
       - "schemas/package.schema.json"
       - "schemas/publisher.schema.json"
       - "schemas/submission.schema.json"

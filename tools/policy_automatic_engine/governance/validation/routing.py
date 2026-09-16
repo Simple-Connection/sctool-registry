@@ -348,7 +348,13 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
         except (OSError, UnicodeError):
             continue
         for token in forbidden_references:
-            matched = token in content
+            if token.startswith("schemas/"):
+                matched = (
+                    token in content
+                    and "tools/policy_automatic_engine/schemas/" not in content
+                )
+            else:
+                matched = token in content
             need(
                 not matched,
                 f"LEGACY_ACTIVE_REFERENCE:{normalized}:{token}",

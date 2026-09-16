@@ -1,5 +1,5 @@
 {
-  "$schema": "./schemas/registry.schema.json",
+  "$schema": "./tools/policy_automatic_engine/schemas/registry/registry.schema.json",
   "schemaVersion": "1.0.0",
   "packages": {},
   "publishers": {},

@@ -26,7 +26,7 @@ function requireIssue(result, code, label) {
 }
 
 const validDescriptor = {
-  $schema: "../schemas/package.schema.json",
+  $schema: "../../../tools/policy_automatic_engine/schemas/package/package.schema.json",
   schemaVersion: "2.0.0",
   id: "example-tool",
   publisher: "Example.Publisher",

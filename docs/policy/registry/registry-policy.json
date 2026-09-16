@@ -1,5 +1,5 @@
 {
-  "$schema": "../schemas/policy.schema.json",
+  "$schema": "../../../tools/policy_automatic_engine/schemas/registry/policy.schema.json",
   "schemaVersion": "2.0.0",
   "source": {
     "visibilityRequired": false,
