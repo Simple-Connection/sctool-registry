@@ -138,7 +138,7 @@ def validate_authoring_sdk_distribution(ctx: ValidationContext, errors: list[str
     contract = ctx.load(path)
     scan_machine(contract, path, errors)
 
-    need(contract.get("schema_version") == "1.3", "AUTHORING_DISTRIBUTION_SCHEMA_VERSION", errors)
+    need(contract.get("schema_version") == "1.4", "AUTHORING_DISTRIBUTION_SCHEMA_VERSION", errors)
     need(contract.get("contract_id") == "AUTHORING_SDK_DISTRIBUTION_V1", "AUTHORING_DISTRIBUTION_CONTRACT_ID", errors)
     need(contract.get("mechanism") == "NPMJS_PUBLIC_REGISTRY", "AUTHORING_DISTRIBUTION_MECHANISM", errors)
     need(contract.get("registry") == "https://registry.npmjs.org", "AUTHORING_DISTRIBUTION_REGISTRY", errors)
@@ -194,6 +194,11 @@ def validate_authoring_sdk_distribution(ctx: ValidationContext, errors: list[str
     need(existing_resolution.get("metadata_authority") == "FORBIDDEN", "AUTHORING_DISTRIBUTION_METADATA_AUTHORITY", errors)
     need(existing_resolution.get("publish_conflict_recovery") == "EXACT_CONTENT_VERIFY", "AUTHORING_DISTRIBUTION_CONFLICT_RECOVERY", errors)
     need(existing_resolution.get("publish_conflict_result") == "EXISTING_VERIFIED", "AUTHORING_DISTRIBUTION_CONFLICT_RESULT", errors)
+    registry_availability = content_verification.get("registry_availability", {})
+    need(registry_availability.get("publish_time_security_scan_tolerant") is True, "AUTHORING_DISTRIBUTION_SCAN_TOLERANT", errors)
+    need(registry_availability.get("anonymous_retrieval_max_attempts") == 40, "AUTHORING_DISTRIBUTION_SCAN_ATTEMPTS", errors)
+    need(registry_availability.get("anonymous_retrieval_delay_seconds") == 30, "AUTHORING_DISTRIBUTION_SCAN_DELAY", errors)
+    need(registry_availability.get("timeout_result") == "FAIL_CLOSED", "AUTHORING_DISTRIBUTION_SCAN_TIMEOUT", errors)
     publication_auth = publication.get("authentication", {})
     need(publication_auth.get("preferred") == "NPM_TRUSTED_PUBLISHING_OIDC", "AUTHORING_DISTRIBUTION_CI_AUTH", errors)
     need(publication_auth.get("bootstrap") == "NPM_TOKEN", "AUTHORING_DISTRIBUTION_BOOTSTRAP_AUTH", errors)
@@ -232,6 +237,10 @@ def validate_authoring_sdk_distribution(ctx: ValidationContext, errors: list[str
         need("PUBLISH_CONFLICT_RECOVERED" in workflow_text, "AUTHORING_WORKFLOW_CONFLICT_RECOVERY", errors)
         need("cannot publish over (the )?previously published versions" in workflow_text, "AUTHORING_WORKFLOW_CONFLICT_PATTERN", errors)
         need("metadata freshness is not authoritative" in workflow_text, "AUTHORING_WORKFLOW_METADATA_NOT_AUTHORITY", errors)
+        need("fetch_remote_package_with_retry 40 30" in workflow_text, "AUTHORING_WORKFLOW_SCAN_RETRY_WINDOW", errors)
+        need("publish-time security scanning" in workflow_text, "AUTHORING_WORKFLOW_SCAN_REASON", errors)
+        need("registry-security-scan wait" in workflow_text, "AUTHORING_WORKFLOW_SCAN_FAIL_CLOSED", errors)
+        need("remote-pack.stderr" in workflow_text, "AUTHORING_WORKFLOW_SCAN_DIAGNOSTIC", errors)
         need("Remote integrity mismatch after publication" not in workflow_text, "AUTHORING_WORKFLOW_RAW_TARBALL_MATCH_RETIRED", errors)
 
 
