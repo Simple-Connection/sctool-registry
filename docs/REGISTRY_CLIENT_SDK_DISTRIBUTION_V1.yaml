@@ -1,4 +1,4 @@
-schema_version: "1.2"
+schema_version: "1.3"
 document_type: registry_client_sdk_distribution_contract
 natural_language: FORBIDDEN
 contract_id: REGISTRY_CLIENT_SDK_DISTRIBUTION_V1
@@ -31,12 +31,28 @@ publish:
   from_ci: REQUIRED
   access: PUBLIC
   pack_before_publish: REQUIRED
-  local_integrity_evidence: REQUIRED
-  remote_integrity_verification: REQUIRED
+  tarball_integrity_evidence: REQUIRED
+  tarball_integrity_match_required: false
   anonymous_remote_verification: REQUIRED
-  existing_version:
-    integrity_equal: REUSE
-    integrity_mismatch: FAIL_CLOSED
+  content_verification:
+    method: EXACT_PACKAGE_CONTENT_SHA256_V1
+    manifest_format: npm-package-content-manifest/v1
+    path_set: EXACT
+    file_bytes_sha256: REQUIRED
+    file_mode: REQUIRED
+    symlink_target: REQUIRED
+    remote_retrieval: ANONYMOUS
+    mismatch: FAIL_CLOSED
+    existing_version_resolution:
+      primary: ANONYMOUS_CONTENT_FETCH
+      metadata_authority: FORBIDDEN
+      publish_conflict_recovery: EXACT_CONTENT_VERIFY
+      publish_conflict_result: EXISTING_VERIFIED
+    registry_availability:
+      publish_time_security_scan_tolerant: true
+      anonymous_retrieval_max_attempts: 40
+      anonymous_retrieval_delay_seconds: 30
+      timeout_result: FAIL_CLOSED
 authentication:
   publication:
     preferred: NPM_TRUSTED_PUBLISHING_OIDC
