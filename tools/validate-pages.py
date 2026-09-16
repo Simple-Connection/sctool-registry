@@ -9,7 +9,9 @@ from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 
 ROOT = Path(__file__).resolve().parents[1]
-SCHEMAS = ROOT / "schemas"
+SCHEMA_ROOT = ROOT / "tools" / "policy_automatic_engine" / "schemas"
+PACKAGE_SCHEMAS = SCHEMA_ROOT / "package"
+REGISTRY_SCHEMAS = SCHEMA_ROOT / "registry"
 FORMAT_CHECKER = FormatChecker()
 
 
@@ -21,9 +23,9 @@ def load_json(path: Path) -> Any:
 
 
 def validator(schema_name: str) -> Draft202012Validator:
-    schema = load_json(SCHEMAS / schema_name)
-    package_schema = load_json(SCHEMAS / "package.schema.json")
-    publisher_schema = load_json(SCHEMAS / "publisher.schema.json")
+    schema = load_json(REGISTRY_SCHEMAS / schema_name)
+    package_schema = load_json(PACKAGE_SCHEMAS / "package.schema.json")
+    publisher_schema = load_json(PACKAGE_SCHEMAS / "publisher.schema.json")
     registry = Registry().with_resources(
         [
             ("package.schema.json", Resource.from_contents(package_schema)),

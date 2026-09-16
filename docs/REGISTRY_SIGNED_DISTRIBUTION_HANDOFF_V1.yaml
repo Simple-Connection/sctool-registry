@@ -55,7 +55,7 @@ identity:
   mutable_latest_resolution: FORBIDDEN
   name_only_resolution_without_run: FORBIDDEN
 evidence:
-  schema: schemas/registry-distribution-handoff.schema.json
+  schema: tools/policy_automatic_engine/schemas/registry/registry-distribution-handoff.schema.json
   file: registry-distribution-handoff.json
   artifact_name_format: registry-signed-distribution-handoff-{revision}
   producer_generation: REQUIRED

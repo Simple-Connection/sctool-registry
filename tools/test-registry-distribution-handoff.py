@@ -126,7 +126,7 @@ def main() -> None:
                 "--contract",
                 "docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml",
                 "--schema",
-                "schemas/registry-distribution-handoff.schema.json",
+                "tools/policy_automatic_engine/schemas/registry/registry-distribution-handoff.schema.json",
                 "--evidence",
                 str(evidence_path),
                 "--site",

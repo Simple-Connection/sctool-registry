@@ -7,7 +7,9 @@ from typing import Any
 from jsonschema import Draft202012Validator, FormatChecker
 
 ROOT = Path(__file__).resolve().parents[1]
-SCHEMAS = ROOT / "schemas"
+SCHEMA_ROOT = ROOT / "tools" / "policy_automatic_engine" / "schemas"
+PACKAGE_SCHEMAS = SCHEMA_ROOT / "package"
+REGISTRY_SCHEMAS = SCHEMA_ROOT / "registry"
 MARKETPLACE_PROFILE_SCHEMA = ROOT / "packages" / "sctool-sdk" / "schemas" / "marketplace-profile.schema.json"
 FORMAT_CHECKER = FormatChecker()
 
@@ -33,8 +35,15 @@ def schema_errors_from_path(schema_path: Path, payload: Any, label: str) -> list
     return rendered
 
 
+def schema_path(schema_name: str) -> Path:
+    matches = [root / schema_name for root in (PACKAGE_SCHEMAS, REGISTRY_SCHEMAS) if (root / schema_name).is_file()]
+    if len(matches) != 1:
+        raise SystemExit(f"Schema resolution failed for {schema_name}: matches={len(matches)}")
+    return matches[0]
+
+
 def schema_errors(schema_name: str, payload: Any, label: str) -> list[str]:
-    return schema_errors_from_path(SCHEMAS / schema_name, payload, label)
+    return schema_errors_from_path(schema_path(schema_name), payload, label)
 
 
 def validate(schema_name: str, payload: Any, label: str) -> None:
@@ -146,15 +155,16 @@ def validate_package_consistency(
 
 
 def main() -> None:
-    for schema_path in sorted(SCHEMAS.glob("*.schema.json")):
+    for schema_path in sorted(SCHEMA_ROOT.rglob("*.schema.json")):
         Draft202012Validator.check_schema(load_json(schema_path))
     Draft202012Validator.check_schema(load_json(MARKETPLACE_PROFILE_SCHEMA))
 
     registry = load_json(ROOT / "registry.json")
     validate("registry.schema.json", registry, "registry.json")
 
-    policy = load_json(ROOT / "policy" / "registry-policy.json")
-    validate("policy.schema.json", policy, "policy/registry-policy.json")
+    policy_path = ROOT / "docs" / "policy" / "registry" / "registry-policy.json"
+    policy = load_json(policy_path)
+    validate("policy.schema.json", policy, "docs/policy/registry/registry-policy.json")
 
     for package_id, relative_path in sorted(registry["packages"].items()):
         path = ROOT / relative_path

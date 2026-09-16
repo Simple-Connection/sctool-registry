@@ -1,0 +1,5 @@
+schema_version: "1.0"
+document_type: policy_template_index
+natural_language: FORBIDDEN
+template_root: docs/policy/template
+templates: {}

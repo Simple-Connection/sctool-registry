@@ -1,0 +1,15 @@
+schema_version: "1.0"
+document_type: registry_policy_index
+natural_language: FORBIDDEN
+policy_root: docs/policy/registry
+machine_policy: docs/policy/registry/registry-policy.json
+active:
+  REGISTRY_MARKETPLACE_HANDOFF_RECONCILIATION_POLICY_V1:
+    path: docs/policy/registry/REGISTRY_MARKETPLACE_HANDOFF_RECONCILIATION_POLICY_V1.md
+    state: POLICY_DECIDED_IMPLEMENTATION_NOT_AUTHORIZED
+  REGISTRY_ARTIFACT_CUSTODY_CACHE_POLICY_V1:
+    path: docs/policy/registry/REGISTRY_ARTIFACT_CUSTODY_CACHE_POLICY_V1.md
+    state: POLICY_DECIDED_IMPLEMENTATION_NOT_AUTHORIZED
+  REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1:
+    path: docs/policy/registry/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md
+    state: POLICY_DECIDED_IMPLEMENTATION_NOT_AUTHORIZED

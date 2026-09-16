@@ -13,8 +13,8 @@ The current contracts that use that repository as permanent custody for all acce
 - `docs/REGISTRY_CONTRACT_V2.md`
 - `docs/ARTIFACT_DELIVERY_V1.md`
 - `docs/REGISTRY_ACCESS_V1.md`
-- `policy/registry-policy.json`
-- `schemas/package.schema.json`
+- `docs/policy/registry/registry-policy.json`
+- `tools/policy_automatic_engine/schemas/package/package.schema.json`
 
 A later implementation must revise those authorities together rather than partially applying this policy.
 

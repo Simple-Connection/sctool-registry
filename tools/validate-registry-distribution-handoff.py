@@ -34,7 +34,7 @@ def list_files(root: Path) -> list[str]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--contract", default="docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml")
-    parser.add_argument("--schema", default="schemas/registry-distribution-handoff.schema.json")
+    parser.add_argument("--schema", default="tools/policy_automatic_engine/schemas/registry/registry-distribution-handoff.schema.json")
     parser.add_argument("--evidence", required=True)
     parser.add_argument("--site", required=True)
     args = parser.parse_args()

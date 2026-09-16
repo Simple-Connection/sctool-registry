@@ -41,8 +41,8 @@ An accepted artifact must be independently revalidated against the canonical SCT
 registry.json                    package/publisher index
 packages/*.json                  accepted package/version/artifact descriptors
 publishers/*.json                registered publisher verification keys
-schemas/*.schema.json            canonical registry contracts
-policy/registry-policy.json      machine-readable admission/access policy
+tools/policy_automatic_engine/schemas/** canonical Registry/package schema contracts
+docs/policy/registry/registry-policy.json machine-readable admission/access policy
 docs/REGISTRY_CONTRACT_V1.md     historical anonymous-download Registry contract
 docs/REGISTRY_CONTRACT_V2.md     current authenticated Registry contract
 docs/REGISTRY_ACCESS_V1.md       GitHub identity/private artifact access contract

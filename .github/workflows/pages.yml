@@ -7,7 +7,7 @@ on:
       - "registry.json"
       - "packages/**"
       - "publishers/**"
-      - "schemas/**"
+      - "tools/policy_automatic_engine/schemas/**"
       - "policy/**"
       - "trust/**"
       - "tools/**"
@@ -25,7 +25,7 @@ on:
       - "registry.json"
       - "packages/**"
       - "publishers/**"
-      - "schemas/**"
+      - "tools/policy_automatic_engine/schemas/**"
       - "policy/**"
       - "trust/**"
       - "tools/**"
@@ -214,7 +214,7 @@ jobs:
         run: >-
           python tools/validate-registry-distribution-handoff.py
           --contract docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml
-          --schema schemas/registry-distribution-handoff.schema.json
+          --schema tools/policy_automatic_engine/schemas/registry/registry-distribution-handoff.schema.json
           --evidence registry-distribution-handoff.json
           --site _site
 

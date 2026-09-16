@@ -9,8 +9,27 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
     scan_machine(index, ctx.policy_index_path, errors)
 
     need(index.get("document_type") == "policy_index", "POLICY_INDEX_TYPE", errors)
-    need(index.get("active_root") == "docs/policy", "POLICY_ACTIVE_ROOT", errors)
     need(index.get("historical_index") == "docs/index.yaml", "POLICY_HISTORY_INDEX", errors)
+    routes = index.get("routes", {})
+    registry_index_path = routes.get("registry")
+    validate_index_path = routes.get("validate")
+    template_index_path = routes.get("template")
+    need(registry_index_path == "docs/policy/registry/index.yaml", "POLICY_REGISTRY_ROUTE", errors)
+    need(validate_index_path == "docs/policy/validate/index.yaml", "POLICY_VALIDATE_ROUTE", errors)
+    need(template_index_path == "docs/policy/template/index.yaml", "POLICY_TEMPLATE_ROUTE", errors)
+    registry_index = ctx.load(registry_index_path)
+    validate_index = ctx.load(validate_index_path)
+    template_index = ctx.load(template_index_path)
+    scan_machine(registry_index, registry_index_path, errors)
+    scan_machine(validate_index, validate_index_path, errors)
+    scan_machine(template_index, template_index_path, errors)
+    need(registry_index.get("document_type") == "registry_policy_index", "REGISTRY_POLICY_INDEX_TYPE", errors)
+    need(registry_index.get("policy_root") == "docs/policy/registry", "REGISTRY_POLICY_ROOT", errors)
+    machine_policy = registry_index.get("machine_policy")
+    need(machine_policy == "docs/policy/registry/registry-policy.json", "REGISTRY_MACHINE_POLICY_ROUTE", errors)
+    need(isinstance(machine_policy, str) and (ctx.root / machine_policy).is_file(), "REGISTRY_MACHINE_POLICY_MISSING", errors)
+    need(validate_index.get("document_type") == "policy_validation_index", "POLICY_VALIDATE_INDEX_TYPE", errors)
+    need(template_index.get("document_type") == "policy_template_index", "POLICY_TEMPLATE_INDEX_TYPE", errors)
 
     entry_policy = index.get("entry_policy", {})
     need(entry_policy.get("active") == "INDEX_ROUTED", "POLICY_ACTIVE_ENTRY", errors)
@@ -18,13 +37,13 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
     need(entry_policy.get("expired") == "REMOVE", "POLICY_EXPIRED_ENTRY", errors)
 
     active_paths: set[str] = set()
-    for policy_id, entry in index.get("active", {}).items():
+    for policy_id, entry in registry_index.get("active", {}).items():
         path = entry.get("path")
         need(isinstance(path, str), f"POLICY_PATH:{policy_id}", errors)
         if not isinstance(path, str):
             continue
         active_paths.add(path)
-        need(path.startswith("docs/policy/"), f"POLICY_ACTIVE_LOCATION:{policy_id}:{path}", errors)
+        need(path.startswith("docs/policy/registry/"), f"POLICY_ACTIVE_LOCATION:{policy_id}:{path}", errors)
         need((ctx.root / path).is_file(), f"POLICY_ACTIVE_MISSING:{policy_id}:{path}", errors)
         need(
             entry.get("state") == "POLICY_DECIDED_IMPLEMENTATION_NOT_AUTHORIZED",
@@ -71,7 +90,15 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
 
     root_policy_files = [
         path.relative_to(ctx.root).as_posix()
-        for path in (ctx.root / "docs").glob("*_POLICY_*.md")
+        for path in (ctx.root / "docs" / "policy").glob("*_POLICY_*.md")
         if path.is_file()
     ]
     need(not root_policy_files, f"POLICY_ROOT_FILES:{','.join(root_policy_files)}", errors)
+    need(not (ctx.root / "policy").exists(), "LEGACY_POLICY_ROOT_PRESENT", errors)
+    need(not (ctx.root / "schemas").exists(), "LEGACY_SCHEMA_ROOT_PRESENT", errors)
+
+    schema_roots = validate_index.get("schema_roots", {})
+    need(schema_roots.get("package") == "tools/policy_automatic_engine/schemas/package", "POLICY_PACKAGE_SCHEMA_ROOT", errors)
+    need(schema_roots.get("registry") == "tools/policy_automatic_engine/schemas/registry", "POLICY_REGISTRY_SCHEMA_ROOT", errors)
+    for schema_root in schema_roots.values():
+        need(isinstance(schema_root, str) and (ctx.root / schema_root).is_dir(), f"POLICY_SCHEMA_ROOT_MISSING:{schema_root}", errors)

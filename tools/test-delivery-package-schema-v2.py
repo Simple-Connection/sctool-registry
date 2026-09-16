@@ -16,7 +16,7 @@ spec.loader.exec_module(registry_validation)
 
 PACKAGE_ID = "example-tool"
 LABEL = "fixture"
-POLICY = registry_validation.load_json(ROOT / "policy" / "registry-policy.json")
+POLICY = registry_validation.load_json(ROOT / "docs" / "policy" / "registry" / "registry-policy.json")
 
 
 def valid_descriptor() -> dict[str, Any]:
@@ -154,7 +154,7 @@ def mismatched_access_contract(payload: dict[str, Any]) -> None:
 
 def main() -> None:
     registry_validation.Draft202012Validator.check_schema(
-        registry_validation.load_json(ROOT / "schemas" / "package.schema.json")
+        registry_validation.load_json(ROOT / "tools" / "policy_automatic_engine" / "schemas" / "package" / "package.schema.json")
     )
 
     expect_valid("valid github-release-asset descriptor", valid_descriptor())

@@ -37,8 +37,8 @@ components:
     manifests:
       - "packages/registry-client-sdk/package.json"
     analysis_inputs:
-      - "schemas/package.schema.json"
-      - "policy/registry-policy.json"
+      - "tools/policy_automatic_engine/schemas/package/package.schema.json"
+      - "docs/policy/registry/registry-policy.json"
       - "docs/REGISTRY_CONTRACT_V2.md"
       - "docs/REGISTRY_ACCESS_V1.md"
       - "docs/ARTIFACT_DELIVERY_V1.md"
@@ -83,8 +83,8 @@ components:
       - GOVERNANCE
       - DOCUMENTATION
     include:
-      - "schemas/*.schema.json"
-      - "policy/registry-policy.json"
+      - "tools/policy_automatic_engine/schemas/**"
+      - "docs/policy/registry/registry-policy.json"
       - "docs/REGISTRY_CONTRACT_V2.md"
       - "docs/REGISTRY_ACCESS_V1.md"
       - "docs/ARTIFACT_DELIVERY_V1.md"
@@ -158,7 +158,22 @@ components:
     include:
       - ".github/workflows/pages.yml"
       - ".github/workflows/sign-trust.yml"
-      - "tools/**"
+      - "tools/build-pages.mjs"
+      - "tools/generate-ed25519-keypair.mjs"
+      - "tools/generate-ptsip-artifact-evidence.py"
+      - "tools/generate-registry-distribution-handoff.mjs"
+      - "tools/lib/**"
+      - "tools/package.json"
+      - "tools/requirements.txt"
+      - "tools/sign-trust.mjs"
+      - "tools/test-delivery-package-schema-v2.py"
+      - "tools/test-registry-distribution-handoff.py"
+      - "tools/validate-pages.py"
+      - "tools/validate-registry-distribution-handoff.py"
+      - "tools/validate-registry.py"
+      - "tools/validate-update-candidate-evidence.py"
+      - "tools/verify-pages.mjs"
+      - "tools/verify-trust.mjs"
     purpose: signed_registry_snapshot_assembly_root_trust_signing_verification_key_bootstrap_and_exact_handoff_production
     shipped: false
     runtime_required: false
@@ -172,11 +187,11 @@ components:
       - "registry.json"
       - "packages/**"
       - "publishers/**"
-      - "schemas/**"
+      - "tools/policy_automatic_engine/schemas/**"
       - "policy/**"
       - "trust/**"
       - "docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml"
-      - "schemas/registry-distribution-handoff.schema.json"
+      - "tools/policy_automatic_engine/schemas/registry/registry-distribution-handoff.schema.json"
       - "ptsip.yaml"
 
   - id: product-documentation

@@ -7,8 +7,8 @@ on:
       - "dev/**"
     paths:
       - "packages/registry-client-sdk/**"
-      - "schemas/registry.schema.json"
-      - "schemas/registry-snapshot.schema.json"
+      - "tools/policy_automatic_engine/schemas/registry/registry.schema.json"
+      - "tools/policy_automatic_engine/schemas/registry/registry-snapshot.schema.json"
       - "registry.json"
       - "tools/build-pages.mjs"
       - "tools/validate-registry.py"
@@ -16,8 +16,8 @@ on:
   pull_request:
     paths:
       - "packages/registry-client-sdk/**"
-      - "schemas/registry.schema.json"
-      - "schemas/registry-snapshot.schema.json"
+      - "tools/policy_automatic_engine/schemas/registry/registry.schema.json"
+      - "tools/policy_automatic_engine/schemas/registry/registry-snapshot.schema.json"
       - "registry.json"
       - "tools/build-pages.mjs"
       - "tools/validate-registry.py"

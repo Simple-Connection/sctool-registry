@@ -1,20 +1,13 @@
-schema_version: "1.0"
+schema_version: "2.0"
 document_type: policy_index
 natural_language: FORBIDDEN
 entry_policy:
   active: INDEX_ROUTED
   historical: INDEX_ONLY
   expired: REMOVE
-active_root: docs/policy
+routes:
+  registry: docs/policy/registry/index.yaml
+  validate: docs/policy/validate/index.yaml
+  template: docs/policy/template/index.yaml
 historical_index: docs/index.yaml
-active:
-  REGISTRY_MARKETPLACE_HANDOFF_RECONCILIATION_POLICY_V1:
-    path: docs/policy/REGISTRY_MARKETPLACE_HANDOFF_RECONCILIATION_POLICY_V1.md
-    state: POLICY_DECIDED_IMPLEMENTATION_NOT_AUTHORIZED
-  REGISTRY_ARTIFACT_CUSTODY_CACHE_POLICY_V1:
-    path: docs/policy/REGISTRY_ARTIFACT_CUSTODY_CACHE_POLICY_V1.md
-    state: POLICY_DECIDED_IMPLEMENTATION_NOT_AUTHORIZED
-  REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1:
-    path: docs/policy/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md
-    state: POLICY_DECIDED_IMPLEMENTATION_NOT_AUTHORIZED
 expired: {}

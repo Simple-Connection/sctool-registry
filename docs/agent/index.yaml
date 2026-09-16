@@ -58,7 +58,7 @@ task_classes:
   POLICY:
     intent_ids: [POLICY_DECISION, POLICY_INDEX, POLICY_MIGRATION]
     routes: [docs/policy/index.yaml, docs/index.yaml]
-    selectors: ["docs/policy/**", "policy/**"]
+    selectors: ["docs/policy/**"]
     directives:
       authority_mode: INDEX_ROUTED
       constraints:
@@ -137,12 +137,12 @@ task_classes:
       commands: {}
   REGISTRY_CLIENT_SDK_ACCESS:
     intent_ids: [REGISTRY_ACCESS, CLIENT_AUTHORIZATION]
-    routes: [docs/REGISTRY_ACCESS_V1.md, docs/REGISTRY_CONTRACT_V2.md, policy/registry-policy.json]
+    routes: [docs/REGISTRY_ACCESS_V1.md, docs/REGISTRY_CONTRACT_V2.md, docs/policy/registry/registry-policy.json]
     selectors: [docs/REGISTRY_ACCESS_V1.md]
     directives: *registry_client_sdk_directives
   REGISTRY_CLIENT_SDK_DELIVERY:
     intent_ids: [ARTIFACT_DELIVERY, ARTIFACT_STAGING, ARTIFACT_INTEGRITY]
-    routes: [docs/ARTIFACT_DELIVERY_V1.md, docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml, policy/registry-policy.json]
+    routes: [docs/ARTIFACT_DELIVERY_V1.md, docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml, docs/policy/registry/registry-policy.json]
     selectors: [docs/ARTIFACT_DELIVERY_V1.md, docs/STAGED_ARTIFACT_LIFECYCLE_V1.yaml]
     directives: *registry_client_sdk_directives
   REGISTRY_CLIENT_SDK_UPDATE:
@@ -211,8 +211,8 @@ task_classes:
       commands: {}
   REGISTRY_CONTRACT:
     intent_ids: [REGISTRY_SCHEMA, REGISTRY_ADMISSION, REGISTRY_IMMUTABILITY]
-    routes: [docs/REGISTRY_CONTRACT_V2.md, policy/registry-policy.json, docs/policy/index.yaml]
-    selectors: [docs/REGISTRY_CONTRACT_V2.md, "schemas/*.schema.json", registry.json, "packages/*.json", "publishers/**"]
+    routes: [docs/REGISTRY_CONTRACT_V2.md, docs/policy/registry/registry-policy.json, docs/policy/index.yaml]
+    selectors: [docs/REGISTRY_CONTRACT_V2.md, "tools/policy_automatic_engine/schemas/**/*.schema.json", registry.json, "packages/*.json", "publishers/**"]
     directives:
       authority_mode: ACTIVE_CONTRACT_ONLY
       constraints:

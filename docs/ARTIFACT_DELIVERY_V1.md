@@ -2,12 +2,12 @@
 
 `artifact_delivery_contract_version: 1.0.0`
 
-> **Migration notice:** the current `registry-access-v1` private-access assumption is scheduled for replacement by the approved public-integrity model in `docs/policy/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md`. Existing v1 descriptor/access semantics remain implementation references until a separately approved successor schema and delivery contract are activated.
+> **Migration notice:** the current `registry-access-v1` private-access assumption is scheduled for replacement by the approved public-integrity model in `docs/policy/registry/REGISTRY_PUBLIC_ARTIFACT_INTEGRITY_POLICY_V1.md`. Existing v1 descriptor/access semantics remain implementation references until a separately approved successor schema and delivery contract are activated.
 
 `package_descriptor_schema_version: 2.0.0`
 
 This document defines the canonical backend-neutral artifact boundary used by SCTool Registry package descriptors.
-Registry Distribution `1.0.1` adopts this contract together with `schemas/package.schema.json` schema `2.0.0`.
+Registry Distribution `1.0.1` adopts this contract together with `tools/policy_automatic_engine/schemas/package/package.schema.json` schema `2.0.0`.
 
 The contract separates:
 
@@ -54,7 +54,7 @@ A package descriptor artifact uses this shape:
 }
 ```
 
-`schemas/package.schema.json` `2.0.0` machine-enforces this envelope.
+`tools/policy_automatic_engine/schemas/package/package.schema.json` `2.0.0` machine-enforces this envelope.
 
 ## 2. Identity and content authority
 
@@ -168,7 +168,7 @@ For Registry Distribution `1.0.1`, it must equal:
 Simple-Connection/sctool-artifacts
 ```
 
-The equality authority is `policy/registry-policy.json`.
+The equality authority is `docs/policy/registry/registry-policy.json`.
 A package descriptor cannot redirect itself to a publisher or third-party repository.
 
 ### `locator.assetId`
@@ -270,7 +270,7 @@ A disappeared or invalid locator is a delivery failure. It does not authorize re
 
 ## 8. Machine enforcement
 
-`schemas/package.schema.json` `2.0.0` enforces:
+`tools/policy_automatic_engine/schemas/package/package.schema.json` `2.0.0` enforces:
 
 ```text
 artifact requires target/content/delivery/publishedAt/contract/signature

@@ -1,0 +1,13 @@
+schema_version: "1.0"
+document_type: policy_validation_index
+natural_language: FORBIDDEN
+schema_roots:
+  package: tools/policy_automatic_engine/schemas/package
+  registry: tools/policy_automatic_engine/schemas/registry
+validators:
+  REGISTRY_JSON:
+    entrypoint: tools/validate-registry.py
+  PAGES_JSON:
+    entrypoint: tools/validate-pages.py
+  REGISTRY_DISTRIBUTION_HANDOFF:
+    entrypoint: tools/validate-registry-distribution-handoff.py
