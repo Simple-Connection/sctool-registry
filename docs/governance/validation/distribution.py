@@ -115,7 +115,11 @@ def validate_signed_distribution_handoff(ctx: ValidationContext, errors: list[st
 
     evidence = contract.get("evidence", {})
     schema_path = evidence.get("schema")
-    need(schema_path == "schemas/registry-distribution-handoff.schema.json", "SIGNED_HANDOFF_EVIDENCE_SCHEMA", errors)
+    need(
+        schema_path == "tools/policy_automatic_engine/schemas/registry/registry-distribution-handoff.schema.json",
+        "SIGNED_HANDOFF_EVIDENCE_SCHEMA",
+        errors,
+    )
     if isinstance(schema_path, str):
         need((ctx.root / schema_path).is_file(), "SIGNED_HANDOFF_EVIDENCE_SCHEMA_MISSING", errors)
     need(evidence.get("artifact_name_format") == "registry-signed-distribution-handoff-{revision}", "SIGNED_HANDOFF_EVIDENCE_ARTIFACT", errors)
