@@ -192,6 +192,7 @@ jobs:
             local_content_digest="$(package_content_digest "$tarball" "$local_extract" "$local_manifest")"
             # Package content identity is authoritative; tarball integrity remains diagnostic evidence only.
             echo "Immutable npm resolution authority: anonymous exact package content"
+            echo "Registry availability policy: bounded security-scan polling, then fail closed"
 
             fetch_remote_package() {
               rm -rf "$remote_dir" "$remote_extract"
