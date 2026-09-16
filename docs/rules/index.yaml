@@ -25,9 +25,18 @@ layout:
   migration_guard:
     forbidden_active_references:
       - "docs/governance/"
-      - "policy/"
-      - "schemas/"
-      - "governance/"
+      - "policy/registry-policy.json"
+      - "policy/**"
+      - "governance/**"
+      - "schemas/package.schema.json"
+      - "schemas/publisher.schema.json"
+      - "schemas/submission.schema.json"
+      - "schemas/policy.schema.json"
+      - "schemas/registry.schema.json"
+      - "schemas/registry-head.schema.json"
+      - "schemas/registry-snapshot.schema.json"
+      - "schemas/registry-distribution-handoff.schema.json"
+      - "schemas/trust.schema.json"
     exclude_prefixes:
       - "docs/ver"
     exclude_files:

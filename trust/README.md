@@ -69,7 +69,7 @@ The Distribution private secret is consumed by `.github/workflows/pages.yml`.
 
 ## Trust publication
 
-Prepare an unsigned trust document according to `schemas/trust.schema.json`, containing only `schemaVersion` and `signed` and omitting `proof`.
+Prepare an unsigned trust document according to `tools/policy_automatic_engine/schemas/registry/trust.schema.json`, containing only `schemaVersion` and `signed` and omitting `proof`.
 The descriptor may authorize one or more Distribution public keys and their lifecycle states.
 
 Encode the unsigned JSON for the manual workflow:

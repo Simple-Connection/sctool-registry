@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 import subprocess
 
 from .common import current_branch, need, scan_machine
@@ -349,11 +348,7 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
         except (OSError, UnicodeError):
             continue
         for token in forbidden_references:
-            if token in {"policy/", "schemas/", "governance/"}:
-                pattern = rf"(?<![A-Za-z0-9_./-]){re.escape(token)}"
-                matched = re.search(pattern, content) is not None
-            else:
-                matched = token in content
+            matched = token in content
             need(
                 not matched,
                 f"LEGACY_ACTIVE_REFERENCE:{normalized}:{token}",
