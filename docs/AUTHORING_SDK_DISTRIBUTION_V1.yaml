@@ -36,6 +36,11 @@ publication:
     symlink_target: REQUIRED
     remote_retrieval: ANONYMOUS
     mismatch: FAIL_CLOSED
+    existing_version_resolution:
+      primary: ANONYMOUS_CONTENT_FETCH
+      metadata_authority: FORBIDDEN
+      publish_conflict_recovery: EXACT_CONTENT_VERIFY
+      publish_conflict_result: EXISTING_VERIFIED
   authentication:
     preferred: NPM_TRUSTED_PUBLISHING_OIDC
     bootstrap: NPM_TOKEN
