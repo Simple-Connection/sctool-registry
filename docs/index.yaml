@@ -48,6 +48,10 @@ versions:
       document_class: CONTRACT
       entry_mode: INDEX_ONLY
       path: docs/ver1.0.1/history/REGISTRY_CONTRACT_V1.md
+    - id: POLICY_SCHEMA_V1
+      document_class: SCHEMA
+      entry_mode: INDEX_ONLY
+      path: docs/ver1.0.1/history/schemas/policy-v1.schema.json
   1.0.2:
     state: HISTORICAL_COMPLETE
     branch: dev/1.0.2
@@ -118,6 +122,16 @@ versions:
       document: docs/ver1.0.3/session_document/ver.1.0.3_P3_product_package_report_routing.yaml
       planning_state: CONCRETIZED
       planning_document: docs/ver1.0.3/session_document/ver.1.0.3_P3_product_package_report_routing_work_plan.yaml
+    history_root: docs/ver1.0.3/history
+    history:
+    - id: P2_CLOSEOUT_TOOL
+      document_class: TOOLING
+      entry_mode: INDEX_ONLY
+      path: docs/ver1.0.3/history/tooling/p2-closeout.py
+    - id: P1_TASK_CONTRACT_TEST
+      document_class: TOOLING
+      entry_mode: INDEX_ONLY
+      path: docs/ver1.0.3/history/tooling/test-task-contract.py
 templates:
   improvement_plan: docs/template/improvement_plan.yaml
   session_essential: docs/template/session_document_template/session_document_essential.yaml

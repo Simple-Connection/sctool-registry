@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - "dev/1.0.3"
+      - "dev/**"
     paths:
       - "packages/registry-client-sdk/**"
       - "schemas/registry.schema.json"
@@ -12,8 +12,6 @@ on:
       - "registry.json"
       - "tools/build-pages.mjs"
       - "tools/validate-registry.py"
-      - "docs/governance/p2-closeout.py"
-      - "docs/ver1.0.3/evidence/P2_product_handoff_observation.yaml"
       - ".github/workflows/registry-client-sdk-regression.yml"
   pull_request:
     paths:
@@ -23,13 +21,10 @@ on:
       - "registry.json"
       - "tools/build-pages.mjs"
       - "tools/validate-registry.py"
-      - "docs/governance/p2-closeout.py"
-      - "docs/ver1.0.3/evidence/P2_product_handoff_observation.yaml"
       - ".github/workflows/registry-client-sdk-regression.yml"
 
 permissions:
-  contents: write
-  actions: read
+  contents: read
 
 concurrency:
   group: registry-client-sdk-regression-${{ github.ref }}
@@ -57,115 +52,3 @@ jobs:
       - name: Verify Registry Client SDK package pack
         working-directory: packages/registry-client-sdk
         run: npm pack --dry-run --json
-
-  closeout:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev/1.0.3'
-    needs: validate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout exact candidate
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-
-      - name: Install machine closeout dependencies
-        run: |
-          python -m pip install -r docs/governance/requirements.txt
-          python -m pip install "PTSIP==0.3.8a1"
-
-      - name: Validate immutable Product handoff observation
-        run: |
-          python - <<'PY'
-          import os
-          import re
-          import yaml
-          from pathlib import Path
-
-          path = Path("docs/ver1.0.3/evidence/P2_product_handoff_observation.yaml")
-          data = yaml.safe_load(path.read_text(encoding="utf-8"))
-          obs = data["observation"]
-          assert data["document_type"] == "cross_repository_observation"
-          assert obs["repository"] == "Simple-Connection/SC_Linked_App"
-          assert obs["branch"] == "dev/2.2.4"
-          assert obs["access"] == "READ_ONLY"
-          assert obs["mutation"] == "FORBIDDEN"
-          sha = str(obs["observed_sha"]).lower()
-          assert re.fullmatch(r"[0-9a-f]{40}", sha)
-          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as output:
-              output.write(f"PRODUCT_HANDOFF_SHA={sha}\n")
-          print(f"Product handoff observation: {sha}")
-          PY
-
-      - name: Generate exact P2 closeout and handoff
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: >-
-          python docs/governance/p2-closeout.py --phase p2
-          --candidate-sha "$GITHUB_SHA"
-          --regression-run-id "$GITHUB_RUN_ID"
-          --product-sha "$PRODUCT_HANDOFF_SHA"
-
-      - name: Validate generated P2 machine closeout
-        run: |
-          python docs/governance/validate.py --root .
-          ptsip validate .
-
-      - name: Commit local P2 closeout
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/index.yaml \
-            docs/ver1.0.3/1.0.3_Improvement_plan.yaml \
-            docs/ver1.0.3/session_document/ver.1.0.3_P2_registry_verified_discovery_profile_consumer.yaml \
-            docs/ver1.0.3/session_document/ver.1.0.3_P2_registry_verified_discovery_profile_consumer_work_plan.yaml \
-            docs/ver1.0.3/evidence/P2_registry_verified_discovery_profile_consumer_handoff.yaml
-          if git diff --cached --quiet; then
-            echo "P2 closeout produced no materialized changes" >&2
-            exit 1
-          fi
-          git commit -m "docs: auto-close P2 exact discovery handoff"
-          echo "P2_CLOSEOUT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
-
-      - name: Validate exact P2 closeout revision
-        run: |
-          python docs/governance/validate.py --root .
-          ptsip validate .
-
-      - name: Clean generated validation cache
-        run: |
-          git diff --exit-code
-          git diff --cached --exit-code
-          git clean -fdx
-
-      - name: Materialize approved P3 start
-        run: python docs/governance/p2-closeout.py --phase p3 --p2-closeout-sha "$P2_CLOSEOUT_SHA"
-
-      - name: Validate generated P3 machine session
-        run: |
-          python docs/governance/validate.py --root .
-          ptsip validate .
-
-      - name: Commit local P3 start
-        run: |
-          git add docs/index.yaml \
-            docs/ver1.0.3/1.0.3_Improvement_plan.yaml \
-            docs/ver1.0.3/session_document/ver.1.0.3_P3_product_package_report_routing.yaml \
-            docs/ver1.0.3/session_document/ver.1.0.3_P3_product_package_report_routing_work_plan.yaml
-          if git diff --cached --quiet; then
-            echo "P3 start produced no materialized changes" >&2
-            exit 1
-          fi
-          git commit -m "docs: start P3 product report routing"
-          echo "P3_START_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
-
-      - name: Validate exact P3 start revision
-        run: |
-          python docs/governance/validate.py --root .
-          ptsip validate .
-
-      - name: Push atomic P2 closeout and P3 start
-        run: |
-          git push origin HEAD:refs/heads/dev/1.0.3
-          echo "P2 closeout: $P2_CLOSEOUT_SHA"
-          echo "P3 start: $P3_START_COMMIT"

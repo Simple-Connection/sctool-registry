@@ -66,10 +66,6 @@ jobs:
         run: |
           "%SCTOOL_PYTHON%" docs/governance/test-session-state-sync.py
 
-      - name: Test source task binding
-        run: |
-          "%SCTOOL_PYTHON%" docs/governance/test-task-contract.py
-
       - name: Verify committed session routing projection
         run: |
           "%SCTOOL_PYTHON%" docs/governance/validate.py --root . --sync-session-states
