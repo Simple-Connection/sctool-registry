@@ -45,7 +45,7 @@ jobs:
       - name: Validate Registry Client SDK
         run: npm --prefix packages/registry-client-sdk test
 
-      - name: Pack, publish or verify immutable package, and bind evidence
+      - name: Pack, publish or verify exact package content, and bind evidence
         shell: bash
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -53,97 +53,222 @@ jobs:
           set -euo pipefail
           cd packages/registry-client-sdk
 
+          package_content_digest() {
+            archive="$1"
+            extract_root="$2"
+            manifest_path="$3"
+
+            rm -rf "$extract_root"
+            mkdir -p "$extract_root"
+            tar -xzf "$archive" -C "$extract_root"
+
+            package_root="$extract_root/package"
+            if [[ ! -d "$package_root" ]]; then
+              echo "Packed artifact is missing the package/ root: $archive" >&2
+              return 1
+            fi
+
+            node - "$package_root" "$manifest_path" <<'NODE'
+          const crypto = require("node:crypto");
+          const fs = require("node:fs");
+          const path = require("node:path");
+
+          const root = process.argv[2];
+          const manifestPath = process.argv[3];
+          const entries = [];
+
+          function modeOf(stat) {
+            return (stat.mode & 0o777).toString(8).padStart(3, "0");
+          }
+
+          function visit(relativePath) {
+            const absolutePath = path.join(root, relativePath);
+            const stat = fs.lstatSync(absolutePath);
+            const canonicalPath = relativePath.split(path.sep).join("/");
+
+            if (stat.isDirectory()) {
+              for (const child of fs.readdirSync(absolutePath).sort()) {
+                visit(path.join(relativePath, child));
+              }
+              return;
+            }
+
+            if (stat.isSymbolicLink()) {
+              entries.push({
+                path: canonicalPath,
+                type: "symlink",
+                mode: modeOf(stat),
+                target: fs.readlinkSync(absolutePath),
+              });
+              return;
+            }
+
+            if (!stat.isFile()) {
+              throw new Error(`Unsupported package entry type: ${canonicalPath}`);
+            }
+
+            const bytes = fs.readFileSync(absolutePath);
+            entries.push({
+              path: canonicalPath,
+              type: "file",
+              mode: modeOf(stat),
+              size: bytes.length,
+              sha256: crypto.createHash("sha256").update(bytes).digest("hex"),
+            });
+          }
+
+          for (const child of fs.readdirSync(root).sort()) {
+            visit(child);
+          }
+
+          const canonical = JSON.stringify(entries);
+          const digest = crypto.createHash("sha256").update(canonical).digest("hex");
+          const manifest = {
+            format: "npm-package-content-manifest/v1",
+            algorithm: "sha256",
+            digest,
+            entries,
+          };
+          fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
+          process.stdout.write(digest);
+          NODE
+          }
+
           name="$(node -p "require('./package.json').name")"
           version="$(node -p "require('./package.json').version")"
           pack_json="$RUNNER_TEMP/registry-client-sdk-pack.json"
           evidence="$RUNNER_TEMP/registry-client-sdk-package-evidence.json"
+          local_manifest="$RUNNER_TEMP/registry-client-sdk-local-content-manifest.json"
+          remote_manifest="$RUNNER_TEMP/registry-client-sdk-remote-content-manifest.json"
+          local_extract="$RUNNER_TEMP/registry-client-sdk-local-extract"
+          remote_extract="$RUNNER_TEMP/registry-client-sdk-remote-extract"
+          remote_dir="$RUNNER_TEMP/registry-client-sdk-remote"
 
           npm pack --json > "$pack_json"
           tarball="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(d[0].filename)" "$pack_json")"
           local_integrity="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(d[0].integrity)" "$pack_json")"
           local_shasum="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(d[0].shasum)" "$pack_json")"
           local_sha256="$(sha256sum "$tarball" | awk '{print $1}')"
+          local_content_digest="$(package_content_digest "$tarball" "$local_extract" "$local_manifest")"
+          echo "Registry Client package identity authority: anonymous exact package content"
+          echo "Registry availability policy: bounded security-scan polling, then fail closed"
 
-          set +e
-          remote_integrity="$(npm view "$name@$version" dist.integrity --registry=https://registry.npmjs.org 2>/dev/null)"
-          view_status=$?
-          set -e
+          fetch_remote_package() {
+            rm -rf "$remote_dir" "$remote_extract"
+            mkdir -p "$remote_dir"
+            remote_pack_json="$RUNNER_TEMP/registry-client-sdk-remote-pack.json"
+            remote_pack_stderr="$RUNNER_TEMP/registry-client-sdk-remote-pack.stderr"
 
-          if [[ $view_status -eq 0 && -n "$remote_integrity" ]]; then
-            remote_tarball="$(npm view "$name@$version" dist.tarball --registry=https://registry.npmjs.org)"
-            if [[ "$remote_integrity" != "$local_integrity" ]]; then
-              echo "Existing package integrity does not match local exact source package." >&2
+            pushd "$remote_dir" >/dev/null
+            set +e
+            env -u NODE_AUTH_TOKEN NPM_CONFIG_USERCONFIG=/dev/null \
+              npm pack "$name@$version" --json --registry=https://registry.npmjs.org > "$remote_pack_json" 2> "$remote_pack_stderr"
+            remote_pack_status=$?
+            set -e
+            if [[ $remote_pack_status -ne 0 ]]; then
+              popd >/dev/null
+              return 1
+            fi
+
+            remote_tarball_name="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(d[0].filename)" "$remote_pack_json")"
+            remote_integrity="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(d[0].integrity||'')" "$remote_pack_json")"
+            remote_shasum="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(d[0].shasum||'')" "$remote_pack_json")"
+            remote_tarball_path="$remote_dir/$remote_tarball_name"
+            remote_sha256="$(sha256sum "$remote_tarball_path" | awk '{print $1}')"
+            remote_content_digest="$(package_content_digest "$remote_tarball_path" "$remote_extract" "$remote_manifest")"
+            popd >/dev/null
+            return 0
+          }
+
+          fetch_remote_package_with_retry() {
+            max_attempts="$1"
+            delay_seconds="$2"
+            for attempt in $(seq 1 "$max_attempts"); do
+              if fetch_remote_package; then
+                return 0
+              fi
+              if [[ "$attempt" -lt "$max_attempts" ]]; then
+                echo "Anonymous npm package retrieval not ready yet: $name@$version (attempt $attempt/$max_attempts)"
+                sleep "$delay_seconds"
+              fi
+            done
+            return 1
+          }
+
+          if fetch_remote_package_with_retry 3 2; then
+            if [[ "$remote_content_digest" != "$local_content_digest" ]]; then
+              echo "Existing package content does not match canonical source: $name@$version" >&2
+              echo "local_content_sha256=$local_content_digest" >&2
+              echo "remote_content_sha256=$remote_content_digest" >&2
               exit 1
             fi
             publish_status="EXISTING_VERIFIED"
+            resolution_status="ANONYMOUS_CONTENT_FETCH"
           else
-            set +e
-            npm view "$name" name --registry=https://registry.npmjs.org >/dev/null 2>&1
-            package_exists_status=$?
-            set -e
-            if [[ $package_exists_status -ne 0 && -z "${NODE_AUTH_TOKEN:-}" ]]; then
-              echo "NPMJS_BOOTSTRAP_AUTH_REQUIRED: first publication requires repository secret NPM_TOKEN with npm scope publish authority." >&2
+            if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+              echo "NPMJS_BOOTSTRAP_AUTH_REQUIRED: first publication requires repository secret NPM_TOKEN with npm scope publish authority for $name." >&2
               echo "After first publication, configure npm trusted publishing for publish-registry-client-sdk.yml and remove the long-lived publish token." >&2
               exit 1
             fi
-            npm publish "$tarball" --registry=https://registry.npmjs.org --access public
-            publish_status="PUBLISHED"
-            remote_integrity=""
-            for attempt in 1 2 3 4 5; do
-              set +e
-              remote_integrity="$(npm view "$name@$version" dist.integrity --registry=https://registry.npmjs.org 2>/dev/null)"
-              status=$?
-              set -e
-              if [[ $status -eq 0 && -n "$remote_integrity" ]]; then
-                break
+
+            publish_log="$RUNNER_TEMP/registry-client-sdk-publish.log"
+            set +e
+            npm publish "$tarball" --registry=https://registry.npmjs.org --access public 2>&1 | tee "$publish_log"
+            publish_exit=${PIPESTATUS[0]}
+            set -e
+
+            if [[ $publish_exit -eq 0 ]]; then
+              publish_status="PUBLISHED"
+              resolution_status="PUBLISHED_THEN_VERIFIED"
+            elif grep -Eiq 'cannot publish over (the )?previously published versions|previously published version|EPUBLISHCONFLICT' "$publish_log"; then
+              echo "Immutable version publish conflict detected; recovering by exact anonymous content verification: $name@$version"
+              publish_status="EXISTING_VERIFIED"
+              resolution_status="PUBLISH_CONFLICT_RECOVERED"
+            else
+              echo "npm publish failed for a reason other than immutable-version conflict: $name@$version" >&2
+              exit "$publish_exit"
+            fi
+
+            # npm publish-time security scanning can delay anonymous installability.
+            if ! fetch_remote_package_with_retry 40 30; then
+              echo "Unable to retrieve npm package anonymously after bounded registry-security-scan wait: $name@$version" >&2
+              if [[ -s "${remote_pack_stderr:-}" ]]; then
+                echo "Last anonymous npm retrieval error:" >&2
+                tail -n 40 "$remote_pack_stderr" >&2
               fi
-              sleep 2
-            done
-            if [[ "$remote_integrity" != "$local_integrity" ]]; then
-              echo "Published package remote integrity did not match local pack integrity." >&2
               exit 1
             fi
-            remote_tarball="$(npm view "$name@$version" dist.tarball --registry=https://registry.npmjs.org)"
+
+            if [[ "$remote_content_digest" != "$local_content_digest" ]]; then
+              echo "Remote package content mismatch after publish/conflict resolution: $name@$version" >&2
+              echo "local_content_sha256=$local_content_digest" >&2
+              echo "remote_content_sha256=$remote_content_digest" >&2
+              exit 1
+            fi
           fi
 
-          export EVIDENCE_PATH="$evidence"
-          export PACKAGE_NAME="$name"
-          export PACKAGE_VERSION="$version"
-          export LOCAL_INTEGRITY="$local_integrity"
-          export REMOTE_INTEGRITY="$remote_integrity"
-          export REMOTE_TARBALL="$remote_tarball"
-          export LOCAL_SHASUM="$local_shasum"
-          export LOCAL_SHA256="$local_sha256"
-          export PUBLISH_STATUS="$publish_status"
-          export SOURCE_REPOSITORY="$GITHUB_REPOSITORY"
-          export SOURCE_REVISION="$GITHUB_SHA"
-          node <<'NODE'
-          const fs = require("fs");
-          const evidence = {
-            format: "registry-client-sdk-package-evidence/v1",
-            package: {
-              name: process.env.PACKAGE_NAME,
-              version: process.env.PACKAGE_VERSION,
-              registry: "https://registry.npmjs.org",
-            },
-            source: {
-              repository: process.env.SOURCE_REPOSITORY,
-              revision: process.env.SOURCE_REVISION,
-            },
-            integrity: {
-              npm: process.env.LOCAL_INTEGRITY,
-              remoteNpm: process.env.REMOTE_INTEGRITY,
-              remoteTarball: process.env.REMOTE_TARBALL,
-              sha1: process.env.LOCAL_SHASUM,
-              sha256: process.env.LOCAL_SHA256,
-            },
-            publication: {
-              status: process.env.PUBLISH_STATUS,
-              immutableVersionVerified: true,
-            },
-          };
-          fs.writeFileSync(process.env.EVIDENCE_PATH, JSON.stringify(evidence, null, 2) + "\n");
-          NODE
+          remote_json="$(env -u NODE_AUTH_TOKEN NPM_CONFIG_USERCONFIG=/dev/null npm view "$name@$version" --json --registry=https://registry.npmjs.org)"
+          remote_registry_integrity="$(node -e "const d=JSON.parse(process.argv[1]);process.stdout.write(d.dist?.integrity||'')" "$remote_json")"
+          remote_tarball_url="$(node -e "const d=JSON.parse(process.argv[1]);process.stdout.write(d.dist?.tarball||'')" "$remote_json")"
+
+          SOURCE_REPOSITORY="$GITHUB_REPOSITORY" \
+          SOURCE_REVISION="$GITHUB_SHA" \
+          PACKAGE_NAME="$name" \
+          PACKAGE_VERSION="$version" \
+          LOCAL_INTEGRITY="$local_integrity" \
+          REMOTE_PACK_INTEGRITY="$remote_integrity" \
+          REMOTE_REGISTRY_INTEGRITY="$remote_registry_integrity" \
+          REMOTE_TARBALL_URL="$remote_tarball_url" \
+          LOCAL_SHASUM="$local_shasum" \
+          REMOTE_SHASUM="$remote_shasum" \
+          LOCAL_SHA256="$local_sha256" \
+          REMOTE_SHA256="$remote_sha256" \
+          LOCAL_CONTENT_DIGEST="$local_content_digest" \
+          REMOTE_CONTENT_DIGEST="$remote_content_digest" \
+          PUBLISH_STATUS="$publish_status" \
+          RESOLUTION_STATUS="$resolution_status" \
+          EVIDENCE_PATH="$evidence" \
+          node -e 'const fs=require("fs");const e={format:"registry-client-sdk-package-evidence/v2",package:{name:process.env.PACKAGE_NAME,version:process.env.PACKAGE_VERSION,registry:"https://registry.npmjs.org",tarball:process.env.REMOTE_TARBALL_URL},source:{repository:process.env.SOURCE_REPOSITORY,revision:process.env.SOURCE_REVISION},verification:{method:"EXACT_PACKAGE_CONTENT_SHA256_V1",failClosed:true,anonymousRemoteRetrieval:true,contentExact:process.env.LOCAL_CONTENT_DIGEST===process.env.REMOTE_CONTENT_DIGEST},content:{localSha256:process.env.LOCAL_CONTENT_DIGEST,remoteSha256:process.env.REMOTE_CONTENT_DIGEST},tarball:{localNpmIntegrity:process.env.LOCAL_INTEGRITY,remotePackNpmIntegrity:process.env.REMOTE_PACK_INTEGRITY,remoteRegistryNpmIntegrity:process.env.REMOTE_REGISTRY_INTEGRITY,localSha1:process.env.LOCAL_SHASUM,remoteSha1:process.env.REMOTE_SHASUM,localSha256:process.env.LOCAL_SHA256,remoteSha256:process.env.REMOTE_SHA256},publication:{status:process.env.PUBLISH_STATUS,resolution:process.env.RESOLUTION_STATUS,immutableVersionVerified:true}};fs.writeFileSync(process.env.EVIDENCE_PATH,JSON.stringify(e,null,2)+"\n")'
           cat "$evidence"
 
       - name: Verify anonymous public initial-install candidate export
@@ -177,6 +302,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: registry-client-sdk-package-evidence-${{ github.sha }}
-          path: ${{ runner.temp }}/registry-client-sdk-package-evidence.json
+          path: |
+            ${{ runner.temp }}/registry-client-sdk-package-evidence.json
+            ${{ runner.temp }}/registry-client-sdk-*-content-manifest.json
           if-no-files-found: error
           retention-days: 30
