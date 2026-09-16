@@ -151,6 +151,7 @@ jobs:
           local_sha256="$(sha256sum "$tarball" | awk '{print $1}')"
           local_content_digest="$(package_content_digest "$tarball" "$local_extract" "$local_manifest")"
           echo "Registry Client package identity authority: anonymous exact package content"
+          echo "Publication target: @simple-connection/sctool-registry-client-sdk@0.2.2"
           echo "Registry availability policy: bounded security-scan polling, then fail closed"
 
           fetch_remote_package() {
