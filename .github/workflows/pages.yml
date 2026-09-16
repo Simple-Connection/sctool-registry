@@ -61,14 +61,14 @@ jobs:
       - name: Install PTSIP and delivery validation dependencies
         run: |
           python -m pip install "PTSIP==0.3.8a1"
-          python -m pip install -r docs/governance/requirements.txt
+          python -m pip install -r tools/policy_automatic_engine/governance/requirements.txt
           python -m pip install -r tools/requirements.txt
 
       - name: Validate development governance
-        run: python docs/governance/validate.py --root .
+        run: python tools/policy_automatic_engine/governance/validate.py --root .
 
       - name: Test machine agent entry routing
-        run: python docs/governance/test-agent-entry.py
+        run: python tools/policy_automatic_engine/governance/tests/test-agent-entry.py
 
       - name: Validate Registry Client SDK boundary
         run: npm --prefix packages/registry-client-sdk test
@@ -124,7 +124,7 @@ jobs:
             --component registry-contracts \
             --component product-documentation
 
-          python docs/governance/generate-node-platform-evidence.py \
+          python tools/policy_automatic_engine/governance/generate-node-platform-evidence.py \
             --validation "$validation" \
             --out "$dependency_evidence" \
             --repository "$GITHUB_REPOSITORY" \

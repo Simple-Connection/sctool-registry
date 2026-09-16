@@ -10,7 +10,7 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
 
     need(index.get("schema_version") == "2.0", "AGENT_INDEX_SCHEMA", errors)
     need(index.get("document_type") == "agent_entry_index", "AGENT_INDEX_TYPE", errors)
-    need(index.get("resolver") == "docs/governance/agent-entry.py", "AGENT_RESOLVER", errors)
+    need(index.get("resolver") == "tools/policy_automatic_engine/governance/agent-entry.py", "AGENT_RESOLVER", errors)
     need(index.get("history_default_entry") == "FORBIDDEN", "AGENT_HISTORY_DEFAULT", errors)
     need(index.get("direct_index_read") == "NOT_REQUIRED", "AGENT_DIRECT_INDEX_READ", errors)
 

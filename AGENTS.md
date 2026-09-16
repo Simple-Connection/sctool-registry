@@ -7,14 +7,14 @@ Do not preload repository documentation or read `docs/agent/index.yaml` directly
 Use the resolver:
 
 ```text
-python docs/governance/agent-entry.py --path <REPOSITORY_PATH>
-python docs/governance/agent-entry.py --task-class <TASK_CLASS>
+python tools/policy_automatic_engine/governance/agent-entry.py --path <REPOSITORY_PATH>
+python tools/policy_automatic_engine/governance/agent-entry.py --task-class <TASK_CLASS>
 ```
 
 If classification is unclear:
 
 ```text
-python docs/governance/agent-entry.py --catalog
+python tools/policy_automatic_engine/governance/agent-entry.py --catalog
 ```
 
 The resolver parses the machine table of contents and returns selected machine directives plus the minimal `read_set`.
@@ -33,7 +33,7 @@ Read only `read_set`. Expand it only when a selected authority explicitly requir
 ## Governance gate
 
 ```text
-python docs/governance/validate.py --root .
-python docs/governance/test-agent-entry.py
+python tools/policy_automatic_engine/governance/validate.py --root .
+python tools/policy_automatic_engine/governance/tests/test-agent-entry.py
 ptsip validate .
 ```

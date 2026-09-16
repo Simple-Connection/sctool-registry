@@ -209,6 +209,25 @@ components:
     release_owner: registry
     compatibility_owner: registry
 
+  - id: policy-automatic-engine
+    classification: DEVELOPMENT_TOOLING
+    roles:
+      - CONFIGURATION
+      - GOVERNANCE
+      - IMPLEMENTATION
+      - VERIFICATION
+      - AUTOMATION
+    include:
+      - "tools/policy_automatic_engine/governance/**"
+    purpose: policy_machine_routing_repository_validation_and_governance_execution_engine
+    shipped: false
+    runtime_required: false
+    executable: true
+    release_owner: development-tooling
+    compatibility_owner: development-tooling
+    manifests:
+      - "tools/policy_automatic_engine/governance/requirements.txt"
+
   - id: repository-governance
     classification: DEVELOPMENT_TOOLING
     roles:
@@ -234,7 +253,6 @@ components:
       - "docs/rules/**"
       - "docs/template/**"
       - "docs/responsibility/**"
-      - "docs/governance/**"
       - "docs/ver*/**"
       - ".gitignore"
       - ".vscode/settings.json"
@@ -244,8 +262,6 @@ components:
     executable: true
     release_owner: development-tooling
     compatibility_owner: development-tooling
-    manifests:
-      - "docs/governance/requirements.txt"
 
 relationships:
   - id: registry-contracts-specify-catalog
@@ -322,6 +338,16 @@ relationships:
     from: product-documentation
     to: repository-tool-authoring-sdk
     type: DOCUMENTS
+
+  - id: repository-governance-governs-policy-automatic-engine
+    from: repository-governance
+    to: policy-automatic-engine
+    type: GOVERNS
+
+  - id: policy-automatic-engine-reads-repository-governance
+    from: policy-automatic-engine
+    to: repository-governance
+    type: READS
 
   - id: repository-governance-governs-catalog
     from: repository-governance

@@ -62,7 +62,7 @@ jobs:
             --component registry-contracts \
             --component product-documentation
 
-          python docs/governance/generate-node-platform-evidence.py \
+          python tools/policy_automatic_engine/governance/generate-node-platform-evidence.py \
             --validation "$validation" \
             --out "$dependency_evidence" \
             --repository "$GITHUB_REPOSITORY" \

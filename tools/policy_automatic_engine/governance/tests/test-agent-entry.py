@@ -6,8 +6,8 @@ from pathlib import Path
 import subprocess
 import sys
 
-ROOT = Path(__file__).resolve().parents[2]
-RESOLVER = ROOT / "docs" / "governance" / "agent-entry.py"
+ROOT = Path(__file__).resolve().parents[4]
+RESOLVER = ROOT / "tools" / "policy_automatic_engine" / "governance" / "agent-entry.py"
 
 
 def run(*args: str) -> dict:
@@ -22,10 +22,10 @@ def main() -> int:
 
     governance = run("--task-class", "GOVERNANCE")
     assert governance["commands"]["GOVERNANCE_VALIDATE"]["argv"] == [
-        "python", "docs/governance/validate.py", "--root", ".",
+        "python", "tools/policy_automatic_engine/governance/validate.py", "--root", ".",
     ]
     assert governance["commands"]["AGENT_ENTRY_TEST"]["argv"] == [
-        "python", "docs/governance/test-agent-entry.py",
+        "python", "tools/policy_automatic_engine/governance/tests/test-agent-entry.py",
     ]
 
     ptsip = run("--task-class", "PTSIP")

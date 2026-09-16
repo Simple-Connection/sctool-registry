@@ -1,7 +1,7 @@
 schema_version: "2.0"
 document_type: agent_entry_index
 natural_language: FORBIDDEN
-resolver: docs/governance/agent-entry.py
+resolver: tools/policy_automatic_engine/governance/agent-entry.py
 default_task_class: REPOSITORY_STATUS
 history_default_entry: FORBIDDEN
 direct_index_read: NOT_REQUIRED
@@ -38,7 +38,7 @@ task_classes:
   GOVERNANCE:
     intent_ids: [GOVERNANCE_VALIDATION, AGENT_ENTRY_ROUTING, MACHINE_DOCUMENT_ROUTING]
     routes: [docs/index.yaml, docs/rules/index.yaml, docs/template/index.yaml, docs/responsibility/index.yaml, docs/agent/index.yaml]
-    selectors: [AGENTS.md, "docs/agent/**", "docs/governance/**"]
+    selectors: [AGENTS.md, "docs/agent/**", "tools/policy_automatic_engine/governance/**"]
     directives:
       authority_mode: MACHINE_VALIDATED
       constraints:
@@ -51,10 +51,10 @@ task_classes:
       commands:
         GOVERNANCE_VALIDATE:
           phase: VALIDATE
-          argv: [python, docs/governance/validate.py, --root, .]
+          argv: [python, tools/policy_automatic_engine/governance/validate.py, --root, .]
         AGENT_ENTRY_TEST:
           phase: VALIDATE
-          argv: [python, docs/governance/test-agent-entry.py]
+          argv: [python, tools/policy_automatic_engine/governance/tests/test-agent-entry.py]
   POLICY:
     intent_ids: [POLICY_DECISION, POLICY_INDEX, POLICY_MIGRATION]
     routes: [docs/policy/index.yaml, docs/index.yaml]
