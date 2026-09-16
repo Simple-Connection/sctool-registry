@@ -233,16 +233,9 @@ jobs:
               return 1
             }
 
-            set +e
-            remote_json="$(env -u NODE_AUTH_TOKEN NPM_CONFIG_USERCONFIG=/dev/null npm view "$name@$version" --json --registry=https://registry.npmjs.org 2>/dev/null)"
-            view_status=$?
-            set -e
-
-            if [[ $view_status -eq 0 && -n "$remote_json" ]]; then
-              if ! fetch_remote_package_with_retry 20 3; then
-                echo "Existing package metadata resolved but anonymous package retrieval failed after retries: $name@$version" >&2
-                exit 1
-              fi
+            # Resolve immutable versions by anonymously fetching package content first.
+            # npm metadata freshness is not authoritative for existence.
+            if fetch_remote_package_with_retry 3 2; then
               if [[ "$remote_content_digest" != "$local_content_digest" ]]; then
                 echo "Existing package content does not match canonical source: $name@$version" >&2
                 echo "local_content_sha256=$local_content_digest" >&2
@@ -250,27 +243,37 @@ jobs:
                 exit 1
               fi
               publish_status="EXISTING_VERIFIED"
+              resolution_status="ANONYMOUS_CONTENT_FETCH"
             else
-              set +e
-              env -u NODE_AUTH_TOKEN NPM_CONFIG_USERCONFIG=/dev/null \
-                npm view "$name" name --registry=https://registry.npmjs.org >/dev/null 2>&1
-              package_exists_status=$?
-              set -e
-              if [[ $package_exists_status -ne 0 && -z "${NODE_AUTH_TOKEN:-}" ]]; then
-                echo "NPMJS_BOOTSTRAP_AUTH_REQUIRED: first publication requires repository secret NPM_TOKEN with npm scope publish authority for $name." >&2
-                echo "After first publication, configure npm trusted publishing for publish-authoring-sdks.yml and remove the long-lived publish token." >&2
-                exit 1
+              if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+                echo "NPMJS_BOOTSTRAP_AUTH_REQUIRED: publication may require repository secret NPM_TOKEN until npm trusted publishing is configured for $name." >&2
               fi
-              npm publish "$tarball" --registry=https://registry.npmjs.org --access public
-              publish_status="PUBLISHED"
+
+              publish_log="$RUNNER_TEMP/${evidence_name}-publish.log"
+              set +e
+              npm publish "$tarball" --registry=https://registry.npmjs.org --access public 2>&1 | tee "$publish_log"
+              publish_exit=${PIPESTATUS[0]}
+              set -e
+
+              if [[ $publish_exit -eq 0 ]]; then
+                publish_status="PUBLISHED"
+                resolution_status="PUBLISHED_THEN_VERIFIED"
+              elif grep -Eiq 'cannot publish over (the )?previously published versions|previously published version|EPUBLISHCONFLICT' "$publish_log"; then
+                echo "Immutable version publish conflict detected; recovering by exact anonymous content verification: $name@$version"
+                publish_status="EXISTING_VERIFIED"
+                resolution_status="PUBLISH_CONFLICT_RECOVERED"
+              else
+                echo "npm publish failed for a reason other than immutable-version conflict: $name@$version" >&2
+                exit "$publish_exit"
+              fi
 
               if ! fetch_remote_package_with_retry 20 3; then
-                echo "Unable to retrieve published package anonymously after retries: $name@$version" >&2
+                echo "Unable to retrieve npm package anonymously after publish/conflict resolution retries: $name@$version" >&2
                 exit 1
               fi
 
               if [[ "$remote_content_digest" != "$local_content_digest" ]]; then
-                echo "Remote package content mismatch after publication: $name@$version" >&2
+                echo "Remote package content mismatch after publish/conflict resolution: $name@$version" >&2
                 echo "local_content_sha256=$local_content_digest" >&2
                 echo "remote_content_sha256=$remote_content_digest" >&2
                 exit 1
@@ -296,8 +299,9 @@ jobs:
             LOCAL_CONTENT_DIGEST="$local_content_digest" \
             REMOTE_CONTENT_DIGEST="$remote_content_digest" \
             PUBLISH_STATUS="$publish_status" \
+            RESOLUTION_STATUS="$resolution_status" \
             EVIDENCE_PATH="$evidence" \
-            node -e 'const fs=require("fs");const e={format:"authoring-sdk-package-evidence/v2",package:{name:process.env.PACKAGE_NAME,version:process.env.PACKAGE_VERSION,registry:"https://registry.npmjs.org",tarball:process.env.REMOTE_TARBALL_URL},source:{repository:process.env.SOURCE_REPOSITORY,revision:process.env.SOURCE_REVISION},verification:{method:"EXACT_PACKAGE_CONTENT_SHA256_V1",failClosed:true,anonymousRemoteRetrieval:true,contentExact:process.env.LOCAL_CONTENT_DIGEST===process.env.REMOTE_CONTENT_DIGEST},content:{localSha256:process.env.LOCAL_CONTENT_DIGEST,remoteSha256:process.env.REMOTE_CONTENT_DIGEST},tarball:{localNpmIntegrity:process.env.LOCAL_INTEGRITY,remotePackNpmIntegrity:process.env.REMOTE_PACK_INTEGRITY,remoteRegistryNpmIntegrity:process.env.REMOTE_REGISTRY_INTEGRITY,localSha1:process.env.LOCAL_SHASUM,remoteSha1:process.env.REMOTE_SHASUM,localSha256:process.env.LOCAL_SHA256,remoteSha256:process.env.REMOTE_SHA256},publication:{status:process.env.PUBLISH_STATUS,immutableVersionVerified:true}};fs.writeFileSync(process.env.EVIDENCE_PATH,JSON.stringify(e,null,2)+"\n")'
+            node -e 'const fs=require("fs");const e={format:"authoring-sdk-package-evidence/v2",package:{name:process.env.PACKAGE_NAME,version:process.env.PACKAGE_VERSION,registry:"https://registry.npmjs.org",tarball:process.env.REMOTE_TARBALL_URL},source:{repository:process.env.SOURCE_REPOSITORY,revision:process.env.SOURCE_REVISION},verification:{method:"EXACT_PACKAGE_CONTENT_SHA256_V1",failClosed:true,anonymousRemoteRetrieval:true,contentExact:process.env.LOCAL_CONTENT_DIGEST===process.env.REMOTE_CONTENT_DIGEST},content:{localSha256:process.env.LOCAL_CONTENT_DIGEST,remoteSha256:process.env.REMOTE_CONTENT_DIGEST},tarball:{localNpmIntegrity:process.env.LOCAL_INTEGRITY,remotePackNpmIntegrity:process.env.REMOTE_PACK_INTEGRITY,remoteRegistryNpmIntegrity:process.env.REMOTE_REGISTRY_INTEGRITY,localSha1:process.env.LOCAL_SHASUM,remoteSha1:process.env.REMOTE_SHASUM,localSha256:process.env.LOCAL_SHA256,remoteSha256:process.env.REMOTE_SHA256},publication:{status:process.env.PUBLISH_STATUS,resolution:process.env.RESOLUTION_STATUS,immutableVersionVerified:true}};fs.writeFileSync(process.env.EVIDENCE_PATH,JSON.stringify(e,null,2)+"\n")'
             cat "$evidence"
             popd >/dev/null
           }
