@@ -218,14 +218,29 @@ jobs:
               return 0
             }
 
+            fetch_remote_package_with_retry() {
+              max_attempts="$1"
+              delay_seconds="$2"
+              for attempt in $(seq 1 "$max_attempts"); do
+                if fetch_remote_package; then
+                  return 0
+                fi
+                if [[ "$attempt" -lt "$max_attempts" ]]; then
+                  echo "Anonymous npm package retrieval not ready yet: $name@$version (attempt $attempt/$max_attempts)"
+                  sleep "$delay_seconds"
+                fi
+              done
+              return 1
+            }
+
             set +e
             remote_json="$(env -u NODE_AUTH_TOKEN NPM_CONFIG_USERCONFIG=/dev/null npm view "$name@$version" --json --registry=https://registry.npmjs.org 2>/dev/null)"
             view_status=$?
             set -e
 
             if [[ $view_status -eq 0 && -n "$remote_json" ]]; then
-              if ! fetch_remote_package; then
-                echo "Existing package metadata resolved but anonymous package retrieval failed: $name@$version" >&2
+              if ! fetch_remote_package_with_retry 20 3; then
+                echo "Existing package metadata resolved but anonymous package retrieval failed after retries: $name@$version" >&2
                 exit 1
               fi
               if [[ "$remote_content_digest" != "$local_content_digest" ]]; then
@@ -249,16 +264,8 @@ jobs:
               npm publish "$tarball" --registry=https://registry.npmjs.org --access public
               publish_status="PUBLISHED"
 
-              remote_ready=false
-              for attempt in 1 2 3 4 5; do
-                if fetch_remote_package; then
-                  remote_ready=true
-                  break
-                fi
-                sleep 2
-              done
-              if [[ "$remote_ready" != "true" ]]; then
-                echo "Unable to retrieve published package anonymously: $name@$version" >&2
+              if ! fetch_remote_package_with_retry 20 3; then
+                echo "Unable to retrieve published package anonymously after retries: $name@$version" >&2
                 exit 1
               fi
 
