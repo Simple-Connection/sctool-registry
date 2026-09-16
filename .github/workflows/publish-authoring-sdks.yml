@@ -197,11 +197,12 @@ jobs:
               rm -rf "$remote_dir" "$remote_extract"
               mkdir -p "$remote_dir"
               remote_pack_json="$RUNNER_TEMP/${evidence_name}-remote-pack.json"
+              remote_pack_stderr="$RUNNER_TEMP/${evidence_name}-remote-pack.stderr"
 
               pushd "$remote_dir" >/dev/null
               set +e
               env -u NODE_AUTH_TOKEN NPM_CONFIG_USERCONFIG=/dev/null \
-                npm pack "$name@$version" --json --registry=https://registry.npmjs.org > "$remote_pack_json" 2>/dev/null
+                npm pack "$name@$version" --json --registry=https://registry.npmjs.org > "$remote_pack_json" 2> "$remote_pack_stderr"
               remote_pack_status=$?
               set -e
               if [[ $remote_pack_status -ne 0 ]]; then
@@ -268,8 +269,14 @@ jobs:
                 exit "$publish_exit"
               fi
 
-              if ! fetch_remote_package_with_retry 20 3; then
-                echo "Unable to retrieve npm package anonymously after publish/conflict resolution retries: $name@$version" >&2
+              # npm publish-time security scanning can delay anonymous installability.
+              # Poll for a bounded window, then fail closed if the artifact never becomes public.
+              if ! fetch_remote_package_with_retry 40 30; then
+                echo "Unable to retrieve npm package anonymously after bounded registry-security-scan wait: $name@$version" >&2
+                if [[ -s "${remote_pack_stderr:-}" ]]; then
+                  echo "Last anonymous npm retrieval error:" >&2
+                  tail -n 40 "$remote_pack_stderr" >&2
+                fi
                 exit 1
               fi
 
