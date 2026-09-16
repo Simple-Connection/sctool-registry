@@ -449,8 +449,6 @@ responsibilities:
       rationale_required: true
       responsibility_description_id: null
       decision_rationale_ids:
-        - ADR_REGISTRY_DELIVERY_INTEGRITY_BOUNDARY
-        - ADR_REGISTRY_FILE_BACKED_ARTIFACT_BOUNDARY
         - ADR_REGISTRY_INITIAL_INSTALL_CANDIDATE_BOUNDARY
   RESP_REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION:
     subject: AUTH_REGISTRY_SDK_PACKAGE_DELIVERY

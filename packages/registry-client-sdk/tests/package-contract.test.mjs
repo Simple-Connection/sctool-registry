@@ -16,15 +16,20 @@ async function readJson(path) {
   return JSON.parse(await readFile(new URL(path, packageRoot), "utf8"));
 }
 
-test("package metadata publishes additive discovery surface at 0.2.0", async () => {
+test("package metadata publishes discovery and initial-install surfaces at 0.2.1", async () => {
   const packageJson = await readJson("package.json");
-  assert.equal(packageJson.version, "0.2.0");
+  assert.equal(packageJson.version, "0.2.1");
   assert.deepEqual(packageJson.exports["./discovery"], {
     types: "./src/discovery.d.mts",
     import: "./src/discovery.mjs",
   });
-  assert.equal(REGISTRY_CLIENT_SDK_VERSION, "0.2.0");
+  assert.deepEqual(packageJson.exports["./initial-install-candidate"], {
+    types: "./src/initial-install-candidate.d.mts",
+    import: "./src/initial-install-candidate.mjs",
+  });
+  assert.equal(REGISTRY_CLIENT_SDK_VERSION, "0.2.1");
   assert.equal(REGISTRY_CLIENT_CONTRACT.discoveryContract, "registry-discovery-v1");
+  assert.equal(REGISTRY_CLIENT_CONTRACT.initialInstallCandidateContract, "initial-install-candidate-v1");
   assert.equal(REGISTRY_DISCOVERY_CONTRACT, "registry-discovery-v1");
   assert.equal(typeof discoverVerifiedRegistry, "function");
   assert.match(
@@ -44,7 +49,7 @@ test("Registry Client SDK has no Authoring SDK runtime dependency", async () => 
   assert.equal(Object.prototype.hasOwnProperty.call(dependencies, "@simple-connection/repository-tool-sdk"), false);
 });
 
-test("npm pack dry-run contains discovery implementation and type declaration", () => {
+test("npm pack dry-run contains discovery and initial-install implementations and type declarations", () => {
   const windows = process.platform === "win32";
   const command = windows ? (process.env.ComSpec ?? "cmd.exe") : "npm";
   const args = windows
@@ -61,4 +66,6 @@ test("npm pack dry-run contains discovery implementation and type declaration", 
   const files = new Set(payload[0].files.map((entry) => entry.path));
   assert.equal(files.has("src/discovery.mjs"), true);
   assert.equal(files.has("src/discovery.d.mts"), true);
+  assert.equal(files.has("src/initial-install-candidate.mjs"), true);
+  assert.equal(files.has("src/initial-install-candidate.d.mts"), true);
 });
