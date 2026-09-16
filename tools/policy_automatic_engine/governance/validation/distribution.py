@@ -189,6 +189,11 @@ def validate_authoring_sdk_distribution(ctx: ValidationContext, errors: list[str
     need(content_verification.get("symlink_target") == "REQUIRED", "AUTHORING_DISTRIBUTION_CONTENT_SYMLINK", errors)
     need(content_verification.get("remote_retrieval") == "ANONYMOUS", "AUTHORING_DISTRIBUTION_CONTENT_ANONYMOUS", errors)
     need(content_verification.get("mismatch") == "FAIL_CLOSED", "AUTHORING_DISTRIBUTION_CONTENT_FAIL_CLOSED", errors)
+    existing_resolution = content_verification.get("existing_version_resolution", {})
+    need(existing_resolution.get("primary") == "ANONYMOUS_CONTENT_FETCH", "AUTHORING_DISTRIBUTION_EXISTING_PRIMARY", errors)
+    need(existing_resolution.get("metadata_authority") == "FORBIDDEN", "AUTHORING_DISTRIBUTION_METADATA_AUTHORITY", errors)
+    need(existing_resolution.get("publish_conflict_recovery") == "EXACT_CONTENT_VERIFY", "AUTHORING_DISTRIBUTION_CONFLICT_RECOVERY", errors)
+    need(existing_resolution.get("publish_conflict_result") == "EXISTING_VERIFIED", "AUTHORING_DISTRIBUTION_CONFLICT_RESULT", errors)
     publication_auth = publication.get("authentication", {})
     need(publication_auth.get("preferred") == "NPM_TRUSTED_PUBLISHING_OIDC", "AUTHORING_DISTRIBUTION_CI_AUTH", errors)
     need(publication_auth.get("bootstrap") == "NPM_TOKEN", "AUTHORING_DISTRIBUTION_BOOTSTRAP_AUTH", errors)
@@ -223,6 +228,10 @@ def validate_authoring_sdk_distribution(ctx: ValidationContext, errors: list[str
         need("local_content_digest" in workflow_text, "AUTHORING_WORKFLOW_CONTENT_LOCAL_DIGEST", errors)
         need("env -u NODE_AUTH_TOKEN NPM_CONFIG_USERCONFIG=/dev/null" in workflow_text, "AUTHORING_WORKFLOW_ANONYMOUS_CONTENT_FETCH", errors)
         need("*-content-manifest.json" in workflow_text, "AUTHORING_WORKFLOW_CONTENT_EVIDENCE", errors)
+        need("ANONYMOUS_CONTENT_FETCH" in workflow_text, "AUTHORING_WORKFLOW_EXISTING_PRIMARY", errors)
+        need("PUBLISH_CONFLICT_RECOVERED" in workflow_text, "AUTHORING_WORKFLOW_CONFLICT_RECOVERY", errors)
+        need("cannot publish over (the )?previously published versions" in workflow_text, "AUTHORING_WORKFLOW_CONFLICT_PATTERN", errors)
+        need("metadata freshness is not authoritative" in workflow_text, "AUTHORING_WORKFLOW_METADATA_NOT_AUTHORITY", errors)
         need("Remote integrity mismatch after publication" not in workflow_text, "AUTHORING_WORKFLOW_RAW_TARBALL_MATCH_RETIRED", errors)
 
 
