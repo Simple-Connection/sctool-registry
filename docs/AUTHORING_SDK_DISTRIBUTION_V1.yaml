@@ -1,4 +1,4 @@
-schema_version: "1.2"
+schema_version: "1.3"
 document_type: authoring_sdk_distribution_contract
 natural_language: FORBIDDEN
 contract_id: AUTHORING_SDK_DISTRIBUTION_V1
@@ -24,8 +24,18 @@ publication:
   access: PUBLIC
   immutable_version: true
   exact_source_revision_evidence: true
-  local_remote_integrity_match_required: true
+  tarball_integrity_evidence: REQUIRED
+  tarball_integrity_match_required: false
   anonymous_remote_verification: true
+  content_verification:
+    method: EXACT_PACKAGE_CONTENT_SHA256_V1
+    manifest_format: npm-package-content-manifest/v1
+    path_set: EXACT
+    file_bytes_sha256: REQUIRED
+    file_mode: REQUIRED
+    symlink_target: REQUIRED
+    remote_retrieval: ANONYMOUS
+    mismatch: FAIL_CLOSED
   authentication:
     preferred: NPM_TRUSTED_PUBLISHING_OIDC
     bootstrap: NPM_TOKEN
