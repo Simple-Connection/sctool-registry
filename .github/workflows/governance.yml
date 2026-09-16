@@ -27,6 +27,7 @@ on:
       - ".github/workflows/pages.yml"
   push:
     branches:
+      - "main"
       - "dev/**"
     paths:
       - "AGENTS.md"
