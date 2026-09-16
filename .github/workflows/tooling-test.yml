@@ -9,12 +9,14 @@ on:
     paths:
       - "docs/**"
       - "tools/policy_automatic_engine/governance/**"
+      - "tools/policy_automatic_engine/schemas/**"
       - "ptsip.yaml"
       - ".github/workflows/tooling-test.yml"
   pull_request:
     paths:
       - "docs/**"
       - "tools/policy_automatic_engine/governance/**"
+      - "tools/policy_automatic_engine/schemas/**"
       - "ptsip.yaml"
       - ".github/workflows/tooling-test.yml"
 
@@ -63,6 +65,7 @@ jobs:
       - name: Install governance dependencies
         run: |
           "%SCTOOL_PYTHON%" -m pip install --disable-pip-version-check -r tools/policy_automatic_engine/governance/requirements.txt
+          "%SCTOOL_PYTHON%" -m pip install --disable-pip-version-check -r tools/requirements.txt
           "%SCTOOL_PYTHON%" -m pip install --disable-pip-version-check "PTSIP==0.3.8a1"
 
       - name: Test session state synchronization
@@ -77,6 +80,10 @@ jobs:
       - name: Validate machine development documentation
         run: |
           "%SCTOOL_PYTHON%" tools/policy_automatic_engine/governance/validate.py --root .
+
+      - name: Validate Registry JSON contracts
+        run: |
+          "%SCTOOL_PYTHON%" tools/validate-registry.py
 
       - name: Validate PTSIP profile
         run: |
