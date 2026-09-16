@@ -1,4 +1,4 @@
-schema_version: "1.0"
+schema_version: "1.1"
 contract_id: AUTHORING_SDK_DISTRIBUTION_V1
 registry: "https://npm.pkg.github.com"
 source_repository: "Simple-Connection/sctool-registry"
@@ -9,18 +9,37 @@ packages:
     package: "@simple-connection/sctool-sdk"
     version: "0.2.0"
     authority: AUTH_SCTOOL_AUTHORING_SDK
+    visibility: PRIVATE
+    consumer_access:
+      repository: "Simple-Connection/SC_Linked_App"
+      repository_id: 1237293737
+      github_actions_role: READ
+      mechanism: MANAGE_ACTIONS_ACCESS
+      required: true
   REPOSITORY_TOOL_AUTHORING_SDK:
     source: "packages/repository-tool-sdk"
     package: "@simple-connection/repository-tool-sdk"
     version: "0.1.0"
     authority: AUTH_REPOSITORY_TOOL_AUTHORING_SDK
+    visibility: PRIVATE
+    consumer_access:
+      repository: "Simple-Connection/SC_Linked_App"
+      repository_id: 1237293737
+      github_actions_role: READ
+      mechanism: MANAGE_ACTIONS_ACCESS
+      required_when_published: true
 publication:
   authority: AUTH_AUTHORING_SDK_PACKAGE_DELIVERY
   immutable_version: true
   exact_source_revision_evidence: true
   local_remote_integrity_match_required: true
 consumer:
+  repository: "Simple-Connection/SC_Linked_App"
+  repository_id: 1237293737
   exact_version_pin_required: true
+  package_repository_access_required: true
+  ci_token_permission: PACKAGES_READ
+  local_token_scope: READ_PACKAGES
   source_authority_transfer: false
   compatibility_authority_transfer: false
   publication_authority_transfer: false

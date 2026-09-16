@@ -18,6 +18,7 @@ The Registry Client SDK owns the consumer-side implementation of Registry contra
 - ephemeral Registry-owned staging;
 - filename/size/SHA-256 verification;
 - read-only verified artifact access;
+- verified initial-install candidate production without fabricated installed state;
 - deterministic update-candidate resolution from a product-authoritative installed-version observation.
 
 ## Current public surfaces
@@ -29,6 +30,8 @@ The Registry Client SDK owns the consumer-side implementation of Registry contra
 @simple-connection/sctool-registry-client-sdk/resolution
 @simple-connection/sctool-registry-client-sdk/artifact-delivery
 @simple-connection/sctool-registry-client-sdk/update-candidate
+@simple-connection/sctool-registry-client-sdk/initial-install-candidate
+@simple-connection/sctool-registry-client-sdk/discovery
 ```
 
 `package-descriptor` validates the current package descriptor contract (`schemaVersion = 2.0.0`) and the Registry policy consistency needed by a consumer. Validation is fail-closed and returns an immutable validated descriptor or structured issues.
@@ -121,6 +124,31 @@ GitHub credentials/identity
 
 Update availability is represented by the surrounding candidate-resolution state, not by a mutable boolean inside the candidate.
 
+## P4-W4-B1 initial-install boundary
+
+Registry Client SDK 0.2.1 adds a separate first-install path for a resolved Registry target:
+
+```text
+verified resolved target
+-> authenticated retrieval
+-> SDK-internal ephemeral staging
+-> filename/size/SHA-256 verification
+-> read-only VerifiedArtifactLease
+-> INITIAL_INSTALL_READY
+```
+
+This path deliberately does not accept or synthesize `installedVersion`. It does not decide whether the Product should install, choose a persistent install path, activate a version, or mutate Product installation state. Those decisions remain under Simple Connection authority.
+
+The public surface is:
+
+```text
+@simple-connection/sctool-registry-client-sdk/initial-install-candidate
+resolveInitialInstallCandidate
+resolveInitialInstallCandidateWithGitHubCli
+```
+
+The existing update-candidate contract remains unchanged for already-installed SCTools.
+
 ## P5 boundary
 
 P5 is not materialized. Its planned responsibility is only `RESP_SIMPLE_CONNECTION_INSTALL`. It may consume a P4 verified update candidate and decide/create product-owned persistent installation state, but P4 does not make that installation decision.
@@ -137,4 +165,4 @@ This SDK must not implement:
 - renderer/UI behavior;
 - production Root trust activation.
 
-The package is currently marked `private` to prevent accidental publication before an explicit SDK distribution mechanism is approved.
+Package publication is governed by `docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml`; released versions are immutable and consumers pin exact versions.

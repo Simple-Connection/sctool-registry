@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - "dev/1.0.3"
+      - "main"
     paths:
       - "packages/registry-client-sdk/**"
       - "docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml"
@@ -21,6 +21,7 @@ concurrency:
 
 jobs:
   publish:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[publish-registry-client-sdk-0.2.1]')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact source
@@ -129,6 +130,33 @@ jobs:
           fs.writeFileSync(process.env.EVIDENCE_PATH, JSON.stringify(evidence, null, 2) + "\n");
           NODE
           cat "$evidence"
+
+      - name: Verify published initial-install candidate export
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          verify_dir="$RUNNER_TEMP/registry-client-sdk-published-verify"
+          mkdir -p "$verify_dir"
+          pushd "$verify_dir" >/dev/null
+          npm pack "@simple-connection/sctool-registry-client-sdk@0.2.1" --json --registry=https://npm.pkg.github.com > remote-pack.json
+          tarball="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('remote-pack.json','utf8'));process.stdout.write(d[0].filename)")"
+          mkdir extracted
+          tar -xzf "$tarball" -C extracted
+          node <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+          const pkg = JSON.parse(fs.readFileSync("extracted/package/package.json", "utf8"));
+          const entry = pkg.exports?.["./initial-install-candidate"];
+          if (!entry?.import || !entry?.types) throw new Error("Missing initial-install-candidate public export");
+          for (const rel of ["src/initial-install-candidate.mjs", "src/initial-install-candidate.d.mts"]) {
+            if (!fs.existsSync(path.join("extracted/package", rel))) throw new Error(`Missing published file: ${rel}`);
+          }
+          if (pkg.version !== "0.2.1") throw new Error(`Unexpected published version: ${pkg.version}`);
+          console.log("Published Registry Client SDK initial-install export verification PASS");
+          NODE
+          popd >/dev/null
 
       - name: Upload SDK package evidence
         uses: actions/upload-artifact@v4

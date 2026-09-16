@@ -1,5 +1,5 @@
 export const REGISTRY_CLIENT_SDK_NAME = "@simple-connection/sctool-registry-client-sdk";
-export const REGISTRY_CLIENT_SDK_VERSION = "0.2.0";
+export const REGISTRY_CLIENT_SDK_VERSION = "0.2.1";
 
 export const REGISTRY_CLIENT_CONTRACT = Object.freeze({
   registryContractVersion: "2.0.0",
@@ -7,6 +7,7 @@ export const REGISTRY_CLIENT_CONTRACT = Object.freeze({
   artifactDeliveryContractVersion: "1.0.0",
   stagedArtifactLifecycleContract: "staged-artifact-lifecycle-v1",
   updateCandidateContract: "update-candidate-v1",
+  initialInstallCandidateContract: "initial-install-candidate-v1",
   discoveryContract: "registry-discovery-v1",
   packageDescriptorSchemaVersion: "2.0.0",
   registrySnapshotSchemaVersion: "1.0.0",
@@ -22,4 +23,5 @@ export * from "./package-descriptor.mjs";
 export * from "./resolution.mjs";
 export * from "./artifact-delivery.mjs";
 export * from "./update-candidate.mjs";
+export * from "./initial-install-candidate.mjs";
 export * from "./discovery.mjs";

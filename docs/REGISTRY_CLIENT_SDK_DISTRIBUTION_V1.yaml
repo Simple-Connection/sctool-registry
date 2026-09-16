@@ -1,4 +1,4 @@
-schema_version: "1.0"
+schema_version: "1.1"
 document_type: registry_client_sdk_distribution_contract
 natural_language: FORBIDDEN
 contract_id: REGISTRY_CLIENT_SDK_DISTRIBUTION_V1
@@ -14,9 +14,16 @@ producer:
   version_source: PACKAGE_JSON
   source_revision_binding: REQUIRED
 consumer:
-  current_repository: "Kinirin/Simple-Connection"
-  target_repository_after_ownership_transfer: "Simple-Connection/Simple-Connection"
+  repository: "Simple-Connection/SC_Linked_App"
+  repository_id: 1237293737
   access: READ_ONLY
+  exact_version_pin: REQUIRED
+  github_actions_package_access:
+    required: true
+    role: READ
+    mechanism: MANAGE_ACTIONS_ACCESS
+    repository: "Simple-Connection/SC_Linked_App"
+    repository_id: 1237293737
 version_policy:
   dependency_range: EXACT
   caret: FORBIDDEN
@@ -37,11 +44,14 @@ authentication:
     preferred: GITHUB_TOKEN
     permission: PACKAGES_WRITE
   consumer_ci:
-    preferred: PACKAGE_REPOSITORY_ACCESS_WITH_GITHUB_TOKEN
+    preferred: GITHUB_TOKEN
+    permission: PACKAGES_READ
+    package_repository_access: REQUIRED
     fallback: READ_PACKAGES_CREDENTIAL
   local_development:
     source_controlled_token: FORBIDDEN
     user_or_environment_credential: REQUIRED
+    token_scope: READ_PACKAGES
 ownership_transition:
   package_scope: "@simple-connection"
   package_identity_change: FORBIDDEN

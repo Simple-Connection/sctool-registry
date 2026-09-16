@@ -177,6 +177,30 @@ rationales:
       versions do not retrieve an artifact. Registry Client SDK does not decide
       installation, choose an install path, or mutate persistent product state.
 
+  ADR_REGISTRY_INITIAL_INSTALL_CANDIDATE_BOUNDARY:
+    status: ACTIVE
+    applies_to:
+      - RESP_REGISTRY_INITIAL_INSTALL_CANDIDATE
+    established_in:
+      version: "1.0.3"
+      session: MAIN_CLEANUP_P4_W4_B1
+    supersedes: []
+    superseded_by: null
+    review_on:
+      - CONTRACT_CHANGE
+      - RESPONSIBILITY_DIMENSION_CHANGE
+      - IMPLEMENTATION_BOUNDARY_CHANGE
+      - LIFECYCLE_CHANGE
+      - OWNERSHIP_POLICY_CHANGE
+    statement: >-
+      A first Marketplace installation has no truthful installed-version observation.
+      Registry Client SDK therefore owns a separate verified initial-install candidate
+      boundary that starts from an already verified resolved Registry target and reuses
+      Registry-owned authenticated retrieval, ephemeral staging, integrity verification,
+      and read-only artifact lease production. It must not fabricate installed state or
+      decide Product install intent, persistent install path, activation, rollback, or
+      persistent Product state.
+
   ADR_SIMPLE_CONNECTION_INSTALL_TRANSACTION_BOUNDARY:
     status: ACTIVE
     applies_to:
