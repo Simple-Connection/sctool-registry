@@ -25,10 +25,12 @@ def dedupe(values: list[str]) -> list[str]:
     return list(dict.fromkeys(values))
 
 
-def merge_dict_lists(target: dict[str, list[str]], source: dict[str, Any]) -> None:
-    for key, values in source.items():
-        if isinstance(values, list):
-            target[key] = dedupe(target.get(key, []) + [str(v) for v in values])
+def merge_commands(target: dict[str, dict[str, Any]], source: dict[str, Any]) -> None:
+    for command_id, definition in source.items():
+        if command_id in target and target[command_id] != definition:
+            raise ValueError(f"COMMAND_COLLISION:{command_id}")
+        if isinstance(definition, dict):
+            target[command_id] = definition
 
 
 def resolve(index: dict[str, Any], selected: list[str]) -> dict[str, Any]:
@@ -44,7 +46,7 @@ def resolve(index: dict[str, Any], selected: list[str]) -> dict[str, Any]:
     owned: list[str] = []
     excluded: list[str] = []
     authority_modes: list[str] = []
-    commands: dict[str, list[str]] = {}
+    commands: dict[str, dict[str, Any]] = {}
     machine: dict[str, Any] = {}
     conditional: dict[str, Any] = {}
 
@@ -59,7 +61,7 @@ def resolve(index: dict[str, Any], selected: list[str]) -> dict[str, Any]:
         forbidden.extend(directives.get("forbidden", []))
         owned.extend(directives.get("owned_capabilities", []))
         excluded.extend(directives.get("excluded_capabilities", []))
-        merge_dict_lists(commands, directives.get("commands", {}))
+        merge_commands(commands, directives.get("commands", {}))
         if isinstance(directives.get("machine"), dict):
             machine.update(directives["machine"])
         if isinstance(directives.get("conditional_task_classes"), dict):

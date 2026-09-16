@@ -49,9 +49,12 @@ task_classes:
         - AGENT_ENTRY_MUST_BE_INDEX_ROUTED
       forbidden: [STATE_EDIT_TO_BYPASS_GATE, PARALLEL_PUBLIC_GOVERNANCE_VALIDATOR]
       commands:
-        validate:
-          - "python docs/governance/validate.py --root ."
-          - "python docs/governance/test-agent-entry.py"
+        GOVERNANCE_VALIDATE:
+          phase: VALIDATE
+          argv: [python, docs/governance/validate.py, --root, .]
+        AGENT_ENTRY_TEST:
+          phase: VALIDATE
+          argv: [python, docs/governance/test-agent-entry.py]
   POLICY:
     intent_ids: [POLICY_DECISION, POLICY_INDEX, POLICY_MIGRATION]
     routes: [docs/policy/index.yaml, docs/index.yaml]
@@ -98,8 +101,15 @@ task_classes:
         specification_family: "0.3.7-draft"
         specification_revision: "3c47816770d194ae42f98faedc911d980db0e62a"
       commands:
-        validate: ["ptsip validate ."]
-        release_optional: ["ptsip conform .", "ptsip gate ."]
+        PTSIP_VALIDATE:
+          phase: VALIDATE
+          argv: [ptsip, validate, .]
+        PTSIP_CONFORM:
+          phase: RELEASE_OPTIONAL
+          argv: [ptsip, conform, .]
+        PTSIP_GATE:
+          phase: RELEASE_OPTIONAL
+          argv: [ptsip, gate, .]
   REGISTRY_CLIENT_SDK_GENERAL:
     intent_ids: [REGISTRY_CLIENT_SDK_SOURCE, REGISTRY_CLIENT_SDK_BOUNDARY]
     routes: [packages/registry-client-sdk/package.json, ptsip.yaml]
@@ -159,7 +169,9 @@ task_classes:
         - QUEUE_PRESENCE_IS_NOT_IMPLEMENTATION_APPROVAL
       forbidden: [AUTOMATIC_LOG_CONTENT_UPLOAD, PRODUCT_REPOSITORY_ISSUE_AS_REGISTRY_FAILURE_AUTHORITY, MULTIPLE_ROUTE_ACTIVE_BRANCHES]
       commands:
-        next: ["python tools/issue-routing/registry_issue_intake.py next"]
+        ISSUE_ROUTING_NEXT:
+          phase: SELECT
+          argv: [python, tools/issue-routing/registry_issue_intake.py, next]
   AUTHORING_SDK_SCTOOL:
     intent_ids: [SCTOOL_AUTHORING, SCTOOL_AUTHORING_PACKAGE]
     routes: [packages/sctool-sdk/package.json, docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml]

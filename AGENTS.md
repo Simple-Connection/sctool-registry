@@ -17,7 +17,8 @@ If classification is unclear:
 python docs/governance/agent-entry.py --catalog
 ```
 
-The resolver parses the machine table of contents and returns the selected task directives plus the minimal `read_set`.
+The resolver parses the machine table of contents and returns selected machine directives plus the minimal `read_set`.
+Executable automation is returned as `commands.<COMMAND_ID>.argv[]`, not prose shell strings.
 
 Read only `read_set`. Expand it only when a selected authority explicitly requires another authority or the task scope changes.
 

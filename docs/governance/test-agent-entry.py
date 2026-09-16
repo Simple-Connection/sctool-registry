@@ -20,6 +20,17 @@ def main() -> int:
     assert "REGISTRY_CLIENT_SDK_UPDATE" in catalog
     assert "POLICY" in catalog
 
+    governance = run("--task-class", "GOVERNANCE")
+    assert governance["commands"]["GOVERNANCE_VALIDATE"]["argv"] == [
+        "python", "docs/governance/validate.py", "--root", ".",
+    ]
+    assert governance["commands"]["AGENT_ENTRY_TEST"]["argv"] == [
+        "python", "docs/governance/test-agent-entry.py",
+    ]
+
+    ptsip = run("--task-class", "PTSIP")
+    assert ptsip["commands"]["PTSIP_VALIDATE"]["argv"] == ["ptsip", "validate", "."]
+
     update = run("--task-class", "REGISTRY_CLIENT_SDK_UPDATE")
     assert update["read_set"] == [
         "docs/UPDATE_CANDIDATE_V1.yaml",
