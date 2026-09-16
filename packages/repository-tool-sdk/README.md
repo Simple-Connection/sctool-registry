@@ -72,6 +72,16 @@ Runtime-capable Tool 예:
 
 Public package placeholder는 `{{package_root}}`만 허용한다. `{{repo_root}}` 같은 host placeholder는 package descriptor에 기록하지 않는다.
 
+## Install
+
+Published as a public scoped package on npmjs.com; installation does not require package authentication.
+
+```text
+npm install @simple-connection/repository-tool-sdk@0.1.1
+```
+
+Release consumers should pin the exact package version.
+
 ## CLI
 
 설치된 package의 bin을 사용할 때:

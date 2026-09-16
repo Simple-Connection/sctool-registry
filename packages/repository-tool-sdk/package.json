@@ -1,6 +1,6 @@
 {
   "name": "@simple-connection/repository-tool-sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Repository Tool package descriptor, validation, identity, scaffold, and CLI contracts.",
   "type": "module",
   "main": "./dist/index.js",
@@ -35,8 +35,8 @@
     "typescript": "7.0.1-rc"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   },
   "repository": {
     "type": "git",

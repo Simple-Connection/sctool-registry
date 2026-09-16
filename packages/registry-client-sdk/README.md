@@ -2,6 +2,14 @@
 
 Package: `@simple-connection/sctool-registry-client-sdk`
 
+Public npmjs install:
+
+```text
+npm install @simple-connection/sctool-registry-client-sdk@0.2.2
+```
+
+Consumer package authentication is not required.
+
 This SDK is owned by `Simple-Connection/sctool-registry` and exists for **Simple Connection Registry consumption**.
 
 It is intentionally separate from `Kinirin/Simple-Connection/program-sdk/sctool-sdk`, which is the SCTool **Authoring SDK** used by developers and coding agents to design, validate, build, test, and package their own tools as `.sctool` artifacts.
@@ -165,4 +173,4 @@ This SDK must not implement:
 - renderer/UI behavior;
 - production Root trust activation.
 
-Package publication is governed by `docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml`; released versions are immutable and consumers pin exact versions.
+Package publication is governed by `docs/REGISTRY_CLIENT_SDK_DISTRIBUTION_V1.yaml`; the package is public on npmjs.com, released versions are immutable, and release consumers pin exact versions.

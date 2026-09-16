@@ -1,6 +1,6 @@
 {
   "name": "@simple-connection/sctool-sdk",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "SCTool authoring SDK for manifest validation, localization, host capabilities, Marketplace profile authoring, scaffolding, build, and package verification.",
   "type": "module",
   "main": "./dist/index.js",
@@ -61,8 +61,8 @@
     "typescript": "7.0.1-rc"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   },
   "repository": {
     "type": "git",

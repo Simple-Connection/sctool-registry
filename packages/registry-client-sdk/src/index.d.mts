@@ -1,5 +1,5 @@
 export declare const REGISTRY_CLIENT_SDK_NAME: "@simple-connection/sctool-registry-client-sdk";
-export declare const REGISTRY_CLIENT_SDK_VERSION: "0.2.1";
+export declare const REGISTRY_CLIENT_SDK_VERSION: "0.2.2";
 
 export interface RegistryClientContractIdentity {
   readonly registryContractVersion: "2.0.0";

@@ -116,7 +116,7 @@ components:
     include:
       - ".github/workflows/publish-registry-client-sdk.yml"
       - "delivery/registry-client-sdk-package/**"
-    purpose: versioned_registry_client_sdk_github_packages_publication_and_integrity_binding
+    purpose: versioned_registry_client_sdk_public_npmjs_publication_and_integrity_binding
     shipped: false
     runtime_required: false
     executable: true
@@ -138,7 +138,7 @@ components:
     include:
       - ".github/workflows/publish-authoring-sdks.yml"
       - "delivery/authoring-sdk-package/**"
-    purpose: immutable_github_packages_publication_for_registry_owned_authoring_sdks
+    purpose: immutable_public_npmjs_publication_for_registry_owned_authoring_sdks
     shipped: false
     runtime_required: false
     executable: true

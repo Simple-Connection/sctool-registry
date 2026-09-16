@@ -1,4 +1,4 @@
-export const SCTOOL_SDK_VERSION = "0.2.0" as const;
+export const SCTOOL_SDK_VERSION = "0.2.1" as const;
 export const SCTOOL_MARKETPLACE_PROFILE_SCHEMA_VERSION = 1 as const;
 export const SCTOOL_MARKETPLACE_PROFILE_DIAGNOSTIC_SCHEMA =
   "sctool-marketplace-profile-validation/v1" as const;

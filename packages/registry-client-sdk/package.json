@@ -1,6 +1,6 @@
 {
   "name": "@simple-connection/sctool-registry-client-sdk",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Registry Client SDK used by Simple Connection to consume SCTool Registry metadata, verified discovery, access, delivery, verified initial-install candidates, and verified update candidates.",
   "type": "module",
   "private": false,
@@ -64,7 +64,7 @@
     "directory": "packages/registry-client-sdk"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   }
 }

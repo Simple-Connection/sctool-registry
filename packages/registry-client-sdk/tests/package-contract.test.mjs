@@ -16,9 +16,11 @@ async function readJson(path) {
   return JSON.parse(await readFile(new URL(path, packageRoot), "utf8"));
 }
 
-test("package metadata publishes discovery and initial-install surfaces at 0.2.1", async () => {
+test("package metadata publishes discovery and initial-install surfaces at 0.2.2", async () => {
   const packageJson = await readJson("package.json");
-  assert.equal(packageJson.version, "0.2.1");
+  assert.equal(packageJson.version, "0.2.2");
+  assert.equal(packageJson.publishConfig.registry, "https://registry.npmjs.org");
+  assert.equal(packageJson.publishConfig.access, "public");
   assert.deepEqual(packageJson.exports["./discovery"], {
     types: "./src/discovery.d.mts",
     import: "./src/discovery.mjs",
@@ -27,7 +29,7 @@ test("package metadata publishes discovery and initial-install surfaces at 0.2.1
     types: "./src/initial-install-candidate.d.mts",
     import: "./src/initial-install-candidate.mjs",
   });
-  assert.equal(REGISTRY_CLIENT_SDK_VERSION, "0.2.1");
+  assert.equal(REGISTRY_CLIENT_SDK_VERSION, "0.2.2");
   assert.equal(REGISTRY_CLIENT_CONTRACT.discoveryContract, "registry-discovery-v1");
   assert.equal(REGISTRY_CLIENT_CONTRACT.initialInstallCandidateContract, "initial-install-candidate-v1");
   assert.equal(REGISTRY_DISCOVERY_CONTRACT, "registry-discovery-v1");

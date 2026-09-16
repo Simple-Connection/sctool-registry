@@ -13,6 +13,14 @@ import {
 } from "../dist/index.js";
 import { createRepositoryToolPackage } from "../builder/repository-tool-builder.mjs";
 
+const packageMetadata = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+
+test("package metadata targets public npmjs distribution at 0.1.1", () => {
+  assert.equal(packageMetadata.version, "0.1.1");
+  assert.equal(packageMetadata.publishConfig?.registry, "https://registry.npmjs.org");
+  assert.equal(packageMetadata.publishConfig?.access, "public");
+});
+
 function validDescriptor() {
   return {
     schemaVersion: 1,

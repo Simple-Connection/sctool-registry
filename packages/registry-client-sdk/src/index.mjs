@@ -1,5 +1,5 @@
 export const REGISTRY_CLIENT_SDK_NAME = "@simple-connection/sctool-registry-client-sdk";
-export const REGISTRY_CLIENT_SDK_VERSION = "0.2.1";
+export const REGISTRY_CLIENT_SDK_VERSION = "0.2.2";
 
 export const REGISTRY_CLIENT_CONTRACT = Object.freeze({
   registryContractVersion: "2.0.0",

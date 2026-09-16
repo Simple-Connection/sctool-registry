@@ -15,7 +15,7 @@ requireEqual(
   "@simple-connection/sctool-registry-client-sdk",
   "sdk name",
 );
-requireEqual(REGISTRY_CLIENT_SDK_VERSION, "0.2.1", "sdk version");
+requireEqual(REGISTRY_CLIENT_SDK_VERSION, "0.2.2", "sdk version");
 requireEqual(REGISTRY_CLIENT_CONTRACT.registryContractVersion, "2.0.0", "registry contract");
 requireEqual(REGISTRY_CLIENT_CONTRACT.registryAccessContract, "registry-access-v1", "access contract");
 requireEqual(REGISTRY_CLIENT_CONTRACT.artifactDeliveryContractVersion, "1.0.0", "delivery contract");

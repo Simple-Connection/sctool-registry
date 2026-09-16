@@ -1,29 +1,25 @@
-schema_version: "1.1"
+schema_version: "1.2"
 document_type: registry_client_sdk_distribution_contract
 natural_language: FORBIDDEN
 contract_id: REGISTRY_CLIENT_SDK_DISTRIBUTION_V1
 responsibility: RESP_REGISTRY_CLIENT_SDK_PACKAGE_PUBLICATION
 authority: AUTH_REGISTRY_SDK_PACKAGE_DELIVERY
-mechanism: GITHUB_PACKAGES
-registry: "https://npm.pkg.github.com"
+mechanism: NPMJS_PUBLIC_REGISTRY
+registry: "https://registry.npmjs.org"
 package: "@simple-connection/sctool-registry-client-sdk"
-visibility: PRIVATE
+version: "0.2.2"
+visibility: PUBLIC
 producer:
   repository: "Simple-Connection/sctool-registry"
   package_root: "packages/registry-client-sdk"
   version_source: PACKAGE_JSON
   source_revision_binding: REQUIRED
 consumer:
-  repository: "Simple-Connection/SC_Linked_App"
-  repository_id: 1237293737
-  access: READ_ONLY
+  primary_repository: "Simple-Connection/SC_Linked_App"
+  public_consumers: ALLOWED
+  authentication: NOT_REQUIRED
+  anonymous_installation: REQUIRED
   exact_version_pin: REQUIRED
-  github_actions_package_access:
-    required: true
-    role: READ
-    mechanism: MANAGE_ACTIONS_ACCESS
-    repository: "Simple-Connection/SC_Linked_App"
-    repository_id: 1237293737
 version_policy:
   dependency_range: EXACT
   caret: FORBIDDEN
@@ -33,26 +29,33 @@ version_policy:
 publish:
   workflow: ".github/workflows/publish-registry-client-sdk.yml"
   from_ci: REQUIRED
+  access: PUBLIC
   pack_before_publish: REQUIRED
   local_integrity_evidence: REQUIRED
   remote_integrity_verification: REQUIRED
+  anonymous_remote_verification: REQUIRED
   existing_version:
     integrity_equal: REUSE
     integrity_mismatch: FAIL_CLOSED
 authentication:
-  ci:
-    preferred: GITHUB_TOKEN
-    permission: PACKAGES_WRITE
-  consumer_ci:
-    preferred: GITHUB_TOKEN
-    permission: PACKAGES_READ
-    package_repository_access: REQUIRED
-    fallback: READ_PACKAGES_CREDENTIAL
-  local_development:
+  publication:
+    preferred: NPM_TRUSTED_PUBLISHING_OIDC
+    bootstrap: NPM_TOKEN
     source_controlled_token: FORBIDDEN
-    user_or_environment_credential: REQUIRED
-    token_scope: READ_PACKAGES
+    github_actions:
+      id_token_permission: WRITE
+      runner: GITHUB_HOSTED
+      node_major: 24
+      npm_minimum: "11.5.1"
+  consumer:
+    required: false
+    token: FORBIDDEN_AS_REQUIREMENT
+trusted_publisher:
+  provider: GITHUB_ACTIONS
+  repository: "Simple-Connection/sctool-registry"
+  workflow_filename: "publish-registry-client-sdk.yml"
+  allowed_action: NPM_PUBLISH
 ownership_transition:
   package_scope: "@simple-connection"
   package_identity_change: FORBIDDEN
-  consumer_access_revalidation: REQUIRED
+  consumer_access_revalidation: NOT_APPLICABLE_PUBLIC_PACKAGE

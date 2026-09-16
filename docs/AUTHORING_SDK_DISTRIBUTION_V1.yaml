@@ -1,45 +1,51 @@
-schema_version: "1.1"
+schema_version: "1.2"
+document_type: authoring_sdk_distribution_contract
+natural_language: FORBIDDEN
 contract_id: AUTHORING_SDK_DISTRIBUTION_V1
-registry: "https://npm.pkg.github.com"
+mechanism: NPMJS_PUBLIC_REGISTRY
+registry: "https://registry.npmjs.org"
 source_repository: "Simple-Connection/sctool-registry"
 workflow: ".github/workflows/publish-authoring-sdks.yml"
 packages:
   SCTOOL_AUTHORING_SDK:
     source: "packages/sctool-sdk"
     package: "@simple-connection/sctool-sdk"
-    version: "0.2.0"
+    version: "0.2.1"
     authority: AUTH_SCTOOL_AUTHORING_SDK
-    visibility: PRIVATE
-    consumer_access:
-      repository: "Simple-Connection/SC_Linked_App"
-      repository_id: 1237293737
-      github_actions_role: READ
-      mechanism: MANAGE_ACTIONS_ACCESS
-      required: true
+    visibility: PUBLIC
   REPOSITORY_TOOL_AUTHORING_SDK:
     source: "packages/repository-tool-sdk"
     package: "@simple-connection/repository-tool-sdk"
-    version: "0.1.0"
+    version: "0.1.1"
     authority: AUTH_REPOSITORY_TOOL_AUTHORING_SDK
-    visibility: PRIVATE
-    consumer_access:
-      repository: "Simple-Connection/SC_Linked_App"
-      repository_id: 1237293737
-      github_actions_role: READ
-      mechanism: MANAGE_ACTIONS_ACCESS
-      required_when_published: true
+    visibility: PUBLIC
 publication:
   authority: AUTH_AUTHORING_SDK_PACKAGE_DELIVERY
+  access: PUBLIC
   immutable_version: true
   exact_source_revision_evidence: true
   local_remote_integrity_match_required: true
+  anonymous_remote_verification: true
+  authentication:
+    preferred: NPM_TRUSTED_PUBLISHING_OIDC
+    bootstrap: NPM_TOKEN
+    source_controlled_token: FORBIDDEN
+    github_actions:
+      id_token_permission: WRITE
+      runner: GITHUB_HOSTED
+      node_major: 24
+      npm_minimum: "11.5.1"
+trusted_publisher:
+  provider: GITHUB_ACTIONS
+  repository: "Simple-Connection/sctool-registry"
+  workflow_filename: "publish-authoring-sdks.yml"
+  allowed_action: NPM_PUBLISH
 consumer:
-  repository: "Simple-Connection/SC_Linked_App"
-  repository_id: 1237293737
+  primary_repository: "Simple-Connection/SC_Linked_App"
+  public_consumers: ALLOWED
+  authentication: NOT_REQUIRED
+  anonymous_installation: REQUIRED
   exact_version_pin_required: true
-  package_repository_access_required: true
-  ci_token_permission: PACKAGES_READ
-  local_token_scope: READ_PACKAGES
   source_authority_transfer: false
   compatibility_authority_transfer: false
   publication_authority_transfer: false

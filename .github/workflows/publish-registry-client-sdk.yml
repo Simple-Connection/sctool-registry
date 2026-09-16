@@ -13,7 +13,7 @@ on:
 
 permissions:
   contents: read
-  packages: write
+  id-token: write
 
 concurrency:
   group: registry-client-sdk-package-${{ github.ref }}
@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   publish:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[publish-registry-client-sdk-0.2.1]')
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[publish-npmjs-sdks]')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact source
@@ -29,12 +29,18 @@ jobs:
         with:
           ref: ${{ github.sha }}
 
-      - name: Configure Node and GitHub Packages
-        uses: actions/setup-node@v5
+      - name: Configure Node and npmjs public registry
+        uses: actions/setup-node@v6
         with:
-          node-version: "22"
-          registry-url: "https://npm.pkg.github.com"
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
           scope: "@simple-connection"
+          package-manager-cache: false
+
+      - name: Verify trusted-publishing-capable npm client
+        shell: bash
+        run: |
+          node -e "const {execFileSync}=require('node:child_process');const v=execFileSync('npm',['--version'],{encoding:'utf8'}).trim().split('.').map(Number);if(v[0]<11||(v[0]===11&&v[1]<5))throw new Error('npm >= 11.5.1 required for trusted publishing');console.log('npm trusted publishing client PASS',v.join('.'))"
 
       - name: Validate Registry Client SDK
         run: npm --prefix packages/registry-client-sdk test
@@ -42,7 +48,7 @@ jobs:
       - name: Pack, publish or verify immutable package, and bind evidence
         shell: bash
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -euo pipefail
           cd packages/registry-client-sdk
@@ -59,24 +65,24 @@ jobs:
           local_sha256="$(sha256sum "$tarball" | awk '{print $1}')"
 
           set +e
-          remote_integrity="$(npm view "$name@$version" dist.integrity --registry=https://npm.pkg.github.com 2>/dev/null)"
+          remote_integrity="$(npm view "$name@$version" dist.integrity --registry=https://registry.npmjs.org 2>/dev/null)"
           view_status=$?
           set -e
 
           if [[ $view_status -eq 0 && -n "$remote_integrity" ]]; then
-            remote_tarball="$(npm view "$name@$version" dist.tarball --registry=https://npm.pkg.github.com)"
+            remote_tarball="$(npm view "$name@$version" dist.tarball --registry=https://registry.npmjs.org)"
             if [[ "$remote_integrity" != "$local_integrity" ]]; then
               echo "Existing package integrity does not match local exact source package." >&2
               exit 1
             fi
             publish_status="EXISTING_VERIFIED"
           else
-            npm publish "$tarball" --registry=https://npm.pkg.github.com --access restricted
+            npm publish "$tarball" --registry=https://registry.npmjs.org --access public
             publish_status="PUBLISHED"
             remote_integrity=""
             for attempt in 1 2 3 4 5; do
               set +e
-              remote_integrity="$(npm view "$name@$version" dist.integrity --registry=https://npm.pkg.github.com 2>/dev/null)"
+              remote_integrity="$(npm view "$name@$version" dist.integrity --registry=https://registry.npmjs.org 2>/dev/null)"
               status=$?
               set -e
               if [[ $status -eq 0 && -n "$remote_integrity" ]]; then
@@ -88,7 +94,7 @@ jobs:
               echo "Published package remote integrity did not match local pack integrity." >&2
               exit 1
             fi
-            remote_tarball="$(npm view "$name@$version" dist.tarball --registry=https://npm.pkg.github.com)"
+            remote_tarball="$(npm view "$name@$version" dist.tarball --registry=https://registry.npmjs.org)"
           fi
 
           export EVIDENCE_PATH="$evidence"
@@ -109,7 +115,7 @@ jobs:
             package: {
               name: process.env.PACKAGE_NAME,
               version: process.env.PACKAGE_VERSION,
-              registry: "https://npm.pkg.github.com",
+              registry: "https://registry.npmjs.org",
             },
             source: {
               repository: process.env.SOURCE_REPOSITORY,
@@ -131,16 +137,16 @@ jobs:
           NODE
           cat "$evidence"
 
-      - name: Verify published initial-install candidate export
+      - name: Verify anonymous public initial-install candidate export
         shell: bash
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_USERCONFIG: /dev/null
         run: |
           set -euo pipefail
           verify_dir="$RUNNER_TEMP/registry-client-sdk-published-verify"
           mkdir -p "$verify_dir"
           pushd "$verify_dir" >/dev/null
-          npm pack "@simple-connection/sctool-registry-client-sdk@0.2.1" --json --registry=https://npm.pkg.github.com > remote-pack.json
+          npm pack "@simple-connection/sctool-registry-client-sdk@0.2.2" --json --registry=https://registry.npmjs.org > remote-pack.json
           tarball="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('remote-pack.json','utf8'));process.stdout.write(d[0].filename)")"
           mkdir extracted
           tar -xzf "$tarball" -C extracted
@@ -153,7 +159,7 @@ jobs:
           for (const rel of ["src/initial-install-candidate.mjs", "src/initial-install-candidate.d.mts"]) {
             if (!fs.existsSync(path.join("extracted/package", rel))) throw new Error(`Missing published file: ${rel}`);
           }
-          if (pkg.version !== "0.2.1") throw new Error(`Unexpected published version: ${pkg.version}`);
+          if (pkg.version !== "0.2.2") throw new Error(`Unexpected published version: ${pkg.version}`);
           console.log("Published Registry Client SDK initial-install export verification PASS");
           NODE
           popd >/dev/null

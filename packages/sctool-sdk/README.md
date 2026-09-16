@@ -49,10 +49,10 @@ templates/
 
 ## Install
 
-The package is published to GitHub Packages and consumers must pin an exact version.
+The package is published as a public scoped package on npmjs.com. Consumer authentication is not required, and release consumers should pin an exact version.
 
 ```text
-@simple-connection/sctool-sdk@0.1.0
+npm install @simple-connection/sctool-sdk@0.2.1
 ```
 
 Registry source checkout validation:

@@ -12,9 +12,19 @@ on:
           - sctool-sdk
           - repository-tool-sdk
           - all
+  push:
+    branches:
+      - "main"
+    paths:
+      - "packages/sctool-sdk/**"
+      - "packages/repository-tool-sdk/**"
+      - "docs/AUTHORING_SDK_DISTRIBUTION_V1.yaml"
+      - ".github/workflows/publish-authoring-sdks.yml"
+      - "delivery/authoring-sdk-package/**"
+
 permissions:
   contents: read
-  packages: write
+  id-token: write
 
 concurrency:
   group: authoring-sdk-packages-${{ github.ref }}
@@ -22,6 +32,7 @@ concurrency:
 
 jobs:
   publish:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[publish-npmjs-sdks]')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact source
@@ -29,12 +40,18 @@ jobs:
         with:
           ref: ${{ github.sha }}
 
-      - name: Configure Node and GitHub Packages
+      - name: Configure Node and npmjs public registry
         uses: actions/setup-node@v6
         with:
-          node-version: "22"
-          registry-url: "https://npm.pkg.github.com"
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
           scope: "@simple-connection"
+          package-manager-cache: false
+
+      - name: Verify trusted-publishing-capable npm client
+        shell: bash
+        run: |
+          node -e "const {execFileSync}=require('node:child_process');const v=execFileSync('npm',['--version'],{encoding:'utf8'}).trim().split('.').map(Number);if(v[0]<11||(v[0]===11&&v[1]<5))throw new Error('npm >= 11.5.1 required for trusted publishing');console.log('npm trusted publishing client PASS',v.join('.'))"
 
       - name: Resolve publication target
         id: target
@@ -43,7 +60,7 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
             target="${{ inputs.package }}"
           else
-            target="sctool-sdk"
+            target="all"
           fi
           echo "package=$target" >> "$GITHUB_OUTPUT"
           echo "Authoring SDK publication target: $target"
@@ -67,7 +84,7 @@ jobs:
       - name: Publish or verify immutable Authoring SDK package
         shell: bash
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -euo pipefail
 
@@ -88,7 +105,7 @@ jobs:
             local_sha256="$(sha256sum "$tarball" | awk '{print $1}')"
 
             set +e
-            remote_json="$(npm view "$name@$version" --json --registry=https://npm.pkg.github.com 2>/dev/null)"
+            remote_json="$(npm view "$name@$version" --json --registry=https://registry.npmjs.org 2>/dev/null)"
             view_status=$?
             set -e
 
@@ -100,14 +117,14 @@ jobs:
               fi
               publish_status="EXISTING_VERIFIED"
             else
-              npm publish "$tarball" --registry=https://npm.pkg.github.com --access restricted
+              npm publish "$tarball" --registry=https://registry.npmjs.org --access public
               publish_status="PUBLISHED"
             fi
 
             remote_json=""
             for attempt in 1 2 3 4 5; do
               set +e
-              remote_json="$(npm view "$name@$version" --json --registry=https://npm.pkg.github.com 2>/dev/null)"
+              remote_json="$(npm view "$name@$version" --json --registry=https://registry.npmjs.org 2>/dev/null)"
               status=$?
               set -e
               if [[ $status -eq 0 && -n "$remote_json" ]]; then break; fi
@@ -125,7 +142,7 @@ jobs:
               exit 1
             fi
 
-            SOURCE_REPOSITORY="$GITHUB_REPOSITORY" SOURCE_REVISION="$GITHUB_SHA" PACKAGE_NAME="$name" PACKAGE_VERSION="$version" LOCAL_INTEGRITY="$local_integrity" REMOTE_INTEGRITY="$remote_integrity" REMOTE_TARBALL="$remote_tarball" LOCAL_SHASUM="$local_shasum" LOCAL_SHA256="$local_sha256" PUBLISH_STATUS="$publish_status" EVIDENCE_PATH="$evidence" node -e 'const fs=require("fs");const e={format:"authoring-sdk-package-evidence/v1",package:{name:process.env.PACKAGE_NAME,version:process.env.PACKAGE_VERSION,registry:"https://npm.pkg.github.com",tarball:process.env.REMOTE_TARBALL},source:{repository:process.env.SOURCE_REPOSITORY,revision:process.env.SOURCE_REVISION},integrity:{npm:process.env.LOCAL_INTEGRITY,remoteNpm:process.env.REMOTE_INTEGRITY,sha1:process.env.LOCAL_SHASUM,sha256:process.env.LOCAL_SHA256},publication:{status:process.env.PUBLISH_STATUS,immutableVersionVerified:true}};fs.writeFileSync(process.env.EVIDENCE_PATH,JSON.stringify(e,null,2)+"\\n")'
+            SOURCE_REPOSITORY="$GITHUB_REPOSITORY" SOURCE_REVISION="$GITHUB_SHA" PACKAGE_NAME="$name" PACKAGE_VERSION="$version" LOCAL_INTEGRITY="$local_integrity" REMOTE_INTEGRITY="$remote_integrity" REMOTE_TARBALL="$remote_tarball" LOCAL_SHASUM="$local_shasum" LOCAL_SHA256="$local_sha256" PUBLISH_STATUS="$publish_status" EVIDENCE_PATH="$evidence" node -e 'const fs=require("fs");const e={format:"authoring-sdk-package-evidence/v1",package:{name:process.env.PACKAGE_NAME,version:process.env.PACKAGE_VERSION,registry:"https://registry.npmjs.org",tarball:process.env.REMOTE_TARBALL},source:{repository:process.env.SOURCE_REPOSITORY,revision:process.env.SOURCE_REVISION},integrity:{npm:process.env.LOCAL_INTEGRITY,remoteNpm:process.env.REMOTE_INTEGRITY,sha1:process.env.LOCAL_SHASUM,sha256:process.env.LOCAL_SHA256},publication:{status:process.env.PUBLISH_STATUS,immutableVersionVerified:true}};fs.writeFileSync(process.env.EVIDENCE_PATH,JSON.stringify(e,null,2)+"\\n")'
             cat "$evidence"
             popd >/dev/null
           }
@@ -147,17 +164,17 @@ jobs:
               ;;
           esac
 
-      - name: Verify published SCTool Authoring SDK public exports
+      - name: Verify anonymous public SCTool Authoring SDK exports
         if: steps.target.outputs.package == 'sctool-sdk' || steps.target.outputs.package == 'all'
         shell: bash
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_USERCONFIG: /dev/null
         run: |
           set -euo pipefail
           verify_dir="$RUNNER_TEMP/sctool-sdk-published-verify"
           mkdir -p "$verify_dir"
           pushd "$verify_dir" >/dev/null
-          npm pack "@simple-connection/sctool-sdk@0.2.0" --json --registry=https://npm.pkg.github.com > remote-pack.json
+          npm pack "@simple-connection/sctool-sdk@0.2.1" --json --registry=https://registry.npmjs.org > remote-pack.json
           tarball="$(node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('remote-pack.json','utf8'));process.stdout.write(d[0].filename)")"
           mkdir extracted
           tar -xzf "$tarball" -C extracted

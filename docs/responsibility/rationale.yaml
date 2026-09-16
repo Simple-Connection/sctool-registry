@@ -247,11 +247,12 @@ rationales:
     statement: >-
       Registry Client SDK package publication is a delivery automation authority
       separate from runtime Registry consumption. The delivery workflow publishes an
-      exact versioned package to GitHub Packages, binds the package to the canonical
+      exact versioned public scoped package to npmjs.com, binds the package to the canonical
       Registry source revision and local pack integrity, and may reuse an existing
       immutable version only when remote integrity equals the locally produced package.
-      Product consumers receive read-only package access and must pin an exact version;
-      package publication does not transfer Registry SDK ownership to the consumer.
+      Public consumers require no package credential and release consumers pin exact
+      versions; package publication does not transfer Registry SDK ownership to the
+      consumer.
 
   ADR_AUTHORING_SDK_REPOSITORY_BOUNDARY:
     status: ACTIVE
@@ -297,6 +298,7 @@ rationales:
       Registry-owned Authoring SDK package publication is a Delivery responsibility
       separate from SDK source authority and Product consumption. The publication
       workflow builds and tests each canonical package, publishes immutable exact
-      versions to GitHub Packages, verifies remote integrity against the local pack,
-      and records revision-bound evidence. Consumer access does not transfer source,
-      version, compatibility, or publication authority.
+      versions as public scoped packages on npmjs.com, verifies remote integrity against the
+      local pack, verifies anonymous package retrieval, and records revision-bound
+      evidence. Public consumption requires no package credential and does not transfer
+      source, version, compatibility, or publication authority.

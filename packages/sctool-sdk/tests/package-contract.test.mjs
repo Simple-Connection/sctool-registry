@@ -13,9 +13,11 @@ test("package metadata exposes Marketplace profile authoring surface", async () 
   const packageJson = await readJson("package.json");
   const lockJson = await readJson("package-lock.json");
 
-  assert.equal(packageJson.version, "0.2.0");
-  assert.equal(lockJson.version, "0.2.0");
-  assert.equal(lockJson.packages[""].version, "0.2.0");
+  assert.equal(packageJson.version, "0.2.1");
+  assert.equal(lockJson.version, "0.2.1");
+  assert.equal(lockJson.packages[""].version, "0.2.1");
+  assert.equal(packageJson.publishConfig.registry, "https://registry.npmjs.org");
+  assert.equal(packageJson.publishConfig.access, "public");
 
   assert.deepEqual(packageJson.exports["./marketplace-profile"], {
     types: "./dist/marketplace-profile.d.ts",
