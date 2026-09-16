@@ -22,6 +22,16 @@ layout:
     - "docs/governance"
     - "policy"
     - "schemas"
+  migration_guard:
+    forbidden_active_references:
+      - "docs/governance/"
+      - "policy/"
+      - "schemas/"
+      - "governance/"
+    exclude_prefixes:
+      - "docs/ver"
+    exclude_files:
+      - "docs/rules/index.yaml"
 tooling:
   entrypoint: "tools/policy_automatic_engine/governance/validate.py"
   requirements: "tools/policy_automatic_engine/governance/requirements.txt"

@@ -188,7 +188,7 @@ components:
       - "packages/**"
       - "publishers/**"
       - "tools/policy_automatic_engine/schemas/**"
-      - "policy/**"
+      - "docs/policy/**"
       - "trust/**"
       - "docs/REGISTRY_SIGNED_DISTRIBUTION_HANDOFF_V1.yaml"
       - "tools/policy_automatic_engine/schemas/registry/registry-distribution-handoff.schema.json"

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import re
+import subprocess
+
 from .common import current_branch, need, scan_machine
 from .context import ValidationContext
 
@@ -317,6 +320,45 @@ def validate(ctx: ValidationContext, errors: list[str]) -> None:
             f"NESTED_GOVERNANCE_PATH:{forbidden_path}",
             errors,
         )
+
+
+    migration_guard = layout.get("migration_guard", {})
+    forbidden_references = migration_guard.get("forbidden_active_references", [])
+    exclude_prefixes = tuple(migration_guard.get("exclude_prefixes", []))
+    exclude_files = set(migration_guard.get("exclude_files", []))
+    try:
+        tracked = subprocess.run(
+            ["git", "ls-files"],
+            cwd=ctx.root,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.splitlines()
+    except Exception:
+        tracked = []
+
+    for relative in tracked:
+        normalized = relative.replace("\\", "/")
+        if normalized in exclude_files or normalized.startswith(exclude_prefixes):
+            continue
+        path = ctx.root / normalized
+        if not path.is_file():
+            continue
+        try:
+            content = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            continue
+        for token in forbidden_references:
+            if token in {"policy/", "schemas/", "governance/"}:
+                pattern = rf"(?<![A-Za-z0-9_./-]){re.escape(token)}"
+                matched = re.search(pattern, content) is not None
+            else:
+                matched = token in content
+            need(
+                not matched,
+                f"LEGACY_ACTIVE_REFERENCE:{normalized}:{token}",
+                errors,
+            )
 
     tooling = ctx.rules_index.get("tooling", {})
     tooling_root = layout.get("tooling_root")
